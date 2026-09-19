@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-const MODEL="gemini-2.5-flash";
+const MODEL="gemini-3.6-flash";
 const WINDOW_MS=3600000;
 const MAX_REQUESTS_PER_HOUR=10;
 const buckets=new Map();
@@ -20,5 +20,41 @@ function context(s,c){
 function extract(d){const a=[];for(const c of Array.isArray(d?.candidates)?d.candidates:[])for(const p of Array.isArray(c?.content?.parts)?c.content.parts:[])if(typeof p?.text==="string")a.push(p.text);return a.join("\n").trim()}
 function grounding(d){const a=[];for(const c of Array.isArray(d?.candidates)?d.candidates:[])for(const x of Array.isArray(c?.groundingMetadata?.groundingChunks)?c.groundingMetadata.groundingChunks:[]){const t=x?.web?.title,u=x?.web?.uri;if(t&&u&&!a.some(v=>v.url===u))a.push({title:t,url:u})}return a.slice(0,8)}
 async function getUser(req){const h=req.headers.get("Authorization")||"";if(!h.startsWith("Bearer "))return null;let k="";try{k=JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS")||"{}").default||""}catch{}k=k||Deno.env.get("SUPABASE_ANON_KEY")||"";if(!k)throw new Error("Supabase publishable key unavailable.");const sb=createClient(Deno.env.get("SUPABASE_URL")!,k,{global:{headers:{Authorization:h}}}),t=h.replace(/^Bearer\s+/i,"");const {data,error}=await sb.auth.getUser(t);if(error||!data?.user)return null;return{sb,user:data.user}}
-async function gemini(input,useSearch){const key=Deno.env.get("GEMINI_API_KEY")||"";if(!key)return{error:"GEMINI_API_KEY не настроен в Supabase Secrets.",status:503};const b={systemInstruction:{parts:[{text:promptRules()}]},contents:[{role:"user",parts:[{text:input}]}],generationConfig:{temperature:0.2,maxOutputTokens:1800,responseMimeType:"text/plain"}};if(useSearch)b.tools=[{google_search:{}}];let r;try{r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+MODEL+":generateContent",{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":key},body:JSON.stringify(b)})}catch{return{error:"Не удалось связаться с Gemini API.",status:502}}const raw=await r.text();let d={};try{d=JSON.parse(raw||"{}")}catch{}if(!r.ok)return{error:clip(d?.error?.message||"",700)||("Gemini HTTP "+r.status),status:r.status};const out=extract(d);return out?{output_text:out,sources:useSearch?grounding(d):[]}:{error:"Gemini вернул пустой ответ.",status:502}}
+async function gemini(input,useSearch){
+  const key=Deno.env.get("GEMINI_API_KEY")||"";
+  if(!key)return{error:"GEMINI_API_KEY не настроен в Supabase Secrets.",status:503};
+  
+  const payload={
+    model:MODEL,
+    system_instruction:promptRules(),
+    input,
+    store:false,
+    generation_config:{max_output_tokens:1800,thinking_level:"low"}
+  };
+  if(useSearch)payload.tools=[{type:"google_search"}];
+  let r;
+  try{
+    r=await fetch("https://generativelanguage.googleapis.com/v1/interactions",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-goog-api-key":key},
+      body:JSON.stringify(payload)
+    });
+  }catch{return{error:"Не удалось связаться с Gemini Interactions API.",status:502}}
+  const raw=await r.text();
+  let d={};try{d=JSON.parse(raw||"{}")}catch{}
+  if(!r.ok){
+    const msg=clip(d?.error?.message||"",900)||("Gemini HTTP "+r.status);
+    return{error:msg,status:r.status};
+  }
+  if(d?.status==="failed"||d?.status==="cancelled"||d?.status==="incomplete")return{error:"Gemini завершил взаимодействие со статусом: "+String(d?.status),status:502};
+  let out=typeof d?.output_text==="string"?d.output_text.trim():"";
+  if(!out && Array.isArray(d?.steps)){
+    const a=[];
+    for(const st of d.steps||[]) for(const part of st?.content||[]) if(part?.type==="text"&&typeof part?.text==="string") a.push(part.text);
+    out=a.join("\n").trim();
+  }
+  const sources=[];
+  for(const st of Array.isArray(d?.steps)?d.steps:[]) if(st?.type==="model_output") for(const part of Array.isArray(st?.content)?st.content:[]) for(const an of Array.isArray(part?.annotations)?part.annotations:[]) if(an?.type==="url_citation"&&an?.url&&!sources.some(x=>x.url===an.url)) sources.push({title:clip(an?.title||an.url,180),url:an.url});
+  return out?{output_text:out,sources:useSearch?sources.slice(0,8):[],interaction_id:d?.id||null}:{error:"Gemini вернул пустой ответ.",status:502};
+}
 Deno.serve(async req=>{if(req.method==="OPTIONS")return new Response("ok",{headers:CORS});try{const a=await getUser(req);if(!a)return json({error:"Требуется авторизация Life Control."},401);if(!rate(a.user.id))return json({error:"Слишком много запросов AI за час. Попробуй позже."},429);if(req.method==="GET")return json({ok:true,configured:Boolean(Deno.env.get("GEMINI_API_KEY")),model:MODEL});if(req.method!=="POST")return json({error:"Method not allowed."},405);const body=await req.json();if(body?.ping===true){const r=await gemini("Ответь одной короткой фразой: Подключение Life Control работает.",false);return r.error?json({error:r.error},r.status):json({ok:true,output_text:r.output_text,model:MODEL,sources:[]})}const sc=scope(body?.scope);const {data:row,error}=await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id",a.user.id).maybeSingle();if(error)return json({error:"Не удалось прочитать данные Life Control из Supabase."},500);const ctx=context(row?.state||{},sc),p="Проанализируй данные пользователя Life Control ниже. Ответь по-русски в структуре:\n\n1) ЧТО УЖЕ ДОСТИГНУТО\n2) ГДЕ Я СЕЙЧАС\n3) ФИНАНСОВОЕ СОСТОЯНИЕ\n4) ЧТО МЕШАЕТ\n5) ЧТО ОСТАЛОСЬ\n6) ГЛАВНЫЙ ФОКУС НА 7 ДНЕЙ\n7) ОДНО ДЕЙСТВИЕ ЗАВТРА\n8) ПРАКТИЧЕСКИЙ СОВЕТ\n\nНе выдумывай отсутствующие данные. Если факт не подтверждён — обозначь его как предположение.\n\nДанные:\n"+JSON.stringify(ctx),r=await gemini(p,sc.webSearch);return r.error?json({error:r.error},r.status):json({ok:true,model:MODEL,output_text:r.output_text,sources:r.sources||[],generated_at:new Date().toISOString(),schema_version:row?.schema_version??null})}catch(e){return json({error:e instanceof Error?e.message:"Неизвестная ошибка Edge Function."},500)}});
