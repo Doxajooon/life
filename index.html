@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V46</title>
+<title>Life Control — личная система движения · офлайн · V47</title>
 <style>
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
@@ -153,6 +153,10 @@ h1{margin:0;font-size:31px;line-height:1.05;letter-spacing:-.04em}h2{margin:0;fo
 .auth-lock[hidden]{display:none}.auth-box{width:min(430px,100%);padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
 .auth-box h1{font-size:26px;margin:0}.auth-box .field{margin-top:12px}.auth-box .auth-actions{display:grid;gap:8px;margin-top:14px}.auth-box .auth-msg{min-height:18px;margin-top:10px;font-size:10px;color:var(--muted)}
 body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibility:hidden;pointer-events:none}
+.pulse-item-action{appearance:none;text-align:left;color:inherit;font:inherit;border:1px solid var(--line);width:100%;cursor:pointer}.pulse-item-action:hover{border-color:var(--blue);transform:translateY(-1px)}
+.day-progress-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.day-progress-kpi{padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.day-progress-kpi .label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}.day-progress-kpi .value{font-size:20px;font-weight:950;margin-top:3px}.runner-stage{padding:16px 12px;border:1px solid var(--line);border-radius:13px;background:var(--soft);margin-top:12px}.runner-track{height:56px;position:relative;border-bottom:2px solid var(--line);margin:0 12px}.runner-track::before{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));transform-origin:left;transform:scaleX(calc(var(--runner-progress,0) / 100));transition:transform .5s ease}.runner-runner{position:absolute;left:calc(var(--runner-progress,0) * 1%);bottom:7px;transform:translateX(-50%);animation:runner-bob .55s ease-in-out infinite alternate}.runner-runner .ui-icon{width:34px;height:34px;color:var(--blue-dark)}@keyframes runner-bob{from{transform:translate(-50%,2px)}to{transform:translate(-50%,-3px)}}.day-progress-main{text-align:center}.day-progress-percent{font-size:36px;font-weight:950;letter-spacing:-.04em;color:var(--blue-dark)}.day-progress-sub{font-size:11px;color:var(--muted);margin-top:3px}@media(max-width:720px){.day-progress-kpis{grid-template-columns:1fr 1fr}.day-progress-kpi:last-child{grid-column:1/-1}}
+.eyebrow{font-size:10px}.sub{font-size:12px}.small{font-size:11px!important}.field label{font-size:10px}.kpi .label,.calendar-kpi .label,.distance-kpi .label,.goal-day-stat .label{font-size:9px}.pulse-label,.calendar-num,.future-title,.t-title,.m-title{font-size:12px}.t-note,.future-time,.money-meta,.debt-kpi-note{font-size:10px}.runtime-status{font-size:10px}
+.auth-brand{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;background:var(--blue-soft);border:1px solid color-mix(in srgb,var(--blue) 30%,var(--line));color:var(--blue-dark);margin-bottom:12px}.auth-brand .ui-icon{width:28px;height:28px}.auth-intro{font-size:12px;color:var(--muted);margin-top:5px}.auth-progress{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:10px;color:var(--muted)}.auth-progress-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:6px}.auth-progress-bar i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));transition:width .25s ease}.auth-spinner{width:14px;height:14px;border:2px solid color-mix(in srgb,currentColor 25%,transparent);border-top-color:currentColor;border-radius:50%;display:inline-block;animation:spin .75s linear infinite;vertical-align:-2px}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:720px){.auth-box{padding:22px 18px}}
 </style>
 </head>
 <body>
@@ -181,14 +185,16 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 19c.5-3 2.2-4.5 5.5-4.5s5 1.5 5.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.5 7.5a3 3 0 0 1 0 5.9M16.5 14.5c2.4.2 3.7 1.6 4 3.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="m5 16.5-.8 4.3 4.3-.8L19 9.5 14.5 5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6 4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
 
+<symbol id="i-runner" viewBox="0 0 24 24"><circle cx="14.6" cy="4.8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12.8 8 10.2 12.2l3.6 2.2 1.8 3.8M10.4 11.4 7.3 9.8M13.5 14.2 9.1 18.6M15.5 8.9l3.7 1.8M11.2 9.2l4.4-.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18h9a4 4 0 0 0 .4-8A5.5 5.5 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7.5 18Z" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol></svg>
 
 <div class="auth-lock" id="authLock" hidden><div class="auth-box">
+  <div class="auth-brand"><svg class="ui-icon"><use href="#i-card"></use></svg></div><div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="auth-intro">Твоя личная система. Вход открывает данные, облачную синхронизацию и AI.</div>
   <div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="sub">Войди в аккаунт, чтобы открыть личные данные и AI.</div>
   <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="username" value="" placeholder="you@example.com"></div>
   <div class="field"><label>Пароль</label><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Минимум 6 символов"></div>
-  <div class="auth-actions"><button class="btn primary" id="gateLoginBtn">Войти</button><button class="btn" id="gateSignupBtn">Создать аккаунт</button><button class="btn ghost" id="gateResetBtn">Забыли пароль?</button></div>
-  <div class="auth-msg" id="gateMsg"></div>
+  <div class="auth-actions"><button class="btn primary" id="gateLoginBtn"><svg class="ui-icon"><use href="#i-check"></use></svg><span>Войти</span></button><button class="btn" id="gateSignupBtn"><svg class="ui-icon"><use href="#i-people"></use></svg><span>Создать аккаунт</span></button><button class="btn ghost" id="gateResetBtn"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg><span>Забыли пароль?</span></button></div>
+  <div class="auth-progress"><span>●</span><span id="authProgressText">Готово к входу</span></div><div class="auth-progress-bar"><i id="authProgressBar"></i></div><div class="auth-msg" id="gateMsg" aria-live="polite"></div>
 </div></div>
 <header class="topbar">
   <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo">LC</div><div><div class="brand-name">LIFE CONTROL</div><div class="brand-sub">личная система движения · офлайн</div></div></div>
@@ -214,7 +220,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
   <div class="card section pulse-card">
     <div class="pulse-head"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>Пульс сегодня</div><h2>Состояние движения</h2><div class="sub">Проценты считаются из фактических данных Life Control.</div></div><select id="dayMode" class="mode-select" aria-label="Режим дня"><option value="normal">Нормальный день</option><option value="heavy">Тяжёлый день</option><option value="rest">Выходной</option></select></div>
     <div class="pulse-grid">
-      <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>День</div><div class="pulse-value" id="pulseDay">0%</div><div class="pulse-bar"><i id="pulseDayBar"></i></div></div>
+<button class="pulse-item pulse-item-action" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="Открыть ход дня"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-runner"></use></svg></span>День</div><div class="pulse-value" id="pulseDay">0%</div><div class="pulse-bar"><i id="pulseDayBar"></i></div></button>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><div class="pulse-value" id="pulseGoal">0%</div><div class="pulse-bar"><i id="pulseGoalBar"></i></div></div>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Финансы</div><div class="pulse-value" id="pulseFinance">0%</div><div class="pulse-bar"><i id="pulseFinanceBar"></i></div></div>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Долг</div><div class="pulse-value" id="pulseDebt">0%</div><div class="pulse-bar"><i id="pulseDebtBar"></i></div></div>
@@ -413,18 +419,18 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 <div class="toast" id="toast" role="status" aria-live="polite"></div><div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
 <script>
 'use strict';
-const KEY='LIFE_CONTROL_V45';
-const BACKUP_KEY='LIFE_CONTROL_V45_SNAPSHOT';
-const BACKUP2_KEY='LIFE_CONTROL_V45_SNAPSHOT_2';
+const KEY='LIFE_CONTROL_V47';
+const BACKUP_KEY='LIFE_CONTROL_V47_SNAPSHOT';
+const BACKUP2_KEY='LIFE_CONTROL_V47_SNAPSHOT_2';
 const LEGACY=['LIFE_CONTROL_V40','LIFE_CONTROL_V39','LIFE_CONTROL_V38','LIFE_CONTROL_V37','LIFE_CONTROL_V36','LIFE_CONTROL_V35','LIFE_CONTROL_V33','LIFE_CONTROL_V32','LIFE_CONTROL_V31','LIFE_CONTROL_V30','LIFE_CONTROL_V29','LIFE_CONTROL_V28','LIFE_CONTROL_V27','LIFE_CONTROL_V26','LIFE_CONTROL_V25','LIFE_CONTROL_V24','LIFE_CONTROL_V23','LIFE_CONTROL_V22','LIFE_CONTROL_V21','LIFE_CONTROL_V20','LIFE_CONTROL_V18','LIFE_CONTROL_V17','LIFE_CONTROL_V16','LIFE_CONTROL_V15','LIFE_CONTROL_V14','LIFE_CONTROL_V13','LIFE_CONTROL_V12','LIFE_CONTROL_V11','LIFE_CONTROL_V10','LIFE_CONTROL_V9'];
 const DAY_MS=86400000,TRASH_TTL=30*DAY_MS;
 const PROFIT_SOURCES=['Зарплата','Фриланс','Спортивная аналитика'];
 const PROFIT_ICONS={'Зарплата':'💼','Фриланс':'💻','Спортивная аналитика':'📊'};
 const DEFAULT={
-  version:41,
+  version:47,
   profile:{name:'',currency:'сомони'},
   wallet:{openingBalance:0},
-  settings:{theme:'light',preMinutes:10,notifications:true},
+  settings:{theme:'light',preMinutes:10,notifications:true,fontScale:1.06},
   ai:{endpoint:'https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai',model:'gemini-3.6-flash',enabled:true,webSearch:false,lastAnalysisAt:'',history:[],consent:{goal:true,money:true,reports:true,notes:false}},
   income:4500,
   runtimeErrors:[],
@@ -446,6 +452,7 @@ const DEFAULT={
 const SUPABASE_CONFIG={url:'https://riqmwueobjazfnhvvumy.supabase.co',publishableKey:'sb_publishable_17lPUQIiyRmlEpFkqosvKg_SBoxJuy8'};
 const AI_FUNCTION_URL='https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai';
 const AI_MODEL='gemini-3.6-flash';
+let calendarRangeStart='',calendarRangeEnd='',goalAiBusy=false,dayProgressTimer=null,appBound=false;
 let calendarRangeStart='',calendarRangeEnd='',goalAiBusy=false;
 const AUTH_REDIRECT_URL='https://doxajooon.github.io/life/';
 const DEFAULT_AUTH_EMAIL='';
@@ -473,7 +480,7 @@ async function openPasswordRecovery(){
 async function cloudRefresh(){const a=cloudAuth();if(!a?.refresh_token)return null;try{const data=await supaFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:a.refresh_token})});setCloudAuth({...data,user:data?.user||a.user||null});return data}catch(e){setCloudAuth(null);return null}}
 async function cloudUser(){const a=cloudAuth();if(!a?.access_token)return null;try{return await supaFetch('/auth/v1/user',{headers:{Authorization:'Bearer '+a.access_token}})}catch(e){return null}}
 async function cloudPull(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)return null;const rows=await supaFetch('/rest/v1/life_state?select=state,schema_version,updated_at&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1');return {user, row:Array.isArray(rows)?rows[0]||null:null}}
-async function cloudPush(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)throw new Error('Войдите в Supabase, чтобы синхронизировать данные.');const body={user_id:user.id,state, schema_version:41,device_id:getDeviceId()};await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});return true}
+  const body={user_id:user.id,state, schema_version:47,device_id:getDeviceId()};
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
 async function cloudSync(){const localStamp=Date.parse(state._lastSavedAt||'')||0;const pulled=await cloudPull();if(!pulled)return {ok:false,logged:false};const cloudStamp=Date.parse(pulled.row?.state?._lastSavedAt||pulled.row?.updated_at||'')||0;if(pulled.row?.state&&cloudStamp>localStamp){state=normalize(pulled.row.state);saveState();renderAll();scheduleNative()}else{await cloudPush()}setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}}
 async function cloudAutoSync(){if(!cloudAuth())return false;const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}}
@@ -499,7 +506,7 @@ function dayReport(){const k=keyDay();state.reports[k]=state.reports[k]||{done:'
 function purgeExpiredTrash(s){const before=(s.notesTrash||[]).length,cut=Date.now()-TRASH_TTL;s.notesTrash=(s.notesTrash||[]).filter(n=>Date.parse(n.deletedAt||0)>cut);return before-s.notesTrash.length}
 function normalize(s){
   const hadWallet=!!(s.wallet&&typeof s.wallet==='object'&&Object.prototype.hasOwnProperty.call(s.wallet,'openingBalance'));
-  s=merge(s,DEFAULT);s.version=41;s.goal=s.goal&&typeof s.goal==='object'?s.goal:clone(DEFAULT.goal);s.goal.aiPlan=s.goal.aiPlan&&typeof s.goal.aiPlan==='object'?s.goal.aiPlan:null;s.goal.aiPlanAt=String(s.goal.aiPlanAt||'');s.goal.aiPlanGoalKey=String(s.goal.aiPlanGoalKey||'');
+  s=merge(s,DEFAULT);s.version=47;
   s.wallet=s.wallet&&typeof s.wallet==='object'?s.wallet:{openingBalance:0};
   s.wallet.openingBalance=Math.max(0,Number(s.wallet.openingBalance)||0);
   if(!hadWallet){
@@ -634,7 +641,7 @@ async function restoreFromIndexedDB(){
 }
 
 function initPersistence(){
-  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v41');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
+  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v47');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
   window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const incoming=normalize(JSON.parse(ev.newValue));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}});
   try{navigator.storage?.persist?.().then(ok=>{state._persistentStorageRequestedAt=new Date().toISOString();state._persistentStorageGranted=!!ok;queueAutosave()}).catch(()=>{});}catch(e){}
 }
@@ -1447,7 +1454,7 @@ function openSettings(){
   $('resetBtn').onclick=()=>{if(confirm('Удалить все локальные данные Life Control?')){for(const k of [KEY,BACKUP_KEY,BACKUP2_KEY,...LEGACY]){try{localStorage.removeItem(k)}catch(e){}}try{indexedDB.deleteDatabase('LifeControlDB');indexedDB.deleteDatabase('LifeControlV26DB')}catch(e){}location.reload()}}
 }
 function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`life-control-backup-${keyDay()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Резервная копия сохранена')}
-function importJSON(ev){const f=ev.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const imported=normalize(JSON.parse(r.result));state=merge(imported,state);state.version=41;saveState();closeModal();renderAll();scheduleNative();toast('Данные восстановлены')}catch(e){toast('Ошибка импорта','Файл не распознан.')}};r.readAsText(f)}
+  state.version=47;saveState()
 function openReportHistory(){
   const entries=Object.entries(state.reports||{}).filter(([,r])=>{if(!r)return false;const hasFields=['done','block','future','tomorrow'].some(k=>String(r[k]||'').trim());return hasFields||!!r.savedAt}).sort((a,b)=>b[0].localeCompare(a[0]));
   const html=entries.length?entries.slice(0,90).map(([day,r])=>{
