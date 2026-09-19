@@ -1,6 +1,6 @@
-Life Control V42
+Life Control V43
 Web: offline-first PWA
 Cloud: Supabase Auth + public.life_state
-AI: Gemini 2.5 Flash via Supabase Edge Function
+AI: Gemini 3.6 Flash via Supabase Edge Function
 Mobile: Android WebView bridge source + CI build
 Desktop: Windows WPF/WebView2 source + CI build
