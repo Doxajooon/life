@@ -676,7 +676,7 @@ function scheduleNative(){
     for(let i=0;i<state.day.steps.length;i++){
       const s=state.day.steps[i],next=state.day.steps[i+1],previous=state.day.steps[i-1];
       const startBody=previous?`Этап «${previous.title}» завершён. Сейчас переходи к: ${s.details?.[0]||s.text||s.title}`:(s.details?.[0]||s.text||'Начни текущий этап.');
-      window.AndroidBridge.scheduleDaily?.(s.id,s.time,`Пора: ${s.title}`,startBody);
+      if(!previous || previous.end!==s.time) window.AndroidBridge.scheduleDaily?.(s.id,s.time,`Пора: ${s.title}`,startBody);
       if(preMinutes>0){
         const pre=timeToMin(s.time)-preMinutes;
         if(pre>=0){
@@ -684,10 +684,8 @@ function scheduleNative(){
           window.AndroidBridge.scheduleDaily?.('pre_'+s.id,`${hh}:${mm}`,`Через ${preMinutes} минут`,`Следующий этап: ${s.title}. Закончи текущее и переходи.`);
         }
       }
-      const end=timeToMin(s.end),nextStart=next?timeToMin(next.time):null;
-      if(!next || nextStart>end){
-        window.AndroidBridge.scheduleDaily?.('end_'+s.id,s.end,`Этап завершён: ${s.title}`,next?`Есть пауза до ${next.time}. Переключайся спокойно.`:'Основные этапы дня завершены. Пора отдыхать.');
-      }
+      const end=timeToMin(s.end);
+      window.AndroidBridge.scheduleDaily?.('end_'+s.id,s.end,`Этап завершён: ${s.title}`,next?`Галочка будет поставлена автоматически. Следующий этап: ${next.title}.`:'Галочка будет поставлена автоматически. Основные этапы дня завершены.');
     }
   }catch(e){
     state.runtimeErrors=Array.isArray(state.runtimeErrors)?state.runtimeErrors:[];
@@ -875,7 +873,7 @@ function renderToday(){
   const mo=motivation();$('motivationText').textContent=mo.text;$('motivationSource').textContent=`${mo.author} — ${mo.source}`;
   renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
   const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>x.i>(info.kind==='active'?info.i:-1));
-  $('timeline').innerHTML=state.day.steps.map((s,i)=>{const done=!!rep.steps[s.id],current=info.kind==='active'&&info.i===i;const stagePct=done?100:(current?Math.round(info.pct):0);return `<div class="timeline-row ${current?'current':''} ${done?'done':''}"><div class="time-range">${esc(s.time)}<br>${esc(s.end)}</div><div><div class="t-title">Этап ${i+1} · ${esc(s.title)}</div><div class="t-note">${esc(s.text)}</div><div class="stage-pct">${done?'100% завершено':current?`${stagePct}% времени прошло`:(nowMin()>=timeToMin(s.end)?'100% завершено':'0% времени прошло')}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} aria-label="${esc(s.title)}"></div>`}).join('');
+  autoCompleteExpiredStages();const effectiveRep=dayReport();$('timeline').innerHTML=state.day.steps.map((s,i)=>{const expired=nowMin()>=timeToMin(s.end),done=!!effectiveRep.steps[s.id]||expired,current=info.kind==='active'&&info.i===i;const stagePct=done?100:(current?Math.round(info.pct):0);return `<div class="timeline-row ${current?'current':''} ${done?'done':''}"><div class="time-range">${esc(s.time)}<br>${esc(s.end)}</div><div><div class="t-title">Этап ${i+1} · ${esc(s.title)}</div><div class="t-note">${esc(s.text)}</div><div class="stage-pct">${done?'100% завершено':current?`${stagePct}% времени прошло`:'0% времени прошло'}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${esc(s.title)}"></div>`}).join('');
   $$('[data-day-step]').forEach(c=>c.onchange=()=>{rep.steps[c.dataset.dayStep]=c.checked;saveState();renderToday()});
   $('nextList').innerHTML=future.length?future.map(x=>`<div class="future-item"><div class="step-no">${x.i+1}</div><div><div class="future-title">${esc(x.s.title)}</div><div class="future-time">${esc(x.s.time)}–${esc(x.s.end)}</div></div><div class="future-arrow">→</div></div>`).join(''):'<div class="empty">После последнего этапа — отдых.</div>';
   $('miniGoal').textContent=state.goal.title;$('miniNext').textContent=state.goal.next;$('todayBalance').textContent=fmtMoney(daySum(state.profits)-daySum(state.expenses));const wm=walletMetrics();setText('todayGoalSaved',`На цель: ${fmtMoney(wm.goal)}`);setText('todayCashState',`Касса: ${fmtMoney(wm.cash)} · Общий капитал: ${fmtMoney(wm.capital)}`);
