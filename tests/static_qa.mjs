@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "47.0.0", "package version must match V47");
+assert.equal(pkg.version, "48.0.0", "package version must match V48");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -70,7 +70,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v47-gemini"), "service worker cache must be V47");
+assert.ok(sw.includes("life-control-v48-gemini"), "service worker cache must be V48");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
@@ -111,4 +111,10 @@ assert.ok(html.includes("s.settings.fontScale=clamp"), "fontScale normalization 
 
 
 
-console.log("LIFE_CONTROL_V47_STATIC_QA_OK");
+console.log("LIFE_CONTROL_V48_STATIC_QA_OK");
+
+assert.ok(html.includes("stateFingerprint"), "change-driven persistence fingerprint missing");
+assert.equal(html.includes("setInterval(()=>{if(document.visibilityState==='visible')saveState()},5000)"), false, "periodic blind save must not exist");
+assert.ok(html.includes("_cloudBaseUpdatedAt"), "cloud base revision guard missing");
+assert.ok(html.includes("Данные обновлены в облаке"), "cloud conflict protection notice missing");
+assert.ok(html.includes("password gate"), "auth gate marker missing");
