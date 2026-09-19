@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "46.0.0", "package version must match V46");
+assert.equal(pkg.version, "47.0.0", "package version must match V47");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -70,7 +70,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v46-gemini"), "service worker cache must be V46");
+assert.ok(sw.includes("life-control-v47-gemini"), "service worker cache must be V47");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
@@ -95,8 +95,17 @@ assert.ok(html.includes("Пророк Мухаммад ﷺ"), "Prophet motivatio
 assert.equal(/Маркус Аврелий|Сенека|Конфуций|Имам аш-Шафии|Умар ибн аль-Хаттаб|Али ибн Абу Талиб/.test(html), false, "non-Prophet motivation source remains");
 assert.ok(fn.includes('body?.mode==="goal"'), "goal AI mode missing in Edge Function");
 assert.ok(fn.includes("achievements"), "goal AI must receive achievements");
+assert.ok(html.includes('pulseDayCard') && html.includes('dayProgressMetrics') && html.includes('runner-runner'), "interactive day progress runner missing");
+assert.ok(html.includes('authProgressText') && html.includes('authProgressBar') && html.includes('auth-spinner'), "auth progress UI missing");
+assert.ok(html.includes('fontScale'), "saved UI font setting missing");
+const schedulerMatch = html.match(/function runScheduler\(\)\{([\s\S]*?)\n\}/);
+assert.ok(schedulerMatch, "scheduler function missing");
+assert.equal(/state\.(debts|profits|expenses)\s*(?:\[[^\]]+\]\s*)?=|state\.(profits|expenses)\.push\(/.test(schedulerMatch[1]), false, "scheduler must not mutate financial records");
+assert.ok(html.includes("end_' + s.id") || html.includes("end_'+s.id"), "end-stage native notification missing");
+assert.equal((html.match(/let calendarRangeStart/g)||[]).length, 1, "calendar range state must be declared once");
 
 
 
 
-console.log("LIFE_CONTROL_V45_STATIC_QA_OK");
+
+console.log("LIFE_CONTROL_V47_STATIC_QA_OK");
