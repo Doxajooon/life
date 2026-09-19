@@ -864,7 +864,7 @@ function renderControlDashboard(){
 }
 function infoForDashboard(){try{return getStageInfo()}catch(e){return null}}
 function renderToday(){
-  renderTodayLight();renderControlDashboard();const d=new Date(),info=getStageInfo(),rep=dayReport(),dd=dailyState();
+  autoCompleteExpiredStages();renderTodayLight();renderControlDashboard();const d=new Date(),info=getStageInfo(),rep=dayReport(),dd=dailyState();
   $('todayTitle').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});$('todayDate').textContent=fmtDate(d);
   const mo=motivation();$('motivationText').textContent=mo.text;$('motivationSource').textContent=`${mo.author} — ${mo.source}`;
   renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
