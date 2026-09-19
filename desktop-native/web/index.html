@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V46</title>
+<title>Life Control — личная система движения · офлайн · V47</title>
 <style>
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
@@ -153,6 +153,10 @@ h1{margin:0;font-size:31px;line-height:1.05;letter-spacing:-.04em}h2{margin:0;fo
 .auth-lock[hidden]{display:none}.auth-box{width:min(430px,100%);padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
 .auth-box h1{font-size:26px;margin:0}.auth-box .field{margin-top:12px}.auth-box .auth-actions{display:grid;gap:8px;margin-top:14px}.auth-box .auth-msg{min-height:18px;margin-top:10px;font-size:10px;color:var(--muted)}
 body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibility:hidden;pointer-events:none}
+.pulse-item-action{appearance:none;text-align:left;color:inherit;font:inherit;border:1px solid var(--line);width:100%;cursor:pointer}.pulse-item-action:hover{border-color:var(--blue);transform:translateY(-1px)}
+.day-progress-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.day-progress-kpi{padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.day-progress-kpi .label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}.day-progress-kpi .value{font-size:20px;font-weight:950;margin-top:3px}.runner-stage{padding:16px 12px;border:1px solid var(--line);border-radius:13px;background:var(--soft);margin-top:12px}.runner-track{height:56px;position:relative;border-bottom:2px solid var(--line);margin:0 12px}.runner-track::before{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));transform-origin:left;transform:scaleX(calc(var(--runner-progress,0) / 100));transition:transform .5s ease}.runner-runner{position:absolute;left:calc(var(--runner-progress,0) * 1%);bottom:7px;transform:translateX(-50%);animation:runner-bob .55s ease-in-out infinite alternate}.runner-runner .ui-icon{width:34px;height:34px;color:var(--blue-dark)}@keyframes runner-bob{from{transform:translate(-50%,2px)}to{transform:translate(-50%,-3px)}}.day-progress-main{text-align:center}.day-progress-percent{font-size:36px;font-weight:950;letter-spacing:-.04em;color:var(--blue-dark)}.day-progress-sub{font-size:11px;color:var(--muted);margin-top:3px}@media(max-width:720px){.day-progress-kpis{grid-template-columns:1fr 1fr}.day-progress-kpi:last-child{grid-column:1/-1}}
+.eyebrow{font-size:10px}.sub{font-size:12px}.small{font-size:11px!important}.field label{font-size:10px}.kpi .label,.calendar-kpi .label,.distance-kpi .label,.goal-day-stat .label{font-size:9px}.pulse-label,.calendar-num,.future-title,.t-title,.m-title{font-size:12px}.t-note,.future-time,.money-meta,.debt-kpi-note{font-size:10px}.runtime-status{font-size:10px}
+.auth-brand{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;background:var(--blue-soft);border:1px solid color-mix(in srgb,var(--blue) 30%,var(--line));color:var(--blue-dark);margin-bottom:12px}.auth-brand .ui-icon{width:28px;height:28px}.auth-intro{font-size:12px;color:var(--muted);margin-top:5px}.auth-progress{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:10px;color:var(--muted)}.auth-progress-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:6px}.auth-progress-bar i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));transition:width .25s ease}.auth-spinner{width:14px;height:14px;border:2px solid color-mix(in srgb,currentColor 25%,transparent);border-top-color:currentColor;border-radius:50%;display:inline-block;animation:spin .75s linear infinite;vertical-align:-2px}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:720px){.auth-box{padding:22px 18px}}
 </style>
 </head>
 <body>
@@ -181,14 +185,16 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 19c.5-3 2.2-4.5 5.5-4.5s5 1.5 5.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15.5 7.5a3 3 0 0 1 0 5.9M16.5 14.5c2.4.2 3.7 1.6 4 3.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></symbol>
 <symbol id="i-pencil" viewBox="0 0 24 24"><path d="m5 16.5-.8 4.3 4.3-.8L19 9.5 14.5 5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6 4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
 
+<symbol id="i-runner" viewBox="0 0 24 24"><circle cx="14.6" cy="4.8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12.8 8 10.2 12.2l3.6 2.2 1.8 3.8M10.4 11.4 7.3 9.8M13.5 14.2 9.1 18.6M15.5 8.9l3.7 1.8M11.2 9.2l4.4-.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18h9a4 4 0 0 0 .4-8A5.5 5.5 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7.5 18Z" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol></svg>
 
 <div class="auth-lock" id="authLock" hidden><div class="auth-box">
+  <div class="auth-brand"><svg class="ui-icon"><use href="#i-card"></use></svg></div><div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="auth-intro">Твоя личная система. Вход открывает данные, облачную синхронизацию и AI.</div>
   <div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="sub">Войди в аккаунт, чтобы открыть личные данные и AI.</div>
   <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="username" value="" placeholder="you@example.com"></div>
   <div class="field"><label>Пароль</label><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Минимум 6 символов"></div>
-  <div class="auth-actions"><button class="btn primary" id="gateLoginBtn">Войти</button><button class="btn" id="gateSignupBtn">Создать аккаунт</button><button class="btn ghost" id="gateResetBtn">Забыли пароль?</button></div>
-  <div class="auth-msg" id="gateMsg"></div>
+  <div class="auth-actions"><button class="btn primary" id="gateLoginBtn"><svg class="ui-icon"><use href="#i-check"></use></svg><span>Войти</span></button><button class="btn" id="gateSignupBtn"><svg class="ui-icon"><use href="#i-people"></use></svg><span>Создать аккаунт</span></button><button class="btn ghost" id="gateResetBtn"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg><span>Забыли пароль?</span></button></div>
+  <div class="auth-progress"><span>●</span><span id="authProgressText">Готово к входу</span></div><div class="auth-progress-bar"><i id="authProgressBar"></i></div><div class="auth-msg" id="gateMsg" aria-live="polite"></div>
 </div></div>
 <header class="topbar">
   <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo">LC</div><div><div class="brand-name">LIFE CONTROL</div><div class="brand-sub">личная система движения · офлайн</div></div></div>
@@ -214,7 +220,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
   <div class="card section pulse-card">
     <div class="pulse-head"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>Пульс сегодня</div><h2>Состояние движения</h2><div class="sub">Проценты считаются из фактических данных Life Control.</div></div><select id="dayMode" class="mode-select" aria-label="Режим дня"><option value="normal">Нормальный день</option><option value="heavy">Тяжёлый день</option><option value="rest">Выходной</option></select></div>
     <div class="pulse-grid">
-      <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>День</div><div class="pulse-value" id="pulseDay">0%</div><div class="pulse-bar"><i id="pulseDayBar"></i></div></div>
+<button class="pulse-item pulse-item-action" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="Открыть ход дня"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-runner"></use></svg></span>День</div><div class="pulse-value" id="pulseDay">0%</div><div class="pulse-bar"><i id="pulseDayBar"></i></div></button>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><div class="pulse-value" id="pulseGoal">0%</div><div class="pulse-bar"><i id="pulseGoalBar"></i></div></div>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Финансы</div><div class="pulse-value" id="pulseFinance">0%</div><div class="pulse-bar"><i id="pulseFinanceBar"></i></div></div>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Долг</div><div class="pulse-value" id="pulseDebt">0%</div><div class="pulse-bar"><i id="pulseDebtBar"></i></div></div>
@@ -413,18 +419,18 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 <div class="toast" id="toast" role="status" aria-live="polite"></div><div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
 <script>
 'use strict';
-const KEY='LIFE_CONTROL_V45';
-const BACKUP_KEY='LIFE_CONTROL_V45_SNAPSHOT';
-const BACKUP2_KEY='LIFE_CONTROL_V45_SNAPSHOT_2';
+const KEY='LIFE_CONTROL_V47';
+const BACKUP_KEY='LIFE_CONTROL_V47_SNAPSHOT';
+const BACKUP2_KEY='LIFE_CONTROL_V47_SNAPSHOT_2';
 const LEGACY=['LIFE_CONTROL_V40','LIFE_CONTROL_V39','LIFE_CONTROL_V38','LIFE_CONTROL_V37','LIFE_CONTROL_V36','LIFE_CONTROL_V35','LIFE_CONTROL_V33','LIFE_CONTROL_V32','LIFE_CONTROL_V31','LIFE_CONTROL_V30','LIFE_CONTROL_V29','LIFE_CONTROL_V28','LIFE_CONTROL_V27','LIFE_CONTROL_V26','LIFE_CONTROL_V25','LIFE_CONTROL_V24','LIFE_CONTROL_V23','LIFE_CONTROL_V22','LIFE_CONTROL_V21','LIFE_CONTROL_V20','LIFE_CONTROL_V18','LIFE_CONTROL_V17','LIFE_CONTROL_V16','LIFE_CONTROL_V15','LIFE_CONTROL_V14','LIFE_CONTROL_V13','LIFE_CONTROL_V12','LIFE_CONTROL_V11','LIFE_CONTROL_V10','LIFE_CONTROL_V9'];
 const DAY_MS=86400000,TRASH_TTL=30*DAY_MS;
 const PROFIT_SOURCES=['Зарплата','Фриланс','Спортивная аналитика'];
 const PROFIT_ICONS={'Зарплата':'💼','Фриланс':'💻','Спортивная аналитика':'📊'};
 const DEFAULT={
-  version:41,
+  version:47,
   profile:{name:'',currency:'сомони'},
   wallet:{openingBalance:0},
-  settings:{theme:'light',preMinutes:10,notifications:true},
+  settings:{theme:'light',preMinutes:10,notifications:true,fontScale:1.06},
   ai:{endpoint:'https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai',model:'gemini-3.6-flash',enabled:true,webSearch:false,lastAnalysisAt:'',history:[],consent:{goal:true,money:true,reports:true,notes:false}},
   income:4500,
   runtimeErrors:[],
@@ -446,7 +452,7 @@ const DEFAULT={
 const SUPABASE_CONFIG={url:'https://riqmwueobjazfnhvvumy.supabase.co',publishableKey:'sb_publishable_17lPUQIiyRmlEpFkqosvKg_SBoxJuy8'};
 const AI_FUNCTION_URL='https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai';
 const AI_MODEL='gemini-3.6-flash';
-let calendarRangeStart='',calendarRangeEnd='',goalAiBusy=false;
+let calendarRangeStart='',calendarRangeEnd='',goalAiBusy=false,dayProgressTimer=null,appBound=false;
 const AUTH_REDIRECT_URL='https://doxajooon.github.io/life/';
 const DEFAULT_AUTH_EMAIL='';
 const CLOUD_AUTH_KEY='LIFE_CONTROL_SUPABASE_AUTH_V1';
@@ -473,7 +479,7 @@ async function openPasswordRecovery(){
 async function cloudRefresh(){const a=cloudAuth();if(!a?.refresh_token)return null;try{const data=await supaFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:a.refresh_token})});setCloudAuth({...data,user:data?.user||a.user||null});return data}catch(e){setCloudAuth(null);return null}}
 async function cloudUser(){const a=cloudAuth();if(!a?.access_token)return null;try{return await supaFetch('/auth/v1/user',{headers:{Authorization:'Bearer '+a.access_token}})}catch(e){return null}}
 async function cloudPull(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)return null;const rows=await supaFetch('/rest/v1/life_state?select=state,schema_version,updated_at&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1');return {user, row:Array.isArray(rows)?rows[0]||null:null}}
-async function cloudPush(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)throw new Error('Войдите в Supabase, чтобы синхронизировать данные.');const body={user_id:user.id,state, schema_version:41,device_id:getDeviceId()};await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});return true}
+async function cloudPush(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)throw new Error('Войдите в Supabase, чтобы синхронизировать данные.');const body={user_id:user.id,state,schema_version:47,device_id:getDeviceId()};await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});return true}
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
 async function cloudSync(){const localStamp=Date.parse(state._lastSavedAt||'')||0;const pulled=await cloudPull();if(!pulled)return {ok:false,logged:false};const cloudStamp=Date.parse(pulled.row?.state?._lastSavedAt||pulled.row?.updated_at||'')||0;if(pulled.row?.state&&cloudStamp>localStamp){state=normalize(pulled.row.state);saveState();renderAll();scheduleNative()}else{await cloudPush()}setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}}
 async function cloudAutoSync(){if(!cloudAuth())return false;const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}}
@@ -499,7 +505,7 @@ function dayReport(){const k=keyDay();state.reports[k]=state.reports[k]||{done:'
 function purgeExpiredTrash(s){const before=(s.notesTrash||[]).length,cut=Date.now()-TRASH_TTL;s.notesTrash=(s.notesTrash||[]).filter(n=>Date.parse(n.deletedAt||0)>cut);return before-s.notesTrash.length}
 function normalize(s){
   const hadWallet=!!(s.wallet&&typeof s.wallet==='object'&&Object.prototype.hasOwnProperty.call(s.wallet,'openingBalance'));
-  s=merge(s,DEFAULT);s.version=41;s.goal=s.goal&&typeof s.goal==='object'?s.goal:clone(DEFAULT.goal);s.goal.aiPlan=s.goal.aiPlan&&typeof s.goal.aiPlan==='object'?s.goal.aiPlan:null;s.goal.aiPlanAt=String(s.goal.aiPlanAt||'');s.goal.aiPlanGoalKey=String(s.goal.aiPlanGoalKey||'');
+  s=merge(s,DEFAULT);s.version=47;
   s.wallet=s.wallet&&typeof s.wallet==='object'?s.wallet:{openingBalance:0};
   s.wallet.openingBalance=Math.max(0,Number(s.wallet.openingBalance)||0);
   if(!hadWallet){
@@ -634,7 +640,7 @@ async function restoreFromIndexedDB(){
 }
 
 function initPersistence(){
-  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v41');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
+  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v47');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
   window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const incoming=normalize(JSON.parse(ev.newValue));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}});
   try{navigator.storage?.persist?.().then(ok=>{state._persistentStorageRequestedAt=new Date().toISOString();state._persistentStorageGranted=!!ok;queueAutosave()}).catch(()=>{});}catch(e){}
 }
@@ -650,7 +656,7 @@ const MOTIVATIONS=[
   {author:'Пророк Мухаммад ﷺ',text:'«Кому Аллах желает добра, тому даёт понимание религии».',source:'Сахих аль-Бухари 71'}
  ];
 function motivation(){const k=keyDay();const idx=Math.floor(Date.UTC(...keyDay().split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS)%MOTIVATIONS.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);if(state.dailyMotivations[k]?.idx===idx)return state.dailyMotivations[k];const m=MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length];const result={idx,text:`${m.text}\n\nСегодня: ${action}.`,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
-function setTheme(){const dark=state.settings.theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';const icon=$('themeIcon');if(icon)icon.innerHTML=`<use href="${dark?'#i-sun':'#i-moon'}"></use>`;const btn=$('themeBtn');if(btn)btn.setAttribute('aria-label',dark?'Включить светлую тему':'Включить тёмную тему');document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#0d1722':'#f5f7fa')}
+function setTheme(){document.documentElement.style.setProperty('--font-scale',String(clamp(Number(state.settings?.fontScale)||1.06,.98,1.12)));const dark=state.settings.theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';const icon=$('themeIcon');if(icon)icon.innerHTML=`<use href="${dark?'#i-sun':'#i-moon'}"></use>`;const btn=$('themeBtn');if(btn)btn.setAttribute('aria-label',dark?'Включить светлую тему':'Включить тёмную тему');document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#0d1722':'#f5f7fa')}
 function toggleTheme(){state.settings.theme=state.settings.theme==='dark'?'light':'dark';saveState();setTheme()}
 function toast(title,body=''){clearTimeout(toastTimer);$('toast').innerHTML=`<strong>${esc(title)}</strong>${body?`<div>${esc(body)}</div>`:''}`;$('toast').classList.add('show');toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3600)}
 function logNotice(title,body){state.notificationsLog.unshift({id:uid(),title,body,at:new Date().toISOString()});state.notificationsLog=state.notificationsLog.slice(0,80);saveState();updateBell()}
@@ -669,7 +675,7 @@ function scheduleNative(){
     for(let i=0;i<state.day.steps.length;i++){
       const s=state.day.steps[i],next=state.day.steps[i+1],previous=state.day.steps[i-1];
       const startBody=previous?`Этап «${previous.title}» завершён. Сейчас переходи к: ${s.details?.[0]||s.text||s.title}`:(s.details?.[0]||s.text||'Начни текущий этап.');
-      window.AndroidBridge.scheduleDaily?.(s.id,s.time,`Пора: ${s.title}`,startBody);
+      if(!previous || previous.end!==s.time) window.AndroidBridge.scheduleDaily?.(s.id,s.time,`Пора: ${s.title}`,startBody);
       if(preMinutes>0){
         const pre=timeToMin(s.time)-preMinutes;
         if(pre>=0){
@@ -677,10 +683,8 @@ function scheduleNative(){
           window.AndroidBridge.scheduleDaily?.('pre_'+s.id,`${hh}:${mm}`,`Через ${preMinutes} минут`,`Следующий этап: ${s.title}. Закончи текущее и переходи.`);
         }
       }
-      const end=timeToMin(s.end),nextStart=next?timeToMin(next.time):null;
-      if(!next || nextStart>end){
-        window.AndroidBridge.scheduleDaily?.('end_'+s.id,s.end,`Этап завершён: ${s.title}`,next?`Есть пауза до ${next.time}. Переключайся спокойно.`:'Основные этапы дня завершены. Пора отдыхать.');
-      }
+      const end=timeToMin(s.end);
+      window.AndroidBridge.scheduleDaily?.('end_'+s.id,s.end,`Этап завершён: ${s.title}`,next?`Галочка будет поставлена автоматически. Следующий этап: ${next.title}.`:'Галочка будет поставлена автоматически. Основные этапы дня завершены.');
     }
   }catch(e){
     state.runtimeErrors=Array.isArray(state.runtimeErrors)?state.runtimeErrors:[];
@@ -790,50 +794,36 @@ function dayExpenses(dateOrKey){
 }
 function calendarMonthKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function calendarRangeMetrics(start,end){
-  if(!start)return {days:0,income:0,expense:0,net:0};
-  const a=new Date(start+'T12:00:00'),b=new Date((end||start)+'T12:00:00');
-  if(Number.isNaN(a.getTime())||Number.isNaN(b.getTime()))return {days:0,income:0,expense:0,net:0};
-  const lo=a<=b?a:b,hi=a<=b?b:a,days=Math.max(1,Math.floor((hi-lo)/DAY_MS)+1);
-  let income=0,expense=0;
-  for(let i=0;i<days;i++){const d=new Date(lo);d.setDate(lo.getDate()+i);const k=keyDay(d);income+=dayIncome(k);expense+=dayExpenses(k)}
-  return {days,income,expense,net:income-expense};
+  if(!start)return {days:0,income:0,expense:0,expenseOps:0,net:0};
+  const a=new Date(start+'T12:00:00'),b=new Date((end||start)+'T12:00:00');if(Number.isNaN(a.getTime())||Number.isNaN(b.getTime()))return {days:0,income:0,expense:0,expenseOps:0,net:0};
+  const lo=a<=b?a:b,hi=a<=b?b:a,days=Math.max(1,Math.floor((hi-lo)/DAY_MS)+1);let income=0,expense=0,expenseOps=0;
+  for(let i=0;i<days;i++){const d=new Date(lo);d.setDate(lo.getDate()+i);const k=keyDay(d);income+=dayIncome(k);expense+=dayExpenses(k);expenseOps+=(state.expenses||[]).filter(x=>{const z=validDate(x.at);return z&&keyDay(z)===k}).length}
+  return {days,income,expense,expenseOps,net:income-expense};
 }
 function renderCalendar(year,month,selectedKey){
-  const first=new Date(year,month,1),last=new Date(year,month+1,0),days=last.getDate();
-  const monthTitle=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}),leading=(first.getDay()+6)%7;
-  const earned=[];
-  for(let day=1;day<=days;day++){const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key);if(income>0)earned.push({day,key,income})}
+  const first=new Date(year,month,1),last=new Date(year,month+1,0),days=last.getDate(),monthTitle=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}),leading=(first.getDay()+6)%7;
+  const earned=[];for(let day=1;day<=days;day++){const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key);if(income>0)earned.push({day,key,income})}
   const total=earned.reduce((s,x)=>s+x.income,0),earnedDays=earned.length,best=earned.reduce((m,x)=>x.income>m?x.income:m,0);
   let selected=selectedKey||keyDay(new Date());if(!selected.startsWith(calendarMonthKey(first)))selected=keyDay(first);
   const selectedDate=new Date(selected+'T12:00:00'),selectedIn=dayIncome(selected),selectedOut=dayExpenses(selected);
   const selectedProfits=(state.profits||[]).filter(x=>{const d=validDate(x.at);return d&&keyDay(d)===selected}).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
   const selectedSources={};selectedProfits.forEach(x=>{const k=normalizeProfitSource(x.sourceGroup||x.source);selectedSources[k]=(selectedSources[k]||0)+Math.max(0,Number(x.amount)||0)});
   const sourceRows=Object.entries(selectedSources).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div class="calendar-source"><span>'+esc(PROFIT_ICONS[k]||'💠')+' '+esc(k)+'</span><strong class="blue">+'+esc(fmtMoney(v))+'</strong></div>').join('');
-  const rs=calendarRangeStart,re=calendarRangeEnd,rangeActive=!!rs;
-  const rangeLo=rs&&re?(rs<re?rs:re):rs,rangeHi=rs&&re?(rs<re?re:rs):rs,range=calendarRangeMetrics(rangeLo,rangeHi);
+  const rs=calendarRangeStart,re=calendarRangeEnd,rangeActive=!!rs,rangeLo=rs&&re?(rs<re?rs:re):rs,rangeHi=rs&&re?(rs<re?re:rs):rs,range=calendarRangeMetrics(rangeLo,rangeHi);
   const week=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];let cells=week.map(w=>'<div class="calendar-week">'+w+'</div>').join('');
   for(let i=0;i<leading;i++)cells+='<div class="calendar-day empty" aria-hidden="true"></div>';
-  for(let day=1;day<=days;day++){
-    const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key),today=key===keyDay(new Date()),sel=key===selected;
-    const inRange=rangeActive&&rangeLo&&rangeHi&&key>=rangeLo&&key<=rangeHi,start=key===rangeLo&&rangeActive,end=key===rangeHi&&rangeActive;
-    cells+='<button class="calendar-day '+(income>0?'earned ':'')+(today?'today ':'')+(sel?'selected ':'')+(inRange?'in-range ':'')+(start?'range-start ':'')+(end?'range-end':'')+'" type="button" data-cal-day="'+key+'" aria-label="'+esc(d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}))+'"><span class="calendar-num">'+day+'</span>'+(income>0?'<span class="calendar-earned">'+esc(fmtMoney(income))+'</span>':'<span class="calendar-day-noearn">—</span>')+'</button>';
-  }
-  const rangeLabel=!rangeActive?'Выбери первый день':(!calendarRangeEnd?'Теперь выбери последний день':range.days+' дн. · '+rangeLo+' → '+rangeHi);
-  const rangeSummary=rangeActive?'<div class="calendar-range-summary"><div class="calendar-kpi"><div class="label">Дней</div><div class="value">'+range.days+'</div></div><div class="calendar-kpi"><div class="label">Прибыль</div><div class="value blue">+'+esc(fmtMoney(range.income))+'</div></div><div class="calendar-kpi"><div class="label">Расход</div><div class="value red-txt">−'+esc(fmtMoney(range.expense))+'</div></div><div class="calendar-kpi"><div class="label">Итог</div><div class="value '+(range.net>=0?'orange-txt':'red-txt')+'">'+(range.net>=0?'+':'−')+esc(fmtMoney(Math.abs(range.net)))+'</div></div></div>':'';
-  const modal='<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Финансовый календарь</div><h2>'+esc(monthTitle)+'</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="calendar-modal" style="margin-top:12px"><div class="calendar-head"><div class="calendar-month">'+esc(monthTitle)+'</div><div class="calendar-nav"><button class="iconbtn" id="calPrev" type="button" aria-label="Предыдущий месяц">‹</button><button class="iconbtn" id="calNext" type="button" aria-label="Следующий месяц">›</button></div></div><div class="calendar-summary"><div class="calendar-kpi"><div class="label">Дней с доходом</div><div class="value">'+earnedDays+'</div></div><div class="calendar-kpi"><div class="label">Заработано</div><div class="value blue">'+esc(fmtMoney(total))+'</div></div><div class="calendar-kpi"><div class="label">Лучший день</div><div class="value orange">'+esc(fmtMoney(best))+'</div></div></div><div class="calendar-grid">'+cells+'</div><div class="calendar-range-bar"><span><strong>Диапазон:</strong> '+esc(rangeLabel)+'</span><div class="calendar-range-actions"><button class="btn small" id="calRangeClear" type="button">Сбросить</button></div></div>'+rangeSummary+'<div class="calendar-selected"><h3>'+esc(selectedDate.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</h3><div class="meta">Доход: <strong class="blue">+'+esc(fmtMoney(selectedIn))+'</strong> · Расход: <strong class="red-txt">−'+esc(fmtMoney(selectedOut))+'</strong></div><div class="stack" style="margin-top:8px">'+(sourceRows||'<div class="empty">В этот день доходов не зафиксировано.</div>')+'</div></div><div class="calendar-foot">Нажми первый день, затем последний — система посчитает весь выбранный период: прибыль, расход и чистый итог.</div></div>';
+  for(let day=1;day<=days;day++){const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key),today=key===keyDay(new Date()),sel=key===selected,inRange=rangeActive&&rangeLo&&rangeHi&&key>=rangeLo&&key<=rangeHi,start=key===rangeLo&&rangeActive,end=key===rangeHi&&rangeActive;cells+='<button class="calendar-day '+(income>0?'earned ':'')+(today?'today ':'')+(sel?'selected ':'')+(inRange?'in-range ':'')+(start?'range-start ':'')+(end?'range-end':'')+'" type="button" data-cal-day="'+key+'" aria-label="'+esc(d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}))+'"><span class="calendar-num">'+day+'</span>'+(income>0?'<span class="calendar-earned">'+esc(fmtMoney(income))+'</span>':'<span class="calendar-day-noearn">—</span>')+'</button>'}
+  const rangeLabel=!rangeActive?'Задай период ниже':(!calendarRangeEnd?'Теперь выбери последнюю дату':range.days+' дн. · '+rangeLo+' → '+rangeHi);
+  const rangeSummary=rangeActive&&calendarRangeEnd?'<div class="calendar-range-summary"><div class="calendar-kpi"><div class="label">Дней</div><div class="value">'+range.days+'</div></div><div class="calendar-kpi"><div class="label">Прибыль</div><div class="value blue">+'+esc(fmtMoney(range.income))+'</div></div><div class="calendar-kpi"><div class="label">Потрачено</div><div class="value red-txt">−'+esc(fmtMoney(range.expense))+'</div></div><div class="calendar-kpi"><div class="label">Чистый итог</div><div class="value '+(range.net>=0?'orange-txt':'red-txt')+'">'+(range.net>=0?'+':'−')+esc(fmtMoney(Math.abs(range.net)))+'</div></div></div>':'';
+  const y=new Date().getFullYear(),defaultStart=calendarRangeStart||y+'-01-01',defaultEnd=calendarRangeEnd||keyDay(new Date());
+  const modal='<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Финансовый календарь</div><h2>Доходы и расходы по периоду</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="calendar-modal" style="margin-top:12px"><div class="calendar-range-bar" style="margin-top:0;display:grid;grid-template-columns:1fr 1fr auto;align-items:end"><div class="field"><label>От</label><input id="calStartDate" type="date" value="'+esc(defaultStart)+'"></div><div class="field"><label>До</label><input id="calEndDate" type="date" value="'+esc(defaultEnd)+'"></div><button class="btn small primary" id="calApplyRange" type="button"><svg class="ui-icon"><use href="#i-check"></use></svg> Рассчитать</button></div><div class="calendar-range-actions" style="margin-top:8px"><button class="btn small" id="calYearBtn" type="button">С 1 января</button><button class="btn small" id="calTodayBtn" type="button">До сегодня</button><button class="btn small ghost" id="calRangeClear" type="button">Очистить</button></div><div class="calendar-head" style="margin-top:12px"><div class="calendar-month">'+esc(monthTitle)+'</div><div class="calendar-nav"><button class="iconbtn" id="calPrev" type="button" aria-label="Предыдущий месяц">‹</button><button class="iconbtn" id="calNext" type="button" aria-label="Следующий месяц">›</button></div></div><div class="calendar-summary"><div class="calendar-kpi"><div class="label">Дней с доходом</div><div class="value">'+earnedDays+'</div></div><div class="calendar-kpi"><div class="label">Заработано за месяц</div><div class="value blue">'+esc(fmtMoney(total))+'</div></div><div class="calendar-kpi"><div class="label">Лучший день</div><div class="value orange">'+esc(fmtMoney(best))+'</div></div></div><div class="calendar-grid">'+cells+'</div><div class="calendar-range-bar"><span><strong>Период:</strong> '+esc(rangeLabel)+'</span></div>'+rangeSummary+'<div class="calendar-selected"><h3>'+esc(selectedDate.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</h3><div class="meta">Доход: <strong class="blue">+'+esc(fmtMoney(selectedIn))+'</strong> · Расход: <strong class="red-txt">−'+esc(fmtMoney(selectedOut))+'</strong></div><div class="stack" style="margin-top:8px">'+(sourceRows||'<div class="empty">В этот день доходов не зафиксировано.</div>')+'</div></div><div class="calendar-foot">Можно указать любой период, например <strong>01.01.2026 → 19.09.2026</strong>. Система считает только реально записанные операции.</div></div>';
   openModal(modal);$('closeModalBtn').onclick=closeModal;
-  $('calRangeClear').onclick=()=>{calendarRangeStart='';calendarRangeEnd='';renderCalendar(year,month,selected)};
-  $('calPrev').onclick=()=>{const nd=new Date(year,month-1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),selected)};
-  $('calNext').onclick=()=>{const nd=new Date(year,month+1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),selected)};
-  $$('[data-cal-day]').forEach(b=>b.onclick=()=>{
-    const k=b.dataset.calDay;selected=k;
-    if(!calendarRangeStart||calendarRangeEnd){calendarRangeStart=k;calendarRangeEnd=''}
-    else if(k<calendarRangeStart){calendarRangeEnd=calendarRangeStart;calendarRangeStart=k}
-    else{calendarRangeEnd=k}
-    renderCalendar(year,month,k);
-  });
+  const apply=()=>{const a=$('calStartDate').value,b=$('calEndDate').value;if(!a){toast('Укажи начальную дату');return}if(b&&b<a){calendarRangeStart=b;calendarRangeEnd=a}else{calendarRangeStart=a;calendarRangeEnd=b||a}renderCalendar(year,month,selected)};
+  $('calApplyRange').onclick=apply;$('calYearBtn').onclick=()=>{calendarRangeStart=new Date().getFullYear()+'-01-01';calendarRangeEnd=keyDay(new Date());renderCalendar(year,month,selected)};$('calTodayBtn').onclick=()=>{calendarRangeEnd=keyDay(new Date());if(!calendarRangeStart)calendarRangeStart=calendarRangeEnd;renderCalendar(year,month,selected)};$('calRangeClear').onclick=()=>{calendarRangeStart='';calendarRangeEnd='';renderCalendar(year,month,selected)};
+  $('calPrev').onclick=()=>{const nd=new Date(year,month-1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),selected)};$('calNext').onclick=()=>{const nd=new Date(year,month+1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),selected)};
+  $$('[data-cal-day]').forEach(b=>b.onclick=()=>{const k=b.dataset.calDay;selected=k;if(!calendarRangeStart||calendarRangeEnd){calendarRangeStart=k;calendarRangeEnd=''}else if(k<calendarRangeStart){calendarRangeEnd=calendarRangeStart;calendarRangeStart=k}else{calendarRangeEnd=k}renderCalendar(year,month,k)});
 }
-function openCalendar(){const d=new Date();calendarRangeStart='';calendarRangeEnd='';renderCalendar(d.getFullYear(),d.getMonth(),keyDay(d))}
+function openCalendar(){const d=new Date();calendarRangeStart=d.getFullYear()+'-01-01';calendarRangeEnd=keyDay(d);renderCalendar(d.getFullYear(),d.getMonth(),keyDay(d))}
 
 function renderControlDashboard(){
   const wm=walletMetrics(), debt=debtTotal(), f=goalFinanceMetrics(), rep=dayReport();
@@ -862,14 +852,27 @@ function renderControlDashboard(){
   setText('dashPriorityText',priorityText);
   setText('controlUpdated',new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));
 }
-function infoForDashboard(){try{return getStageInfo()}catch(e){return null}}
+function infoForDashboard(){try{return getStageInfo()}catch(e){return null}}function dayProgressMetrics(){
+  const steps=state.day.steps||[];if(!steps.length)return {pct:0,elapsed:0,remaining:0,stageIndex:-1,stage:'—',sleepAt:'—'};
+  const start=timeToMin(steps[0].time),sleep=timeToMin(steps[steps.length-1].end),now=nowMin(),span=Math.max(1,sleep-start),elapsed=clamp(now-start,0,span),pct=clamp(Math.round(elapsed/span*100),0,100);
+  const info=getStageInfo();let remaining=0;if(now<start)remaining=sleep-start;else if(now<sleep)remaining=sleep-now;
+  return {pct,elapsed,remaining,stageIndex:info.kind==='active'?info.i:info.kind==='between'?steps.findIndex(s=>s.id===info.next?.id):steps.length-1,stage:info.kind==='active'?info.s.title:info.kind==='between'?info.next?.title:'Сон / завершение дня',sleepAt:steps[steps.length-1].end};
+}
+function updateDayProgressModal(){
+  const p=dayProgressMetrics(),modal=$('dayProgressModal');if(!modal)return;modal.style.setProperty('--runner-progress',p.pct);setText('dayProgressPercent',p.pct+'%');setText('dayProgressPassed',p.pct+'% пройдено');setText('dayProgressLeft',(100-p.pct)+'% осталось');setText('dayProgressElapsed',fmtDuration(p.elapsed));setText('dayProgressRemain',p.remaining>0?fmtDuration(p.remaining):'День завершён');setText('dayProgressStage',p.stageIndex>=0?'Этап '+(p.stageIndex+1)+' из '+(state.day.steps.length||0):'До начала дня');setText('dayProgressSleep',p.sleepAt);
+}
+function openDayProgress(){
+  openModal('<div class="close-row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-runner"></use></svg> Ход дня</div><h2>От начала дня до сна</h2><div class="sub">Процент считается по реальному расписанию и обновляется каждую секунду.</div></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div id="dayProgressModal" style="margin-top:12px"><div class="day-progress-main"><div class="day-progress-percent" id="dayProgressPercent">0%</div><div class="day-progress-sub" id="dayProgressPassed">0% пройдено</div></div><div class="runner-stage"><div class="runner-track"><div class="runner-runner"><svg class="ui-icon"><use href="#i-runner"></use></svg></div></div></div><div class="day-progress-kpis"><div class="day-progress-kpi"><div class="label">Прошло</div><div class="value" id="dayProgressElapsed">0 мин</div></div><div class="day-progress-kpi"><div class="label">Осталось до сна</div><div class="value" id="dayProgressRemain">0 мин</div></div><div class="day-progress-kpi"><div class="label">Текущий этап</div><div class="value" id="dayProgressStage">—</div></div></div><div class="card" style="margin-top:10px;background:var(--soft);padding:12px"><div class="row"><span class="small muted">Сон / завершение дня</span><strong id="dayProgressSleep">—</strong></div><div class="sub" id="dayProgressLeft" style="margin-top:5px">100% осталось</div></div></div>');
+  $('closeModalBtn').onclick=closeModal;updateDayProgressModal();clearInterval(dayProgressTimer);dayProgressTimer=setInterval(updateDayProgressModal,1000);
+}
+
 function renderToday(){
   autoCompleteExpiredStages();renderTodayLight();renderControlDashboard();const d=new Date(),info=getStageInfo(),rep=dayReport(),dd=dailyState();
   $('todayTitle').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});$('todayDate').textContent=fmtDate(d);
   const mo=motivation();$('motivationText').textContent=mo.text;$('motivationSource').textContent=`${mo.author} — ${mo.source}`;
   renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
   const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>x.i>(info.kind==='active'?info.i:-1));
-  $('timeline').innerHTML=state.day.steps.map((s,i)=>{const done=!!rep.steps[s.id],current=info.kind==='active'&&info.i===i;const stagePct=done?100:(current?Math.round(info.pct):0);return `<div class="timeline-row ${current?'current':''} ${done?'done':''}"><div class="time-range">${esc(s.time)}<br>${esc(s.end)}</div><div><div class="t-title">Этап ${i+1} · ${esc(s.title)}</div><div class="t-note">${esc(s.text)}</div><div class="stage-pct">${done?'100% завершено':current?`${stagePct}% времени прошло`:(nowMin()>=timeToMin(s.end)?'100% завершено':'0% времени прошло')}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} aria-label="${esc(s.title)}"></div>`}).join('');
+  autoCompleteExpiredStages();const effectiveRep=dayReport();$('timeline').innerHTML=state.day.steps.map((s,i)=>{const expired=nowMin()>=timeToMin(s.end),done=!!effectiveRep.steps[s.id]||expired,current=info.kind==='active'&&info.i===i;const stagePct=done?100:(current?Math.round(info.pct):0);return `<div class="timeline-row ${current?'current':''} ${done?'done':''}"><div class="time-range">${esc(s.time)}<br>${esc(s.end)}</div><div><div class="t-title">Этап ${i+1} · ${esc(s.title)}</div><div class="t-note">${esc(s.text)}</div><div class="stage-pct">${done?'100% завершено':current?`${stagePct}% времени прошло`:'0% времени прошло'}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${esc(s.title)}"></div>`}).join('');
   $$('[data-day-step]').forEach(c=>c.onchange=()=>{rep.steps[c.dataset.dayStep]=c.checked;saveState();renderToday()});
   $('nextList').innerHTML=future.length?future.map(x=>`<div class="future-item"><div class="step-no">${x.i+1}</div><div><div class="future-title">${esc(x.s.title)}</div><div class="future-time">${esc(x.s.time)}–${esc(x.s.end)}</div></div><div class="future-arrow">→</div></div>`).join(''):'<div class="empty">После последнего этапа — отдых.</div>';
   $('miniGoal').textContent=state.goal.title;$('miniNext').textContent=state.goal.next;$('todayBalance').textContent=fmtMoney(daySum(state.profits)-daySum(state.expenses));const wm=walletMetrics();setText('todayGoalSaved',`На цель: ${fmtMoney(wm.goal)}`);setText('todayCashState',`Касса: ${fmtMoney(wm.cash)} · Общий капитал: ${fmtMoney(wm.capital)}`);
@@ -1447,7 +1450,7 @@ function openSettings(){
   $('resetBtn').onclick=()=>{if(confirm('Удалить все локальные данные Life Control?')){for(const k of [KEY,BACKUP_KEY,BACKUP2_KEY,...LEGACY]){try{localStorage.removeItem(k)}catch(e){}}try{indexedDB.deleteDatabase('LifeControlDB');indexedDB.deleteDatabase('LifeControlV26DB')}catch(e){}location.reload()}}
 }
 function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`life-control-backup-${keyDay()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Резервная копия сохранена')}
-function importJSON(ev){const f=ev.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const imported=normalize(JSON.parse(r.result));state=merge(imported,state);state.version=41;saveState();closeModal();renderAll();scheduleNative();toast('Данные восстановлены')}catch(e){toast('Ошибка импорта','Файл не распознан.')}};r.readAsText(f)}
+  state.version=47;saveState()
 function openReportHistory(){
   const entries=Object.entries(state.reports||{}).filter(([,r])=>{if(!r)return false;const hasFields=['done','block','future','tomorrow'].some(k=>String(r[k]||'').trim());return hasFields||!!r.savedAt}).sort((a,b)=>b[0].localeCompare(a[0]));
   const html=entries.length?entries.slice(0,90).map(([day,r])=>{
@@ -1460,12 +1463,13 @@ function openReportHistory(){
 function updateBell(){const unread=state.notificationsLog.some(n=>!state.lastReadAt||Date.parse(n.at)>Date.parse(state.lastReadAt));$('bellDot').classList.toggle('show',unread)}
 function showView(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo({top:0,behavior:'smooth'})}
 function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open')}
-function closeModal(){$('modalBack').classList.remove('open')}
+function closeModal(){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open')}
 function renderAll(){setTheme();purgeExpiredTrash(state);renderToday();renderGoal();renderMoney();renderNotes();updateBell()}
 function bind(){
+  if(appBound)return;appBound=true;
   $$('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
   const homeBrand=$('homeBrand');homeBrand.onclick=()=>{closeModal();showView('viewToday')};homeBrand.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();homeBrand.click()}};
-  $('themeBtn').onclick=toggleTheme;$('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=openSettings;$('calendarBtn').onclick=openCalendar;
+  $('themeBtn').onclick=toggleTheme;$('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=openSettings;$('calendarBtn').onclick=openCalendar;$('pulseDayCard').onclick=openDayProgress;
   const reportInputs=['rDone','rBlock','rFuture','rTomorrow'];
   reportInputs.forEach(id=>$(id).addEventListener('input',()=>{const r=dayReport();r.done=$('rDone').value;r.block=$('rBlock').value;r.future=$('rFuture').value;r.tomorrow=$('rTomorrow').value;r.savedAt=r.savedAt||new Date().toISOString();queueAutosave();$('reportSaved').textContent='Автосохранение…'}));
   $('saveReportBtn').onclick=()=>{const r=dayReport();r.done=$('rDone').value.trim();r.block=$('rBlock').value.trim();r.future=$('rFuture').value.trim();r.tomorrow=$('rTomorrow').value.trim();r.savedAt=new Date().toISOString();saveState();renderToday();toast('Итог дня сохранён','Завтра начинаем с одного шага.')};
@@ -1481,6 +1485,8 @@ window.addEventListener('unhandledrejection',ev=>{try{state.runtimeErrors=Array.
 function authErrorFromUrl(){try{const q=new URLSearchParams(location.hash.slice(1));const code=q.get('error_code')||q.get('error');const desc=q.get('error_description');if(code||desc){clearAuthHash();setTimeout(()=>toast('Ошибка входа',decodeURIComponent(desc||code||'Ссылка недействительна')),250);return true}}catch(e){}return false}
 function lockApp(){document.body.classList.add('auth-locked');const el=$('authLock');if(el)el.hidden=false}
 function unlockApp(){document.body.classList.remove('auth-locked');const el=$('authLock');if(el)el.hidden=true}
+function setAuthProgress(text,pct){setText('authProgressText',text);const bar=$('authProgressBar');if(bar)bar.style.width=clamp(Number(pct)||0,0,100)+'%'}
+function setAuthBusy(id,busy,label){const b=$(id);if(!b)return;if(!b.dataset.defaultHtml)b.dataset.defaultHtml=b.innerHTML;b.disabled=!!busy;b.innerHTML=busy?'<span class="auth-spinner"></span><span>'+esc(label)+'</span>':b.dataset.defaultHtml}
 async function requireAuth(){
   lockApp();
   const recovery=recoverySessionFromUrl();
@@ -1489,9 +1495,9 @@ async function requireAuth(){
   if(recovery){unlockApp();return true}
   const email=$('gateEmail'),pass=$('gatePassword'),msg=$('gateMsg');
   const say=t=>{if(msg)msg.textContent=t};
-  $('gateLoginBtn').onclick=async()=>{say('Вход…');try{const d=await cloudSignIn(email.value.trim(),pass.value);if(!d?.access_token)throw new Error(d?.msg||d?.error_description||d?.message||'Неверный email или пароль.');const u=await cloudUser();setCloudAuth({...d,user:u||d.user});unlockApp();bind();lastDay=keyDay();say('');await cloudPullIntoLocal();renderAll();refreshCloudUI();toast('Вход выполнен','Life Control открыт.')}catch(e){say(String(e.message||e))}};
-  $('gateSignupBtn').onclick=async()=>{say('Создание аккаунта…');try{const d=await cloudSignUp(email.value.trim(),pass.value);if(d?.session?.access_token){setCloudAuth(d.session);unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();renderAll();refreshCloudUI();say('');toast('Аккаунт создан','Life Control открыт.')}else say('Аккаунт создан. Проверь почту и подтверди адрес, затем войди.')}catch(e){say(String(e.message||e))}};
-  $('gateResetBtn').onclick=async()=>{try{const em=email.value.trim();if(!/^\\S+@\\S+\\.\\S+$/.test(em))throw new Error('Введи корректный email.');await cloudRecover(em);say('Письмо восстановления отправлено.')}catch(e){say(String(e.message||e))}};
+   $('gateLoginBtn').onclick=async()=>{setAuthBusy('gateLoginBtn',true,'Вход…');setAuthProgress('Проверяю аккаунт…',20);say('');try{const d=await cloudSignIn(email.value.trim(),pass.value);setAuthProgress('Сессия подтверждена…',45);if(!d?.access_token)throw new Error(d?.msg||d?.error_description||d?.message||'Неверный email или пароль.');const u=await cloudUser();setAuthProgress('Загружаю личные данные…',65);setCloudAuth({...d,user:u||d.user});unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();toast('Вход выполнен','Life Control открыт.')}catch(e){say(String(e.message||e));setAuthProgress('Вход не выполнен',0)}finally{setAuthBusy('gateLoginBtn',false,'Войти')}};
+   $('gateSignupBtn').onclick=async()=>{setAuthBusy('gateSignupBtn',true,'Создаю аккаунт…');setAuthProgress('Создаю защищённый профиль…',25);say('');try{const d=await cloudSignUp(email.value.trim(),pass.value);setAuthProgress('Профиль создан…',55);if(d?.session?.access_token){setCloudAuth(d.session);unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();say('');toast('Аккаунт создан','Life Control открыт.')}else{say('Аккаунт создан. Проверь почту и подтверди адрес, затем войди.');setAuthProgress('Проверь почту',65)}}catch(e){say(String(e.message||e));setAuthProgress('Создание не завершено',0)}finally{setAuthBusy('gateSignupBtn',false,'Создать аккаунт')}};
+   $('gateResetBtn').onclick=async()=>{setAuthBusy('gateResetBtn',true,'Отправляю…');setAuthProgress('Отправляю письмо восстановления…',35);try{const em=email.value.trim();if(!/^\\S+@\\S+\\.\\S+$/.test(em))throw new Error('Введи корректный email.');await cloudRecover(em);setAuthProgress('Письмо отправлено',100);say('Письмо восстановления отправлено.')}catch(e){say(String(e.message||e));setAuthProgress('Не удалось отправить',0)}finally{setAuthBusy('gateResetBtn',false,'Забыли пароль?')}};
   return false;
 }
 async function init(){
