@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V41</title>
+<title>Life Control — личная система движения · офлайн · V43</title>
 <style>
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
@@ -381,9 +381,9 @@ h1{margin:0;font-size:31px;line-height:1.05;letter-spacing:-.04em}h2{margin:0;fo
 <div class="toast" id="toast" role="status" aria-live="polite"></div><div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
 <script>
 'use strict';
-const KEY='LIFE_CONTROL_V41';
-const BACKUP_KEY='LIFE_CONTROL_V41_SNAPSHOT';
-const BACKUP2_KEY='LIFE_CONTROL_V41_SNAPSHOT_2';
+const KEY='LIFE_CONTROL_V43';
+const BACKUP_KEY='LIFE_CONTROL_V43_SNAPSHOT';
+const BACKUP2_KEY='LIFE_CONTROL_V43_SNAPSHOT_2';
 const LEGACY=['LIFE_CONTROL_V40','LIFE_CONTROL_V39','LIFE_CONTROL_V38','LIFE_CONTROL_V37','LIFE_CONTROL_V36','LIFE_CONTROL_V35','LIFE_CONTROL_V33','LIFE_CONTROL_V32','LIFE_CONTROL_V31','LIFE_CONTROL_V30','LIFE_CONTROL_V29','LIFE_CONTROL_V28','LIFE_CONTROL_V27','LIFE_CONTROL_V26','LIFE_CONTROL_V25','LIFE_CONTROL_V24','LIFE_CONTROL_V23','LIFE_CONTROL_V22','LIFE_CONTROL_V21','LIFE_CONTROL_V20','LIFE_CONTROL_V18','LIFE_CONTROL_V17','LIFE_CONTROL_V16','LIFE_CONTROL_V15','LIFE_CONTROL_V14','LIFE_CONTROL_V13','LIFE_CONTROL_V12','LIFE_CONTROL_V11','LIFE_CONTROL_V10','LIFE_CONTROL_V9'];
 const DAY_MS=86400000,TRASH_TTL=30*DAY_MS;
 const PROFIT_SOURCES=['Зарплата','Фриланс','Спортивная аналитика'];
@@ -393,7 +393,7 @@ const DEFAULT={
   profile:{name:'',currency:'сомони'},
   wallet:{openingBalance:0},
   settings:{theme:'light',preMinutes:10,notifications:true},
-  ai:{endpoint:'https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai',model:'gemini-2.5-flash',enabled:true,webSearch:false,lastAnalysisAt:'',history:[],consent:{goal:true,money:true,reports:true,notes:false}},
+  ai:{endpoint:'https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai',model:'gemini-3.6-flash',enabled:true,webSearch:false,lastAnalysisAt:'',history:[],consent:{goal:true,money:true,reports:true,notes:false}},
   income:4500,
   runtimeErrors:[],
   debts:{bank:100000,firms:120000,monthlyPayment:5200},
@@ -413,7 +413,7 @@ const DEFAULT={
 
 const SUPABASE_CONFIG={url:'https://riqmwueobjazfnhvvumy.supabase.co',publishableKey:'sb_publishable_17lPUQIiyRmlEpFkqosvKg_SBoxJuy8'};
 const AI_FUNCTION_URL='https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai';
-const AI_MODEL='gemini-2.5-flash';
+const AI_MODEL='gemini-3.6-flash';
 const DEFAULT_AUTH_EMAIL='doxajooon@gmail.com';
 const CLOUD_AUTH_KEY='LIFE_CONTROL_SUPABASE_AUTH_V1';
 function cloudAuth(){try{return JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)||'null')}catch(e){return null}}
