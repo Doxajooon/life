@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "44.0.0", "package version must match V44");
+assert.equal(pkg.version, "44.0.0", "package version must match V45");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -70,7 +70,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v44-gemini"), "service worker cache must be V44");
+assert.ok(sw.includes("life-control-v45-gemini"), "service worker cache must be V45");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
@@ -83,6 +83,10 @@ assert.equal(html.includes("aiTestBtn"), false, "AI analysis modal must not show
 assert.ok(html.includes("cloudAutoSync"), "automatic cloud sync missing");
 assert.ok(html.includes("refreshAIHealth"), "automatic AI health check missing");
 assert.ok(html.includes("cloudNetworkState"), "cloud network status missing");
+assert.ok(html.includes("id=\"controlDashboard\""), "control dashboard missing");
+assert.ok(html.includes("dashCash") && html.includes("dashDebt") && html.includes("dashGoal") && html.includes("dashDiscipline"), "dashboard indicators missing");
+assert.ok(html.includes("renderControlDashboard"), "dashboard renderer missing");
 
 
-console.log("LIFE_CONTROL_V44_STATIC_QA_OK");
+
+console.log("LIFE_CONTROL_V45_STATIC_QA_OK");
