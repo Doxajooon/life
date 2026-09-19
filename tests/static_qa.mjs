@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "43.0.0", "package version must match V43");
+assert.equal(pkg.version, "44.0.0", "package version must match V44");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -70,9 +70,19 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v43-gemini"), "service worker cache must be V43");
+assert.ok(sw.includes("life-control-v44-gemini"), "service worker cache must be V44");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
 
-console.log("LIFE_CONTROL_V43_STATIC_QA_OK");
+assert.equal(html.includes("cloudLoginBtn"), false, "settings must not show login button after auth");
+assert.equal(html.includes("cloudResetBtn"), false, "settings must not show password reset controls");
+assert.equal(html.includes("cloudSyncBtn"), false, "settings must not show manual sync button");
+assert.equal(html.includes("testAiBtn"), false, "settings must not show manual AI check button");
+assert.equal(html.includes("aiTestBtn"), false, "AI analysis modal must not show manual connection check");
+assert.ok(html.includes("cloudAutoSync"), "automatic cloud sync missing");
+assert.ok(html.includes("refreshAIHealth"), "automatic AI health check missing");
+assert.ok(html.includes("cloudNetworkState"), "cloud network status missing");
+
+
+console.log("LIFE_CONTROL_V44_STATIC_QA_OK");
