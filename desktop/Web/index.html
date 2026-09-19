@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V47</title>
+<title>Life Control — личная система движения · офлайн · V48</title>
 <style>
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
@@ -25,6 +25,10 @@ html[data-theme="dark"]{
 }
 *{box-sizing:border-box}
 html,body,.shell,.view,.card,.card *{ -webkit-user-select:text; user-select:text; }
+.ui-icon{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:currentColor;stroke:currentColor;stroke-width:0;transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,opacity .18s ease}
+button:hover .ui-icon,.btn:hover .ui-icon,.iconbtn:hover .ui-icon,.bottom button:hover .ui-icon{transform:translateY(-1px) scale(1.07);filter:drop-shadow(0 2px 3px color-mix(in srgb,var(--blue) 24%,transparent))}
+button:active .ui-icon,.btn:active .ui-icon,.iconbtn:active .ui-icon{transform:scale(.91) rotate(-2deg);filter:none}
+.bottom button.active .ui-icon{transform:translateY(-1px) scale(1.1)}
 button,input,textarea,select{ -webkit-user-select:text; user-select:text; }
 ::selection{background:color-mix(in srgb,var(--blue) 28%,transparent);color:var(--text)}
 .goal-finance{margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
@@ -419,9 +423,9 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 <div class="toast" id="toast" role="status" aria-live="polite"></div><div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
 <script>
 'use strict';
-const KEY='LIFE_CONTROL_V47';
-const BACKUP_KEY='LIFE_CONTROL_V47_SNAPSHOT';
-const BACKUP2_KEY='LIFE_CONTROL_V47_SNAPSHOT_2';
+const KEY='LIFE_CONTROL_V48';
+const BACKUP_KEY='LIFE_CONTROL_V48_SNAPSHOT';
+const BACKUP2_KEY='LIFE_CONTROL_V48_SNAPSHOT_2';
 const LEGACY=['LIFE_CONTROL_V46','LIFE_CONTROL_V45','LIFE_CONTROL_V40','LIFE_CONTROL_V39','LIFE_CONTROL_V38','LIFE_CONTROL_V37','LIFE_CONTROL_V36','LIFE_CONTROL_V35','LIFE_CONTROL_V33','LIFE_CONTROL_V32','LIFE_CONTROL_V31','LIFE_CONTROL_V30','LIFE_CONTROL_V29','LIFE_CONTROL_V28','LIFE_CONTROL_V27','LIFE_CONTROL_V26','LIFE_CONTROL_V25','LIFE_CONTROL_V24','LIFE_CONTROL_V23','LIFE_CONTROL_V22','LIFE_CONTROL_V21','LIFE_CONTROL_V20','LIFE_CONTROL_V18','LIFE_CONTROL_V17','LIFE_CONTROL_V16','LIFE_CONTROL_V15','LIFE_CONTROL_V14','LIFE_CONTROL_V13','LIFE_CONTROL_V12','LIFE_CONTROL_V11','LIFE_CONTROL_V10','LIFE_CONTROL_V9'];
 const DAY_MS=86400000,TRASH_TTL=30*DAY_MS;
 const PROFIT_SOURCES=['Зарплата','Фриланс','Спортивная аналитика'];
@@ -454,6 +458,9 @@ const AI_FUNCTION_URL='https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/lif
 const AI_MODEL='gemini-3.6-flash';
 let calendarRangeStart='',calendarRangeEnd='',goalAiBusy=false,dayProgressTimer=null,appBound=false;
 const AUTH_REDIRECT_URL='https://doxajooon.github.io/life/';
+const CLOUD_BASE_KEY='_cloudBaseUpdatedAt';
+let _persistFingerprint='';
+let _cloudConflictNoticeAt=0;
 const DEFAULT_AUTH_EMAIL='';
 const CLOUD_AUTH_KEY='LIFE_CONTROL_SUPABASE_AUTH_V1';
 function cloudAuth(){try{return JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)||'null')}catch(e){return null}}
@@ -479,9 +486,42 @@ async function openPasswordRecovery(){
 async function cloudRefresh(){const a=cloudAuth();if(!a?.refresh_token)return null;try{const data=await supaFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:a.refresh_token})});setCloudAuth({...data,user:data?.user||a.user||null});return data}catch(e){setCloudAuth(null);return null}}
 async function cloudUser(){const a=cloudAuth();if(!a?.access_token)return null;try{return await supaFetch('/auth/v1/user',{headers:{Authorization:'Bearer '+a.access_token}})}catch(e){return null}}
 async function cloudPull(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)return null;const rows=await supaFetch('/rest/v1/life_state?select=state,schema_version,updated_at&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1');return {user, row:Array.isArray(rows)?rows[0]||null:null}}
-async function cloudPush(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)throw new Error('Войдите в Supabase, чтобы синхронизировать данные.');const body={user_id:user.id,state,schema_version:47,device_id:getDeviceId()};await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});return true}
+async function cloudPush(){
+  let user=await cloudUser();
+  if(!user){await cloudRefresh();user=await cloudUser()}
+  if(!user)throw new Error('Войдите в Supabase, чтобы синхронизировать данные.');
+  const latest=await cloudPull();
+  const remote=latest?.row;
+  const remoteStamp=remote?.updated_at||remote?.state?._lastSavedAt||'';
+  const baseStamp=state[CLOUD_BASE_KEY]||'';
+  if(remote?.state && baseStamp && remoteStamp && remoteStamp!==baseStamp){
+    state=normalize(remote.state);
+    state[CLOUD_BASE_KEY]=remoteStamp;
+    _persistFingerprint='';
+    saveState();
+    renderAll();scheduleNative();
+    const now=Date.now();if(now-_cloudConflictNoticeAt>10000){_cloudConflictNoticeAt=now;toast('Данные обновлены в облаке','Эта вкладка не перезаписала более новую версию Supabase.');}
+    return false;
+  }
+  const body={user_id:user.id,state,schema_version:48,device_id:getDeviceId()};
+  const saved=await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(body)});
+  const row=Array.isArray(saved)?saved[0]:saved;
+  state[CLOUD_BASE_KEY]=row?.updated_at||new Date().toISOString();
+  return true;
+}
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
-async function cloudSync(){const localStamp=Date.parse(state._lastSavedAt||'')||0;const pulled=await cloudPull();if(!pulled)return {ok:false,logged:false};const cloudStamp=Date.parse(pulled.row?.state?._lastSavedAt||pulled.row?.updated_at||'')||0;if(pulled.row?.state&&cloudStamp>localStamp){state=normalize(pulled.row.state);saveState();renderAll();scheduleNative()}else{await cloudPush()}setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}}
+async function cloudSync(){
+  const localStamp=Date.parse(state._lastSavedAt||'')||0;
+  const pulled=await cloudPull();
+  if(!pulled)return {ok:false,logged:false};
+  const row=pulled.row;
+  if(!row?.state){state[CLOUD_BASE_KEY]='';await cloudPush();setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user};}
+  const cloudStamp=Date.parse(row.state?._lastSavedAt||row.updated_at||'')||0;
+  state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';
+  if(cloudStamp>localStamp){state=normalize(row.state);state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';_persistFingerprint='';saveState();renderAll();scheduleNative();}
+  else if(cloudStamp<localStamp){await cloudPush()}
+  setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}
+}
 async function cloudAutoSync(){if(!cloudAuth())return false;const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}}
 
 const $=id=>document.getElementById(id), $$=sel=>Array.from(document.querySelectorAll(sel));
@@ -552,11 +592,16 @@ function load(){
 let state=load(),toastTimer=null,lastDay='',lastTick=0,autosaveTimer=null;
 
 let cloudSyncTimer=null;
-async function cloudPullIntoLocal(){try{const pulled=await cloudPull();if(!pulled?.row?.state)return false;const localStamp=Date.parse(state._lastSavedAt||'')||0;const cloudStamp=Date.parse(pulled.row.state._lastSavedAt||pulled.row.updated_at||'')||0;if(cloudStamp>localStamp){state=normalize(pulled.row.state);saveState();renderAll();scheduleNative();return true}return false}catch(e){return false}}
-function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(cloudAuth())cloudPush().catch(()=>{})},2500)}
+async function cloudPullIntoLocal(){try{const pulled=await cloudPull();if(!pulled?.row?.state)return false;const localStamp=Date.parse(state._lastSavedAt||'')||0;const cloudStamp=Date.parse(pulled.row.state._lastSavedAt||pulled.row.updated_at||'')||0;state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';if(cloudStamp>localStamp){state=normalize(pulled.row.state);state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';saveState();renderAll();scheduleNative();return true}return false}catch(e){return false}}
+function stateFingerprint(){try{const x=clone(state);delete x._lastSavedAt;delete x._persistentStorageRequestedAt;delete x._persistentStorageGranted;delete x[CLOUD_BASE_KEY];return JSON.stringify(x)}catch(e){return ''}}
+function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(cloudAuth()&&_persistFingerprint)cloudPush().catch(()=>{})},2500)}
 function saveState(){
   try{
     const purgedTrashCount=purgeExpiredTrash(state);
+    const fingerprint=stateFingerprint();
+    if(fingerprint && fingerprint===_persistFingerprint){
+      return;
+    }
     state._lastSavedAt=new Date().toISOString();
     const savedAt=state._lastSavedAt;
     const payload=JSON.stringify(state);
@@ -572,6 +617,7 @@ function saveState(){
     if(purgedTrashCount>0)mirrorPromise.then(()=>compactRecoverySnapshots()).catch(()=>{});
     mirrorPromise.catch(()=>{});
     try{syncChannel?.postMessage({payload,savedAt})}catch(e){}
+    if(fingerprint)_persistFingerprint=fingerprint;
     if(!ok && !state._storageWarned){state._storageWarned=true;toast('Локальное сохранение недоступно','Проверь свободную память устройства.')}
     queueCloudSync();
   }catch(e){try{console.error('Life Control save error',e)}catch(_){}}
@@ -639,6 +685,7 @@ async function restoreFromIndexedDB(){
   return false;
 }
 
+_persistFingerprint=stateFingerprint();
 function initPersistence(){
   try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v47');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
   window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const incoming=normalize(JSON.parse(ev.newValue));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}});
@@ -1490,9 +1537,11 @@ function setAuthBusy(id,busy,label){const b=$(id);if(!b)return;if(!b.dataset.def
 async function requireAuth(){
   lockApp();
   const recovery=recoverySessionFromUrl();
-  let a=cloudAuth();
-  if(a?.access_token){const u=await cloudUser();if(u){setCloudAuth({...a,user:u});unlockApp();return recovery}}
   if(recovery){unlockApp();return true}
+  // Security policy: a page reload never unlocks Life Control from a stored Supabase session.
+  // The password gate is shown again, while the existing refresh token remains available for a successful login.
+  const a=cloudAuth();
+  if(a?.access_token) setCloudAuth({...a,user:null});
   const email=$('gateEmail'),pass=$('gatePassword'),msg=$('gateMsg');
   const say=t=>{if(msg)msg.textContent=t};
    $('gateLoginBtn').onclick=async()=>{setAuthBusy('gateLoginBtn',true,'Вход…');setAuthProgress('Проверяю аккаунт…',20);say('');try{const d=await cloudSignIn(email.value.trim(),pass.value);setAuthProgress('Сессия подтверждена…',45);if(!d?.access_token)throw new Error(d?.msg||d?.error_description||d?.message||'Неверный email или пароль.');const u=await cloudUser();setAuthProgress('Загружаю личные данные…',65);setCloudAuth({...d,user:u||d.user});unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();toast('Вход выполнен','Life Control открыт.')}catch(e){say(String(e.message||e));setAuthProgress('Вход не выполнен',0)}finally{setAuthBusy('gateLoginBtn',false,'Войти')}};
@@ -1507,7 +1556,6 @@ async function init(){
   bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){await cloudAutoSync();await refreshAIHealth(true)}if(recovery){setTimeout(()=>openPasswordRecovery(),120)}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
-  setInterval(()=>{if(document.visibilityState==='visible')saveState()},5000);
   setInterval(()=>{if(document.visibilityState==='visible'&&cloudAuth())cloudAutoSync()},60000);
   document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();restoreFromIndexedDB()}});
   window.addEventListener('pagehide',saveState);window.addEventListener('beforeunload',saveState);
