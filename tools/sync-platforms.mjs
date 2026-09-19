@@ -1,16 +1,25 @@
 import { cpSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
+
 const root=resolve(new URL("..",import.meta.url).pathname);
-mkdirSync(resolve(root,"public"),{recursive:true});
-cpSync(resolve(root,"index.html"),resolve(root,"public/index.html"));
-mkdirSync(resolve(root,"android/app/src/main/assets"),{recursive:true});
-cpSync(resolve(root,"index.html"),resolve(root,"android/app/src/main/assets/index.html"));
-for(const f of ["manifest.webmanifest","icon.svg","sw.js"]){
- const p=resolve(root,"public",f); try{cpSync(p,resolve(root,"android/app/src/main/assets",f));}catch{}
+const source=resolve(root,"index.html");
+const targets=[
+  "public/index.html",
+  "android/app/src/main/assets/index.html",
+  "desktop-native/web/index.html",
+  "desktop/Web/index.html"
+];
+
+for(const target of targets){
+  mkdirSync(resolve(root,target,".."),{recursive:true});
+  cpSync(source,resolve(root,target));
 }
-mkdirSync(resolve(root,"desktop/Web"),{recursive:true});
-cpSync(resolve(root,"index.html"),resolve(root,"desktop/Web/index.html"));
-for(const f of ["manifest.webmanifest","icon.svg","sw.js"]){
- const p=resolve(root,"public",f); try{cpSync(p,resolve(root,"desktop/Web",f));}catch{}
+
+for(const targetRoot of ["public","android/app/src/main/assets","desktop-native/web","desktop/Web"]){
+  for(const f of ["manifest.webmanifest","icon.svg","sw.js"]){
+    const sourcePath=resolve(root,"public",f);
+    try{cpSync(sourcePath,resolve(root,targetRoot,f));}catch{}
+  }
 }
-console.log("Synced web → public, Android assets, desktop Web.");
+
+console.log("Synced web → public, Android, desktop-native and desktop Web.");
