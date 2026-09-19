@@ -494,7 +494,7 @@ async function cloudPush(){
   const remote=latest?.row;
   const remoteStamp=remote?.updated_at||remote?.state?._lastSavedAt||'';
   const baseStamp=state[CLOUD_BASE_KEY]||'';
-  if(remote?.state && baseStamp && remoteStamp && remoteStamp!==baseStamp){
+  if(remote?.state && ((!baseStamp && remoteStamp && Date.parse(remoteStamp||'')>Date.parse(state._lastSavedAt||'') ) || (baseStamp && remoteStamp && remoteStamp!==baseStamp))){
     state=normalize(remote.state);
     state[CLOUD_BASE_KEY]=remoteStamp;
     _persistFingerprint='';
