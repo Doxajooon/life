@@ -185,7 +185,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 
 <div class="auth-lock" id="authLock" hidden><div class="auth-box">
   <div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="sub">Войди в аккаунт, чтобы открыть личные данные и AI.</div>
-  <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="you@example.com"></div>
+  <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="username" value="" placeholder="you@example.com"></div>
   <div class="field"><label>Пароль</label><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Минимум 6 символов"></div>
   <div class="auth-actions"><button class="btn primary" id="gateLoginBtn">Войти</button><button class="btn" id="gateSignupBtn">Создать аккаунт</button><button class="btn ghost" id="gateResetBtn">Забыли пароль?</button></div>
   <div class="auth-msg" id="gateMsg"></div>
@@ -428,7 +428,7 @@ const SUPABASE_CONFIG={url:'https://riqmwueobjazfnhvvumy.supabase.co',publishabl
 const AI_FUNCTION_URL='https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai';
 const AI_MODEL='gemini-3.6-flash';
 const AUTH_REDIRECT_URL='https://doxajooon.github.io/life/';
-const DEFAULT_AUTH_EMAIL='doxajooon@gmail.com';
+const DEFAULT_AUTH_EMAIL='';
 const CLOUD_AUTH_KEY='LIFE_CONTROL_SUPABASE_AUTH_V1';
 function cloudAuth(){try{return JSON.parse(localStorage.getItem(CLOUD_AUTH_KEY)||'null')}catch(e){return null}}
 function setCloudAuth(v){try{if(v)localStorage.setItem(CLOUD_AUTH_KEY,JSON.stringify(v));else localStorage.removeItem(CLOUD_AUTH_KEY)}catch(e){}}
