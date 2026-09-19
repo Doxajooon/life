@@ -480,7 +480,7 @@ async function openPasswordRecovery(){
 async function cloudRefresh(){const a=cloudAuth();if(!a?.refresh_token)return null;try{const data=await supaFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:a.refresh_token})});setCloudAuth({...data,user:data?.user||a.user||null});return data}catch(e){setCloudAuth(null);return null}}
 async function cloudUser(){const a=cloudAuth();if(!a?.access_token)return null;try{return await supaFetch('/auth/v1/user',{headers:{Authorization:'Bearer '+a.access_token}})}catch(e){return null}}
 async function cloudPull(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)return null;const rows=await supaFetch('/rest/v1/life_state?select=state,schema_version,updated_at&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1');return {user, row:Array.isArray(rows)?rows[0]||null:null}}
-  const body={user_id:user.id,state, schema_version:47,device_id:getDeviceId()};
+async function cloudPush(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)throw new Error('Войдите в Supabase, чтобы синхронизировать данные.');const body={user_id:user.id,state,schema_version:47,device_id:getDeviceId()};await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(body)});return true}
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
 async function cloudSync(){const localStamp=Date.parse(state._lastSavedAt||'')||0;const pulled=await cloudPull();if(!pulled)return {ok:false,logged:false};const cloudStamp=Date.parse(pulled.row?.state?._lastSavedAt||pulled.row?.updated_at||'')||0;if(pulled.row?.state&&cloudStamp>localStamp){state=normalize(pulled.row.state);saveState();renderAll();scheduleNative()}else{await cloudPush()}setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}}
 async function cloudAutoSync(){if(!cloudAuth())return false;const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}}
@@ -1468,7 +1468,7 @@ function closeModal(){clearInterval(dayProgressTimer);dayProgressTimer=null;$('m
 function renderAll(){setTheme();purgeExpiredTrash(state);renderToday();renderGoal();renderMoney();renderNotes();updateBell()}
 function bind(){
   if(appBound)return;appBound=true;
-  $('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+  $$('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
   const homeBrand=$('homeBrand');homeBrand.onclick=()=>{closeModal();showView('viewToday')};homeBrand.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();homeBrand.click()}};
   $('themeBtn').onclick=toggleTheme;$('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=openSettings;$('calendarBtn').onclick=openCalendar;$('pulseDayCard').onclick=openDayProgress;
   const reportInputs=['rDone','rBlock','rFuture','rTomorrow'];
