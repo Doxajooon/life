@@ -428,7 +428,7 @@ async function supaFetch(path,opts={}){
   return data;
 }
 async function cloudSignIn(email,password){const data=await supaFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});setCloudAuth(data);return data}
-async function cloudSignUp(email,password){const data=await supaFetch('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password})});if(data?.session)setCloudAuth(data.session);return data}
+async function cloudSignUp(email,password){const data=await supaFetch('/auth/v1/signup?redirect_to='+encodeURIComponent(AUTH_REDIRECT_URL),{method:'POST',body:JSON.stringify({email,password})});if(data?.session)setCloudAuth(data.session);return data}
 async function cloudRecover(email){return await supaFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(AUTH_REDIRECT_URL),{method:'POST',body:JSON.stringify({email})})}
 async function cloudUpdatePassword(password){const a=cloudAuth();if(!a?.access_token)throw new Error('Ссылка восстановления недействительна или истекла. Запроси новое письмо.');return await supaFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+a.access_token},body:JSON.stringify({password})})}
 function clearAuthHash(){try{history.replaceState({},document.title,location.pathname+location.search)}catch(e){location.hash=''}}
