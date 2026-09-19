@@ -1,0 +1,5 @@
+BUILD STATUS
+
+Windows x64: BUILT locally and verified as PE32+ GUI executable.
+Android APK: source project + GitHub Actions build workflow included; the current environment does not contain the Android SDK/Gradle toolchain, so the APK binary is not embedded here. Run GitHub Actions “Build Android APK + Windows EXE” after uploading the repository; the workflow produces the APK artifact.
+Gemini key: not included in this archive. Keep it only in Supabase Edge Functions → Secrets as GEMINI_API_KEY.

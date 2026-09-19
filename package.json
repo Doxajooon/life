@@ -1,0 +1,10 @@
+{
+  "name": "life-control",
+  "private": true,
+  "version": "42.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/static_qa.mjs",
+    "sync": "node tools/sync-platforms.mjs"
+  }
+}

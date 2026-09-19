@@ -1,0 +1,17 @@
+import { strict as assert } from "node:assert";
+import { readFileSync } from "node:fs";
+const html=readFileSync(new URL("../index.html",import.meta.url),"utf8");
+const pub=readFileSync(new URL("../public/index.html",import.meta.url),"utf8");
+const fn=readFileSync(new URL("../supabase/functions/life-control-ai/index.ts",import.meta.url),"utf8");
+const android=readFileSync(new URL("../android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java",import.meta.url),"utf8");
+assert.equal(pub,html);
+for (const good of ["AI_FUNCTION_URL","gemini-2.5-flash","cloudSignIn","cloudSignUp","cloudResetBtn","cloudRecover","cloudUpdatePassword","recoverySessionFromUrl","state.ai.history","doxajooon@gmail.com","AndroidBridge"]) assert.ok(html.includes(good),`missing ${good}`);
+for (const bad of ["OPENAI","gpt-5.6","setAiEndpoint","setAiModel","/api/ai"]) assert.equal(html.includes(bad),false,`legacy ${bad}`);
+assert.ok(fn.includes("GEMINI_API_KEY"));
+assert.ok(fn.includes("gemini-2.5-flash"));
+assert.ok(fn.includes("life_state"));
+assert.ok(fn.includes("auth.getUser"));
+assert.equal(/OPENAI/i.test(fn),false);
+assert.ok(android.includes("addJavascriptInterface"));
+assert.ok(android.includes("scheduleDaily"));
+console.log("LIFE_CONTROL_V42_QA_OK");

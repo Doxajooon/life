@@ -1,0 +1,3 @@
+# Life Control — Supabase Edge Functions
+[functions.life-control-ai]
+verify_jwt = false
