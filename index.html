@@ -40,7 +40,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .actions{display:flex;gap:7px}.iconbtn{width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);display:grid;place-items:center;font-size:17px;position:relative}.bell-dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--orange);right:8px;top:8px;display:none}.bell-dot.show{display:block}
 .shell{max-width:980px;margin:0 auto;padding:20px 16px calc(92px + var(--safe))}.view{display:none}.view.active{display:block}.eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
 h1{margin:0;font-size:31px;line-height:1.05;letter-spacing:-.04em}h2{margin:0;font-size:19px;line-height:1.1}.sub{color:var(--muted);font-size:11px;margin-top:4px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.section{margin-top:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-.btn{min-height:42px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:9px 13px;font-weight:850}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.orange{background:var(--orange-soft);border-color:color-mix(in srgb,var(--orange) 36%,var(--line));color:var(--orange-dark)}.btn.red{background:var(--red-soft);border-color:color-mix(in srgb,var(--red) 36%,var(--line));color:var(--red)}.btn.small{min-height:34px;font-size:10px;padding:7px 10px}.btn.ghost{background:transparent}
+.btn{min-height:42px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:9px 13px;font-weight:850;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease}.btn:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(23,34,45,.08);border-color:color-mix(in srgb,var(--blue) 34%,var(--line))}.btn:active{transform:translateY(0);box-shadow:none}.btn.primary{background:var(--blue);border-color:var(--blue);color:white}.btn.orange{background:var(--orange-soft);border-color:color-mix(in srgb,var(--orange) 36%,var(--line));color:var(--orange-dark)}.btn.red{background:var(--red-soft);border-color:color-mix(in srgb,var(--red) 36%,var(--line));color:var(--red)}.btn.small{min-height:34px;font-size:10px;padding:7px 10px}.btn.ghost{background:transparent}.iconbtn{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}.iconbtn:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(23,34,45,.08);border-color:color-mix(in srgb,var(--blue) 34%,var(--line))}
 .date-head{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}.date-main{display:flex;flex-direction:column;gap:5px}.date-main h1{font-family:"Aptos Display","Segoe UI Variable","Segoe UI",system-ui,sans-serif;font-size:clamp(30px,5.5vw,42px);font-weight:650;letter-spacing:-.028em;color:var(--text)}.date-main .sub{font-family:"Aptos","Segoe UI",system-ui,sans-serif;font-size:12px}.calendar-open{appearance:none;border:0;background:transparent;padding:0;margin:0;color:inherit;cursor:pointer;display:inline-grid;place-items:center}.calendar-open:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 24%,transparent);outline-offset:4px;border-radius:9px}.clock{text-align:right}.clock-time{font-size:32px;font-weight:950;letter-spacing:.03em;line-height:1}.clock-state{font-size:9px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.08em}
 .motivation{border-left:4px solid var(--orange);background:var(--soft);padding:15px;border-radius:12px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.motivation-title{font-size:9px;text-transform:uppercase;letter-spacing:.14em;font-weight:950;color:var(--orange-dark)}.motivation-text{font-size:15px;line-height:1.5;margin-top:6px}.motivation-source{font-size:10px;color:var(--muted);margin-top:7px}
 .now-card{border:1px solid var(--blue);overflow:hidden;box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 8%,transparent)}.now-top{padding:15px 15px 13px;display:flex;justify-content:space-between;gap:12px}.now-kicker{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--blue-dark);font-weight:950}.now-title{font-size:23px;line-height:1.08;font-weight:950;margin-top:3px}.now-meta{font-size:10px;color:var(--muted);margin-top:5px}.auto-track{height:8px;background:var(--line)}.auto-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--orange));transition:width .8s linear}.now-foot{display:flex;justify-content:space-between;gap:10px;padding:9px 15px 12px;font-size:9px;color:var(--muted)}
@@ -57,7 +57,7 @@ h1{margin:0;font-size:31px;line-height:1.05;letter-spacing:-.04em}h2{margin:0;fo
 .bottom{position:fixed;z-index:50;left:0;right:0;bottom:0;padding:8px 10px calc(8px + var(--safe));display:grid;grid-template-columns:repeat(4,1fr);gap:7px;background:color-mix(in srgb,var(--bg) 95%,transparent);backdrop-filter:blur(18px);border-top:1px solid var(--line)}.bottom button{min-height:50px;border:1px solid transparent;border-radius:11px;background:transparent;color:var(--muted);font-size:10px;font-weight:850;display:grid;place-items:center;gap:2px}.bottom button b{font-size:19px;line-height:1;color:var(--text)}.bottom button.active{background:var(--panel);border-color:var(--line);box-shadow:var(--shadow);color:var(--blue-dark)}
 .toast{position:fixed;z-index:120;left:50%;bottom:calc(82px + var(--safe));transform:translate(-50%,18px);opacity:0;pointer-events:none;transition:.2s;max-width:min(92vw,520px);width:max-content;background:var(--text);color:var(--bg);padding:11px 13px;border-radius:11px;box-shadow:var(--shadow);font-size:10px}.toast.show{opacity:1;transform:translate(-50%,0)}.toast strong{font-size:11px}.toast div{margin-top:2px;opacity:.8}
 
-.calendar-modal{max-width:760px}.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-month{font-size:19px;font-weight:900;text-transform:capitalize}.calendar-nav{display:flex;gap:6px}.calendar-nav .iconbtn{width:38px;height:38px}.calendar-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.calendar-kpi{padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.calendar-kpi .label{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.calendar-kpi .value{font-size:17px;font-weight:950;margin-top:3px}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:12px}.calendar-week{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;padding:4px 0}.calendar-day{min-height:72px;padding:8px 6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:border-color .15s ease,transform .15s ease}.calendar-day:hover{border-color:var(--blue);transform:translateY(-1px)}.calendar-day.empty{background:transparent;border-color:transparent;cursor:default;transform:none}.calendar-day.today{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--blue) 45%,transparent)}.calendar-day.selected{border-color:var(--blue);background:var(--blue-soft)}.calendar-day.earned{border-color:color-mix(in srgb,var(--orange) 42%,var(--line))}.calendar-num{font-size:11px;font-weight:900}.calendar-earned{font-size:10px;font-weight:950;color:var(--blue-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.calendar-earned::before{content:"+ ";color:var(--orange)}.calendar-day-noearn{font-size:9px;color:var(--muted)}.calendar-selected{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}.calendar-selected h3{margin:0;font-size:14px}.calendar-selected .meta{font-size:10px;color:var(--muted);margin-top:4px}.calendar-source{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:10px}.calendar-source:first-child{border-top:0}.calendar-source strong{white-space:nowrap}.calendar-foot{margin-top:10px;font-size:9px;color:var(--muted)}
+.calendar-modal{max-width:760px}.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-month{font-size:19px;font-weight:900;text-transform:capitalize}.calendar-nav{display:flex;gap:6px}.calendar-nav .iconbtn{width:38px;height:38px}.calendar-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.calendar-kpi{padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.calendar-kpi .label{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.calendar-kpi .value{font-size:17px;font-weight:950;margin-top:3px}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:12px}.calendar-week{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;padding:4px 0}.calendar-day{min-height:72px;padding:8px 6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:border-color .15s ease,transform .15s ease}.calendar-day:hover{border-color:var(--blue);transform:translateY(-1px)}.calendar-day.empty{background:transparent;border-color:transparent;cursor:default;transform:none}.calendar-day.today{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--blue) 45%,transparent)}.calendar-day.selected{border-color:var(--blue);background:var(--blue-soft)}.calendar-day.earned{border-color:color-mix(in srgb,var(--orange) 42%,var(--line))}.calendar-num{font-size:11px;font-weight:900}.calendar-earned{font-size:10px;font-weight:950;color:var(--blue-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.calendar-earned::before{content:"+ ";color:var(--orange)}.calendar-day-noearn{font-size:9px;color:var(--muted)}.calendar-selected{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}.calendar-selected h3{margin:0;font-size:14px}.calendar-selected .meta{font-size:10px;color:var(--muted);margin-top:4px}.calendar-source{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:10px}.calendar-source:first-child{border-top:0}.calendar-source strong{white-space:nowrap}.calendar-foot{margin-top:10px;font-size:9px;color:var(--muted)}.calendar-range-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--soft);font-size:9px;color:var(--muted)}.calendar-range-bar strong{color:var(--text)}.calendar-range-actions{display:flex;gap:6px;flex-wrap:wrap}.calendar-day.range-start,.calendar-day.range-end{box-shadow:inset 0 0 0 2px var(--blue)}.calendar-day.in-range{background:color-mix(in srgb,var(--blue-soft) 72%,var(--panel));border-color:color-mix(in srgb,var(--blue) 35%,var(--line))}.calendar-range-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.calendar-range-summary .calendar-kpi{min-width:0}.goal-ai-card{margin-top:14px;padding:14px;border:1px solid color-mix(in srgb,var(--blue) 28%,var(--line));border-radius:13px;background:linear-gradient(180deg,var(--blue-soft),var(--panel))}.goal-ai-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.goal-ai-status{font-size:9px;color:var(--muted);margin-top:4px}.goal-ai-summary{font-size:10px;color:var(--text);margin-top:10px;white-space:pre-wrap;line-height:1.5}.goal-ai-plan{display:grid;gap:7px;margin-top:10px}.goal-ai-item{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}.goal-ai-item b{font-size:10px}.goal-ai-item div{font-size:9px;color:var(--muted);margin-top:3px}.goal-ai-badge{font-size:8px;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-dark)}@media(max-width:720px){.calendar-range-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.goal-ai-head{align-items:stretch;flex-direction:column}}
 .modal-back{position:fixed;inset:0;z-index:100;background:rgba(7,15,24,.48);display:none;align-items:flex-end;justify-content:center;padding:12px}.modal-back.open{display:flex}.modal{width:min(760px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 22px 70px rgba(0,0,0,.25)}.grab{width:42px;height:4px;border-radius:99px;background:var(--line);margin:0 auto 12px}.close-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.notice-list{display:grid;gap:7px;margin-top:11px}.notice{display:grid;grid-template-columns:8px 1fr;gap:9px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.notice-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);margin-top:6px}.notice-title{font-size:11px;font-weight:900}.notice-body,.notice-time{font-size:9px;color:var(--muted);margin-top:2px}.trash-banner{padding:10px 12px;border:1px dashed var(--line);border-radius:10px;background:var(--soft);font-size:10px;color:var(--muted);margin-top:10px}.empty{text-align:center;padding:22px;color:var(--muted);border:1px dashed var(--line);border-radius:11px;background:var(--soft);font-size:11px}
 
 /* V27 functional additions — preserves V18/V21 visual language */
@@ -326,6 +326,11 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
         <div class="distance-kpi"><div class="label"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg>Реальный темп / день</div><div class="value" id="goalActualRate">—</div></div>
       </div>
       <div class="tempo-alert" id="goalTempoAlert">Задай срок цели и начни фиксировать накопления — тогда система сможет сравнить темп.</div>
+     <div class="goal-ai-card" id="goalAiCard">
+       <div class="goal-ai-head"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-spark"></use></svg> AI-СТРАТЕГИЯ ЦЕЛИ</div><h2 style="margin-top:4px">Как дойти до результата</h2><div class="goal-ai-status" id="goalAiState">План появится после задания или изменения цели.</div></div><button class="btn small primary" id="goalAiBtn"><svg class="ui-icon"><use href="#i-spark"></use></svg> Обновить AI</button></div>
+       <div class="goal-ai-summary" id="goalAiSummary">AI покажет, что уже достигнуто, что уже есть в капитале и какие конкретные действия нужны дальше.</div>
+       <div class="goal-ai-plan" id="goalAiPlan"></div>
+     </div>
     </div>
   </div>
 
@@ -424,7 +429,7 @@ const DEFAULT={
   income:4500,
   runtimeErrors:[],
   debts:{bank:100000,firms:120000,monthlyPayment:5200},
-  goal:{title:'Стать финансово независимым',why:'Сформировать самостоятельную жизнь на собственном доходе, закрыть долги и создать устойчивую основу для семьи.',next:'Стабилизировать ежемесячный денежный поток и двигаться по текущему долгу.',finance:{targetAmount:0,savedAmount:0,manualSavedAmount:0,targetDate:'',startedAt:'',completedAt:'',contributions:[]},milestones:[
+  goal:{title:'Стать финансово независимым',why:'Сформировать самостоятельную жизнь на собственном доходе, закрыть долги и создать устойчивую основу для семьи.',next:'Стабилизировать ежемесячный денежный поток и двигаться по текущему долгу.',aiPlan:null,aiPlanAt:'',aiPlanGoalKey:'',finance:{targetAmount:0,savedAmount:0,manualSavedAmount:0,targetDate:'',startedAt:'',completedAt:'',contributions:[]},milestones:[
     {id:'m1',title:'Остановить рост долга и держать деньги под контролем',done:false},
     {id:'m2',title:'Закрыть основную часть долгов',done:false},
     {id:'m3',title:'Закончить необходимые комнаты и бытовую базу',done:false},
@@ -441,6 +446,7 @@ const DEFAULT={
 const SUPABASE_CONFIG={url:'https://riqmwueobjazfnhvvumy.supabase.co',publishableKey:'sb_publishable_17lPUQIiyRmlEpFkqosvKg_SBoxJuy8'};
 const AI_FUNCTION_URL='https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai';
 const AI_MODEL='gemini-3.6-flash';
+let calendarRangeStart='',calendarRangeEnd='',goalAiBusy=false;
 const AUTH_REDIRECT_URL='https://doxajooon.github.io/life/';
 const DEFAULT_AUTH_EMAIL='';
 const CLOUD_AUTH_KEY='LIFE_CONTROL_SUPABASE_AUTH_V1';
@@ -493,7 +499,7 @@ function dayReport(){const k=keyDay();state.reports[k]=state.reports[k]||{done:'
 function purgeExpiredTrash(s){const before=(s.notesTrash||[]).length,cut=Date.now()-TRASH_TTL;s.notesTrash=(s.notesTrash||[]).filter(n=>Date.parse(n.deletedAt||0)>cut);return before-s.notesTrash.length}
 function normalize(s){
   const hadWallet=!!(s.wallet&&typeof s.wallet==='object'&&Object.prototype.hasOwnProperty.call(s.wallet,'openingBalance'));
-  s=merge(s,DEFAULT);s.version=41;
+  s=merge(s,DEFAULT);s.version=41;s.goal=s.goal&&typeof s.goal==='object'?s.goal:clone(DEFAULT.goal);s.goal.aiPlan=s.goal.aiPlan&&typeof s.goal.aiPlan==='object'?s.goal.aiPlan:null;s.goal.aiPlanAt=String(s.goal.aiPlanAt||'');s.goal.aiPlanGoalKey=String(s.goal.aiPlanGoalKey||'');
   s.wallet=s.wallet&&typeof s.wallet==='object'?s.wallet:{openingBalance:0};
   s.wallet.openingBalance=Math.max(0,Number(s.wallet.openingBalance)||0);
   if(!hadWallet){
@@ -634,17 +640,15 @@ function initPersistence(){
 }
 function getStageInfo(){const m=nowMin();for(let i=0;i<state.day.steps.length;i++){const s=state.day.steps[i],st=timeToMin(s.time),endRaw=timeToMin(s.end);let en=endRaw;if(en<=st)en=i<state.day.steps.length-1?timeToMin(state.day.steps[i+1].time):1440;if(m>=st&&m<en)return {kind:'active',i,s,start:st,end:en,now:m,pct:clamp((m-st)/(en-st)*100,0,100)}}const next=state.day.steps.find(s=>timeToMin(s.time)>m);return next?{kind:'between',next,now:m,pct:0}:{kind:'after',now:m,pct:100}}
 const MOTIVATIONS=[
-  {author:'Пророк Мухаммад ﷺ',text:'«Самые любимые деяния перед Аллахом — те, которые совершаются постоянно, даже если их мало.»',source:'Сахих аль-Бухари; Сахих Муслим'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Деяния оцениваются по намерениям.»',source:'Сахих аль-Бухари 1; Сахих Муслим 1907'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Сильный верующий лучше и более любим Аллахом, чем слабый верующий, хотя в каждом есть благо.»',source:'Сахих Муслим 2664'},
-  {author:'Маркус Аврелий',text:'«Не трать оставшуюся жизнь на размышления о других. Действуй там, где ты можешь что-то изменить.»',source:'Медитации, по смыслу'},
-  {author:'Сенека',text:'«Трудности укрепляют ум, как труд укрепляет тело.»',source:'Моральные письма, по смыслу'},
-  {author:'Имам аш-Шафии',text:'«Знание — это не то, что запомнено, а то, что приносит пользу.»',source:'Изречение, атрибуция встречается в классической традиции'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Стремись к тому, что приносит тебе пользу, проси помощи у Аллаха и не проявляй беспомощности.»',source:'Сахих Муслим 2664'},
-  {author:'Умар ибн аль-Хаттаб',text:'«Отчитывайте себя прежде, чем с вас спросят.»',source:'Изречение, приписываемое Умару'},
-  {author:'Али ибн Абу Талиб',text:'«Знание лучше имущества: знание охраняет тебя, а имущество приходится охранять.»',source:'Изречение, приписываемое Али'},
-  {author:'Конфуций',text:'«Тот, кто хочет двигаться вперёд, должен делать первый шаг.»',source:'Классическая формулировка по мотивам учения'}
-];
+  {author:'Пророк Мухаммад ﷺ',text:'«Поистине, дела оцениваются по намерениям, и каждому человеку — лишь то, что он намеревался совершить».',source:'Сахих аль-Бухари 1; Сахих Муслим 1907'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Самые любимые Аллахом дела — постоянные, даже если они малы».',source:'Сахих аль-Бухари 6464–6465; Сахих Муслим 783b'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Стремись к тому, что приносит тебе пользу, проси помощи у Аллаха и не проявляй беспомощности».',source:'Сахих Муслим 2664'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Сильный верующий лучше и более любим Аллахом, чем слабый верующий, хотя в каждом есть благо».',source:'Сахих Муслим 2664'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Кто верует в Аллаха и Судный день, пусть говорит благое или молчит».',source:'Сахих аль-Бухари 6018'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Никто из вас не уверует по-настоящему, пока не пожелает своему брату того же, чего желает себе».',source:'Сахих аль-Бухари 13; Сахих Муслим 45'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Облегчайте и не затрудняйте; радуйте и не отталкивайте».',source:'Сахих аль-Бухари 69; 6124'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Кому Аллах желает добра, тому даёт понимание религии».',source:'Сахих аль-Бухари 71'}
+ ];
 function motivation(){const k=keyDay();const idx=Math.floor(Date.UTC(...keyDay().split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS)%MOTIVATIONS.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);if(state.dailyMotivations[k]?.idx===idx)return state.dailyMotivations[k];const m=MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length];const result={idx,text:`${m.text}\n\nСегодня: ${action}.`,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
 function setTheme(){const dark=state.settings.theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';const icon=$('themeIcon');if(icon)icon.innerHTML=`<use href="${dark?'#i-sun':'#i-moon'}"></use>`;const btn=$('themeBtn');if(btn)btn.setAttribute('aria-label',dark?'Включить светлую тему':'Включить тёмную тему');document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#0d1722':'#f5f7fa')}
 function toggleTheme(){state.settings.theme=state.settings.theme==='dark'?'light':'dark';saveState();setTheme()}
@@ -686,7 +690,25 @@ function scheduleNative(){
   }
 }
 
-function runScheduler(){const day=keyDay();if(day!==lastDay){lastDay=day;state._sent={};saveState();renderAll()}const info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);for(let i=0;i<state.day.steps.length;i++){const s=state.day.steps[i],next=state.day.steps[i+1],st=timeToMin(s.time),en=timeToMin(s.end),pre=st-preMinutes,sk=`s|${day}|${s.id}`,pk=`p|${day}|${s.id}`,ek=`e|${day}|${s.id}`;if(m>=st&&m<st+1&&!state._sent[sk]){state._sent[sk]=true;saveState();const previous=state.day.steps[i-1];notify(`Пора: ${s.title}`,previous?`Этап «${previous.title}» завершён. Сейчас: ${s.details?.[0]||s.text||s.title}`:s.details?.[0]||s.text||s.title)}if(preMinutes>0&&pre>=0&&m>=pre&&m<pre+1&&!state._sent[pk]){state._sent[pk]=true;saveState();notify(`Через ${preMinutes} минут`,`Следующий этап: ${s.title}. Закончи текущее и переходи.`)}const nextStartsLater=!next || timeToMin(next.time)>en;if(nextStartsLater&&m>=en&&m<en+1&&!state._sent[ek]){state._sent[ek]=true;saveState();notify(`Этап завершён: ${s.title}`,next?`Есть пауза до ${next.time}. Переключайся спокойно.`:'Основные этапы дня завершены. Пора отдыхать.')}}if(!hasTextSelection()){renderClock(info);renderAuto(info);renderTodayLight()} }
+function autoCompleteExpiredStages(){
+  const rep=dayReport(),m=nowMin();let changed=false;
+  for(const s of state.day.steps||[]){const en=timeToMin(s.end);if(m>=en&&!rep.steps[s.id]){rep.steps[s.id]=true;changed=true}}
+  if(changed){rep.savedAt=new Date().toISOString();saveState()}
+  return changed;
+}
+function runScheduler(){
+  const day=keyDay();
+  if(day!==lastDay){lastDay=day;state._sent={};saveState();renderAll()}
+  const autoDone=autoCompleteExpiredStages(),info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
+  for(let i=0;i<state.day.steps.length;i++){
+    const s=state.day.steps[i],next=state.day.steps[i+1],st=timeToMin(s.time),en=timeToMin(s.end),pre=st-preMinutes;
+    const sk='s|'+day+'|'+s.id,pk='p|'+day+'|'+s.id,ek='e|'+day+'|'+s.id;
+    if(m>=st&&m<st+1&&!state._sent[sk]){state._sent[sk]=true;saveState();const previous=state.day.steps[i-1];notify('Пора: '+s.title,previous?'Этап «'+previous.title+'» завершён. Сейчас: '+(s.details?.[0]||s.text||s.title):(s.details?.[0]||s.text||s.title))}
+    if(preMinutes>0&&pre>=0&&m>=pre&&m<pre+1&&!state._sent[pk]){state._sent[pk]=true;saveState();notify('Через '+preMinutes+' минут','Следующий этап: '+s.title+'. Закончи текущее и переходи.')}
+    if(m>=en&&m<en+1&&!state._sent[ek]){state._sent[ek]=true;saveState();notify('Этап завершён: '+s.title,next?'Галочка поставлена автоматически. Следующий этап: '+next.title:'Галочка поставлена автоматически. Основные этапы дня завершены.')}
+  }
+  if(autoDone)renderToday();else if(!hasTextSelection()){renderClock(info);renderAuto(info);renderTodayLight()}
+}
 function renderClock(info=getStageInfo()){const d=new Date();setText('clock',d.toLocaleTimeString('ru-RU',{hour12:false}));setText('clockState',info.kind==='active'?`${info.s.time}–${info.s.end}`:info.kind==='between'?'перерыв между этапами':'день завершён')}
 function renderStagePercents(info=getStageInfo()){
   const now=nowMin();
@@ -767,34 +789,51 @@ function dayExpenses(dateOrKey){
   return (state.expenses||[]).filter(x=>{const d=validDate(x.at);return d&&keyDay(d)===key}).reduce((sum,x)=>sum+Math.max(0,Number(x.amount)||0),0)
 }
 function calendarMonthKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function calendarRangeMetrics(start,end){
+  if(!start)return {days:0,income:0,expense:0,net:0};
+  const a=new Date(start+'T12:00:00'),b=new Date((end||start)+'T12:00:00');
+  if(Number.isNaN(a.getTime())||Number.isNaN(b.getTime()))return {days:0,income:0,expense:0,net:0};
+  const lo=a<=b?a:b,hi=a<=b?b:a,days=Math.max(1,Math.floor((hi-lo)/DAY_MS)+1);
+  let income=0,expense=0;
+  for(let i=0;i<days;i++){const d=new Date(lo);d.setDate(lo.getDate()+i);const k=keyDay(d);income+=dayIncome(k);expense+=dayExpenses(k)}
+  return {days,income,expense,net:income-expense};
+}
 function renderCalendar(year,month,selectedKey){
   const first=new Date(year,month,1),last=new Date(year,month+1,0),days=last.getDate();
-  const monthTitle=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
-  const leading=(first.getDay()+6)%7;
+  const monthTitle=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}),leading=(first.getDay()+6)%7;
   const earned=[];
-  for(let day=1;day<=days;day++){const d=new Date(year,month,day);const key=keyDay(d);const income=dayIncome(key);if(income>0)earned.push({day,key,income})}
+  for(let day=1;day<=days;day++){const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key);if(income>0)earned.push({day,key,income})}
   const total=earned.reduce((s,x)=>s+x.income,0),earnedDays=earned.length,best=earned.reduce((m,x)=>x.income>m?x.income:m,0);
-  let selected=selectedKey||keyDay(new Date());
-  if(!selected.startsWith(calendarMonthKey(first)))selected=keyDay(first);
-  const selectedDate=new Date(selected+'T12:00:00');
-  const selectedIn=dayIncome(selected),selectedOut=dayExpenses(selected);
+  let selected=selectedKey||keyDay(new Date());if(!selected.startsWith(calendarMonthKey(first)))selected=keyDay(first);
+  const selectedDate=new Date(selected+'T12:00:00'),selectedIn=dayIncome(selected),selectedOut=dayExpenses(selected);
   const selectedProfits=(state.profits||[]).filter(x=>{const d=validDate(x.at);return d&&keyDay(d)===selected}).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
   const selectedSources={};selectedProfits.forEach(x=>{const k=normalizeProfitSource(x.sourceGroup||x.source);selectedSources[k]=(selectedSources[k]||0)+Math.max(0,Number(x.amount)||0)});
-  const sourceRows=Object.entries(selectedSources).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="calendar-source"><span>${esc(PROFIT_ICONS[k]||'💠')} ${esc(k)}</span><strong class="blue">+${esc(fmtMoney(v))}</strong></div>`).join('');
-  const week=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  let cells=week.map(w=>`<div class="calendar-week">${w}</div>`).join('');
+  const sourceRows=Object.entries(selectedSources).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div class="calendar-source"><span>'+esc(PROFIT_ICONS[k]||'💠')+' '+esc(k)+'</span><strong class="blue">+'+esc(fmtMoney(v))+'</strong></div>').join('');
+  const rs=calendarRangeStart,re=calendarRangeEnd,rangeActive=!!rs;
+  const rangeLo=rs&&re?(rs<re?rs:re):rs,rangeHi=rs&&re?(rs<re?re:rs):rs,range=calendarRangeMetrics(rangeLo,rangeHi);
+  const week=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];let cells=week.map(w=>'<div class="calendar-week">'+w+'</div>').join('');
   for(let i=0;i<leading;i++)cells+='<div class="calendar-day empty" aria-hidden="true"></div>';
   for(let day=1;day<=days;day++){
     const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key),today=key===keyDay(new Date()),sel=key===selected;
-    cells+=`<button class="calendar-day ${income>0?'earned ':''}${today?'today ':''}${sel?'selected':''}" type="button" data-cal-day="${key}"><span class="calendar-num">${day}</span>${income>0?`<span class="calendar-earned">${esc(fmtMoney(income))}</span>`:'<span class="calendar-day-noearn">—</span>'}</button>`;
+    const inRange=rangeActive&&rangeLo&&rangeHi&&key>=rangeLo&&key<=rangeHi,start=key===rangeLo&&rangeActive,end=key===rangeHi&&rangeActive;
+    cells+='<button class="calendar-day '+(income>0?'earned ':'')+(today?'today ':'')+(sel?'selected ':'')+(inRange?'in-range ':'')+(start?'range-start ':'')+(end?'range-end':'')+'" type="button" data-cal-day="'+key+'" aria-label="'+esc(d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}))+'"><span class="calendar-num">'+day+'</span>'+(income>0?'<span class="calendar-earned">'+esc(fmtMoney(income))+'</span>':'<span class="calendar-day-noearn">—</span>')+'</button>';
   }
-  const modal=`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Доход по дням</div><h2>${esc(monthTitle)}</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="calendar-modal" style="margin-top:12px"><div class="calendar-head"><div class="calendar-month">${esc(monthTitle)}</div><div class="calendar-nav"><button class="iconbtn" id="calPrev" type="button" aria-label="Предыдущий месяц">‹</button><button class="iconbtn" id="calNext" type="button" aria-label="Следующий месяц">›</button></div></div><div class="calendar-summary"><div class="calendar-kpi"><div class="label">Дней с доходом</div><div class="value">${earnedDays}</div></div><div class="calendar-kpi"><div class="label">Заработано</div><div class="value blue">${esc(fmtMoney(total))}</div></div><div class="calendar-kpi"><div class="label">Лучший день</div><div class="value orange">${esc(fmtMoney(best))}</div></div></div><div class="calendar-grid">${cells}</div><div class="calendar-selected"><h3>${esc(selectedDate.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}</h3><div class="meta">Доход: <strong class="blue">+${esc(fmtMoney(selectedIn))}</strong> · Расход: <strong class="red-txt">−${esc(fmtMoney(selectedOut))}</strong></div><div class="stack" style="margin-top:8px">${sourceRows||'<div class="empty">В этот день доходов не зафиксировано.</div>'}</div></div><div class="calendar-foot">Каждый день берётся из сохранённых финансовых операций Life Control. Новые поступления появятся здесь автоматически.</div></div>`;
+  const rangeLabel=!rangeActive?'Выбери первый день':(!calendarRangeEnd?'Теперь выбери последний день':range.days+' дн. · '+rangeLo+' → '+rangeHi);
+  const rangeSummary=rangeActive?'<div class="calendar-range-summary"><div class="calendar-kpi"><div class="label">Дней</div><div class="value">'+range.days+'</div></div><div class="calendar-kpi"><div class="label">Прибыль</div><div class="value blue">+'+esc(fmtMoney(range.income))+'</div></div><div class="calendar-kpi"><div class="label">Расход</div><div class="value red-txt">−'+esc(fmtMoney(range.expense))+'</div></div><div class="calendar-kpi"><div class="label">Итог</div><div class="value '+(range.net>=0?'orange-txt':'red-txt')+'">'+(range.net>=0?'+':'−')+esc(fmtMoney(Math.abs(range.net)))+'</div></div></div>':'';
+  const modal='<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Финансовый календарь</div><h2>'+esc(monthTitle)+'</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="calendar-modal" style="margin-top:12px"><div class="calendar-head"><div class="calendar-month">'+esc(monthTitle)+'</div><div class="calendar-nav"><button class="iconbtn" id="calPrev" type="button" aria-label="Предыдущий месяц">‹</button><button class="iconbtn" id="calNext" type="button" aria-label="Следующий месяц">›</button></div></div><div class="calendar-summary"><div class="calendar-kpi"><div class="label">Дней с доходом</div><div class="value">'+earnedDays+'</div></div><div class="calendar-kpi"><div class="label">Заработано</div><div class="value blue">'+esc(fmtMoney(total))+'</div></div><div class="calendar-kpi"><div class="label">Лучший день</div><div class="value orange">'+esc(fmtMoney(best))+'</div></div></div><div class="calendar-grid">'+cells+'</div><div class="calendar-range-bar"><span><strong>Диапазон:</strong> '+esc(rangeLabel)+'</span><div class="calendar-range-actions"><button class="btn small" id="calRangeClear" type="button">Сбросить</button></div></div>'+rangeSummary+'<div class="calendar-selected"><h3>'+esc(selectedDate.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</h3><div class="meta">Доход: <strong class="blue">+'+esc(fmtMoney(selectedIn))+'</strong> · Расход: <strong class="red-txt">−'+esc(fmtMoney(selectedOut))+'</strong></div><div class="stack" style="margin-top:8px">'+(sourceRows||'<div class="empty">В этот день доходов не зафиксировано.</div>')+'</div></div><div class="calendar-foot">Нажми первый день, затем последний — система посчитает весь выбранный период: прибыль, расход и чистый итог.</div></div>';
   openModal(modal);$('closeModalBtn').onclick=closeModal;
-  $('calPrev').onclick=()=>{const nd=new Date(year,month-1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),keyDay(selectedDate))};
-  $('calNext').onclick=()=>{const nd=new Date(year,month+1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),keyDay(selectedDate))};
-  $$('[data-cal-day]').forEach(b=>b.onclick=()=>renderCalendar(year,month,b.dataset.calDay));
+  $('calRangeClear').onclick=()=>{calendarRangeStart='';calendarRangeEnd='';renderCalendar(year,month,selected)};
+  $('calPrev').onclick=()=>{const nd=new Date(year,month-1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),selected)};
+  $('calNext').onclick=()=>{const nd=new Date(year,month+1,1);renderCalendar(nd.getFullYear(),nd.getMonth(),selected)};
+  $$('[data-cal-day]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.calDay;selected=k;
+    if(!calendarRangeStart||calendarRangeEnd){calendarRangeStart=k;calendarRangeEnd=''}
+    else if(k<calendarRangeStart){calendarRangeEnd=calendarRangeStart;calendarRangeStart=k}
+    else{calendarRangeEnd=k}
+    renderCalendar(year,month,k);
+  });
 }
-function openCalendar(){const d=new Date();renderCalendar(d.getFullYear(),d.getMonth(),keyDay(d))}
+function openCalendar(){const d=new Date();calendarRangeStart='';calendarRangeEnd='';renderCalendar(d.getFullYear(),d.getMonth(),keyDay(d))}
 
 function renderControlDashboard(){
   const wm=walletMetrics(), debt=debtTotal(), f=goalFinanceMetrics(), rep=dayReport();
@@ -994,6 +1033,39 @@ function renderProfitSources(){
 }
 function renderMoneyCharts(){renderMoneyFlowChart();renderExpenseDonut();renderProfitSources()}
 
+function goalAIKey(){
+  const g=state.goal||{},f=g.finance||{};
+  return [g.title,g.why,g.next,f.targetAmount||0,f.targetDate||'',(g.milestones||[]).map(m=>m.title+':'+(m.done?'1':'0')).join('|')].join('||');
+}
+function renderGoalAI(){
+  const g=state.goal||{},plan=g.aiPlan,key=goalAIKey(),stateEl=$('goalAiState'),summary=$('goalAiSummary'),list=$('goalAiPlan');
+  if(!stateEl||!summary||!list)return;
+  if(!String(g.title||'').trim()){stateEl.textContent='Сначала задай цель.';summary.textContent='';list.innerHTML='';return}
+  if(!plan){stateEl.textContent='AI-план ещё не сформирован. После сохранения цели он запускается автоматически.';summary.textContent='AI покажет: что уже достигнуто, что уже есть и что конкретно делать дальше.';list.innerHTML='';return}
+  if(plan.goalKey!==key){stateEl.textContent='Цель изменена — нужен новый AI-план.';summary.textContent='Сохрани новую формулировку цели и обнови AI.';list.innerHTML='';return}
+  stateEl.textContent=plan.at?'Обновлено '+fmtDateTime(new Date(plan.at)):'AI-план готов';summary.textContent=plan.summary||'';
+  list.innerHTML=(Array.isArray(plan.actions)?plan.actions:[]).map((x,i)=>'<div class="goal-ai-item"><div><span class="goal-ai-badge">'+esc(x.priority||('P'+(i+1)))+'</span> '+esc(x.action||'Действие')+'</div><div>'+esc(x.deadline||'Срок не указан')+' · '+esc(x.result||'Измеримый результат не указан')+'</div></div>').join('')||'<div class="empty">AI не вернул структурированный план. Нажми «Обновить AI».</div>';
+}
+function parseGoalAI(text){
+  const raw=String(text||'').trim(),actions=[],lines=raw.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  for(const line of lines){const m=line.match(/\b(P[123])\s*\|\s*([^|]+)\|\s*([^|]+)\|\s*([^|]+)(?:\|\s*(.*))?/i);if(m)actions.push({priority:m[1].toUpperCase(),action:m[2].trim(),deadline:m[3].trim(),result:m[4].trim(),basis:(m[5]||'').trim()})}
+  const summary=raw.split(/\n/).filter(x=>/ТЕКУЩЕЕ СОСТОЯНИЕ|ГЛАВНАЯ ПРОБЛЕМА|ЧТО УЖЕ ДОСТИГНУТО|ЧТО УЖЕ ЕСТЬ|ГЛАВНЫЙ ФОКУС/i.test(x)).slice(0,6).join('\n');
+  return {summary:summary||raw.slice(0,1200),actions:actions.slice(0,5),raw};
+}
+async function requestGoalAI(force=false){
+  if(goalAiBusy||state.ai?.enabled===false||!cloudAuth()?.access_token)return;
+  const key=goalAIKey();if(!force&&state.goal.aiPlan?.goalKey===key)return;
+  goalAiBusy=true;const stateEl=$('goalAiState'),summary=$('goalAiSummary');
+  if(stateEl)stateEl.textContent='AI строит план по текущей цели…';
+  if(summary)summary.textContent='Собираю факты: прогресс, капитал, деньги, долги, результаты и ближайший шаг.';
+  try{
+    const data=await callAI({mode:'goal',scope:{goal:true,money:true,reports:true,notes:false,webSearch:false}});
+    const parsed=parseGoalAI(data.output_text||'');
+    state.goal.aiPlan={goalKey:key,at:new Date().toISOString(),summary:parsed.summary,actions:parsed.actions,raw:parsed.raw};
+    state.goal.aiPlanAt=state.goal.aiPlan.at;state.goal.aiPlanGoalKey=key;saveState();if(cloudAuth())cloudPush().catch(()=>{});renderGoalAI();toast('AI-план цели готов','Система показала, что уже есть и что делать дальше.');
+  }catch(e){if(stateEl)stateEl.textContent='AI сейчас недоступен';if(summary)summary.textContent=String(e?.message||e||'Неизвестная ошибка AI.')}
+  finally{goalAiBusy=false}
+}
 function renderGoal(){
   syncGoalFinanceCompletion();
   const total=state.goal.milestones.length,done=state.goal.milestones.filter(m=>m.done).length,p=total?Math.round(done/total*100):0;
@@ -1012,7 +1084,7 @@ function renderGoal(){
   const contrib=[...(state.goal.finance.contributions||[])].sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,10);
   $('goalSavingList').innerHTML=contrib.length?contrib.map(e=>`<div class="saving-item"><div class="saving-main"><div class="saving-title">Пополнение цели</div><div class="saving-meta">${esc(e.note||'Без комментария')} · ${esc(fmtDateTime(new Date(e.at)))}</div></div><div class="saving-amount">+${esc(fmtMoney(e.amount))}</div><button class="delete-x" data-del-saving="${esc(e.id)}" aria-label="Удалить накопление">×</button></div>`).join(''):'<div class="empty">Пополнений пока нет. Можно вести сумму вручную или добавлять накопления кнопкой выше.</div>';
   $$('[data-del-saving]').forEach(b=>b.onclick=()=>{const id=b.dataset.delSaving;state.goal.finance.contributions=state.goal.finance.contributions.filter(x=>x.id!==id);syncGoalFinanceCompletion();saveState();renderAll();toast('Пополнение удалено')});
-  renderGoalChart();
+  renderGoalChart();renderGoalAI();
   $('milestones').innerHTML=state.goal.milestones.map((m,i)=>`<div class="milestone ${m.done?'done':''}"><div class="m-no">${m.done?'✓':i+1}</div><div><div class="m-title">${esc(m.title)}</div><div class="m-status">${m.done?'Этап закрыт':'Впереди'}</div></div><input class="check" type="checkbox" data-ms="${esc(m.id)}" ${m.done?'checked':''}></div>`).join('');
   $$('[data-ms]').forEach(c=>c.onchange=()=>{const m=state.goal.milestones.find(x=>x.id===c.dataset.ms);if(!m)return;m.done=c.checked;const next=state.goal.milestones.find(x=>!x.done);state.goal.next=next?next.title:'Цель достигнута — выбери следующий финансовый ориентир.';saveState();renderAll();toast(c.checked?'Этап закрыт':'Этап открыт',m.title)});
   $('achievements').innerHTML=state.achievements.length?state.achievements.slice().sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).map(a=>`<div class="note"><div class="note-title">Результат</div><div class="note-body">${esc(a.text)}</div><div class="note-time">${esc(fmtDateTime(new Date(a.at)))}</div></div>`).join(''):'<div class="empty">Здесь остаются реальные завершённые результаты.</div>';
@@ -1237,7 +1309,7 @@ function openGoalFinanceEdit(){
 function openGoalEdit(){
   const d=state.drafts?.goalEdit||{},g=state.goal;openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-settings"></use></svg></span>Настройка</div><h2>Главная цель</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Цель</label><textarea id="gTitle">${esc(d.title??g.title)}</textarea></div><div class="field"><label>Зачем</label><textarea id="gWhy">${esc(d.why??g.why)}</textarea></div><div class="field"><label>Следующий шаг</label><input id="gNext" value="${esc(d.next??g.next)}"></div><div class="field"><label>Этапы цели</label><textarea id="gMilestones">${esc(d.milestones??g.milestones.map(m=>`${m.done?'[x] ':'[ ] '}${m.title}`).join('\n'))}</textarea></div><div class="sub">Изменения полей сохраняются автоматически. Кнопка «Сохранить» завершает настройку.</div><div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn" id="goalFinanceFromEdit"><svg class="ui-icon"><use href="#i-money"></use></svg> Финансовая сумма</button><button class="btn primary" id="saveGoalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=()=>{clearDraft('goalEdit');closeModal()};
   const autosave=()=>{const lines=$('gMilestones').value.split(/\n+/).map(x=>x.trim()).filter(Boolean),old=g.milestones;state.goal.title=$('gTitle').value.trim()||g.title;state.goal.why=$('gWhy').value.trim();const firstOpen=lines.map(x=>x.replace(/^\[[ xX]\]\s*/,'').trim()).find((_,idx)=>!/\[x\]/i.test(lines[idx]||''));state.goal.next=$('gNext').value.trim()||firstOpen||state.goal.next;state.goal.milestones=lines.length?lines.map(line=>{const done=/^\[x\]\s*/i.test(line),title=line.replace(/^\[[ xX]\]\s*/,'').trim(),prev=old.find(m=>m.title===title);return {id:prev?.id||uid(),title,done}}):clone(DEFAULT.goal.milestones);state.drafts.goalEdit={title:$('gTitle').value,why:$('gWhy').value,next:$('gNext').value,milestones:$('gMilestones').value};saveState();renderGoal();renderToday()};['gTitle','gWhy','gNext','gMilestones'].forEach(id=>$(id).addEventListener('input',autosave));
-  $('goalFinanceFromEdit').onclick=()=>{saveDraft('goalEdit',{title:$('gTitle').value,why:$('gWhy').value,next:$('gNext').value,milestones:$('gMilestones').value});closeModal();setTimeout(openGoalFinanceEdit,0)};$('saveGoalBtn').onclick=()=>{autosave();clearDraft('goalEdit');closeModal();renderAll();toast('Цель обновлена')}
+  $('goalFinanceFromEdit').onclick=()=>{saveDraft('goalEdit',{title:$('gTitle').value,why:$('gWhy').value,next:$('gNext').value,milestones:$('gMilestones').value});closeModal();setTimeout(openGoalFinanceEdit,0)};$('saveGoalBtn').onclick=()=>{autosave();clearDraft('goalEdit');closeModal();renderAll();toast('Цель обновлена');setTimeout(()=>requestGoalAI(true),80)}
 }
 function openAchievement(){
   const d=state.drafts?.achievement||{};openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-spark"></use></svg></span>Результат</div><h2>Зафиксировать</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Что конкретно достиг</label><textarea id="achInput" placeholder="Например: закрыл этап, накопил сумму, закончил часть работы...">${esc(d.text||'')}</textarea></div><div class="sub">Текст сохраняется автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveAchBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить результат</button></div></div>`);$('closeModalBtn').onclick=closeModal;$('achInput').addEventListener('input',()=>saveDraft('achievement',{text:$('achInput').value}));$('saveAchBtn').onclick=()=>{const t=$('achInput').value.trim();if(!t){toast('Добавь факт');return}state.achievements.push({id:uid(),text:t,at:new Date().toISOString()});clearDraft('achievement');saveState();closeModal();renderGoal();toast('Результат сохранён')};setTimeout(()=>$('achInput').focus(),50)
@@ -1269,7 +1341,7 @@ async function callAI(options={}){
   if('onLine' in navigator&&navigator.onLine===false)throw new Error('Нет интернет-соединения. Life Control Core продолжает работать офлайн.');
   const token=await getAISessionToken();
   const headers={'Content-Type':'application/json','apikey':SUPABASE_CONFIG.publishableKey,'Authorization':'Bearer '+token,'X-Life-Control':'1'};
-  const body=options.ping?{ping:true}:{scope:{goal:options.scope?.goal!==false,money:options.scope?.money!==false,reports:options.scope?.reports!==false,notes:options.scope?.notes===true,webSearch:options.scope?.webSearch===true}};
+  const body=options.ping?{ping:true}:{mode:options.mode||'life',scope:{goal:options.scope?.goal!==false,money:options.scope?.money!==false,reports:options.scope?.reports!==false,notes:options.scope?.notes===true,webSearch:options.scope?.webSearch===true}};
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),50000);
   let res;
   try{res=await fetch(AI_FUNCTION_URL,{method:'POST',headers,body:JSON.stringify(body),signal:controller.signal,cache:'no-store'})}
@@ -1400,7 +1472,7 @@ function bind(){
   $('historyBtn').onclick=openReportHistory;$('lifeAnalysisBtn').onclick=openLifeAnalysis;$('aiAnalysisBtn').onclick=openGeminiAnalysis;
   $('dayMode').onchange=()=>{const d=dailyState();d.mode=$('dayMode').value;state.dayMode=d.mode;saveState();renderToday()};
   $('addNoteBtn').onclick=()=>openNote();$('trashBtn').onclick=openTrash;$('noteSearch').oninput=renderNotes;
-  $('addProfitBtn').onclick=()=>openMoneyForm('profit');$('addExpenseBtn').onclick=()=>openMoneyForm('expense');$('addPersonalExpenseBtn').onclick=()=>openMoneyForm('expense','Личное');$('addBudgetBtn').onclick=openBudget;$('todayAddProfitBtn').onclick=()=>openMoneyForm('profit');$('todayAddExpenseBtn').onclick=()=>openMoneyForm('expense');$('editGoalBtn').onclick=openGoalEdit;$('editGoalFinanceBtn').onclick=openGoalFinanceEdit;$('editGoalFinanceBtn2').onclick=openGoalFinanceEdit;$('addGoalSavingBtn').onclick=openGoalSaving;$('addAchBtn').onclick=openAchievement;$('editDebtBtn').onclick=openDebtEdit;$('editDebtBtn2').onclick=openDebtEdit;
+  $('addProfitBtn').onclick=()=>openMoneyForm('profit');$('addExpenseBtn').onclick=()=>openMoneyForm('expense');$('addPersonalExpenseBtn').onclick=()=>openMoneyForm('expense','Личное');$('addBudgetBtn').onclick=openBudget;$('todayAddProfitBtn').onclick=()=>openMoneyForm('profit');$('todayAddExpenseBtn').onclick=()=>openMoneyForm('expense');$('editGoalBtn').onclick=openGoalEdit;$('goalAiBtn').onclick=()=>requestGoalAI(true);$('editGoalFinanceBtn').onclick=openGoalFinanceEdit;$('editGoalFinanceBtn2').onclick=openGoalFinanceEdit;$('addGoalSavingBtn').onclick=openGoalSaving;$('addAchBtn').onclick=openAchievement;$('editDebtBtn').onclick=openDebtEdit;$('editDebtBtn2').onclick=openDebtEdit;
   $('modalBack').onclick=e=>{if(e.target===$('modalBack'))closeModal()};
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('modalBack').classList.contains('open'))closeModal()});
 }
