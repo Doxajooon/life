@@ -1497,6 +1497,48 @@ function openSettings(){
   $('resetBtn').onclick=()=>{if(confirm('Удалить все локальные данные Life Control?')){for(const k of [KEY,BACKUP_KEY,BACKUP2_KEY,...LEGACY]){try{localStorage.removeItem(k)}catch(e){}}try{indexedDB.deleteDatabase('LifeControlDB');indexedDB.deleteDatabase('LifeControlV26DB')}catch(e){}location.reload()}}
 }
 function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`life-control-backup-${keyDay()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Резервная копия сохранена')}
+async function forgetDeletedNoteFromSnapshots(id){
+  try{
+    for(const k of [KEY,BACKUP_KEY,BACKUP2_KEY,...LEGACY]){
+      const raw=safeReadStorage(k);if(!raw)continue;
+      try{
+        const s=JSON.parse(raw);
+        if(Array.isArray(s.notes))s.notes=s.notes.filter(n=>n?.id!==id);
+        if(Array.isArray(s.notesTrash))s.notesTrash=s.notesTrash.filter(n=>n?.id!==id);
+        localStorage.setItem(k,JSON.stringify(s));
+      }catch(e){}
+    }
+  }catch(e){}
+  try{
+    const db=await openLifeDB();if(!db)return;
+    await new Promise(resolve=>{try{
+      const tx=db.transaction(['state','backups'],'readwrite');
+      const clean=rec=>{if(!rec?.payload)return;try{const s=JSON.parse(rec.payload);if(Array.isArray(s.notes))s.notes=s.notes.filter(n=>n?.id!==id);if(Array.isArray(s.notesTrash))s.notesTrash=s.notesTrash.filter(n=>n?.id!==id);rec.payload=JSON.stringify(s);return rec}catch(e){return rec}};
+      const ss=tx.objectStore('state'),bs=tx.objectStore('backups');
+      const sr=ss.get('current');sr.onsuccess=()=>{const rec=clean(sr.result);if(rec)ss.put(rec)};
+      const br=bs.getAll();br.onsuccess=()=>{for(const rec of br.result||[]){const cleanRec=clean(rec);if(cleanRec)bs.put(cleanRec)}};
+      tx.oncomplete=resolve;tx.onerror=resolve;tx.onabort=resolve;
+    }catch(e){resolve()}});
+  }catch(e){}
+}
+async function importJSON(ev){
+  const file=ev?.target?.files?.[0];if(!file)return;
+  try{
+    const text=await file.text();const parsed=JSON.parse(text);
+    if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))throw new Error('Файл не содержит корректное состояние Life Control.');
+    if(!Array.isArray(parsed.profits)||!Array.isArray(parsed.expenses)||!Array.isArray(parsed.notes))throw new Error('Это не полный резервный файл Life Control.');
+    if(!confirm('Импорт заменит локальные данные текущего устройства. Перед импортом текущая версия останется в резервной копии. Продолжить?'))return;
+    const current=JSON.stringify(state);
+    try{localStorage.setItem(BACKUP2_KEY,current);localStorage.setItem(BACKUP_KEY,current)}catch(e){}
+    state=normalize(parsed);
+    state._cloudBaseUpdatedAt='';
+    _persistFingerprint='';
+    saveState();
+    renderAll();scheduleNative();refreshCloudUI();
+    toast('Резервная копия импортирована','Проверь данные перед продолжением работы.');
+  }catch(e){toast('Импорт не выполнен',e?.message||String(e))}
+  finally{if(ev?.target)ev.target.value=''}
+}
   state.version=47;saveState()
 function openReportHistory(){
   const entries=Object.entries(state.reports||{}).filter(([,r])=>{if(!r)return false;const hasFields=['done','block','future','tomorrow'].some(k=>String(r[k]||'').trim());return hasFields||!!r.savedAt}).sort((a,b)=>b[0].localeCompare(a[0]));
