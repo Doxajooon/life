@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "48.0.0", "package version must match V48");
+assert.equal(pkg.version, "49.0.0", "package version must match V49");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -70,7 +70,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v48-gemini"), "service worker cache must be V48");
+assert.ok(sw.includes("life-control-v49-gemini"), "service worker cache must be V49");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
@@ -107,11 +107,16 @@ assert.ok(html.includes("LIFE_CONTROL_V46") && html.includes("LIFE_CONTROL_V45")
 assert.ok(html.includes("s.settings.fontScale=clamp"), "fontScale normalization missing");
 
 
+assert.ok(html.includes("const stored=cloudAuth()"), "persistent Supabase session restore missing");
+assert.ok(html.includes("async function cloudLogout()"), "explicit cloud logout function missing");
+assert.equal(html.includes("Security policy: a page reload never unlocks Life Control"), false, "old forced-login policy remains");
+assert.ok(html.includes("function effectiveDayMode()"), "automatic day mode logic missing");
+assert.ok(html.includes("function dayMood()"), "automatic day mood logic missing");
+assert.ok(html.includes("function openMetricDetail("), "interactive KPI detail modal missing");
+assert.ok(html.includes("function playNotificationSound()"), "in-app notification sound missing");
+assert.ok(html.includes("cloudLogout()"), "manual logout action missing");
 
-
-
-
-console.log("LIFE_CONTROL_V48_STATIC_QA_OK");
+console.log("LIFE_CONTROL_V49_STATIC_QA_OK");
 
 assert.ok(html.includes("stateFingerprint"), "change-driven persistence fingerprint missing");
 assert.ok(html.includes("async function importJSON"), "safe JSON import missing");
