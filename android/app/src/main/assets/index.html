@@ -25,6 +25,14 @@ html[data-theme="dark"]{
 }
 *{box-sizing:border-box}
 html,body{width:100%;min-width:320px;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+/* V50 UX hardening: stable mobile navigation, no accidental zoom, smooth reopen */
+html,body{touch-action:pan-y;overscroll-behavior-x:none;}
+body{zoom:1;}
+input,textarea,select{font-size:16px;}
+.bottom{position:fixed;left:0;right:0;bottom:0;width:100%;transform:translate3d(0,0,0);will-change:transform;contain:layout paint;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.bottom button{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:manipulation;}
+@media(max-width:720px){.bottom{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}.bottom button{font-size:10px;}}
+
 body{overscroll-behavior-y:none;}
 html,body,.shell,.view,.card,.card *{ -webkit-user-select:text; user-select:text; }
 .ui-icon{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:currentColor;stroke:currentColor;stroke-width:0;transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,opacity .18s ease}
@@ -1605,14 +1613,45 @@ async function init(){
   const authError=authErrorFromUrl();
   const recovery=await requireAuth();
   if(!cloudAuth()&&!recovery)return;
-  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}if(recovery){setTimeout(()=>openPasswordRecovery(),120)}});
+
+  /* V50 startup: local state is already loaded synchronously. Render immediately.
+     IndexedDB/cloud refresh run in the background and never block the first frame. */
+  bind();
+  lastDay=keyDay();
+  initPersistence();
+  renderAll();
+  scheduleNative();
+  runScheduler();
+  queueAutosave();
+  refreshCloudUI();
+
+  restoreFromIndexedDB({render:false}).then(changed=>{
+    if(changed){renderAll();scheduleNative();}
+  }).catch(()=>{});
+
+  if(cloudAuth()){
+    cloudAutoSync().catch(()=>{});
+    refreshAIHealth(true).catch(()=>{});
+  }
+  if(recovery){setTimeout(()=>openPasswordRecovery(),120)}
+
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
   setInterval(()=>{if(document.visibilityState==='visible'&&cloudAuth())cloudAutoSync()},60000);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();restoreFromIndexedDB()}});
-  window.addEventListener('pagehide',saveState);window.addEventListener('beforeunload',saveState);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){saveState();}
+    else{
+      runScheduler();
+      scheduleNative();
+      restoreFromIndexedDB({render:false}).then(changed=>{if(changed){renderAll();scheduleNative();}}).catch(()=>{});
+      if(cloudAuth())cloudAutoSync().catch(()=>{});
+    }
+  });
+  window.addEventListener('pagehide',saveState);
+  window.addEventListener('beforeunload',saveState);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
+
 window.addEventListener('online',()=>{refreshCloudUI();if(cloudAuth()){cloudAutoSync();refreshAIHealth(true)}});window.addEventListener('offline',()=>{refreshCloudUI();refreshAIHealth(true)});init();
 </script>
 </body>
