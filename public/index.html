@@ -170,6 +170,13 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .view{position:relative;z-index:1;}
 .bottom{z-index:300;pointer-events:auto;}
 .modal-back{pointer-events:auto;}
+
+/* V52 navigation hardening */
+.bottom{pointer-events:auto!important;z-index:300!important;}
+.bottom button{pointer-events:auto!important;cursor:pointer;touch-action:manipulation;}
+.bottom button:hover{transform:translateY(-1px);border-color:var(--blue);background:var(--blue-soft);color:var(--blue-dark);}
+.bottom button:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 35%,transparent);outline-offset:2px;}
+.view{position:relative;}
 </style>
 </head>
 <body>
@@ -432,9 +439,9 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 <div class="toast" id="toast" role="status" aria-live="polite"></div><div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
 <script>
 'use strict';
-const KEY='LIFE_CONTROL_V48';
-const BACKUP_KEY='LIFE_CONTROL_V48_SNAPSHOT';
-const BACKUP2_KEY='LIFE_CONTROL_V48_SNAPSHOT_2';
+const KEY='LIFE_CONTROL_V52';
+const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
+const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
 const LEGACY=['LIFE_CONTROL_V46','LIFE_CONTROL_V45','LIFE_CONTROL_V40','LIFE_CONTROL_V39','LIFE_CONTROL_V38','LIFE_CONTROL_V37','LIFE_CONTROL_V36','LIFE_CONTROL_V35','LIFE_CONTROL_V33','LIFE_CONTROL_V32','LIFE_CONTROL_V31','LIFE_CONTROL_V30','LIFE_CONTROL_V29','LIFE_CONTROL_V28','LIFE_CONTROL_V27','LIFE_CONTROL_V26','LIFE_CONTROL_V25','LIFE_CONTROL_V24','LIFE_CONTROL_V23','LIFE_CONTROL_V22','LIFE_CONTROL_V21','LIFE_CONTROL_V20','LIFE_CONTROL_V18','LIFE_CONTROL_V17','LIFE_CONTROL_V16','LIFE_CONTROL_V15','LIFE_CONTROL_V14','LIFE_CONTROL_V13','LIFE_CONTROL_V12','LIFE_CONTROL_V11','LIFE_CONTROL_V10','LIFE_CONTROL_V9'];
 const DAY_MS=86400000,TRASH_TTL=30*DAY_MS;
 const PROFIT_SOURCES=['Зарплата','Фриланс','Спортивная аналитика'];
@@ -1566,6 +1573,26 @@ function showView(id){
   $('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
   requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'}));
 }
+
+/* V52 delegated navigation */
+(function hardenNavigation(){
+  const navigate=(button)=>{
+    if(!button)return;
+    const id=button.dataset.view;
+    if(!id)return;
+    try{showView(id);}catch(err){console.error('[Life Control] navigation error',err);}
+  };
+  document.addEventListener('click',(event)=>{
+    const button=event.target instanceof Element ? event.target.closest('.bottom button[data-view]') : null;
+    if(button){event.preventDefault();navigate(button);}
+  },true);
+  document.addEventListener('keydown',(event)=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    const button=event.target instanceof Element ? event.target.closest('.bottom button[data-view]') : null;
+    if(button){event.preventDefault();navigate(button);}
+  },true);
+  window.showView=window.showView||showView;
+})();
 function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open')}
 function closeModal(){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open')}
 function renderAll(){setTheme();purgeExpiredTrash(state);renderToday();renderGoal();renderMoney();renderNotes();updateBell()}
