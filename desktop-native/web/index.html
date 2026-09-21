@@ -1588,8 +1588,8 @@ function updateBell(){const unread=state.notificationsLog.some(n=>!state.lastRea
 function showView(id){
   const target=document.getElementById(id);
   if(!target)return;
-  $('.view').forEach(v=>v.classList.toggle('active',v===target));
-  $('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
+  document.querySelectorAll('.bottom button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
   requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'}));
 }
 
@@ -1678,7 +1678,7 @@ async function init(){
   const authError=authErrorFromUrl();
   const recovery=await requireAuth();
   if(!cloudAuth()&&!recovery)return;
-  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}if(recovery){setTimeout(()=>openPasswordRecovery(),120)}});
+  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}if(recovery){try{const k='LIFE_CONTROL_RECOVERY_PROMPT_V1';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');setTimeout(()=>openPasswordRecovery(),120)}}catch(e){setTimeout(()=>openPasswordRecovery(),120)}}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
   setInterval(()=>{if(document.visibilityState==='visible'&&cloudAuth())cloudAutoSync()},60000);
