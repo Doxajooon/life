@@ -1646,16 +1646,55 @@ async function requireAuth(){
       const user=await cloudUser();
       if(user){setCloudAuth({...cloudAuth(),user});return}
       const refreshed=await cloudRefresh();
-      if(refreshed?.access_token){const refreshedUser=await cloudUser();if(refreshedUser)setCloudAuth({...refreshed,user:refreshedUser});}
+      if(refreshed?.access_token){
+        const refreshedUser=await cloudUser();
+        if(refreshedUser)setCloudAuth({...refreshed,user:refreshedUser});
+      }
     }).catch(()=>{});
     return true;
   }
   lockApp();
   const email=$('gateEmail'),pass=$('gatePassword'),msg=$('gateMsg');
   const say=t=>{if(msg)msg.textContent=t};
-   $('gateLoginBtn').onclick=async()=>{setAuthBusy('gateLoginBtn',true,'Вход…');setAuthProgress('Проверяю аккаунт…',20);say('');try{const d=await cloudSignIn(email.value.trim(),pass.value);setAuthProgress('Сессия подтверждена…',45);if(!d?.access_token)throw new Error(d?.msg||d?.error_description||d?.message||'Неверный email или пароль.');const u=await cloudUser();setAuthProgress('Загружаю личные данные…',65);setCloudAuth({...d,user:u||d.user});unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();toast('Вход выполнен','Life Control открыт.')}catch(e){say(String(e.message||e));setAuthProgress('Вход не выполнен',0)}finally{setAuthBusy('gateLoginBtn',false,'Войти')}};
-   $('gateSignupBtn').onclick=async()=>{setAuthBusy('gateSignupBtn',true,'Создаю аккаунт…');setAuthProgress('Создаю защищённый профиль…',25);say('');try{const d=await cloudSignUp(email.value.trim(),pass.value);setAuthProgress('Профиль создан…',55);if(d?.session?.access_token){setCloudAuth(d.session);unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();say('');toast('Аккаунт создан','Life Control открыт.')}else{say('Аккаунт создан. Проверь почту и подтверди адрес, затем войди.');setAuthProgress('Проверь почту',65)}}catch(e){say(String(e.message||e));setAuthProgress('Создание не завершено',0)}finally{setAuthBusy('gateSignupBtn',false,'Создать аккаунт')}};
-   $('gateResetBtn').onclick=async()=>{setAuthBusy('gateResetBtn',true,'Отправляю…');setAuthProgress('Отправляю письмо восстановления…',35);try{const em=email.value.trim();if(!/^\\S+@\\S+\\.\\S+$/.test(em))throw new Error('Введи корректный email.');await cloudRecover(em);setAuthProgress('Письмо отправлено',100);say('Письмо восстановления отправлено.')}catch(e){say(String(e.message||e));setAuthProgress('Не удалось отправить',0)}finally{setAuthBusy('gateResetBtn',false,'Забыли пароль?')}};
+  $('gateLoginBtn').onclick=async()=>{
+    setAuthBusy('gateLoginBtn',true,'Вход…');setAuthProgress('Проверяю аккаунт…',20);say('');
+    try{
+      const em=email.value.trim();
+      if(!/^\S+@\S+\.\S+$/.test(em))throw new Error('Введи корректный email.');
+      const d=await cloudSignIn(em,pass.value);
+      setAuthProgress('Сессия подтверждена…',45);
+      if(!d?.access_token)throw new Error(d?.msg||d?.error_description||d?.message||'Неверный email или пароль.');
+      const u=await cloudUser();
+      setAuthProgress('Загружаю личные данные…',65);
+      setCloudAuth({...d,user:u||d.user});
+      unlockApp();bind();lastDay=keyDay();
+      await cloudPullIntoLocal();
+      setAuthProgress('Готово',100);renderAll();refreshCloudUI();toast('Вход выполнен','Life Control открыт.');
+    }catch(e){say(String(e.message||e));setAuthProgress('Вход не выполнен',0)}
+    finally{setAuthBusy('gateLoginBtn',false,'Войти')}
+  };
+  $('gateSignupBtn').onclick=async()=>{
+    setAuthBusy('gateSignupBtn',true,'Создаю аккаунт…');setAuthProgress('Создаю защищённый профиль…',25);say('');
+    try{
+      const em=email.value.trim();
+      if(!/^\S+@\S+\.\S+$/.test(em))throw new Error('Введи корректный email.');
+      const d=await cloudSignUp(em,pass.value);
+      setAuthProgress('Профиль создан…',55);
+      if(d?.session?.access_token){
+        setCloudAuth(d.session);unlockApp();bind();lastDay=keyDay();
+        await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();say('');toast('Аккаунт создан','Life Control открыт.');
+      }else{say('Аккаунт создан. Проверь почту и подтверди адрес, затем войди.');setAuthProgress('Проверь почту',65)}
+    }catch(e){say(String(e.message||e));setAuthProgress('Создание не завершено',0)}
+    finally{setAuthBusy('gateSignupBtn',false,'Создать аккаунт')}
+  };
+  $('gateResetBtn').onclick=async()=>{
+    setAuthBusy('gateResetBtn',true,'Отправляю…');setAuthProgress('Отправляю письмо восстановления…',35);
+    try{
+      const em=email.value.trim();if(!/^\S+@\S+\.\S+$/.test(em))throw new Error('Введи корректный email.');
+      await cloudRecover(em);setAuthProgress('Письмо отправлено',100);say('Письмо восстановления отправлено.');
+    }catch(e){say(String(e.message||e));setAuthProgress('Не удалось отправить',0)}
+    finally{setAuthBusy('gateResetBtn',false,'Забыли пароль?')}
+  };
   return false;
 }
 async function init(){
