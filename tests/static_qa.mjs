@@ -140,5 +140,6 @@ assert.ok(html.includes('autocomplete="new-password"') || html.includes('autocom
 assert.ok(/autocomplete="(?:off|username)"/.test(html), "email field must define controlled autocomplete");
 assert.ok(html.includes("window.scrollTo(0,0)"), "navigation scroll reset must target document root");
 assert.ok(html.includes("pointer-events:auto!important"), "bottom navigation must accept pointer events");
+assert.ok(html.includes("V55 navigation hardening"), "V55 navigation hardening missing");
 assert.ok(html.includes("schema_version:50"), "cloud writes must use current V50 schema");
 assert.ok(html.includes("cloudSyncInFlight"), "cloud sync mutex missing");
