@@ -1618,8 +1618,8 @@ function bind(){
     });
   }
   /* Navigation uses delegated click handling so rerenders cannot break the buttons. */
-  const nav=$('.bottom [data-view]');
-  nav.forEach(b=>{b.onclick=null;b.disabled=false;b.setAttribute('aria-disabled','false')});
+  const navButtons=$('.bottom [data-view]');
+  navButtons.forEach(b=>{b.onclick=null;b.disabled=false;b.setAttribute('aria-disabled','false')});
   const bottom=document.querySelector('.bottom');
   if(bottom&&!bottom.dataset.bound){
     bottom.dataset.bound='1';
