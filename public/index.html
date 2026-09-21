@@ -513,7 +513,7 @@ async function cloudPush(){
   return true;
 }
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
-async async function cloudSync(){
+async function cloudSync(){
   const localStamp=Date.parse(state._lastSavedAt||'')||0;
   const pulled=await cloudPull();
   if(!pulled)return {ok:false,logged:false};
