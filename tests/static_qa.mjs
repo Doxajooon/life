@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "49.0.0", "package version must match V49");
+assert.equal(pkg.version, "54.0.0", "package version must match V54");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -70,7 +70,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v49-gemini"), "service worker cache must be V49");
+assert.ok(sw.includes("life-control-v54"), "service worker cache must be V54");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
@@ -116,7 +116,7 @@ assert.ok(html.includes("function openMetricDetail("), "interactive KPI detail m
 assert.ok(html.includes("function playNotificationSound()"), "in-app notification sound missing");
 assert.ok(html.includes("cloudLogout()"), "manual logout action missing");
 
-console.log("LIFE_CONTROL_V49_STATIC_QA_OK");
+console.log("LIFE_CONTROL_V54_STATIC_QA_OK");
 
 assert.ok(html.includes("stateFingerprint"), "change-driven persistence fingerprint missing");
 assert.ok(html.includes("async function importJSON"), "safe JSON import missing");
