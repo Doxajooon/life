@@ -526,10 +526,13 @@ async function cloudPush(){
   const remote=latest?.row;
   const remoteStamp=remote?.updated_at||remote?.state?._lastSavedAt||'';
   const baseStamp=state[CLOUD_BASE_KEY]||'';
-  if(remote?.state && ((!baseStamp && remoteStamp && Date.parse(remoteStamp||'')>Date.parse(state._lastSavedAt||'') ) || (baseStamp && remoteStamp && remoteStamp!==baseStamp))){
+  const localDirty=_localDirtySinceCloud;
+  if(remote?.state && !localDirty && ((!baseStamp && remoteStamp && Date.parse(remoteStamp||'')>Date.parse(state._lastSavedAt||'')) || (baseStamp && remoteStamp && remoteStamp!==baseStamp))){
     state=normalize(remote.state);
     state[CLOUD_BASE_KEY]=remoteStamp;
     _persistFingerprint='';
+    _cloudBaseFingerprint=stateFingerprint();
+    _localDirtySinceCloud=false;
     saveState();
     renderAll();scheduleNative();
     const now=Date.now();if(now-_cloudConflictNoticeAt>10000){_cloudConflictNoticeAt=now;toast('Данные обновлены в облаке','Эта вкладка не перезаписала более новую версию Supabase.');}
@@ -539,6 +542,8 @@ async function cloudPush(){
   const saved=await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(body)});
   const row=Array.isArray(saved)?saved[0]:saved;
   state[CLOUD_BASE_KEY]=row?.updated_at||new Date().toISOString();
+  _cloudBaseFingerprint=stateFingerprint();
+  _localDirtySinceCloud=false;
   return true;
 }
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
@@ -549,9 +554,22 @@ async function cloudSync(){
   const row=pulled.row;
   if(!row?.state){state[CLOUD_BASE_KEY]='';await cloudPush();setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user};}
   const cloudStamp=Date.parse(row.state?._lastSavedAt||row.updated_at||'')||0;
-  state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';
-  if(cloudStamp>localStamp){state=normalize(row.state);state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';_persistFingerprint='';saveState();renderAll();scheduleNative();}
-  else if(cloudStamp<localStamp){await cloudPush()}
+  if(_localDirtySinceCloud){
+    await cloudPush();
+  }else if(cloudStamp>localStamp){
+    state=normalize(row.state);
+    state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';
+    _persistFingerprint='';
+    _cloudBaseFingerprint=stateFingerprint();
+    _localDirtySinceCloud=false;
+    saveState();renderAll();scheduleNative();
+  }else if(cloudStamp<localStamp){
+    await cloudPush();
+  }else{
+    state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';
+    _cloudBaseFingerprint=stateFingerprint();
+    _localDirtySinceCloud=false;
+  }
   setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}
 }
 async function cloudAutoSync(){if(!cloudAuth())return false;const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}}
@@ -623,7 +641,7 @@ function load(){
 }
 let state=load(),toastTimer=null,lastDay='',lastTick=0,autosaveTimer=null;
 
-let cloudSyncTimer=null;
+let cloudSyncTimer=null, _localDirtySinceCloud=false, _cloudBaseFingerprint='';
 async function cloudPullIntoLocal(){try{const pulled=await cloudPull();if(!pulled?.row?.state)return false;const localStamp=Date.parse(state._lastSavedAt||'')||0;const cloudStamp=Date.parse(pulled.row.state._lastSavedAt||pulled.row.updated_at||'')||0;state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';if(cloudStamp>localStamp){state=normalize(pulled.row.state);state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';saveState();renderAll();scheduleNative();return true}return false}catch(e){return false}}
 function stateFingerprint(){try{const x=clone(state);delete x._lastSavedAt;delete x._persistentStorageRequestedAt;delete x._persistentStorageGranted;delete x[CLOUD_BASE_KEY];return JSON.stringify(x)}catch(e){return ''}}
 function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(cloudAuth()&&_persistFingerprint)cloudPush().catch(()=>{})},2500)}
@@ -634,6 +652,7 @@ function saveState(){
     if(fingerprint && fingerprint===_persistFingerprint){
       return;
     }
+    if(fingerprint && _cloudBaseFingerprint && fingerprint!==_cloudBaseFingerprint)_localDirtySinceCloud=true;
     state._lastSavedAt=new Date().toISOString();
     const savedAt=state._lastSavedAt;
     const payload=JSON.stringify(state);
