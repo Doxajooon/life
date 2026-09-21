@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "50.0.0", "package version must match V50");
+assert.equal(pkg.version, "51.0.0", "package version must match V51");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -70,7 +70,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v50-gemini"), "service worker cache must be V50");
+assert.ok(sw.includes("life-control-v51-jamals-life"), "service worker cache must be V51");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
@@ -131,3 +131,9 @@ assert.equal(html.includes("setInterval(()=>{if(document.visibilityState==='visi
 assert.ok(html.includes("_cloudBaseUpdatedAt"), "cloud base revision guard missing");
 assert.ok(html.includes("Данные обновлены в облаке"), "cloud conflict protection notice missing");
 assert.ok(html.includes("gateLoginBtn") && html.includes("gatePassword"), "password auth gate missing");
+
+assert.ok(html.includes("JAMAL`S LIFE"), "brand must be Jamal`s Life");
+assert.ok(html.includes("id=\"dayModeAuto\""), "automatic rhythm indicator missing");
+assert.ok(html.includes("V51 stable interaction layer"), "V51 interaction layer missing");
+assert.equal(html.includes("id=\"dayMode\""), false, "manual day mode selector must not override automatic rhythm");
+assert.ok(html.includes("data-metric=\"cash\"") && html.includes("data-metric=\"debt\"") && html.includes("data-metric=\"goal\"") && html.includes("data-metric=\"discipline\""), "Today KPIs must be interactive");
