@@ -119,6 +119,9 @@ assert.ok(html.includes("cloudLogout()"), "manual logout action missing");
 
 assert.ok(html.includes("V50 UX hardening"), "V50 UX hardening styles missing");
 assert.ok(html.includes("touch-action:manipulation"), "mobile navigation touch optimization missing");
+assert.ok(html.includes("deterministic navigation") || html.includes("make navigation and wheel scrolling deterministic") || html.includes("mainNav"), "navigation hardening marker missing");
+assert.equal(/<nav class="bottom"[^>]*>.*onclick="showView/.test(html), false, "navigation must not depend on inline onclick handlers");
+assert.ok(html.includes("cloudSyncInFlight"), "cloud sync mutex missing");
 assert.ok(html.includes("transform:translateZ(0)"), "bottom navigation compositor stabilization missing");
 assert.ok(html.includes("function showView(id)") && html.includes("window.scrollTo"), "view switching must reset scroll after layout");
 
