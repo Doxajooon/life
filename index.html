@@ -25,8 +25,8 @@ html[data-theme="dark"]{
 }
 *{box-sizing:border-box}
 html,body{width:100%;min-width:320px;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
-html{overflow-y:auto;}
-body{position:relative;overflow-x:hidden;}
+html{overflow-y:scroll;height:auto;}
+body{position:relative;overflow-x:hidden;overflow-y:auto;min-height:100vh;height:auto;}
 .bottom button{touch-action:manipulation;user-select:none;-webkit-user-select:none;}
 @media(max-width:720px){.bottom{left:0;right:0;bottom:env(safe-area-inset-bottom,0px);padding-left:10px;padding-right:10px;}}
 
@@ -38,7 +38,7 @@ input,textarea,select{font-size:16px;}
 .bottom button{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:manipulation;}
 @media(max-width:720px){.bottom{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}.bottom button{font-size:10px;}}
 
-body{overscroll-behavior-y:none;}
+body{overscroll-behavior-y:auto;}
 html,body,.shell,.view,.card,.card *{ -webkit-user-select:text; user-select:text; }
 .ui-icon{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:currentColor;stroke:currentColor;stroke-width:0;transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,opacity .18s ease}
 button:hover .ui-icon,.btn:hover .ui-icon,.iconbtn:hover .ui-icon,.bottom button:hover .ui-icon{transform:translateY(-1px) scale(1.07);filter:drop-shadow(0 2px 3px color-mix(in srgb,var(--blue) 24%,transparent))}
@@ -176,6 +176,11 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .day-progress-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.day-progress-kpi{padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.day-progress-kpi .label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}.day-progress-kpi .value{font-size:20px;font-weight:950;margin-top:3px}.runner-stage{padding:16px 12px;border:1px solid var(--line);border-radius:13px;background:var(--soft);margin-top:12px}.runner-track{height:56px;position:relative;border-bottom:2px solid var(--line);margin:0 12px}.runner-track::before{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));transform-origin:left;transform:scaleX(calc(var(--runner-progress,0) / 100));transition:transform .5s ease}.runner-runner{position:absolute;left:calc(var(--runner-progress,0) * 1%);bottom:7px;transform:translateX(-50%);animation:runner-bob .55s ease-in-out infinite alternate}.runner-runner .ui-icon{width:34px;height:34px;color:var(--blue-dark)}@keyframes runner-bob{from{transform:translate(-50%,2px)}to{transform:translate(-50%,-3px)}}.day-progress-main{text-align:center}.day-progress-percent{font-size:36px;font-weight:950;letter-spacing:-.04em;color:var(--blue-dark)}.day-progress-sub{font-size:11px;color:var(--muted);margin-top:3px}@media(max-width:720px){.day-progress-kpis{grid-template-columns:1fr 1fr}.day-progress-kpi:last-child{grid-column:1/-1}}
 .eyebrow{font-size:10px}.sub{font-size:12px}.small{font-size:11px!important}.field label{font-size:10px}.kpi .label,.calendar-kpi .label,.distance-kpi .label,.goal-day-stat .label{font-size:9px}.pulse-label,.calendar-num,.future-title,.t-title,.m-title{font-size:12px}.t-note,.future-time,.money-meta,.debt-kpi-note{font-size:10px}.runtime-status{font-size:10px}
 .auth-brand{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;background:var(--blue-soft);border:1px solid color-mix(in srgb,var(--blue) 30%,var(--line));color:var(--blue-dark);margin-bottom:12px}.auth-brand .ui-icon{width:28px;height:28px}.auth-intro{font-size:12px;color:var(--muted);margin-top:5px}.auth-progress{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:10px;color:var(--muted)}.auth-progress-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:6px}.auth-progress-bar i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));transition:width .25s ease}.auth-spinner{width:14px;height:14px;border:2px solid color-mix(in srgb,currentColor 25%,transparent);border-top-color:currentColor;border-radius:50%;display:inline-block;animation:spin .75s linear infinite;vertical-align:-2px}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:720px){.auth-box{padding:22px 18px}}
+/* V50 scroll/password hardening */
+html,body{scroll-behavior:auto;}
+.view{overflow:visible;min-height:calc(100vh - 90px);}
+.modal-back.open{overscroll-behavior:contain;}
+.modal{overscroll-behavior:contain;}
 </style>
 </head>
 <body>
@@ -211,7 +216,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
   <div class="auth-brand"><svg class="ui-icon"><use href="#i-card"></use></svg></div><div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="auth-intro">Твоя личная система. Вход открывает данные, облачную синхронизацию и AI.</div>
   <div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="sub">Войди в аккаунт, чтобы открыть личные данные и AI.</div>
   <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="username" value="" placeholder="you@example.com"></div>
-  <div class="field"><label>Пароль</label><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Минимум 6 символов"></div>
+  <div class="field"><label>Пароль</label><input id="gatePassword" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Минимум 6 символов"></div>
   <div class="auth-actions"><button class="btn primary" id="gateLoginBtn"><svg class="ui-icon"><use href="#i-check"></use></svg><span>Войти</span></button><button class="btn" id="gateSignupBtn"><svg class="ui-icon"><use href="#i-people"></use></svg><span>Создать аккаунт</span></button><button class="btn ghost" id="gateResetBtn"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg><span>Забыли пароль?</span></button></div>
   <div class="auth-progress"><span>●</span><span id="authProgressText">Готово к входу</span></div><div class="auth-progress-bar"><i id="authProgressBar"></i></div><div class="auth-msg" id="gateMsg" aria-live="polite"></div>
 </div></div>
@@ -495,7 +500,7 @@ async function cloudUpdatePassword(password){const a=cloudAuth();if(!a?.access_t
 function clearAuthHash(){try{history.replaceState({},document.title,location.pathname+location.search)}catch(e){location.hash=''}}
 function recoverySessionFromUrl(){try{const q=new URLSearchParams(location.hash.slice(1));const at=q.get('access_token'),rt=q.get('refresh_token'),type=q.get('type');if(at&&rt&&(type==='recovery'||q.get('type')==='recovery')){setCloudAuth({access_token:at,refresh_token:rt,token_type:q.get('token_type')||'bearer',expires_in:Number(q.get('expires_in')||0),user:null});clearAuthHash();return true}}catch(e){}return false}
 async function openPasswordRecovery(){
-  openModal('<div class="close-row"><div><div class="eyebrow">Life Control</div><h2>Новый пароль</h2><div class="sub">Ссылка восстановления приняла сессию. Задай новый пароль для аккаунта.</div></div></div><div class="stack" style="margin-top:12px"><div class="field"><label>Новый пароль</label><input id="recoveryPassword1" type="password" autocomplete="new-password" placeholder="Минимум 6 символов"></div><div class="field"><label>Повтори пароль</label><input id="recoveryPassword2" type="password" autocomplete="new-password" placeholder="Повтори пароль"></div><button class="btn primary" id="recoverySaveBtn">Сохранить новый пароль</button></div>');
+  openModal('<div class="close-row"><div><div class="eyebrow">Life Control</div><h2>Новый пароль</h2><div class="sub">Ссылка восстановления приняла сессию. Задай новый пароль для аккаунта.</div></div></div><div class="stack" style="margin-top:12px"><div class="field"><label>Новый пароль</label><input id="recoveryPassword1" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Минимум 6 символов"></div><div class="field"><label>Повтори пароль</label><input id="recoveryPassword2" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Повтори пароль"></div><button class="btn primary" id="recoverySaveBtn">Сохранить новый пароль</button></div>');
   $('recoverySaveBtn').onclick=async()=>{const a=$('recoveryPassword1').value,b=$('recoveryPassword2').value;if(a.length<6){toast('Пароль слишком короткий','Минимум 6 символов.');return}if(a!==b){toast('Пароли не совпадают');return}try{await cloudUpdatePassword(a);const u=await cloudUser();const auth=cloudAuth();if(auth) setCloudAuth({...auth,user:u||auth.user});closeModal();toast('Пароль изменён','Теперь можно войти в Life Control с новым паролем.')}catch(e){toast('Не удалось сменить пароль',e.message)}};
 }
 async function cloudRefresh(){const a=cloudAuth();if(!a?.refresh_token)return null;try{const data=await supaFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:a.refresh_token})});if(data?.access_token)setCloudAuth({...data,user:data?.user||a.user||null});return data||null}catch(e){return null}}
