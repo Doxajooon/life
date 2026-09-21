@@ -124,4 +124,4 @@ assert.ok(html.includes("async function forgetDeletedNoteFromSnapshots"), "perma
 assert.equal(html.includes("setInterval(()=>{if(document.visibilityState==='visible')saveState()},5000)"), false, "periodic blind save must not exist");
 assert.ok(html.includes("_cloudBaseUpdatedAt"), "cloud base revision guard missing");
 assert.ok(html.includes("Данные обновлены в облаке"), "cloud conflict protection notice missing");
-assert.ok(html.includes("gateLoginBtn") && html.includes("Security policy"), "password auth gate missing");
+assert.ok(html.includes("gateLoginBtn") && html.includes("gatePassword"), "password auth gate missing");
