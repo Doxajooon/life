@@ -46,6 +46,21 @@ jobs:
       - name: Build debug APK
         working-directory: android
         run: gradle :app:assembleDebug --no-daemon
+      - name: Align and sign APK
+        working-directory: android
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          ALIGNED="app/build/outputs/apk/debug/app-debug-aligned.apk"
+          ZIPALIGN="$(find "$ANDROID_HOME/build-tools" -type f -name zipalign | sort -V | tail -1)"
+          test -x "$ZIPALIGN"
+          "$ZIPALIGN" -f 4 "$APK" "$ALIGNED"
+          mv "$ALIGNED" "$APK"
+          KEYSTORE="$RUNNER_TEMP/life-control-debug.keystore"
+          keytool -genkeypair -v -keystore "$KEYSTORE" -storepass android -keypass android             -alias lifecontrol -keyalg RSA -keysize 2048 -validity 10000             -dname "CN=Life Control, OU=Debug, O=Life Control, L=Khujand, ST=Sughd, C=TJ"
+          jarsigner -keystore "$KEYSTORE" -storepass android -keypass android             -sigalg SHA256withRSA -digestalg SHA-256 "$APK" lifecontrol
+          jarsigner -verify "$APK"
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
