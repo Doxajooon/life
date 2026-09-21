@@ -137,3 +137,10 @@ assert.ok(html.includes("id=\"dayModeAuto\""), "automatic rhythm indicator missi
 assert.ok(html.includes("V51 stable interaction layer"), "V51 interaction layer missing");
 assert.equal(html.includes("id=\"dayMode\""), false, "manual day mode selector must not override automatic rhythm");
 assert.ok(html.includes("data-metric=\"cash\"") && html.includes("data-metric=\"debt\"") && html.includes("data-metric=\"goal\"") && html.includes("data-metric=\"discipline\""), "Today KPIs must be interactive");
+
+assert.ok(html.includes('autocomplete="new-password"'), "password field must prevent saved-password autofill");
+assert.ok(html.includes('autocomplete="off" inputmode="email"'), "email field must not be auto-filled with credentials");
+assert.ok(html.includes("document.documentElement.scrollTop=0"), "navigation scroll reset must target document root");
+assert.ok(html.includes(".bottom{pointer-events:auto;}"), "bottom navigation must accept pointer events");
+assert.ok(html.includes("schema_version:50"), "cloud writes must use current V50 schema");
+assert.ok(html.includes("cloudSyncInFlight"), "cloud sync mutex missing");
