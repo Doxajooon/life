@@ -11,6 +11,13 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Life Control — личная система движения · офлайн · V50</title>
 <style>
+/* V55 navigation hardening */
+html,body{overflow-y:auto!important;overflow-x:hidden!important;height:auto!important;min-height:100%;}
+body{overscroll-behavior-y:auto!important;touch-action:auto!important;}
+main,.shell,.view{overflow:visible!important;}
+.bottom{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:2147483000!important;width:100%!important;pointer-events:auto!important;transform:translateZ(0);-webkit-transform:translateZ(0);}
+.bottom button{pointer-events:auto!important;touch-action:manipulation!important;user-select:none;-webkit-user-select:none;}
+
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
   --line:#d9e2ea;--blue:#2479ad;--blue-dark:#15587f;--blue-soft:#eaf5fb;
@@ -191,8 +198,8 @@ html,body{scroll-behavior:auto;}
 <div class="auth-lock" id="authLock" hidden><div class="auth-box">
   <div class="auth-brand"><svg class="ui-icon"><use href="#i-card"></use></svg></div><div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="auth-intro">Твоя личная система. Вход открывает данные, облачную синхронизацию и AI.</div>
   <div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="sub">Войди в аккаунт, чтобы открыть личные данные и AI.</div>
-  <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="username" value="" placeholder="you@example.com"></div>
-  <div class="field"><label>Пароль</label><input id="gatePassword" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Минимум 6 символов"></div>
+  <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="off" inputmode="email" value="" placeholder="you@example.com"></div>
+  <div class="field"><label>Пароль</label><input id="gatePassword" name="password" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Минимум 6 символов"></div>
   <div class="auth-actions"><button class="btn primary" id="gateLoginBtn"><svg class="ui-icon"><use href="#i-check"></use></svg><span>Войти</span></button><button class="btn" id="gateSignupBtn"><svg class="ui-icon"><use href="#i-people"></use></svg><span>Создать аккаунт</span></button><button class="btn ghost" id="gateResetBtn"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg><span>Забыли пароль?</span></button></div>
   <div class="auth-progress"><span>●</span><span id="authProgressText">Готово к входу</span></div><div class="auth-progress-bar"><i id="authProgressBar"></i></div><div class="auth-msg" id="gateMsg" aria-live="polite"></div>
 </div></div>
@@ -1576,13 +1583,12 @@ function openReportHistory(){
 }
 function updateBell(){const unread=state.notificationsLog.some(n=>!state.lastReadAt||Date.parse(n.at)>Date.parse(state.lastReadAt));$('bellDot').classList.toggle('show',unread)}
 function showView(id){
-  const target=document.getElementById(id);
+  if(!id)return;
+  const target=$(id);
   if(!target)return;
-  $('.view').forEach(v=>v.classList.toggle('active',v.id===id));
-  $('.bottom button').forEach(v=>v.classList.toggle('active',v.dataset.view===id));
-  document.documentElement.scrollTop=0;
-  document.body.scrollTop=0;
-  requestAnimationFrame(()=>{document.documentElement.scrollTop=0;document.body.scrollTop=0;});
+  $('.view').forEach(v=>v.classList.toggle('active',v===target));
+  $('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+  requestAnimationFrame(()=>{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0;});
 }
 function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open')}
 function closeModal(){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open')}
@@ -1600,6 +1606,17 @@ document.addEventListener('click',e=>{
 
 function bind(){
   if(appBound)return;appBound=true;
+  const nav=$('mainNav');
+  if(nav&&!nav.dataset.bound){
+    nav.dataset.bound='v55';
+    nav.addEventListener('click',e=>{
+      const b=e.target.closest('button[data-view]');
+      if(!b)return;
+      e.preventDefault();
+      e.stopPropagation();
+      showView(b.dataset.view);
+    });
+  }
   /* Navigation uses delegated click handling so rerenders cannot break the buttons. */
   const nav=$('.bottom [data-view]');
   nav.forEach(b=>{b.onclick=null;b.disabled=false;b.setAttribute('aria-disabled','false')});
