@@ -27,14 +27,14 @@ html[data-theme="dark"]{
 html,body{width:100%;min-width:320px;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 html{overflow-y:scroll;height:auto;}
 body{position:relative;overflow-x:hidden;overflow-y:auto;min-height:100vh;height:auto;}
-.bottom button{touch-action:manipulation;user-select:none;-webkit-user-select:none;}
+.bottom button{touch-action:manipulation;user-select:none;-webkit-user-select:none;pointer-events:auto;cursor:pointer;}
 @media(max-width:720px){.bottom{left:0;right:0;bottom:env(safe-area-inset-bottom,0px);padding-left:10px;padding-right:10px;}}
 
 /* V50 UX hardening: stable mobile navigation, no accidental zoom, smooth reopen */
 html,body{touch-action:pan-y;overscroll-behavior-x:none;}
 body{zoom:1;}
 input,textarea,select{font-size:16px;}
-.bottom{position:fixed;left:0;right:0;bottom:0;width:100%;transform:translate3d(0,0,0);will-change:transform;contain:layout paint;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.bottom{position:fixed;left:0;right:0;bottom:0;width:100%;transform:translate3d(0,0,0);will-change:transform;backface-visibility:hidden;-webkit-backface-visibility:hidden;pointer-events:auto;}
 .bottom button{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:manipulation;}
 @media(max-width:720px){.bottom{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right));}.bottom button{font-size:10px;}}
 
@@ -498,7 +498,19 @@ async function cloudSignUp(email,password){const data=await supaFetch('/auth/v1/
 async function cloudRecover(email){return await supaFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(AUTH_REDIRECT_URL),{method:'POST',body:JSON.stringify({email})})}
 async function cloudUpdatePassword(password){const a=cloudAuth();if(!a?.access_token)throw new Error('Ссылка восстановления недействительна или истекла. Запроси новое письмо.');return await supaFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+a.access_token},body:JSON.stringify({password})})}
 function clearAuthHash(){try{history.replaceState({},document.title,location.pathname+location.search)}catch(e){location.hash=''}}
-function recoverySessionFromUrl(){try{const q=new URLSearchParams(location.hash.slice(1));const at=q.get('access_token'),rt=q.get('refresh_token'),type=q.get('type');if(at&&rt&&(type==='recovery'||q.get('type')==='recovery')){setCloudAuth({access_token:at,refresh_token:rt,token_type:q.get('token_type')||'bearer',expires_in:Number(q.get('expires_in')||0),user:null});clearAuthHash();return true}}catch(e){}return false}
+function recoverySessionFromUrl(){
+  try{
+    const q=new URLSearchParams(location.hash.slice(1)),at=q.get('access_token'),rt=q.get('refresh_token'),type=q.get('type');
+    if(at&&rt&&type==='recovery'){
+      if(sessionStorage.getItem('LIFE_CONTROL_RECOVERY_HANDLED')==='1'){clearAuthHash();return false}
+      sessionStorage.setItem('LIFE_CONTROL_RECOVERY_HANDLED','1');
+      setCloudAuth({access_token:at,refresh_token:rt,token_type:q.get('token_type')||'bearer',expires_in:Number(q.get('expires_in')||0),user:null});
+      clearAuthHash();
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
 async function openPasswordRecovery(){
   openModal('<div class="close-row"><div><div class="eyebrow">Life Control</div><h2>Новый пароль</h2><div class="sub">Ссылка восстановления приняла сессию. Задай новый пароль для аккаунта.</div></div></div><div class="stack" style="margin-top:12px"><div class="field"><label>Новый пароль</label><input id="recoveryPassword1" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Минимум 6 символов"></div><div class="field"><label>Повтори пароль</label><input id="recoveryPassword2" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Повтори пароль"></div><button class="btn primary" id="recoverySaveBtn">Сохранить новый пароль</button></div>');
   $('recoverySaveBtn').onclick=async()=>{const a=$('recoveryPassword1').value,b=$('recoveryPassword2').value;if(a.length<6){toast('Пароль слишком короткий','Минимум 6 символов.');return}if(a!==b){toast('Пароли не совпадают');return}try{await cloudUpdatePassword(a);const u=await cloudUser();const auth=cloudAuth();if(auth) setCloudAuth({...auth,user:u||auth.user});closeModal();toast('Пароль изменён','Теперь можно войти в Life Control с новым паролем.')}catch(e){toast('Не удалось сменить пароль',e.message)}};
@@ -1615,7 +1627,20 @@ document.addEventListener('click',e=>{
 
 function bind(){
   if(appBound)return;appBound=true;
-  $$('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+  /* Navigation uses delegated click handling so rerenders cannot break the buttons. */
+  const nav=$('.bottom [data-view]');
+  nav.forEach(b=>{b.onclick=null;b.disabled=false;b.setAttribute('aria-disabled','false')});
+  const bottom=document.querySelector('.bottom');
+  if(bottom&&!bottom.dataset.bound){
+    bottom.dataset.bound='1';
+    bottom.addEventListener('click',e=>{
+      const b=e.target.closest('[data-view]');
+      if(!b||!bottom.contains(b))return;
+      e.preventDefault();
+      e.stopPropagation();
+      showView(b.dataset.view);
+    });
+  }
   const homeBrand=$('homeBrand');homeBrand.onclick=()=>{closeModal();showView('viewToday')};homeBrand.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();homeBrand.click()}};
   $('themeBtn').onclick=toggleTheme;$('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=openSettings;[['dashCash','cash'],['dashDebt','debt'],['dashGoal','goal'],['dashDiscipline','discipline']].forEach(([id,type])=>{const el=$(id),card=el?.closest('.kpi');if(card){card.classList.add('clickable-kpi');card.tabIndex=0;card.onclick=()=>openMetricDetail(type);card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMetricDetail(type)}}}});$('calendarBtn').onclick=openCalendar;$('pulseDayCard').onclick=openDayProgress;
   const reportInputs=['rDone','rBlock','rFuture','rTomorrow'];
