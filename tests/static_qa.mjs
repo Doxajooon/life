@@ -18,7 +18,7 @@ const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 
-assert.equal(pkg.version, "50.0.0", "package version must match V49");
+assert.equal(pkg.version, "50.0.0", "package version must match V50");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -115,6 +115,12 @@ assert.ok(html.includes("function dayMood()"), "automatic day mood logic missing
 assert.ok(html.includes("function openMetricDetail("), "interactive KPI detail modal missing");
 assert.ok(html.includes("function playNotificationSound()"), "in-app notification sound missing");
 assert.ok(html.includes("cloudLogout()"), "manual logout action missing");
+
+
+assert.ok(html.includes("V50 UX hardening"), "V50 UX hardening styles missing");
+assert.ok(html.includes("touch-action:manipulation"), "mobile navigation touch optimization missing");
+assert.ok(html.includes("transform:translateZ(0)"), "bottom navigation compositor stabilization missing");
+assert.ok(html.includes("requestAnimationFrame(()=>window.scrollTo(0,0))"), "view switching must reset scroll after layout");
 
 console.log("LIFE_CONTROL_V50_STATIC_QA_OK");
 
