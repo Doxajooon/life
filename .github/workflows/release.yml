@@ -66,7 +66,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: life-control-v49-debug-apk
+          name: life-control-v54-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
 # V49 global verification
