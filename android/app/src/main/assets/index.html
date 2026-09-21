@@ -24,9 +24,9 @@ html[data-theme="dark"]{
   --shadow:0 15px 36px rgba(0,0,0,.24)
 }
 *{box-sizing:border-box}
-html,body{width:100%;min-width:320px;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
-body{overscroll-behavior-y:none;}
-html,body,.shell,.view,.card,.card *{ -webkit-user-select:text; user-select:text; }
+html,body{width:100%;min-width:320px;overflow-x:hidden;overflow-y:auto!important;-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:pan-y;}
+body{overscroll-behavior-y:auto;touch-action:pan-y;}
+html,body,.shell,.view,.card,.card *{ -webkit-user-select:text; user-select:text; } .shell{touch-action:pan-y;} .view{touch-action:pan-y;}
 .ui-icon{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:currentColor;stroke:currentColor;stroke-width:0;transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,opacity .18s ease}
 button:hover .ui-icon,.btn:hover .ui-icon,.iconbtn:hover .ui-icon,.bottom button:hover .ui-icon{transform:translateY(-1px) scale(1.07);filter:drop-shadow(0 2px 3px color-mix(in srgb,var(--blue) 24%,transparent))}
 button:active .ui-icon,.btn:active .ui-icon,.iconbtn:active .ui-icon{transform:scale(.91) rotate(-2deg);filter:none}
@@ -1623,7 +1623,18 @@ function showView(id){
     if(document.querySelector('.modal-back.open'))return;
     const t=e.target instanceof Element?e.target:null;
     if(t&&t.closest('input,textarea,select,.modal'))return;
-    if(Math.abs(e.deltaY)>0){window.scrollBy(0,e.deltaY);e.preventDefault();}
+    if(Math.abs(e.deltaY)>0){window.scrollBy({top:e.deltaY,left:0,behavior:'auto'});e.preventDefault();}
+  },{passive:false,capture:true});
+})();
+(function mobileScrollGuard(){
+  let startY=0;
+  document.addEventListener('touchstart',e=>{if(e.touches?.length===1)startY=e.touches[0].clientY},{passive:true,capture:true});
+  document.addEventListener('touchmove',e=>{
+    if(document.body.classList.contains('auth-locked'))return;
+    if(document.querySelector('.modal-back.open'))return;
+    const t=e.target instanceof Element?e.target:null;
+    if(t?.closest('input,textarea,select,.modal,.bottom'))return;
+    if(e.touches?.length===1){const dy=startY-e.touches[0].clientY;if(Math.abs(dy)>0)window.scrollBy(0,dy);startY=e.touches[0].clientY;}
   },{passive:false,capture:true});
 })();
 function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open')}
