@@ -17,14 +17,22 @@ const sw = read("sw.js");
 const manifest = read("manifest.webmanifest");
 const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
+const androidGradle = read("android/app/build.gradle");
 
 assert.equal(pkg.version, "54.0.0", "package version must match V54");
+assert.match(androidGradle, /versionCode 54\b/, "Android versionCode must match V54");
+assert.match(androidGradle, /versionName '54\.0'/, "Android versionName must match V54");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
 
 const scriptMatches = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
 assert.equal(scriptMatches.length, 1, "index.html must contain exactly one inline script");
+assert.ok(html.includes("function showView(id)"), "navigation function missing");
+for (const view of ["viewToday","viewGoal","viewMoney","viewNotes"]) assert.ok(html.includes(`data-view="${view}"`) && html.includes(`id="${view}"`), `navigation view missing: ${view}`);
+assert.equal((html.match(/data-view="view(?:Today|Goal|Money|Notes)"/g)||[]).length, 4, "main navigation must contain exactly four view buttons");
+assert.ok(/html\{[^}]*overflow-y:auto!important/.test(html), "document wheel scrolling must remain enabled");
+assert.equal(html.includes("life-control-v50"), false, "stale V50 runtime channel remains");
 assert.doesNotThrow(() => new Function(scriptMatches[0][1]), "main browser script has syntax errors");
 
 for (const required of [
