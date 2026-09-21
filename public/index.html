@@ -31,6 +31,15 @@ body{position:relative;overflow-x:hidden;overflow-y:auto;min-height:100vh;height
 @media(max-width:720px){.bottom{left:0;right:0;bottom:env(safe-area-inset-bottom,0px);padding-left:10px;padding-right:10px;}}
 
 /* V50 UX hardening: stable mobile navigation, no accidental zoom, smooth reopen */
+/* V51 navigation/scroll reliability */
+html,body{overflow-x:hidden!important;overflow-y:auto!important;height:auto!important;min-height:100%;}
+body{position:relative!important;touch-action:auto!important;overscroll-behavior-y:auto!important;}
+.shell{overflow:visible!important;}
+.view{overflow:visible!important;}
+.bottom{pointer-events:auto!important;z-index:9999!important;}
+.bottom button{pointer-events:auto!important;cursor:pointer!important;touch-action:manipulation!important;}
+html.view-switching,html.view-switching body{overflow-y:auto!important;}
+
 html,body{touch-action:pan-y;overscroll-behavior-x:none;}
 body{zoom:1;}
 input,textarea,select{font-size:16px;}
@@ -439,7 +448,7 @@ html,body{scroll-behavior:auto;}
   <div class="note-list section" id="notesList"></div>
 </section>
 </main>
-<nav class="bottom" aria-label="Основная навигация"><button type="button" data-view="viewToday" class="active"><b><svg class="ui-icon"><use href="#i-home"></use></svg></b>Сегодня</button><button type="button" data-view="viewGoal"><b><svg class="ui-icon"><use href="#i-target"></use></svg></b>Цель</button><button type="button" data-view="viewMoney"><b><svg class="ui-icon"><use href="#i-money"></use></svg></b>Деньги</button><button type="button" data-view="viewNotes"><b><svg class="ui-icon"><use href="#i-note"></use></svg></b>Заметки</button></nav>
+<nav class="bottom" id="mainNav" aria-label="Основная навигация"><button type="button" data-view="viewToday" class="active" onclick="showView('viewToday')"><b><svg class="ui-icon"><use href="#i-home"></use></svg></b>Сегодня</button><button type="button" data-view="viewGoal" onclick="showView('viewGoal')"><b><svg class="ui-icon"><use href="#i-target"></use></svg></b>Цель</button><button type="button" data-view="viewMoney" onclick="showView('viewMoney')"><b><svg class="ui-icon"><use href="#i-money"></use></svg></b>Деньги</button><button type="button" data-view="viewNotes" onclick="showView('viewNotes')"><b><svg class="ui-icon"><use href="#i-note"></use></svg></b>Заметки</button></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div><div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
 <script>
 'use strict';
@@ -1601,14 +1610,12 @@ function openReportHistory(){
 function updateBell(){const unread=state.notificationsLog.some(n=>!state.lastReadAt||Date.parse(n.at)>Date.parse(state.lastReadAt));$('bellDot').classList.toggle('show',unread)}
 function showView(id){
   const target=document.getElementById(id);
-  if(!target)return;
+  if(!target)return false;
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
   document.querySelectorAll('.bottom [data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
-  document.documentElement.classList.add('view-switching');
-  requestAnimationFrame(()=>{
-    window.scrollTo(0,0);
-    document.documentElement.classList.remove('view-switching');
-  });
+  document.documentElement.classList.remove('view-switching');
+  requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'}));
+  return true;
 }
 
 function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open')}
