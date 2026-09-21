@@ -519,7 +519,7 @@ async function cloudPush(){
     const now=Date.now();if(now-_cloudConflictNoticeAt>10000){_cloudConflictNoticeAt=now;toast('Данные обновлены в облаке','Эта вкладка не перезаписала более новую версию Supabase.');}
     return false;
   }
-  const body={user_id:user.id,state,schema_version:48,device_id:getDeviceId()};
+  const body={user_id:user.id,state,schema_version:50,device_id:getDeviceId()};
   const saved=await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(body)});
   const row=Array.isArray(saved)?saved[0]:saved;
   state[CLOUD_BASE_KEY]=row?.updated_at||new Date().toISOString();
@@ -538,7 +538,24 @@ async function cloudSync(){
   else if(cloudStamp<localStamp){await cloudPush()}
   setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}
 }
-async function cloudAutoSync(){if(!cloudAuth())return false;const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}}
+async function cloudAutoSync(){
+  if(!cloudAuth())return false;
+  if(cloudSyncInFlight)return cloudSyncInFlight;
+  const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';
+  cloudSyncInFlight=(async()=>{
+    try{
+      const result=await cloudSync();
+      if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';
+      refreshCloudUI();
+      return !!result?.ok;
+    }catch(e){
+      if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';
+      refreshCloudUI();
+      return false;
+    }finally{cloudSyncInFlight=null}
+  })();
+  return cloudSyncInFlight;
+}
 
 const $=id=>document.getElementById(id), $$=sel=>Array.from(document.querySelectorAll(sel));
 const clone=x=>JSON.parse(JSON.stringify(x));
@@ -607,7 +624,7 @@ function load(){
 }
 let state=load(),toastTimer=null,lastDay='',lastTick=0,autosaveTimer=null;
 
-let cloudSyncTimer=null;
+let cloudSyncTimer=null,cloudSyncInFlight=null;
 async function cloudPullIntoLocal(){try{const pulled=await cloudPull();if(!pulled?.row?.state)return false;const localStamp=Date.parse(state._lastSavedAt||'')||0;const cloudStamp=Date.parse(pulled.row.state._lastSavedAt||pulled.row.updated_at||'')||0;state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';if(cloudStamp>localStamp){state=normalize(pulled.row.state);state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';saveState();renderAll();scheduleNative();return true}return false}catch(e){return false}}
 function stateFingerprint(){try{const x=clone(state);delete x._lastSavedAt;delete x._persistentStorageRequestedAt;delete x._persistentStorageGranted;delete x[CLOUD_BASE_KEY];return JSON.stringify(x)}catch(e){return ''}}
 function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(cloudAuth()&&_persistFingerprint)cloudPush().catch(()=>{})},2500)}
@@ -1554,7 +1571,7 @@ async function importJSON(ev){
   }catch(e){toast('Импорт не выполнен',e?.message||String(e))}
   finally{if(ev?.target)ev.target.value=''}
 }
-  state.version=47;saveState()
+  state.version=50;saveState()
 function openReportHistory(){
   const entries=Object.entries(state.reports||{}).filter(([,r])=>{if(!r)return false;const hasFields=['done','block','future','tomorrow'].some(k=>String(r[k]||'').trim());return hasFields||!!r.savedAt}).sort((a,b)=>b[0].localeCompare(a[0]));
   const html=entries.length?entries.slice(0,90).map(([day,r])=>{
