@@ -1,7 +1,7 @@
 {
   "name": "life-control",
   "private": true,
-  "version": "50.0.0",
+  "version": "54.0.0",
   "type": "module",
   "scripts": {
     "test": "node tests/static_qa.mjs",
