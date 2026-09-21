@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#f7f9fc">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V49</title>
+<title>Life Control — личная система движения · офлайн · V50</title>
 <style>
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
@@ -24,6 +24,8 @@ html[data-theme="dark"]{
   --shadow:0 15px 36px rgba(0,0,0,.24)
 }
 *{box-sizing:border-box}
+html,body{width:100%;min-width:320px;overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{overscroll-behavior-y:none;}
 html,body,.shell,.view,.card,.card *{ -webkit-user-select:text; user-select:text; }
 .ui-icon{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:currentColor;stroke:currentColor;stroke-width:0;transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s ease,opacity .18s ease}
 button:hover .ui-icon,.btn:hover .ui-icon,.iconbtn:hover .ui-icon,.bottom button:hover .ui-icon{transform:translateY(-1px) scale(1.07);filter:drop-shadow(0 2px 3px color-mix(in srgb,var(--blue) 24%,transparent))}
@@ -665,30 +667,25 @@ function mirrorToIndexedDB(payload,savedAt){
   return idbWriteChain;
 }
 
-async function restoreFromIndexedDB(){
+async function restoreFromIndexedDB(options={render:true}){
   const readCurrent=async db=>db?await new Promise(resolve=>{try{const tx=db.transaction('state','readonly');const req=tx.objectStore('state').get('current');req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>resolve(null)}catch(e){resolve(null)}}):null;
   const readBackups=async db=>db?await new Promise(resolve=>{try{const tx=db.transaction('backups','readonly');const req=tx.objectStore('backups').getAll();req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>Date.parse(b.savedAt)-Date.parse(a.savedAt)));req.onerror=()=>resolve([])}catch(e){resolve([])}}):[];
   try{
     const db=await openLifeDB();
     let rec=await readCurrent(db);
-    if(!rec?.payload){
-      const backups=await readBackups(db);
-      rec=backups[0]||null;
-    }
-    if(!rec?.payload){
-      const legacy=await openLegacyDB();rec=await readCurrent(legacy);try{legacy?.close()}catch(e){}
-    }
+    if(!rec?.payload){const backups=await readBackups(db);rec=backups[0]||null;}
+    if(!rec?.payload){const legacy=await openLegacyDB();rec=await readCurrent(legacy);try{legacy?.close()}catch(e){}}
     if(!rec?.payload)return false;
     const incoming=normalize(JSON.parse(rec.payload));
     const ls=Date.parse(state._lastSavedAt||'')||0,is=Date.parse(incoming._lastSavedAt||rec.savedAt||'')||0;
-    if(is>ls){state=incoming;saveState();renderAll();scheduleNative();return true}
+    if(is>ls){state=incoming;_persistFingerprint='';if(options.render!==false){renderAll();scheduleNative();}return true;}
   }catch(e){}
   return false;
 }
 
 _persistFingerprint=stateFingerprint();
 function initPersistence(){
-  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v47');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
+  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v50');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
   window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const incoming=normalize(JSON.parse(ev.newValue));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}});
   try{navigator.storage?.persist?.().then(ok=>{state._persistentStorageRequestedAt=new Date().toISOString();state._persistentStorageGranted=!!ok;queueAutosave()}).catch(()=>{});}catch(e){}
 }
@@ -1555,7 +1552,7 @@ function openReportHistory(){
   $('closeModalBtn').onclick=closeModal;
 }
 function updateBell(){const unread=state.notificationsLog.some(n=>!state.lastReadAt||Date.parse(n.at)>Date.parse(state.lastReadAt));$('bellDot').classList.toggle('show',unread)}
-function showView(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$$('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo({top:0,behavior:'smooth'})}
+function showView(id){$('.view').forEach(v=>v.classList.toggle('active',v.id===id));$('.bottom button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));window.scrollTo({top:0,behavior:'auto'})}
 function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open')}
 function closeModal(){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open')}
 function renderAll(){setTheme();purgeExpiredTrash(state);renderToday();renderGoal();renderMoney();renderNotes();updateBell()}
@@ -1587,13 +1584,14 @@ async function requireAuth(){
   if(recovery){unlockApp();return true}
   const stored=cloudAuth();
   if(stored?.access_token){
-    const user=await cloudUser();
-    if(user){setCloudAuth({...stored,user});unlockApp();return true}
-    const refreshed=await cloudRefresh();
-    if(refreshed?.access_token){
-      const refreshedUser=await cloudUser();
-      if(refreshedUser){setCloudAuth({...refreshed,user:refreshedUser});unlockApp();return true}
-    }
+    unlockApp();
+    Promise.resolve().then(async()=>{
+      const user=await cloudUser();
+      if(user){setCloudAuth({...cloudAuth(),user});return}
+      const refreshed=await cloudRefresh();
+      if(refreshed?.access_token){const refreshedUser=await cloudUser();if(refreshedUser)setCloudAuth({...refreshed,user:refreshedUser});}
+    }).catch(()=>{});
+    return true;
   }
   lockApp();
   const email=$('gateEmail'),pass=$('gatePassword'),msg=$('gateMsg');
@@ -1607,7 +1605,7 @@ async function init(){
   const authError=authErrorFromUrl();
   const recovery=await requireAuth();
   if(!cloudAuth()&&!recovery)return;
-  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){await cloudAutoSync();await refreshAIHealth(true)}if(recovery){setTimeout(()=>openPasswordRecovery(),120)}});
+  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}if(recovery){setTimeout(()=>openPasswordRecovery(),120)}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
   setInterval(()=>{if(document.visibilityState==='visible'&&cloudAuth())cloudAutoSync()},60000);
