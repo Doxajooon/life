@@ -171,19 +171,27 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .bottom{z-index:300;pointer-events:auto;}
 .modal-back{pointer-events:auto;}
 
-/* V53 navigation hardening */
+/* V54 navigation hardening */
 .bottom{pointer-events:auto!important;z-index:300!important;}
 .bottom button{pointer-events:auto!important;cursor:pointer;touch-action:manipulation;}
 .bottom button:hover{transform:translateY(-1px);border-color:var(--blue);background:var(--blue-soft);color:var(--blue-dark);}
 .bottom button:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 35%,transparent);outline-offset:2px;}
 .view{position:relative;}
 
-/* V53 navigation direct-action */
+/* V54 navigation direct-action */
 .bottom button b{width:36px;height:28px;display:grid;place-items:center;border-radius:9px;transition:transform .16s ease,background .16s ease,box-shadow .16s ease,color .16s ease;}
 .bottom button:hover b{transform:translateY(-2px) scale(1.05);background:var(--blue-soft);box-shadow:0 5px 14px color-mix(in srgb,var(--blue) 16%,transparent);color:var(--blue-dark);}
 .bottom button:active b{transform:scale(.92);}
 .bottom button.active b{background:var(--blue-soft);color:var(--blue-dark);}
 .bottom button span{line-height:1;}
+
+/* V54 scroll and navigation emergency fix */
+html{overflow-y:auto!important;overflow-x:hidden!important;}
+body{min-height:100vh!important;overflow-y:visible!important;overflow-x:hidden!important;}
+body.auth-locked{overflow:hidden!important;}
+.bottom{pointer-events:auto!important;}
+.bottom button,.bottom button *{pointer-events:auto!important;}
+@media(max-width:720px){html,body{overflow-y:auto!important;}}
 </style>
 </head>
 <body>
@@ -1599,6 +1607,20 @@ function showView(id){
     if(button){event.preventDefault();navigate(button);}
   },true);
   window.showView=window.showView||showView;
+})();
+
+/* V54 reliable wheel fallback and direct nav */
+(function(){
+  const nav=(el)=>{const b=el&&el.closest?el.closest('.bottom button[data-view]'):null;if(!b)return false;const id=b.dataset.view;if(!id)return false;try{showView(id);return true}catch(e){console.error('[Life Control] nav',e);return false;}};
+  document.addEventListener('pointerup',e=>{if(nav(e.target))e.preventDefault();},true);
+  document.addEventListener('click',e=>{if(nav(e.target)){e.preventDefault();e.stopPropagation();}},true);
+  document.addEventListener('wheel',e=>{
+    if(document.body.classList.contains('auth-locked'))return;
+    if(document.querySelector('.modal-back.open'))return;
+    const t=e.target instanceof Element?e.target:null;
+    if(t&&t.closest('input,textarea,select,.modal'))return;
+    if(Math.abs(e.deltaY)>0){window.scrollBy(0,e.deltaY);e.preventDefault();}
+  },{passive:false,capture:true});
 })();
 function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open')}
 function closeModal(){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open')}
