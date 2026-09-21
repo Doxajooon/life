@@ -1623,7 +1623,7 @@ function showView(id){
     if(document.querySelector('.modal-back.open'))return;
     const t=e.target instanceof Element?e.target:null;
     if(t&&t.closest('input,textarea,select,.modal'))return;
-    if(Math.abs(e.deltaY)>0){window.scrollBy({top:e.deltaY,left:0,behavior:'auto');e.preventDefault();}
+    if(Math.abs(e.deltaY)>0){window.scrollBy({top:e.deltaY,left:0,behavior:'auto'});e.preventDefault();}
   },{passive:false,capture:true});
 })();
 (function mobileScrollGuard(){
