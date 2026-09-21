@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V50</title>
+<title>Life Control — личная система движения · офлайн · V51</title>
 <style>
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
@@ -163,6 +163,13 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .day-progress-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.day-progress-kpi{padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}.day-progress-kpi .label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}.day-progress-kpi .value{font-size:20px;font-weight:950;margin-top:3px}.runner-stage{padding:16px 12px;border:1px solid var(--line);border-radius:13px;background:var(--soft);margin-top:12px}.runner-track{height:56px;position:relative;border-bottom:2px solid var(--line);margin:0 12px}.runner-track::before{content:'';position:absolute;left:0;right:0;bottom:-2px;height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));transform-origin:left;transform:scaleX(calc(var(--runner-progress,0) / 100));transition:transform .5s ease}.runner-runner{position:absolute;left:calc(var(--runner-progress,0) * 1%);bottom:7px;transform:translateX(-50%);animation:runner-bob .55s ease-in-out infinite alternate}.runner-runner .ui-icon{width:34px;height:34px;color:var(--blue-dark)}@keyframes runner-bob{from{transform:translate(-50%,2px)}to{transform:translate(-50%,-3px)}}.day-progress-main{text-align:center}.day-progress-percent{font-size:36px;font-weight:950;letter-spacing:-.04em;color:var(--blue-dark)}.day-progress-sub{font-size:11px;color:var(--muted);margin-top:3px}@media(max-width:720px){.day-progress-kpis{grid-template-columns:1fr 1fr}.day-progress-kpi:last-child{grid-column:1/-1}}
 .eyebrow{font-size:10px}.sub{font-size:12px}.small{font-size:11px!important}.field label{font-size:10px}.kpi .label,.calendar-kpi .label,.distance-kpi .label,.goal-day-stat .label{font-size:9px}.pulse-label,.calendar-num,.future-title,.t-title,.m-title{font-size:12px}.t-note,.future-time,.money-meta,.debt-kpi-note{font-size:10px}.runtime-status{font-size:10px}
 .auth-brand{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;background:var(--blue-soft);border:1px solid color-mix(in srgb,var(--blue) 30%,var(--line));color:var(--blue-dark);margin-bottom:12px}.auth-brand .ui-icon{width:28px;height:28px}.auth-intro{font-size:12px;color:var(--muted);margin-top:5px}.auth-progress{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:10px;color:var(--muted)}.auth-progress-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:6px}.auth-progress-bar i{display:block;width:0;height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));transition:width .25s ease}.auth-spinner{width:14px;height:14px;border:2px solid color-mix(in srgb,currentColor 25%,transparent);border-top-color:currentColor;border-radius:50%;display:inline-block;animation:spin .75s linear infinite;vertical-align:-2px}@keyframes spin{to{transform:rotate(360deg)}}@media(max-width:720px){.auth-box{padding:22px 18px}}
+
+/* V51 interaction hardening: keep navigation and controls reliably clickable. */
+.topbar,.topbar *,.bottom,.bottom *,.btn,.iconbtn,[data-view],button,a,input,textarea,select{pointer-events:auto;}
+.bottom{touch-action:manipulation;}
+.view{position:relative;z-index:1;}
+.bottom{z-index:300;pointer-events:auto;}
+.modal-back{pointer-events:auto;}
 </style>
 </head>
 <body>
@@ -513,7 +520,7 @@ async function cloudPush(){
   return true;
 }
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
-async async function cloudSync(){
+async function cloudSync(){
   const localStamp=Date.parse(state._lastSavedAt||'')||0;
   const pulled=await cloudPull();
   if(!pulled)return {ok:false,logged:false};
