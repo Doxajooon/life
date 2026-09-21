@@ -1506,6 +1506,10 @@ function runSelfTest(){
   checks.push(['Автосохранение',typeof saveState==='function'&&typeof restoreFromIndexedDB==='function']);
   checks.push(['Gemini / Supabase AI',typeof callAI==='function'&&typeof getAISessionToken==='function']);
   checks.push(['Три этапа',validateDaySteps()==='']);
+  const navButtons=$('.bottom button[data-view]');
+  const navViews=['viewToday','viewGoal','viewMoney','viewNotes'];
+  checks.push(['Навигация',navButtons.length===4&&navViews.every(id=>!!$(id))]);
+  checks.push(['Прокрутка',getComputedStyle(document.documentElement).overflowY!=='hidden'&&getComputedStyle(document.body).overflowY!=='hidden']);
   const errors=Array.isArray(state.runtimeErrors)?state.runtimeErrors.length:0;
   const ok=checks.every(x=>x[1])&&errors===0;
   const text=checks.map(([name,yes])=>`${yes?'✓':'✕'} ${name}`).join(' · ')+` · Ошибок сеанса: ${errors}`;
