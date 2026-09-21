@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.media.AudioAttributes;
+import android.provider.Settings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,12 +14,21 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 public final class NotificationUtil {
-    private static final String CHANNEL = "life_control";
+    private static final String CHANNEL = "life_control_v2";
     private NotificationUtil() {}
     static void ensureChannel(Context ctx) {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager nm = ctx.getSystemService(NotificationManager.class);
-            if (nm != null) nm.createNotificationChannel(new NotificationChannel(CHANNEL, "Life Control", NotificationManager.IMPORTANCE_DEFAULT));
+            if (nm != null) {
+                NotificationChannel ch = new NotificationChannel(CHANNEL, "Life Control", NotificationManager.IMPORTANCE_DEFAULT);
+                ch.setDescription("Напоминания Life Control");
+                ch.enableVibration(true);
+                ch.setSound(Settings.System.DEFAULT_NOTIFICATION_URI, new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build());
+                nm.createNotificationChannel(ch);
+            }
         }
     }
     static void show(Context ctx, String title, String body, int id) {
