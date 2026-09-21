@@ -230,7 +230,7 @@ html,body{scroll-behavior:auto;}
   <div class="auth-progress"><span>●</span><span id="authProgressText">Готово к входу</span></div><div class="auth-progress-bar"><i id="authProgressBar"></i></div><div class="auth-msg" id="gateMsg" aria-live="polite"></div>
 </div></div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo">LC</div><div><div class="brand-name">LIFE CONTROL</div><div class="brand-sub">личная система движения · офлайн</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo">LC</div><div><div class="brand-name">JAMAL`S LIFE</div><div class="brand-sub">личная система движения · офлайн</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="notifyBtn" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
     <button class="iconbtn" id="themeBtn" aria-label="Сменить тему" title="Сменить тему"><svg class="ui-icon" id="themeIcon"><use href="#i-moon"></use></svg></button>
@@ -251,7 +251,7 @@ html,body{scroll-behavior:auto;}
   </div>
 
   <div class="card section pulse-card">
-    <div class="pulse-head"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>Пульс сегодня</div><h2>Состояние движения</h2><div class="sub">Проценты считаются из фактических данных Life Control.</div></div><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">Тяжёлый день</strong></div><select id="dayMode" class="mode-select" aria-label="Автоматически определяемый режим дня" title="Режим определяется автоматически"><option value="normal">Нормальный день</option><option value="heavy">Тяжёлый день</option><option value="rest">Выходной</option></select></div>
+    <div class="pulse-head"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>Пульс сегодня</div><h2>Состояние движения</h2><div class="sub">Проценты считаются из фактических данных Life Control.</div></div><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">Тяжёлый день</strong></div><span class="day-mode-auto" id="dayModeAuto" title="Ритм дня определяется автоматически"></span></div>
     <div class="pulse-grid">
 <button class="pulse-item pulse-item-action" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="Открыть ход дня"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-runner"></use></svg></span>День</div><div class="pulse-value" id="pulseDay">0%</div><div class="pulse-bar"><i id="pulseDayBar"></i></div></button>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><div class="pulse-value" id="pulseGoal">0%</div><div class="pulse-bar"><i id="pulseGoalBar"></i></div></div>
@@ -264,10 +264,10 @@ html,body{scroll-behavior:auto;}
   <div class="card section" id="controlDashboard">
     <div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Контрольная панель</div><h2>Ключевые показатели</h2><div class="sub">Фактическое состояние системы на текущий момент.</div></div><span class="small muted" id="controlUpdated">—</span></div>
     <div class="kpi-row" style="margin-top:11px">
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Свободная касса</div><div class="value orange-txt" id="dashCash">0</div><div class="debt-kpi-note" id="dashCashMeta">—</div></div>
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Обязательства</div><div class="value red-txt" id="dashDebt">0</div><div class="debt-kpi-note" id="dashDebtMeta">—</div></div>
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><div class="value blue" id="dashGoal">0%</div><div class="debt-kpi-note" id="dashGoalMeta">—</div></div>
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-check"></use></svg></span>Дисциплина</div><div class="value" id="dashDiscipline">0%</div><div class="debt-kpi-note" id="dashDisciplineMeta">—</div></div>
+      <button type="button" class="kpi clickable-kpi" data-metric="cash"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Свободная касса</div><div class="value orange-txt" id="dashCash">0</div><div class="debt-kpi-note" id="dashCashMeta">—</div></div>
+      <button type="button" class="kpi clickable-kpi" data-metric="debt"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Обязательства</div><div class="value red-txt" id="dashDebt">0</div><div class="debt-kpi-note" id="dashDebtMeta">—</div></div>
+      <button type="button" class="kpi clickable-kpi" data-metric="goal"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><div class="value blue" id="dashGoal">0%</div><div class="debt-kpi-note" id="dashGoalMeta">—</div></div>
+      <button type="button" class="kpi clickable-kpi" data-metric="discipline"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-check"></use></svg></span>Дисциплина</div><div class="value" id="dashDiscipline">0%</div><div class="debt-kpi-note" id="dashDisciplineMeta">—</div></div>
     </div>
     <div class="grid g2" style="margin-top:10px">
       <div class="pressure-box"><div class="eyebrow">Финансовый контроль</div><h3 id="dashFinancialTitle" style="margin:4px 0">—</h3><div class="sub" id="dashFinancialText">—</div></div>
@@ -1649,12 +1649,15 @@ function bind(){
     });
   }
   const homeBrand=$('homeBrand');homeBrand.onclick=()=>{closeModal();showView('viewToday')};homeBrand.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();homeBrand.click()}};
-  $('themeBtn').onclick=toggleTheme;$('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=openSettings;[['dashCash','cash'],['dashDebt','debt'],['dashGoal','goal'],['dashDiscipline','discipline']].forEach(([id,type])=>{const el=$(id),card=el?.closest('.kpi');if(card){card.classList.add('clickable-kpi');card.tabIndex=0;card.onclick=()=>openMetricDetail(type);card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMetricDetail(type)}}}});$('calendarBtn').onclick=openCalendar;$('pulseDayCard').onclick=openDayProgress;
+  $('themeBtn').onclick=toggleTheme;$('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=openSettings;
+  [['dashCash','cash'],['dashDebt','debt'],['dashGoal','goal'],['dashDiscipline','discipline']].forEach(([id,type])=>{const el=$(id),card=el?.closest('.kpi');if(card){card.classList.add('clickable-kpi');card.tabIndex=0;card.setAttribute('role','button');card.onclick=()=>openMetricDetail(type);card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openMetricDetail(type)}}}});
+  $('[data-metric]').forEach(card=>{card.onclick=()=>openMetricDetail(card.dataset.metric);});
+  $('calendarBtn').onclick=openCalendar;$('pulseDayCard').onclick=openDayProgress;
   const reportInputs=['rDone','rBlock','rFuture','rTomorrow'];
   reportInputs.forEach(id=>$(id).addEventListener('input',()=>{const r=dayReport();r.done=$('rDone').value;r.block=$('rBlock').value;r.future=$('rFuture').value;r.tomorrow=$('rTomorrow').value;r.savedAt=r.savedAt||new Date().toISOString();queueAutosave();$('reportSaved').textContent='Автосохранение…'}));
   $('saveReportBtn').onclick=()=>{const r=dayReport();r.done=$('rDone').value.trim();r.block=$('rBlock').value.trim();r.future=$('rFuture').value.trim();r.tomorrow=$('rTomorrow').value.trim();r.savedAt=new Date().toISOString();saveState();renderToday();toast('Итог дня сохранён','Завтра начинаем с одного шага.')};
   $('historyBtn').onclick=openReportHistory;$('lifeAnalysisBtn').onclick=openLifeAnalysis;$('aiAnalysisBtn').onclick=openGeminiAnalysis;
-  $('dayMode').onchange=()=>{const d=dailyState();d.mode=$('dayMode').value;state.dayMode=d.mode;saveState();renderToday()};
+  $('dayMode')?.remove();
   $('addNoteBtn').onclick=()=>openNote();$('trashBtn').onclick=openTrash;$('noteSearch').oninput=renderNotes;
   $('addProfitBtn').onclick=()=>openMoneyForm('profit');$('addExpenseBtn').onclick=()=>openMoneyForm('expense');$('addPersonalExpenseBtn').onclick=()=>openMoneyForm('expense','Личное');$('addBudgetBtn').onclick=openBudget;$('todayAddProfitBtn').onclick=()=>openMoneyForm('profit');$('todayAddExpenseBtn').onclick=()=>openMoneyForm('expense');$('editGoalBtn').onclick=openGoalEdit;$('goalAiBtn').onclick=()=>requestGoalAI(true);$('editGoalFinanceBtn').onclick=openGoalFinanceEdit;$('editGoalFinanceBtn2').onclick=openGoalFinanceEdit;$('addGoalSavingBtn').onclick=openGoalSaving;$('addAchBtn').onclick=openAchievement;$('editDebtBtn').onclick=openDebtEdit;$('editDebtBtn2').onclick=openDebtEdit;
   $('modalBack').onclick=e=>{if(e.target===$('modalBack'))closeModal()};
