@@ -171,12 +171,19 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .bottom{z-index:300;pointer-events:auto;}
 .modal-back{pointer-events:auto;}
 
-/* V52 navigation hardening */
+/* V53 navigation hardening */
 .bottom{pointer-events:auto!important;z-index:300!important;}
 .bottom button{pointer-events:auto!important;cursor:pointer;touch-action:manipulation;}
 .bottom button:hover{transform:translateY(-1px);border-color:var(--blue);background:var(--blue-soft);color:var(--blue-dark);}
 .bottom button:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 35%,transparent);outline-offset:2px;}
 .view{position:relative;}
+
+/* V53 navigation direct-action */
+.bottom button b{width:36px;height:28px;display:grid;place-items:center;border-radius:9px;transition:transform .16s ease,background .16s ease,box-shadow .16s ease,color .16s ease;}
+.bottom button:hover b{transform:translateY(-2px) scale(1.05);background:var(--blue-soft);box-shadow:0 5px 14px color-mix(in srgb,var(--blue) 16%,transparent);color:var(--blue-dark);}
+.bottom button:active b{transform:scale(.92);}
+.bottom button.active b{background:var(--blue-soft);color:var(--blue-dark);}
+.bottom button span{line-height:1;}
 </style>
 </head>
 <body>
@@ -435,7 +442,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
   <div class="note-list section" id="notesList"></div>
 </section>
 </main>
-<nav class="bottom"><button data-view="viewToday" class="active"><b><svg class="ui-icon"><use href="#i-home"></use></svg></b>Сегодня</button><button data-view="viewGoal"><b><svg class="ui-icon"><use href="#i-target"></use></svg></b>Цель</button><button data-view="viewMoney"><b><svg class="ui-icon"><use href="#i-money"></use></svg></b>Деньги</button><button data-view="viewNotes"><b><svg class="ui-icon"><use href="#i-note"></use></svg></b>Заметки</button></nav>
+<nav class="bottom" id="bottomNav" aria-label="Основная навигация"><button type="button" data-view="viewToday" class="active" aria-label="Сегодня" onclick="showView('viewToday')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-home"></use></svg></b><span>Сегодня</span></button><button type="button" data-view="viewGoal" aria-label="Цель" onclick="showView('viewGoal')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg></b><span>Цель</span></button><button type="button" data-view="viewMoney" aria-label="Деньги" onclick="showView('viewMoney')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-money"></use></svg></b><span>Деньги</span></button><button type="button" data-view="viewNotes" aria-label="Заметки" onclick="showView('viewNotes')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg></b><span>Заметки</span></button></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div><div class="modal-back" id="modalBack"><div class="modal" id="modal"></div></div>
 <script>
 'use strict';
