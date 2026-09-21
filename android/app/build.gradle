@@ -8,11 +8,17 @@ android {
         applicationId 'com.doxajooon.lifecontrol'
         minSdk 26
         targetSdk 35
-        versionCode 47
-        versionName '47.0'
+        versionCode 48
+        versionName '48.0'
     }
 
     buildFeatures { buildConfig true }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
 
 configurations.all {
     resolutionStrategy.eachDependency { details ->
