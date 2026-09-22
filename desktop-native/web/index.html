@@ -667,13 +667,13 @@ function load(){
 let state=load(),toastTimer=null,lastDay='',lastTick=0,autosaveTimer=null;
 
 const CLOUD_DIRTY_KEY='LIFE_CONTROL_CLOUD_DIRTY_V1';
-let cloudSyncTimer=null, cloudSyncInFlight=null, _localDirtySinceCloud=false, _cloudBaseFingerprint='';
+let cloudSyncTimer=null, cloudSyncInFlight=null, _localDirtySinceCloud=false, _cloudBaseFingerprint='', appReadyForSync=false;
 try{_localDirtySinceCloud=localStorage.getItem(CLOUD_DIRTY_KEY)==='1'}catch(e){}
-async function cloudPullIntoLocal(){try{const pulled=await cloudPull();if(!pulled?.row?.state)return false;const localStamp=Date.parse(state._lastSavedAt||'')||0;const cloudStamp=Date.parse(pulled.row.state._lastSavedAt||pulled.row.updated_at||'')||0;state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';if(cloudStamp>localStamp){state=normalize(pulled.row.state);state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';saveState();renderAll();scheduleNative();return true}return false}catch(e){return false}}
+async function cloudPullIntoLocal(){try{const pulled=await cloudPull();if(!pulled?.row?.state)return false;const localDirty=_localDirtySinceCloud||(()=>{try{return localStorage.getItem(CLOUD_DIRTY_KEY)==='1'}catch(e){return false}})();if(localDirty)return false;const localStamp=Date.parse(state._lastSavedAt||'')||0;const cloudStamp=Date.parse(pulled.row.state._lastSavedAt||pulled.row.updated_at||'')||0;if(cloudStamp>localStamp){state=normalize(pulled.row.state);state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';_persistFingerprint='';_cloudBaseFingerprint=stateFingerprint();clearCloudDirty();saveState();renderAll();scheduleNative();return true}return false}catch(e){return false}}
 function stateFingerprint(){try{const x=clone(state);delete x._lastSavedAt;delete x._persistentStorageRequestedAt;delete x._persistentStorageGranted;delete x[CLOUD_BASE_KEY];return JSON.stringify(x)}catch(e){return ''}}
 function markCloudDirty(){_localDirtySinceCloud=true;try{localStorage.setItem(CLOUD_DIRTY_KEY,'1')}catch(e){}}
 function clearCloudDirty(){_localDirtySinceCloud=false;try{localStorage.removeItem(CLOUD_DIRTY_KEY)}catch(e){}}
-function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(cloudAuth()&&_persistFingerprint)cloudAutoSync().catch(()=>{})},2500)}
+function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(appReadyForSync&&cloudAuth()&&_persistFingerprint)cloudAutoSync().catch(()=>{})},2500)}
 function saveState(){
   try{
     const purgedTrashCount=purgeExpiredTrash(state);
@@ -1737,18 +1737,18 @@ async function init(){
   const authError=authErrorFromUrl();
   const recovery=await requireAuth();
   if(!cloudAuth()&&!recovery)return;
-  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}});
+  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();appReadyForSync=true;queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
   let syncHeartbeatTimer=null;
-  const runCloudHeartbeat=()=>{if(document.visibilityState==='visible'&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})};
+  const runCloudHeartbeat=()=>{if(appReadyForSync&&document.visibilityState==='visible'&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})};
   syncHeartbeatTimer=setInterval(runCloudHeartbeat,1000);
   runCloudHeartbeat();
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();restoreFromIndexedDB()}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();restoreFromIndexedDB().finally(()=>{if(appReadyForSync&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})})}});
   window.addEventListener('pagehide',saveState);window.addEventListener('beforeunload',saveState);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
-window.addEventListener('online',()=>{refreshCloudUI();if(cloudAuth()){cloudAutoSync();refreshAIHealth(true)}});window.addEventListener('offline',()=>{refreshCloudUI();refreshAIHealth(true)});init();
+window.addEventListener('online',()=>{refreshCloudUI();if(appReadyForSync&&cloudAuth()){cloudAutoSync();refreshAIHealth(true)}});window.addEventListener('offline',()=>{refreshCloudUI();refreshAIHealth(true)});init();
 </script>
 </body>
 </html>
