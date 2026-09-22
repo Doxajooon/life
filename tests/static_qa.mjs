@@ -124,7 +124,13 @@ assert.ok(html.includes("function openMetricDetail("), "interactive KPI detail m
 assert.ok(html.includes("function playNotificationSound()"), "in-app notification sound missing");
 assert.ok(html.includes("cloudLogout()"), "manual logout action missing");
 
-console.log("LIFE_CONTROL_V54_STATIC_QA_OK");
+assert.equal(html.includes("setTimeout(()=>openPasswordRecovery(),120)"), false, "password recovery must never auto-open");
+assert.equal(html.includes("LIFE_CONTROL_RECOVERY_PROMPT_V1"), false, "legacy automatic recovery prompt flag must be gone");
+assert.ok(html.includes("modal-back.open{overflow-y:auto"), "modal backdrop scrolling hardening missing");
+assert.ok(html.includes("max-height:min(92dvh,92vh)"), "modal viewport sizing missing");
+assert.ok(html.includes("env(safe-area-inset-bottom"), "safe-area bottom padding missing");
+
+console.log("LIFE_CONTROL_V55_STATIC_QA_OK");
 
 assert.ok(html.includes("stateFingerprint"), "change-driven persistence fingerprint missing");
 assert.ok(html.includes("async function importJSON"), "safe JSON import missing");
