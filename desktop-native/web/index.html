@@ -9,8 +9,23 @@
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V54</title>
+<title>Life Control — личная система движения · офлайн · V55</title>
 <style>
+/* V55 modal/mobile viewport hardening */
+html,body{min-height:100%;}
+.modal-back.open{overflow-y:auto;-webkit-overflow-scrolling:touch;align-items:flex-end;padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));}
+.modal{max-height:min(92dvh,92vh);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain;}
+.modal>*{max-width:100%;}
+.modal .btn{max-width:100%;}
+@media(max-width:720px){
+  .modal-back.open{padding-left:8px;padding-right:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));}
+  .modal{width:100%;max-height:calc(100dvh - 16px);border-radius:16px;padding:13px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));}
+  .close-row{align-items:flex-start;position:sticky;top:-1px;background:var(--panel);padding-bottom:8px;z-index:2;}
+  .close-row>.btn{flex:0 0 auto;white-space:nowrap;}
+  .grid.g2{grid-template-columns:1fr;}
+  .modal .grid.g2 .grid.g2{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+
 :root{
   --bg:#f5f7fa;--panel:#ffffff;--soft:#f1f5f9;--text:#17222d;--muted:#6d7c8d;
   --line:#d9e2ea;--blue:#2479ad;--blue-dark:#15587f;--blue-soft:#eaf5fb;
@@ -1708,7 +1723,7 @@ async function init(){
   const authError=authErrorFromUrl();
   const recovery=await requireAuth();
   if(!cloudAuth()&&!recovery)return;
-  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}if(recovery){try{const k='LIFE_CONTROL_RECOVERY_PROMPT_V1';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');setTimeout(()=>openPasswordRecovery(),120)}}catch(e){setTimeout(()=>openPasswordRecovery(),120)}}});
+  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
   setInterval(()=>{if(document.visibilityState==='visible'&&cloudAuth())cloudAutoSync()},60000);
