@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Life Control">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>Life Control — личная система движения · офлайн · V55</title>
+<title>Life Control — личная система движения · офлайн · V55.1</title>
 <style>
 /* V55 modal/mobile viewport hardening */
 html,body{min-height:100%;}
@@ -1726,7 +1726,10 @@ async function init(){
   bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
-  setInterval(()=>{if(document.visibilityState==='visible'&&cloudAuth())cloudAutoSync()},60000);
+  let syncHeartbeatTimer=null;
+  const runCloudHeartbeat=()=>{if(document.visibilityState==='visible'&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})};
+  syncHeartbeatTimer=setInterval(runCloudHeartbeat,1000);
+  runCloudHeartbeat();
   document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();restoreFromIndexedDB()}});
   window.addEventListener('pagehide',saveState);window.addEventListener('beforeunload',saveState);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
