@@ -19,9 +19,9 @@ const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 const androidGradle = read("android/app/build.gradle");
 
-assert.equal(pkg.version, "54.0.0", "package version must match V54");
-assert.match(androidGradle, /versionCode 54\b/, "Android versionCode must match V54");
-assert.match(androidGradle, /versionName '54\.0'/, "Android versionName must match V54");
+assert.equal(pkg.version, "55.1.0", "package version must match V55.1");
+assert.match(androidGradle, /versionCode 551\b/, "Android versionCode must match V55.1");
+assert.match(androidGradle, /versionName '55\.1'/, "Android versionName must match V55.1");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -78,7 +78,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v54-fix1"), "service worker cache must be V54 fix1");
+assert.ok(sw.includes("life-control-v55-1"), "service worker cache must be V55.1");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
