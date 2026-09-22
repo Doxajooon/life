@@ -544,13 +544,13 @@ async function cloudPush(){
   const remote=latest?.row;
   const remoteStamp=remote?.updated_at||remote?.state?._lastSavedAt||'';
   const baseStamp=state[CLOUD_BASE_KEY]||'';
-  const localDirty=_localDirtySinceCloud;
+  const localDirty=_localDirtySinceCloud || (()=>{try{return localStorage.getItem(CLOUD_DIRTY_KEY)==='1'}catch(e){return false}})();
   if(remote?.state && !localDirty && ((!baseStamp && remoteStamp && Date.parse(remoteStamp||'')>Date.parse(state._lastSavedAt||'')) || (baseStamp && remoteStamp && remoteStamp!==baseStamp))){
     state=normalize(remote.state);
     state[CLOUD_BASE_KEY]=remoteStamp;
     _persistFingerprint='';
     _cloudBaseFingerprint=stateFingerprint();
-    _localDirtySinceCloud=false;
+    clearCloudDirty();
     saveState();
     renderAll();scheduleNative();
     const now=Date.now();if(now-_cloudConflictNoticeAt>10000){_cloudConflictNoticeAt=now;toast('Данные обновлены в облаке','Эта вкладка не перезаписала более новую версию Supabase.');}
@@ -561,7 +561,7 @@ async function cloudPush(){
   const row=Array.isArray(saved)?saved[0]:saved;
   state[CLOUD_BASE_KEY]=row?.updated_at||new Date().toISOString();
   _cloudBaseFingerprint=stateFingerprint();
-  _localDirtySinceCloud=false;
+  clearCloudDirty();
   return true;
 }
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
@@ -579,18 +579,24 @@ async function cloudSync(){
     state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';
     _persistFingerprint='';
     _cloudBaseFingerprint=stateFingerprint();
-    _localDirtySinceCloud=false;
+    clearCloudDirty();
     saveState();renderAll();scheduleNative();
   }else if(cloudStamp<localStamp){
     await cloudPush();
   }else{
     state[CLOUD_BASE_KEY]=row.updated_at||row.state?._lastSavedAt||'';
     _cloudBaseFingerprint=stateFingerprint();
-    _localDirtySinceCloud=false;
+    clearCloudDirty();
   }
   setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user}
 }
-async function cloudAutoSync(){if(!cloudAuth())return false;const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}}
+async function cloudAutoSync(){
+  if(!cloudAuth())return false;
+  if(cloudSyncInFlight)return cloudSyncInFlight;
+  const sync=$('cloudSyncState');if(sync)sync.textContent='Синхронизация…';
+  cloudSyncInFlight=(async()=>{try{const result=await cloudSync();if(sync)sync.textContent=result?.ok?'Синхронизировано':'Ожидание сети';refreshCloudUI();return !!result?.ok}catch(e){if(sync)sync.textContent=('onLine' in navigator&&navigator.onLine===false)?'Ожидание сети':'Повтор при подключении';refreshCloudUI();return false}})();
+  try{return await cloudSyncInFlight}finally{cloudSyncInFlight=null}
+}
 
 const $=id=>document.getElementById(id), $$=sel=>Array.from(document.querySelectorAll(sel));
 const clone=x=>JSON.parse(JSON.stringify(x));
@@ -659,10 +665,14 @@ function load(){
 }
 let state=load(),toastTimer=null,lastDay='',lastTick=0,autosaveTimer=null;
 
-let cloudSyncTimer=null, _localDirtySinceCloud=false, _cloudBaseFingerprint='';
+const CLOUD_DIRTY_KEY='LIFE_CONTROL_CLOUD_DIRTY_V1';
+let cloudSyncTimer=null, cloudSyncInFlight=null, _localDirtySinceCloud=false, _cloudBaseFingerprint='';
+try{_localDirtySinceCloud=localStorage.getItem(CLOUD_DIRTY_KEY)==='1'}catch(e){}
 async function cloudPullIntoLocal(){try{const pulled=await cloudPull();if(!pulled?.row?.state)return false;const localStamp=Date.parse(state._lastSavedAt||'')||0;const cloudStamp=Date.parse(pulled.row.state._lastSavedAt||pulled.row.updated_at||'')||0;state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';if(cloudStamp>localStamp){state=normalize(pulled.row.state);state[CLOUD_BASE_KEY]=pulled.row.updated_at||pulled.row.state._lastSavedAt||'';saveState();renderAll();scheduleNative();return true}return false}catch(e){return false}}
 function stateFingerprint(){try{const x=clone(state);delete x._lastSavedAt;delete x._persistentStorageRequestedAt;delete x._persistentStorageGranted;delete x[CLOUD_BASE_KEY];return JSON.stringify(x)}catch(e){return ''}}
-function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(cloudAuth()&&_persistFingerprint)cloudPush().catch(()=>{})},2500)}
+function markCloudDirty(){_localDirtySinceCloud=true;try{localStorage.setItem(CLOUD_DIRTY_KEY,'1')}catch(e){}}
+function clearCloudDirty(){_localDirtySinceCloud=false;try{localStorage.removeItem(CLOUD_DIRTY_KEY)}catch(e){}}
+function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(cloudAuth()&&_persistFingerprint)cloudAutoSync().catch(()=>{})},2500)}
 function saveState(){
   try{
     const purgedTrashCount=purgeExpiredTrash(state);
@@ -670,7 +680,7 @@ function saveState(){
     if(fingerprint && fingerprint===_persistFingerprint){
       return;
     }
-    if(fingerprint && _cloudBaseFingerprint && fingerprint!==_cloudBaseFingerprint)_localDirtySinceCloud=true;
+    if(fingerprint && _cloudBaseFingerprint && fingerprint!==_cloudBaseFingerprint)markCloudDirty();
     state._lastSavedAt=new Date().toISOString();
     const savedAt=state._lastSavedAt;
     const payload=JSON.stringify(state);
