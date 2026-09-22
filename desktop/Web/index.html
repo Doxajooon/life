@@ -533,7 +533,7 @@ async function openPasswordRecovery(){
   $('recoverySaveBtn').onclick=async()=>{const a=$('recoveryPassword1').value,b=$('recoveryPassword2').value;if(a.length<6){toast('Пароль слишком короткий','Минимум 6 символов.');return}if(a!==b){toast('Пароли не совпадают');return}try{await cloudUpdatePassword(a);const u=await cloudUser();const auth=cloudAuth();if(auth) setCloudAuth({...auth,user:u||auth.user});closeModal();toast('Пароль изменён','Теперь можно войти в Life Control с новым паролем.')}catch(e){toast('Не удалось сменить пароль',e.message)}};
 }
 async function cloudRefresh(){const a=cloudAuth();if(!a?.refresh_token)return null;try{const data=await supaFetch('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:a.refresh_token})});if(data?.access_token)setCloudAuth({...data,user:data?.user||a.user||null});return data||null}catch(e){return null}}
-async function cloudLogout(){const a=cloudAuth();try{if(a?.access_token)await supaFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+a.access_token}})}catch(e){}setCloudAuth(null);try{localStorage.removeItem(CLOUD_BASE_KEY)}catch(e){}location.reload()}
+async function cloudLogout(){clearCloudDirty();const a=cloudAuth();try{if(a?.access_token)await supaFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+a.access_token}})}catch(e){}setCloudAuth(null);try{localStorage.removeItem(CLOUD_BASE_KEY)}catch(e){}location.reload()}
 async function cloudUser(){const a=cloudAuth();if(!a?.access_token)return null;try{return await supaFetch('/auth/v1/user',{headers:{Authorization:'Bearer '+a.access_token}})}catch(e){return null}}
 async function cloudPull(){let user=await cloudUser();if(!user){await cloudRefresh();user=await cloudUser()}if(!user)return null;const rows=await supaFetch('/rest/v1/life_state?select=state,schema_version,updated_at&user_id=eq.'+encodeURIComponent(user.id)+'&limit=1');return {user, row:Array.isArray(rows)?rows[0]||null:null}}
 async function cloudPush(){
@@ -572,7 +572,8 @@ async function cloudSync(){
   const row=pulled.row;
   if(!row?.state){state[CLOUD_BASE_KEY]='';await cloudPush();setCloudAuth({...cloudAuth(),user:pulled.user});return {ok:true,logged:true,user:pulled.user};}
   const cloudStamp=Date.parse(row.state?._lastSavedAt||row.updated_at||'')||0;
-  if(_localDirtySinceCloud){
+  const localDirty=_localDirtySinceCloud || (()=>{try{return localStorage.getItem(CLOUD_DIRTY_KEY)==='1'}catch(e){return false}})();
+  if(localDirty){
     await cloudPush();
   }else if(cloudStamp>localStamp){
     state=normalize(row.state);
