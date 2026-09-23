@@ -479,16 +479,6 @@ function syncGoalFinanceCompletion(){
 }
 function goalFinanceMetrics(){return FinanceEngine.goal()}
 
-function computeCashFromState(savedOverride=null){
-  const opening=Math.max(0,Number(state.wallet?.openingBalance)||0);
-  const historicalGoal=Math.max(0,Number(state.goal?.finance?.manualSavedAmount)||0);
-  const income=totalProfitAll();
-  const expense=totalExpenseAll();
-  const saved=savedOverride===null?Math.max(0,Number(state.goal?.finance?.savedAmount)||0):Math.max(0,Number(savedOverride)||0);
-  const capital=opening+historicalGoal+income-expense;
-  return capital-saved;
-}
-
 function svgLineChart(pointsActual, pointsPlan, target, labels, yFormatter, tooltipFormatter=yFormatter){
   const W=640,H=230,L=62,R=16,T=16,B=38,iw=W-L-R,ih=H-T-B;
   const allVals=[...pointsActual,...pointsPlan,...(target>0?[target]:[])].map(Number).filter(Number.isFinite);
@@ -507,14 +497,6 @@ function svgLineChart(pointsActual, pointsPlan, target, labels, yFormatter, tool
 }
 function fmtAxisMoney(v){return Number(v||0).toLocaleString('ru-RU')}
 function dateKeyFromDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function shortDateLabel(iso){const d=new Date(iso+'T12:00:00');return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`}
-function aggregateByDay(items, days){
-  const map=new Map();
-  for(const it of items||[]){const at=new Date(it.at);if(Number.isNaN(at.getTime()))continue;map.set(dateKeyFromDate(at),(map.get(dateKeyFromDate(at))||0)+(Number(it.amount)||0))}
-  const out=[],today=new Date(); today.setHours(0,0,0,0);
-  for(let i=days-1;i>=0;i--){const d=new Date(today);d.setDate(today.getDate()-i);const k=dateKeyFromDate(d);out.push({day:k,value:map.get(k)||0,label:`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`})}
-  return out;
-}
 function goalChartData(){
   const f=state.goal.finance||{},target=Math.max(0,Number(f.targetAmount)||0);
   if(target<=0)return null;
@@ -653,25 +635,9 @@ function renderGoal(){
   $('achievements').innerHTML=state.achievements.length?state.achievements.slice().sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).map(a=>`<div class="note"><div class="note-title">Результат</div><div class="note-body">${esc(a.text)}</div><div class="note-time">${esc(fmtDateTime(new Date(a.at)))}</div></div>`).join(''):'<div class="empty">Здесь остаются реальные завершённые результаты.</div>';
 }
 
-function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){chart.innerHTML='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);chart.innerHTML=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
-function normalizeProfitSource(v){
-  const raw=String(v||'').trim();
-  const s=raw.toLowerCase();
-  if(s.includes('зарп')||s.includes('работ'))return 'Зарплата';
-  if(s.includes('фриланс')||s.includes('подработ')||s.includes('услуг'))return 'Фриланс';
-  if(s.includes('тотализ')||s.includes('ставк')||s.includes('бет')||s.includes('спорт')||s.includes('аналитик'))return 'Спортивная аналитика';
-  return PROFIT_SOURCES.includes(raw)?raw:'Фриланс';
-}
 function totalProfitAll(){return FinanceEngine.totalIncome()}
 function totalExpenseAll(){return FinanceEngine.totalExpense()}
 function walletMetrics(){return FinanceEngine.wallet()}
-function previousBestDayNet(){
-  const days=new Set([...state.profits,...state.expenses].map(x=>x.dateKey||keyDay(new Date(x.at))));
-  days.delete(keyDay());
-  let best=0;
-  for(const day of days){const p=daySum(state.profits,day),e=daySum(state.expenses,day);best=Math.max(best,p-e)}
-  return best;
-}
 function monthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function budgetSpent(name){const month=monthKey();return (state.expenses||[]).reduce((sum,e)=>{const at=new Date(e.at);if(Number.isNaN(at.getTime())||dateKeyFromDate(at).slice(0,7)!==month)return sum;return sum+(String(e.category||'').trim().toLowerCase()===String(name||'').trim().toLowerCase()?Math.max(0,Number(e.amount)||0):0)},0)}
 function renderBudgets(){const list=$('budgetList');if(!list)return;const rows=Array.isArray(state.budgets)?state.budgets:[];if(!rows.length){list.innerHTML='<div class="empty">Добавь бюджет, например: Еда 1000 · Дом 1500 · Транспорт 500.</div>';return}list.innerHTML=rows.map(b=>{const spent=budgetSpent(b.name),planned=Math.max(0,Number(b.planned)||0),remaining=planned-spent,pct=planned?clamp(Math.round(spent/planned*100),0,100):(spent?100:0);return `<div class="budget-row ${remaining<0?'over':''}"><div><div class="budget-name"><span class="budget-ico">${esc(EXPENSE_ICONS[b.name]||'🧾')}</span>${esc(b.name)}</div><div class="budget-meta">План: ${esc(fmtMoney(planned))} · Потрачено: ${esc(fmtMoney(spent))}</div></div><div><div class="budget-track"><i class="budget-fill" style="width:${pct}%"></i></div><div class="budget-state">${remaining>=0?`Осталось ${esc(fmtMoney(remaining))}`:`Перерасход ${esc(fmtMoney(Math.abs(remaining)))}`}</div></div><button class="delete-x" data-del-budget="${esc(b.id)}" aria-label="Удалить бюджет">×</button></div>`}).join('');$$('[data-del-budget]').forEach(b=>b.onclick=()=>{state.budgets=state.budgets.filter(x=>x.id!==b.dataset.delBudget);saveState();renderMoney();toast('Бюджет удалён')})}
