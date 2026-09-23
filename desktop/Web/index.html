@@ -842,7 +842,7 @@ async function restoreFromIndexedDB(options={render:true}){
 
 _persistFingerprint=stateFingerprint();
 function initPersistence(){
-  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v54');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
+  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v55-1');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
   window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const incoming=normalize(JSON.parse(ev.newValue));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}});
   try{navigator.storage?.persist?.().then(ok=>{state._persistentStorageRequestedAt=new Date().toISOString();state._persistentStorageGranted=!!ok;queueAutosave()}).catch(()=>{});}catch(e){}
 }
@@ -1764,7 +1764,7 @@ function showView(id){
   window.showView=window.showView||showView;
 })();
 
-/* V54 reliable wheel fallback and direct nav */
+/* V55.1 reliable wheel fallback and direct nav */
 (function(){
   const nav=(el)=>{const b=el&&el.closest?el.closest('.bottom button[data-view]'):null;if(!b)return false;const id=b.dataset.view;if(!id)return false;try{showView(id);return true}catch(e){console.error('[Life Control] nav',e);return false;}};
   document.addEventListener('pointerup',e=>{if(nav(e.target))e.preventDefault();},true);
