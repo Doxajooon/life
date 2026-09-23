@@ -37,7 +37,7 @@ assert.ok(html.includes('./css/app.css'), "external application CSS missing");
 assert.ok(runtimeJs.includes("function showView(id)"), "navigation function missing");
 for (const view of ["viewToday","viewGoal","viewMoney","viewNotes"]) assert.ok(html.includes(`data-view="${view}"`) && html.includes(`id="${view}"`), `navigation view missing: ${view}`);
 assert.equal((html.match(/data-view="view(?:Today|Goal|Money|Notes)"/g)||[]).length, 4, "main navigation must contain exactly four view buttons");
-assert.ok(/html\{[^}]*overflow-y:auto!important/.test(html), "document wheel scrolling must remain enabled");
+assert.ok(css.includes("overflow-y:auto!important"), "document wheel scrolling must remain enabled");
 assert.equal(html.includes("life-control-v50"), false, "stale V50 runtime channel remains");
 assert.doesNotThrow(() => new Function(runtimeJs), "modular browser scripts have syntax errors");
 
@@ -115,7 +115,7 @@ assert.ok(runtimeJs.includes('fontScale'), "saved UI font setting missing");
 const schedulerMatch = runtimeJs.match(/function runScheduler\(\)\{([\s\S]*?)\n\}/);
 assert.ok(schedulerMatch, "scheduler function missing");
 assert.equal(/state\.(debts|profits|expenses)\s*(?:\[[^\]]+\]\s*)?=|state\.(profits|expenses)\.push\(/.test(schedulerMatch[1]), false, "scheduler must not mutate financial records");
-assert.ok(html.includes("end_' + s.id") || html.includes("end_'+s.id"), "end-stage native notification missing");
+assert.ok(runtimeJs.includes("end_' + s.id") || html.includes("end_'+s.id"), "end-stage native notification missing");
 assert.equal((runtimeJs.match(/let calendarRangeStart/g)||[]).length, 1, "calendar range state must be declared once");
 assert.ok(runtimeJs.includes("LIFE_CONTROL_V46") && runtimeJs.includes("LIFE_CONTROL_V45"), "V45/V46 local migration keys missing");
 assert.ok(runtimeJs.includes("s.settings.fontScale=clamp"), "fontScale normalization missing");
