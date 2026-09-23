@@ -354,6 +354,73 @@ body[data-layout="desktop"] .modal{width:min(900px,calc(100% - 32px));max-height
 @media(prefers-reduced-motion:reduce){
   .layout-switch button{transition:none!important}
 }
+/* V55.3 global modal containment */
+.modal-back.open{
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:100dvh;
+  padding:clamp(8px,2vh,18px) clamp(8px,2vw,18px) calc(clamp(8px,2vh,18px) + env(safe-area-inset-bottom,0px));
+}
+.modal{
+  display:flex;
+  flex-direction:column;
+  width:min(760px,100%);
+  max-width:100%;
+  max-height:calc(100dvh - 24px);
+  min-height:0;
+  margin:auto;
+  overflow:hidden;
+}
+.modal > .grab{flex:0 0 auto}
+.modal > .close-row,
+.modal > .modal-header{flex:0 0 auto}
+.modal > .stack,
+.modal > .notice-list,
+.modal > .card,
+.modal > form,
+.modal > .modal-content,
+.modal > [class*="grid"]{
+  min-width:0;
+  max-width:100%;
+}
+.modal input,.modal textarea,.modal select{max-width:100%;min-width:0}
+.modal .grid,.modal .kpi-row,.modal .row,.modal .money-item,.modal .saving-item,.modal .budget-row{
+  min-width:0;
+  max-width:100%;
+}
+.modal .money-main,.modal .saving-main,.modal .budget-row>div{min-width:0}
+.modal .money-title,.modal .money-meta,.modal .saving-meta,.modal .budget-meta{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.modal .modal-scroll,.modal .scroll-area{
+  min-height:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.modal [id^="save"],.modal [id="calApplyRange"],.modal [id="recoverySaveBtn"]{
+  flex:0 0 auto;
+}
+@media(max-width:720px){
+  .modal-back.open{
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));
+  }
+  .modal{
+    width:100%;
+    max-height:calc(100dvh - 16px);
+    border-radius:18px;
+    padding:12px;
+  }
+  .modal .grid.g2{grid-template-columns:1fr}
+  .modal .modal-actions,.modal .actions,.modal .button-row{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .modal .close-row{gap:8px;flex-wrap:wrap}
+  .modal .close-row>div{min-width:0;flex:1 1 180px}
+  .modal .close-row>.btn{flex:0 0 auto}
+}
 </style>
 </head>
 <body>
