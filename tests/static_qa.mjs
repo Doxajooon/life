@@ -40,7 +40,7 @@ for (const view of ["viewToday","viewGoal","viewMoney","viewNotes"]) assert.ok(h
 assert.equal((html.match(/data-view="view(?:Today|Goal|Money|Notes)"/g)||[]).length, 4, "main navigation must contain exactly four view buttons");
 assert.ok(css.includes("overflow-y:auto!important"), "document wheel scrolling must remain enabled");
 assert.equal(html.includes("life-control-v50"), false, "stale V50 runtime channel remains");
-for (const [name, code] of [["supabase.js", supabaseJs], ["finance.js", financeJs], ["app.js", appJs]]) assert.doesNotThrow(() => new Function(code), `${name} has syntax errors`);
+for (const [name, code] of [["supabase.js", supabaseJs], ["finance.js", financeJs], ["app.js", appJs]]) assert.doesNotThrow(() => new Function(`{\n${code}\n}`), `${name} has syntax errors`);
 
 for (const required of [
   "SUPABASE_CONFIG",
