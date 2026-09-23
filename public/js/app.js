@@ -477,28 +477,8 @@ function syncGoalFinanceCompletion(){
     if(!f.completedAt)f.completedAt=new Date().toISOString();
   }else f.completedAt='';
 }
-function goalFinanceMetrics(){
-  syncGoalFinanceCompletion();
-  const f=state.goal.finance||{};
-  const target=Math.max(0,Number(f.targetAmount)||0);
-  const saved=Math.max(0,Number(f.savedAmount)||0);
-  const cashRaw=computeCashFromState(saved);
-  const cash=Math.max(0,cashRaw);
-  const available=Math.max(0,saved+cash);
-  const remaining=Math.max(0,target-available);
-  const pct=target?clamp(Math.round(available/target*100),0,100):0;
-  let days=0,daysLabel='Накопление',startText='—';
-  const start=f.startedAt?new Date(f.startedAt):null;
-  if(start&&!Number.isNaN(start.getTime())){
-    startText=start.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const end=(f.completedAt&&target&&available>=target)?new Date(f.completedAt):new Date();
-    const delta=Math.max(0,end.getTime()-start.getTime());
-    days=Math.max(1,Math.ceil(delta/DAY_MS));
-  }
-  const completed=!!(target>0&&available>=target);
-  if(completed)daysLabel='Собрано за';
-  return {target,saved,cash,available,remaining,pct,days,daysLabel,startText,completed,targetDate:f.targetDate||''};
-}
+function goalFinanceMetrics(){return FinanceEngine.goal()}
+
 function computeCashFromState(savedOverride=null){
   const opening=Math.max(0,Number(state.wallet?.openingBalance)||0);
   const historicalGoal=Math.max(0,Number(state.goal?.finance?.manualSavedAmount)||0);
