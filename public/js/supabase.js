@@ -53,7 +53,7 @@ async function cloudPush(){
     const now=Date.now();if(now-_cloudConflictNoticeAt>10000){_cloudConflictNoticeAt=now;toast('Данные обновлены в облаке','Эта вкладка не перезаписала более новую версию Supabase.');}
     return false;
   }
-  state.version=55;const body={user_id:user.id,state,schema_version:55,device_id:getDeviceId()};
+  state.version=56;const body={user_id:user.id,state,schema_version:55,device_id:getDeviceId()};
   const saved=await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(body)});
   const row=Array.isArray(saved)?saved[0]:saved;
   state[CLOUD_BASE_KEY]=row?.updated_at||new Date().toISOString();
