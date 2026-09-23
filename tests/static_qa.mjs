@@ -95,13 +95,13 @@ assert.equal(html.includes("cloudSyncBtn"), false, "settings must not show manua
 assert.equal(html.includes("testAiBtn"), false, "settings must not show manual AI check button");
 assert.equal(html.includes("aiTestBtn"), false, "AI analysis modal must not show manual connection check");
 assert.ok(runtimeJs.includes("cloudAutoSync"), "automatic cloud sync missing");
-assert.ok(html.includes("refreshAIHealth"), "automatic AI health check missing");
+assert.ok(runtimeJs.includes("refreshAIHealth"), "automatic AI health check missing");
 assert.ok(html.includes("cloudNetworkState"), "cloud network status missing");
 assert.ok(html.includes("id=\"controlDashboard\""), "control dashboard missing");
 assert.ok(html.includes("dashCash") && html.includes("dashDebt") && html.includes("dashGoal") && html.includes("dashDiscipline"), "dashboard indicators missing");
 assert.ok(runtimeJs.includes("renderControlDashboard"), "dashboard renderer missing");
 assert.ok(runtimeJs.includes("calendarRangeMetrics"), "calendar range metrics missing");
-assert.ok(html.includes("calendarRangeStart") && html.includes("calendarRangeEnd"), "calendar range selection missing");
+assert.ok(runtimeJs.includes("calendarRangeStart") && runtimeJs.includes("calendarRangeEnd"), "calendar range selection missing");
 assert.ok(html.includes("goalAiCard") && html.includes("requestGoalAI"), "goal AI panel missing");
 assert.ok(runtimeJs.includes("autoCompleteExpiredStages"), "automatic stage completion missing");
 assert.ok(html.includes("goalAiBtn"), "goal AI refresh button missing");
