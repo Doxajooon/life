@@ -116,7 +116,7 @@ assert.ok(runtimeJs.includes('fontScale'), "saved UI font setting missing");
 const schedulerMatch = runtimeJs.match(/function runScheduler\(\)\{([\s\S]*?)\n\}/);
 assert.ok(schedulerMatch, "scheduler function missing");
 assert.equal(/state\.(debts|profits|expenses)\s*(?:\[[^\]]+\]\s*)?=|state\.(profits|expenses)\.push\(/.test(schedulerMatch[1]), false, "scheduler must not mutate financial records");
-assert.ok(runtimeJs.includes("end_' + s.id") || html.includes("end_'+s.id"), "end-stage native notification missing");
+assert.ok(runtimeJs.includes("end_'+s.id"), "end-stage native notification missing");
 assert.equal((runtimeJs.match(/let calendarRangeStart/g)||[]).length, 1, "calendar range state must be declared once");
 assert.ok(runtimeJs.includes("LIFE_CONTROL_V46") && runtimeJs.includes("LIFE_CONTROL_V45"), "V45/V46 local migration keys missing");
 assert.ok(runtimeJs.includes("s.settings.fontScale=clamp"), "fontScale normalization missing");
