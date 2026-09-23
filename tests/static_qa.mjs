@@ -32,6 +32,7 @@ const supabaseJs = read("public/js/supabase.js");
 const financeJs = read("public/js/finance.js");
 const appJs = read("public/js/app.js");
 const runtimeJs = [supabaseJs, financeJs, appJs].join("\n");
+const css = read("public/css/app.css");
 assert.ok(html.includes('./js/supabase.js') && html.includes('./js/finance.js') && html.includes('./js/app.js'), "modular runtime scripts missing");
 assert.ok(html.includes('./css/app.css'), "external application CSS missing");
 assert.ok(runtimeJs.includes("function showView(id)"), "navigation function missing");
@@ -132,7 +133,6 @@ assert.ok(runtimeJs.includes("cloudLogout()"), "manual logout action missing");
 
 assert.equal(html.includes("setTimeout(()=>openPasswordRecovery(),120)"), false, "password recovery must never auto-open");
 assert.equal(html.includes("LIFE_CONTROL_RECOVERY_PROMPT_V1"), false, "legacy automatic recovery prompt flag must be gone");
-const css = read("public/css/app.css");
 assert.ok(css.includes(".modal-back.open") && css.includes("V55.3 global modal containment"), "modal containment CSS missing");
 assert.ok(css.includes("max-height:min(92dvh,92vh)"), "modal viewport sizing missing");
 assert.ok(css.includes("env(safe-area-inset-bottom"), "safe-area bottom padding missing");
