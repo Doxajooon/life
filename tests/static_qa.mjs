@@ -130,7 +130,7 @@ assert.ok(html.includes("modal-back.open{overflow-y:auto"), "modal backdrop scro
 assert.ok(html.includes("max-height:min(92dvh,92vh)"), "modal viewport sizing missing");
 assert.ok(html.includes("env(safe-area-inset-bottom"), "safe-area bottom padding missing");
 
-console.log("LIFE_CONTROL_V55_STATIC_QA_OK");
+console.log("LIFE_CONTROL_V55_FINANCE_DEEP_QA_OK");
 
 assert.ok(html.includes("stateFingerprint"), "change-driven persistence fingerprint missing");
 assert.ok(html.includes("async function importJSON"), "safe JSON import missing");
@@ -143,9 +143,13 @@ assert.ok(html.includes('id="addProfitBtn"'), "profit button id is malformed or 
 assert.equal(/id="addProfitBtn[^"]*</.test(html), false, "malformed profit button id remains");
 assert.ok(html.includes("moneyViewDate"), "historical money day state missing");
 assert.ok(html.includes("moneyDateIso"), "historical money date helper missing");
+assert.ok(html.includes("refreshFinanceIndicators"), "automatic finance indicator refresh missing");
+assert.ok(html.includes("commitFinanceChange"), "central finance change commit missing");
 assert.ok(html.includes("openMoneyEdit"), "money edit handler missing");
 assert.ok(html.includes('id="moneyDate"'), "money edit date control missing");
 assert.ok(html.includes('id="moneyNextDay"') && html.includes('id="moneyPrevDay"'), "money day navigation missing");
 assert.equal(/V52 delegated navigation|V54 reliable wheel fallback|mobileScrollGuard/.test(html), false, "legacy capture navigation/touch guards remain");
 assert.ok(html.includes(".ui-icon{pointer-events:none"), "icons must not intercept button pointer events");
 
+
+assert.ok(html.includes("ФИНАНСЫ"), "Finance section must be labeled ФИНАНСЫ");
