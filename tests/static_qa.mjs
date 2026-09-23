@@ -139,3 +139,13 @@ assert.equal(html.includes("setInterval(()=>{if(document.visibilityState==='visi
 assert.ok(html.includes("_cloudBaseUpdatedAt"), "cloud base revision guard missing");
 assert.ok(html.includes("Данные обновлены в облаке"), "cloud conflict protection notice missing");
 assert.ok(html.includes("gateLoginBtn") && html.includes("gatePassword"), "password auth gate missing");
+assert.ok(html.includes('id="addProfitBtn"'), "profit button id is malformed or missing");
+assert.equal(/id="addProfitBtn[^"]*</.test(html), false, "malformed profit button id remains");
+assert.ok(html.includes("moneyViewDate"), "historical money day state missing");
+assert.ok(html.includes("moneyDateIso"), "historical money date helper missing");
+assert.ok(html.includes("openMoneyEdit"), "money edit handler missing");
+assert.ok(html.includes('id="moneyDate"'), "money edit date control missing");
+assert.ok(html.includes('id="moneyNextDay"') && html.includes('id="moneyPrevDay"'), "money day navigation missing");
+assert.equal(/V52 delegated navigation|V54 reliable wheel fallback|mobileScrollGuard/.test(html), false, "legacy capture navigation/touch guards remain");
+assert.ok(html.includes(".ui-icon{pointer-events:none"), "icons must not intercept button pointer events");
+
