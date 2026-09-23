@@ -560,10 +560,10 @@ const DAY_MS=86400000,TRASH_TTL=30*DAY_MS;
 const PROFIT_SOURCES=['Зарплата','Фриланс','Спортивная аналитика'];
 const PROFIT_ICONS={'Зарплата':'💼','Фриланс':'💻','Спортивная аналитика':'📊'};
 const DEFAULT={
-  version:47,
+  version:55,
   profile:{name:'',currency:'сомони'},
   wallet:{openingBalance:0},
-  settings:{theme:'light',preMinutes:10,notifications:true,fontScale:1.06},
+  settings:{theme:'light',preMinutes:10,notifications:true,fontScale:1.06,viewMode:''},
   ai:{endpoint:'https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai',model:'gemini-3.6-flash',enabled:true,webSearch:false,lastAnalysisAt:'',history:[],consent:{goal:true,money:true,reports:true,notes:false}},
   income:4500,
   runtimeErrors:[],
@@ -636,7 +636,7 @@ async function cloudPush(){
     const now=Date.now();if(now-_cloudConflictNoticeAt>10000){_cloudConflictNoticeAt=now;toast('Данные обновлены в облаке','Эта вкладка не перезаписала более новую версию Supabase.');}
     return false;
   }
-  const body={user_id:user.id,state,schema_version:48,device_id:getDeviceId()};
+  state.version=55;const body={user_id:user.id,state,schema_version:55,device_id:getDeviceId()};
   const saved=await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(body)});
   const row=Array.isArray(saved)?saved[0]:saved;
   state[CLOUD_BASE_KEY]=row?.updated_at||new Date().toISOString();
@@ -700,7 +700,7 @@ function dayReport(){const k=keyDay();state.reports[k]=state.reports[k]||{done:'
 function purgeExpiredTrash(s){const before=(s.notesTrash||[]).length,cut=Date.now()-TRASH_TTL;s.notesTrash=(s.notesTrash||[]).filter(n=>Date.parse(n.deletedAt||0)>cut);return before-s.notesTrash.length}
 function normalize(s){
   const hadWallet=!!(s.wallet&&typeof s.wallet==='object'&&Object.prototype.hasOwnProperty.call(s.wallet,'openingBalance'));
-  s=merge(s,DEFAULT);s.version=47;s.settings=s.settings&&typeof s.settings==='object'?s.settings:clone(DEFAULT.settings);s.settings.fontScale=clamp(Number(s.settings.fontScale)||1.06,.98,1.12);
+  s=merge(s,DEFAULT);s.version=55;s.settings=s.settings&&typeof s.settings==='object'?s.settings:clone(DEFAULT.settings);s.settings.fontScale=clamp(Number(s.settings.fontScale)||1.06,.98,1.12);
   s.wallet=s.wallet&&typeof s.wallet==='object'?s.wallet:{openingBalance:0};
   s.wallet.openingBalance=Math.max(0,Number(s.wallet.openingBalance)||0);
   if(!hadWallet){
@@ -858,21 +858,28 @@ const MOTIVATIONS=[
   {author:'Пророк Мухаммад ﷺ',text:'«Кому Аллах желает добра, тому даёт понимание религии».',source:'Сахих аль-Бухари 71'}
  ];
 function motivation(){const k=keyDay();const idx=Math.floor(Date.UTC(...keyDay().split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS)%MOTIVATIONS.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);if(state.dailyMotivations[k]?.idx===idx)return state.dailyMotivations[k];const m=MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length];const result={idx,text:`${m.text}\n\nСегодня: ${action}.`,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
-function applyLayoutMode(mode){
+function applyLayoutMode(mode,persist=true){
   mode=mode==='desktop'?'desktop':'mobile';
+  const changed=state.settings?.viewMode!==mode;
+  if(state.settings)state.settings.viewMode=mode;
   try{localStorage.setItem('LIFE_CONTROL_LAYOUT_V1',mode)}catch(e){}
   document.body.dataset.layout=mode;
   document.querySelectorAll('[data-layout-mode]').forEach(b=>b.classList.toggle('active',b.dataset.layoutMode===mode));
   const meta=document.querySelector('meta[name="theme-color"]');
   if(meta)meta.setAttribute('content',state.settings?.theme==='dark'?'#0d1722':'#f5f7fa');
+  if(persist&&changed&&typeof saveState==='function')saveState();
 }
 function initLayoutMode(){
-  let mode='';
-  try{mode=localStorage.getItem('LIFE_CONTROL_LAYOUT_V1')||''}catch(e){}
+  let mode=state.settings?.viewMode||'';
+  if(mode!=='mobile'&&mode!=='desktop'){
+    try{mode=localStorage.getItem('LIFE_CONTROL_LAYOUT_V1')||''}catch(e){}
+  }
   if(mode!=='mobile'&&mode!=='desktop')mode=window.matchMedia('(max-width:720px)').matches?'mobile':'desktop';
-  applyLayoutMode(mode);
-  document.querySelectorAll('[data-layout-mode]').forEach(b=>b.onclick=()=>applyLayoutMode(b.dataset.layoutMode));
-  window.addEventListener('resize',()=>{try{if(!localStorage.getItem('LIFE_CONTROL_LAYOUT_V1'))applyLayoutMode(window.matchMedia('(max-width:720px)').matches?'mobile':'desktop')}catch(e){}});
+  applyLayoutMode(mode,false);
+  document.querySelectorAll('[data-layout-mode]').forEach(b=>b.onclick=()=>applyLayoutMode(b.dataset.layoutMode,true));
+  window.addEventListener('resize',()=>{try{
+    if(!state.settings?.viewMode&& !localStorage.getItem('LIFE_CONTROL_LAYOUT_V1'))applyLayoutMode(window.matchMedia('(max-width:720px)').matches?'mobile':'desktop',false);
+  }catch(e){}});
 }
 function setTheme(){document.documentElement.style.setProperty('--font-scale',String(clamp(Number(state.settings?.fontScale)||1.06,.98,1.12)));const dark=state.settings.theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';const icon=$('themeIcon');if(icon)icon.innerHTML=`<use href="${dark?'#i-sun':'#i-moon'}"></use>`;const btn=$('themeBtn');if(btn)btn.setAttribute('aria-label',dark?'Включить светлую тему':'Включить тёмную тему');document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#0d1722':'#f5f7fa')}
 function toggleTheme(){state.settings.theme=state.settings.theme==='dark'?'light':'dark';saveState();setTheme()}
@@ -1718,7 +1725,7 @@ async function importJSON(ev){
   }catch(e){toast('Импорт не выполнен',e?.message||String(e))}
   finally{if(ev?.target)ev.target.value=''}
 }
-  state.version=47;saveState()
+  state.version=55;saveState()
 function openReportHistory(){
   const entries=Object.entries(state.reports||{}).filter(([,r])=>{if(!r)return false;const hasFields=['done','block','future','tomorrow'].some(k=>String(r[k]||'').trim());return hasFields||!!r.savedAt}).sort((a,b)=>b[0].localeCompare(a[0]));
   const html=entries.length?entries.slice(0,90).map(([day,r])=>{
