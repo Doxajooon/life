@@ -34,7 +34,7 @@ const appJs = read("public/js/app.js");
 const runtimeJs = [supabaseJs, financeJs, appJs].join("\n");
 assert.ok(html.includes('./js/supabase.js') && html.includes('./js/finance.js') && html.includes('./js/app.js'), "modular runtime scripts missing");
 assert.ok(html.includes('./css/app.css'), "external application CSS missing");
-assert.ok(html.includes("function showView(id)"), "navigation function missing");
+assert.ok(runtimeJs.includes("function showView(id)"), "navigation function missing");
 for (const view of ["viewToday","viewGoal","viewMoney","viewNotes"]) assert.ok(html.includes(`data-view="${view}"`) && html.includes(`id="${view}"`), `navigation view missing: ${view}`);
 assert.equal((html.match(/data-view="view(?:Today|Goal|Money|Notes)"/g)||[]).length, 4, "main navigation must contain exactly four view buttons");
 assert.ok(/html\{[^}]*overflow-y:auto!important/.test(html), "document wheel scrolling must remain enabled");
@@ -111,7 +111,7 @@ assert.ok(fn.includes('body?.mode==="goal"'), "goal AI mode missing in Edge Func
 assert.ok(fn.includes("achievements"), "goal AI must receive achievements");
 assert.ok(html.includes('pulseDayCard') && html.includes('dayProgressMetrics') && html.includes('runner-runner'), "interactive day progress runner missing");
 assert.ok(html.includes('authProgressText') && html.includes('authProgressBar') && html.includes('auth-spinner'), "auth progress UI missing");
-assert.ok(html.includes('fontScale'), "saved UI font setting missing");
+assert.ok(runtimeJs.includes('fontScale'), "saved UI font setting missing");
 const schedulerMatch = runtimeJs.match(/function runScheduler\(\)\{([\s\S]*?)\n\}/);
 assert.ok(schedulerMatch, "scheduler function missing");
 assert.equal(/state\.(debts|profits|expenses)\s*(?:\[[^\]]+\]\s*)?=|state\.(profits|expenses)\.push\(/.test(schedulerMatch[1]), false, "scheduler must not mutate financial records");
