@@ -1330,7 +1330,7 @@ function renderProfitSources(){
   const map=new Map(PROFIT_SOURCES.map(s=>[s,0]));
   for(const p of state.profits||[]){const raw=String(p.sourceGroup||p.source||'').trim();const k=normalizeProfitSource(raw);map.set(k,(map.get(k)||0)+(Number(p.amount)||0))}
   const rows=PROFIT_SOURCES.map(k=>[k,map.get(k)||0]);const total=rows.reduce((a,[,v])=>a+v,0);
-  list.innerHTML=rows.map(([k,v])=>{const pct=total>0?Math.round(v/total*100):0;return `<div class="source-row"><div><div class="source-name"><span class="source-ico">${esc(PROFIT_ICONS[k]||'💠')}</span>${esc(k)}</div><div class="source-track"><i class="source-fill" style="width:${pct}%"></i></div></div><div class="source-val">${esc(fmtMoney(v))} <span class="small muted">${pct}%</span></div></div>`}).join('');
+  list.innerHTML=rows.map(([k,v])=>{const pct=total>0?Math.round(v/total*100):0;return `<div class="source-row"><div><div class="source-name"><span class="source-ico">${esc(PROFIT_ICONS[k]||'💠')}</span>${esc(k)}</div><div class="source-track"><i class="source-fill" style="width:${pct}%"></i></div></div><div class="source-val">${esc(fmtMoney(v))} <span class="small muted">${pct}%</span></div></div>`}).join('');setText('financeSalaryValue',fmtMoney(map.get('Зарплата')||0));setText('financeFreelanceValue',fmtMoney(map.get('Фриланс')||0));setText('financeAnalyticsValue',fmtMoney(map.get('Спортивная аналитика')||0));setText('financeOtherValue',fmtMoney(map.get('Другое')||0));
   setText('profitSourceNote',total?`Три источника считаются из всех сохранённых поступлений: ${fmtMoney(total)}.`:'Три источника готовы к учёту: зарплата, фриланс и спортивная аналитика.');
 }
 function renderMoneyCharts(){renderMoneyFlowChart();renderExpenseDonut();renderProfitSources()}
@@ -1576,7 +1576,7 @@ function moneyDateIso(dateKey,baseIso=''){const key=String(dateKey||keyDay()),t=
 function openMoneyEdit(kind,id){const item=(kind==='profit'?state.profits:state.expenses).find(x=>x.id===id);if(item)openMoneyForm(kind,'',item)}
 function openMoneyForm(kind,presetCategory='',editItem=null){
   const isProfit=kind==='profit',dk=isProfit?'moneyProfit':'moneyExpense',draft=editItem?{amount:editItem.amount,type:isProfit?(editItem.sourceGroup||editItem.source):editItem.category,note:editItem.note||'',customCategory:editItem.customCategory||'',debtPay:!!editItem.debtPayment,debtType:editItem.debtPayment||'bank',dateKey:keyDay(validDate(editItem.at))}:state.drafts?.[dk]||{};const editing=!!editItem;
-  const sourceValue=normalizeProfitSource(draft.type||draft.source||'Зарплата');
+  const sourceValue=normalizeProfitSource(draft.type||draft.source||presetCategory||'Зарплата');
   const savedCategory=draft.type||presetCategory||'Еда';
   const category=EXPENSE_QUICK.some(x=>x.value===savedCategory)?savedCategory:'Другое';
   const customDraft=String(draft.customCategory||((category==='Другое'&&savedCategory!=='Другое')?savedCategory:''));
