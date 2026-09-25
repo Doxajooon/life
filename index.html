@@ -495,60 +495,121 @@ button:not(:disabled) .ui-icon{will-change:transform;}
 </section>
 
 <section id="viewMoney" class="view">
-  <div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Финансы</div><h1><svg class="ui-icon" style="width:24px;height:24px;vertical-align:2px;color:var(--blue)"><use href="#i-money"></use></svg> Финансы</h1><div class="sub">Только реальные поступления, расходы и обязательства.</div></div><button class="btn small" id="editDebtBtn"><svg class="ui-icon"><use href="#i-card"></use></svg> Долги</button></div>
-  <div class="money-day-picker section"><button class="btn small" id="moneyPrevDay">←</button><strong id="moneySelectedDateLabel">Сегодня</strong><button class="btn small" id="moneyNextDay">→</button><input id="moneyDateJump" type="date" style="max-width:150px"></div><div class="money-actions section"><button class="btn primary" id="addProfitBtn"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Прибыль</button><button class="btn orange" id="addExpenseBtn"><svg class="ui-icon"><use href="#i-arrow-down"></use></svg> Расход</button><button class="btn" id="addPersonalExpenseBtn"><svg class="ui-icon"><use href="#i-money"></use></svg> Личное</button></div>
-  <div class="finance-quick-add"><button type="button" class="finance-quick-btn income" id="financeQuickIncome"><span class="quick-symbol">＋</span><span class="quick-title">Добавить прибыль</span><span class="quick-sub">Зарплата · Фриланс · Спортивная аналитика · Другое</span></button><button type="button" class="finance-quick-btn expense" id="financeQuickExpense"><span class="quick-symbol">−</span><span class="quick-title">Добавить расход</span><span class="quick-sub">Еда · Транспорт · Дом · Семья · Личное · Другое</span></button></div><div class="finance-quick-hint">Одна кнопка = одна операция. После сохранения касса, цель и капитал обновляются сразу.</div>
-  <div class="kpi-row money-kpi-row section"><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg></span>Выбранный день · прибыль</div><div class="value blue" id="mProfitToday">0</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-arrow-down"></use></svg></span>Выбранный день · расход</div><div class="value red-txt" id="mExpenseToday">0</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Баланс</div><div class="value orange-txt" id="mBalanceToday">0</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>На цель</div><div class="value blue" id="mGoalSaved">0</div></div></div>
-  <div class="card section finance-center">
-    <div class="pressure-box money-sync-overview"><div class="eyebrow"><svg class="ui-icon"><use href="#i-money"></use></svg> Единое финансовое состояние</div><h2 style="margin-top:4px">Одна касса для всех разделов</h2><div class="kpi-row money-sync-kpis" style="margin-top:11px"><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-wallet"></use></svg></span>Касса</div><div class="value" id="moneyFlowBalance">0</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>На цель</div><div class="value blue" id="moneyGoalCapital">0</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-spark"></use></svg></span>Общий капитал</div><div class="value orange-txt" id="moneyTotalCapital">0</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Долг</div><div class="value red-txt" id="moneyDebtCapital">0</div></div></div><div class="pressure-state" id="moneySyncState">Прибыль и расходы меняют единую кассу. Эта сумма связана с «Сегодня», «Цель» и «Финансы» и пересчитывается сразу.</div></div>
-    <div class="money-best-day"><div class="eyebrow"><svg class="ui-icon"><use href="#i-spark"></use></svg> Результат дня</div><h2 id="moneyBestDayTitle" style="margin-top:4px">Сегодня можно стать лучше</h2><div class="sub" id="moneyBestDayText">Новая прибыль сразу поднимет финансовый пульс.</div><div class="best-meter"><i id="moneyBestDayBar"></i></div><div class="small muted" id="moneyBestDayPct">0%</div></div>
+  <div class="finance-header">
+    <div>
+      <div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Финансы</div>
+      <h1>Финансы</h1>
+      <div class="sub">Одна касса. Две кнопки. Все операции сразу отражаются в аналитике, зарплате, цели и общем капитале.</div>
+    </div>
+    <div class="finance-header-actions"><button class="btn small" id="editDebtBtn"><svg class="ui-icon"><use href="#i-card"></use></svg> Долги</button></div>
   </div>
 
-  <div class="card section"><div class="budget-head"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Бюджеты</div><h2 style="margin-top:4px">На что можно тратить</h2><div class="sub">Расходы автоматически уменьшают соответствующий бюджет месяца. Перерасход сразу виден.</div></div><button class="btn small" id="addBudgetBtn"><svg class="ui-icon"><use href="#i-money"></use></svg> Бюджет</button></div><div class="budget-list" id="budgetList"></div></div>
+  <div class="finance-period section">
+    <button class="btn small" id="moneyPrevDay" aria-label="Предыдущий день">←</button>
+    <strong id="moneySelectedDateLabel">Сегодня</strong>
+    <button class="btn small" id="moneyNextDay" aria-label="Следующий день">→</button>
+    <input id="moneyDateJump" type="date" aria-label="Выбрать дату">
+  </div>
+
+  <div class="finance-hero card section">
+    <div class="finance-balance">
+      <div class="eyebrow">Общий баланс</div>
+      <div class="finance-balance-value" id="moneyFlowBalance">0</div>
+      <div class="finance-mini-row">
+        <span>Прибыль <b class="blue" id="mProfitToday">0</b></span>
+        <span>Расход <b class="red-txt" id="mExpenseToday">0</b></span>
+        <span>Касса <b id="mBalanceToday">0</b></span>
+      </div>
+    </div>
+    <div class="finance-capital-grid">
+      <div><span>На цель</span><b id="moneyGoalCapital">0</b></div>
+      <div><span>Общий капитал</span><b id="moneyTotalCapital">0</b></div>
+      <div><span>Долг</span><b class="red-txt" id="moneyDebtCapital">0</b></div>
+    </div>
+  </div>
+
+  <div class="finance-main-actions">
+    <button type="button" class="finance-action income" id="financeQuickIncome">
+      <span class="finance-action-symbol">＋</span>
+      <span class="finance-action-title">Добавить прибыль</span>
+      <span class="finance-action-sub">Зарплата · Фриланс · Аналитика · Другое</span>
+    </button>
+    <button type="button" class="finance-action expense" id="financeQuickExpense">
+      <span class="finance-action-symbol">−</span>
+      <span class="finance-action-title">Добавить расход</span>
+      <span class="finance-action-sub">Продукты · Транспорт · Дом · Семья · Личное · Другое</span>
+    </button>
+  </div>
+
+  <div class="finance-source-row">
+    <button type="button" class="finance-source-card" data-finance-source="Зарплата" id="financeSalaryCard">
+      <span class="source-hero-icon">💼</span><span><small>Зарплата</small><b id="financeSalaryValue">0</b></span><span class="source-arrow">→</span>
+    </button>
+    <button type="button" class="finance-source-card" data-finance-source="Фриланс" id="financeFreelanceCard">
+      <span class="source-hero-icon">💻</span><span><small>Фриланс</small><b id="financeFreelanceValue">0</b></span><span class="source-arrow">→</span>
+    </button>
+    <button type="button" class="finance-source-card" data-finance-source="Спортивная аналитика" id="financeAnalyticsCard">
+      <span class="source-hero-icon">📊</span><span><small>Аналитика</small><b id="financeAnalyticsValue">0</b></span><span class="source-arrow">→</span>
+    </button>
+    <button type="button" class="finance-source-card" data-finance-source="Другое" id="financeOtherCard">
+      <span class="source-hero-icon">•••</span><span><small>Другое</small><b id="financeOtherValue">0</b></span><span class="source-arrow">→</span>
+    </button>
+  </div>
+
+  <div class="finance-latest card section">
+    <div class="row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-report"></use></svg> Последняя операция</div><h2 style="margin-top:4px">Что изменилось последним</h2></div><span class="small muted">обновляется сразу</span></div>
+    <div id="financeLatestOperation" class="finance-latest-body"></div>
+  </div>
+
+  <div class="card section finance-sync-card">
+    <div class="eyebrow"><svg class="ui-icon"><use href="#i-link"></use></svg> Связанные данные</div>
+    <div class="finance-sync-grid">
+      <div><span>Касса</span><b id="moneyFlowBalance2">0</b></div>
+      <div><span>На цель</span><b id="moneyGoalCapital2">0</b></div>
+      <div><span>Общий капитал</span><b id="moneyTotalCapital2">0</b></div>
+      <div><span>Долг</span><b class="red-txt" id="moneyDebtCapital2">0</b></div>
+    </div>
+    <div class="pressure-state" id="moneySyncState">Прибыль увеличивает кассу, расход уменьшает её. Все разделы используют одни и те же операции.</div>
+  </div>
+
+  <div class="card section">
+    <div class="budget-head"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Бюджеты</div><h2 style="margin-top:4px">На что можно тратить</h2><div class="sub">Расходы автоматически уменьшают соответствующий бюджет месяца.</div></div><button class="btn small" id="addBudgetBtn"><svg class="ui-icon"><use href="#i-money"></use></svg> Бюджет</button></div>
+    <div class="budget-list" id="budgetList"></div>
+  </div>
 
   <div class="card section analytics-card">
-    <div class="row">
-      <div><div class="eyebrow"><svg class="ui-icon"><use href="#i-report"></use></svg> Прозрачность денег</div><h2>Куда приходят и уходят деньги</h2><div class="sub">Все диаграммы строятся только из твоих сохранённых операций.</div></div>
-      <span class="small muted" id="moneyChartRange">Последние 14 дней</span>
-    </div>
-
+    <div class="row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-report"></use></svg> Аналитика</div><h2>Откуда и куда движутся деньги</h2><div class="sub">Последняя операция и все сохранённые записи используются автоматически.</div></div><span class="small muted" id="moneyChartRange">Последние 14 дней</span></div>
     <div class="money-analytics-grid" style="margin-top:12px">
       <div class="chart-grid-card">
         <div class="eyebrow"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Поток денег</div>
-        <div class="analytics-title" style="font-size:14px;margin-top:3px">Прибыль и расход по дням</div>
+        <div class="analytics-title">Прибыль и расход по дням</div>
         <div class="lc-chart-wrap" id="moneyFlowChart"></div>
         <div class="lc-legend"><span><i></i>Прибыль</span><span><i class="plan"></i>Расход</span></div>
-        <div class="money-flow-summary">
-          <div class="flow-pill">Прибыль 14 дн.<b id="flowProfit14">0</b></div>
-          <div class="flow-pill">Расход 14 дн.<b id="flowExpense14">0</b></div>
-          <div class="flow-pill">Баланс<b id="flowNet14">0</b></div>
-        </div>
+        <div class="money-flow-summary"><div class="flow-pill">Прибыль 14 дн.<b id="flowProfit14">0</b></div><div class="flow-pill">Расход 14 дн.<b id="flowExpense14">0</b></div><div class="flow-pill">Баланс<b id="flowNet14">0</b></div></div>
       </div>
-
       <div class="chart-grid-card">
         <div class="eyebrow"><svg class="ui-icon"><use href="#i-arrow-down"></use></svg> Расходы</div>
-        <div class="analytics-title" style="font-size:14px;margin-top:3px">Куда ушли деньги</div>
-        <div class="donut-layout">
-          <div class="donut" id="expenseDonut"><div class="donut-center" id="expenseDonutCenter">Нет данных</div></div>
-          <div class="chart-legend" id="expenseLegend"></div>
-        </div>
+        <div class="analytics-title">Куда ушли деньги</div>
+        <div class="donut-layout"><div class="donut" id="expenseDonut"><div class="donut-center" id="expenseDonutCenter">Нет данных</div></div><div class="chart-legend" id="expenseLegend"></div></div>
         <div class="sub" id="expenseChartNote" style="margin-top:9px">Добавь расходы — распределение появится автоматически.</div>
       </div>
     </div>
-
-    <div class="chart-grid-card" style="margin-top:12px">
-      <div class="eyebrow"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Доходы</div>
-      <div class="analytics-title" style="font-size:14px;margin-top:3px">Откуда приходят деньги</div>
-      <div class="source-list" id="profitSourceList"></div>
-      <div class="sub" id="profitSourceNote" style="margin-top:9px">Источники появятся после первой записи прибыли.</div>
-    </div>
+    <div class="chart-grid-card" style="margin-top:12px"><div class="eyebrow"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Источники дохода</div><div class="analytics-title">Зарплата · Фриланс · Аналитика</div><div class="source-list" id="profitSourceList"></div><div class="sub" id="profitSourceNote" style="margin-top:9px">Источники появятся после первой записи прибыли.</div></div>
   </div>
 
-  <div class="grid g2 section"><div class="card"><div class="eyebrow cell-head"><span class="cell-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Этот месяц</div><h2 id="mMonth">0</h2><div class="sub">Прибыль − расходы</div></div><div class="card"><div class="eyebrow cell-head"><span class="cell-title-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Общий долг</div><h2 id="mDebt">0</h2><div class="sub" id="mPayment">Платёж / мес: 0</div></div></div>
-  <div class="grid g2 section"><div class="card"><div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg></span>Прибыль</div><h2>Последние записи</h2></div></div><div class="money-list" id="profitList" style="margin-top:10px"></div></div><div class="card"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-arrow-down"></use></svg></span>Расход</div><h2>Последние записи</h2></div><div class="money-list" id="expenseList" style="margin-top:10px"></div></div></div>
-  <div class="card section"><div class="row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-report"></use></svg> Анализ</div><h2>Куда движутся деньги</h2><div class="sub">Этот блок рассчитывается автоматически и не требует ручного запуска.</div></div><span class="small muted">обновляется сразу</span></div><div id="financeAnalysis" class="finance-analysis" style="margin-top:10px"></div></div>
+  <div class="grid g2 section">
+    <div class="card"><div class="eyebrow cell-head"><span class="cell-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Этот месяц</div><h2 id="mMonth">0</h2><div class="sub">Прибыль − расходы</div></div>
+    <div class="card"><div class="eyebrow cell-head"><span class="cell-title-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Общий долг</div><h2 id="mDebt">0</h2><div class="sub" id="mPayment">Платёж / мес: 0</div></div>
+  </div>
 
-  <div class="card section"><div class="row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Обязательства</div><h2>Долги</h2></div><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div><div id="debtSummary" style="margin-top:10px"></div></div>
+  <div class="grid g2 section">
+    <div class="card"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg></span>Прибыль</div><h2>Последние записи</h2><div class="money-list" id="profitList" style="margin-top:10px"></div></div>
+    <div class="card"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-arrow-down"></use></svg></span>Расход</div><h2>Последние записи</h2><div class="money-list" id="expenseList" style="margin-top:10px"></div></div>
+  </div>
+
+  <div class="card section"><div class="row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-report"></use></svg> Финансовый анализ</div><h2>Что происходит с деньгами</h2><div class="sub">Рассчитывается автоматически.</div></div><span class="small muted">в реальном времени</span></div><div id="financeAnalysis" class="finance-analysis" style="margin-top:10px"></div></div>
+
+  <div class="card section"><div class="row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Обязательства</div><h2>Долги</h2><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div></div><div id="debtSummary" style="margin-top:10px"></div></div>
 </section>
 
 <section id="viewNotes" class="view">
