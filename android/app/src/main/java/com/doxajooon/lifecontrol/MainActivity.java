@@ -9,6 +9,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.graphics.Color;
+import android.view.View;
+import android.webkit.CookieManager;
 import android.provider.Settings;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -32,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
         webView = new WebView(this);
         setContentView(webView);
         WebView.setWebContentsDebuggingEnabled(false);
+        CookieManager.getInstance().setAcceptCookie(true);
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
                 .build();
@@ -42,13 +47,46 @@ public class MainActivity extends AppCompatActivity {
             @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, String url) {
                 return loader.shouldInterceptRequest(Uri.parse(url));
             }
+            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                String scheme = uri.getScheme();
+                if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) return false;
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
+                } catch (Exception ignored) {}
+                return true;
+            }
+            @Override public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                if (view.getUrl() == null || view.getUrl().equals(failingUrl)) {
+                    view.loadDataWithBaseURL(
+                        "https://" + DOMAIN + "/assets/",
+                        "<!doctype html><meta name='viewport' content='width=device-width,initial-scale=1'>" +
+                        "<body style='font-family:sans-serif;background:#101827;color:white;padding:24px'>" +
+                        "<h2>Life Control</h2><p>Не удалось загрузить приложение.</p>" +
+                        "<p style='opacity:.7'>Проверь интернет и нажми «Повторить».</p>" +
+                        "<button onclick='location.reload()' style='padding:12px 18px'>Повторить</button></body>",
+                        "text/html", "UTF-8", null
+                    );
+                }
+            }
         });
         webView.setWebChromeClient(new WebChromeClient());
+        webView.setBackgroundColor(Color.TRANSPARENT);
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setDatabaseEnabled(true);
         webView.getSettings().setAllowFileAccess(false);
         webView.getSettings().setAllowContentAccess(false);
+        webView.getSettings().setBuiltInZoomControls(false);
+        webView.getSettings().setDisplayZoomControls(false);
+        webView.getSettings().setSupportZoom(false);
+        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
+        webView.getSettings().setSupportMultipleWindows(false);
+        webView.getSettings().setCacheMode(android.webkit.WebSettings.LOAD_DEFAULT);
+        if (Build.VERSION.SDK_INT >= 26) webView.getSettings().setSafeBrowsingEnabled(true);
+        if (Build.VERSION.SDK_INT >= 21) webView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         webView.addJavascriptInterface(new AndroidBridge(this), "AndroidBridge");
         webView.loadUrl("https://" + DOMAIN + "/assets/index.html");
         requestNotificationPermission();
@@ -58,6 +96,22 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFICATIONS);
         }
+    }
+
+    @Override protected void onSaveInstanceState(Bundle outState) {
+        if (webView != null) webView.saveState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override protected void onDestroy() {
+        if (webView != null) {
+            webView.stopLoading();
+            webView.setWebChromeClient(null);
+            webView.setWebViewClient(null);
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 
     @Override public void onBackPressed() {
