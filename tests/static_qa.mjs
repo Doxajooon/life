@@ -19,7 +19,7 @@ const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 const androidGradle = read("android/app/build.gradle");
 
-assert.equal(pkg.version, "55.2.0", "package version must match V55.1");
+assert.equal(pkg.version, "55.2.0", "package version must match V55.2");
 assert.match(androidGradle, /versionCode 552\b/, "Android versionCode must match V55.1");
 assert.match(androidGradle, /versionName '55\.2'/, "Android versionName must match V55.1");
 for (const path of copies) {
@@ -78,9 +78,14 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v55-1"), "service worker cache must be V55.1");
+assert.ok(sw.includes("life-control-v55-2"), "service worker cache must be V55.1");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
+assert.ok(android.includes("WebViewAssetLoader"), "Android asset loader missing");
+assert.ok(android.includes("setDomStorageEnabled(true)"), "Android DOM storage missing");
+assert.ok(android.includes("setAcceptThirdPartyCookies"), "Android cookie support missing");
+assert.ok(android.includes("doxajooon.github.io"), "Android auth redirect handler missing");
+assert.ok(android.includes("Supabase"), "Android Supabase integration comments missing");
 assert.ok(android.includes("scheduleDaily"), "Android notification bridge missing");
 
 assert.equal(html.includes("cloudLoginBtn"), false, "settings must not show login button after auth");
