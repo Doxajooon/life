@@ -50,6 +50,22 @@ public class MainActivity extends AppCompatActivity {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String scheme = uri.getScheme();
+                String host = uri.getHost();
+                String path = uri.getPath();
+                // Supabase Auth redirects to the public GitHub Pages callback.
+                // Keep the user inside the native WebView and feed the callback
+                // query/hash back into the bundled offline-first app.
+                if ("https".equalsIgnoreCase(scheme)
+                        && "doxajooon.github.io".equalsIgnoreCase(host)
+                        && path != null
+                        && ("/life".equals(path) || "/life/".equals(path))) {
+                    StringBuilder local = new StringBuilder("https://")
+                            .append(DOMAIN).append("/assets/index.html");
+                    if (uri.getQuery() != null) local.append("?").append(uri.getQuery());
+                    if (uri.getFragment() != null) local.append("#").append(uri.getFragment());
+                    view.loadUrl(local.toString());
+                    return true;
+                }
                 if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) return false;
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, uri));
@@ -88,7 +104,11 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 26) webView.getSettings().setSafeBrowsingEnabled(true);
         if (Build.VERSION.SDK_INT >= 21) webView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         webView.addJavascriptInterface(new AndroidBridge(this), "AndroidBridge");
-        webView.loadUrl("https://" + DOMAIN + "/assets/index.html");
+        if (savedInstanceState != null) {
+            webView.restoreState(savedInstanceState);
+        } else {
+            webView.loadUrl("https://" + DOMAIN + "/assets/index.html");
+        }
         requestNotificationPermission();
     }
 
@@ -96,6 +116,16 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFICATIONS);
         }
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (webView != null) webView.onResume();
+    }
+
+    @Override protected void onPause() {
+        if (webView != null) webView.onPause();
+        super.onPause();
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {
