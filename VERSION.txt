@@ -1,4 +1,4 @@
-Life Control V55.1
+Life Control V55.2
 Web: offline-first PWA
 Cloud: Supabase Auth + public.life_state
 AI: Gemini 3.6 Flash via Supabase Edge Function
