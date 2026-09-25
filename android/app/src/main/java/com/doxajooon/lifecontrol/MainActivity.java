@@ -188,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                         "<h2>Life Control</h2>" +
                         "<p>Не удалось загрузить приложение.</p>" +
                         "<p style='opacity:.7'>Повторная попытка загрузит локальную версию приложения.</p>" +
-                        "<button onclick='location.href=""+APP_URL+""' style='padding:12px 18px'>Повторить</button>" +
+                        "<a href='" + APP_URL + "' style='display:inline-block;padding:12px 18px;background:#fff;color:#101827;text-decoration:none;border-radius:8px'>Повторить</a>" +
                         "</body>",
                 "text/html", "UTF-8", null
         );
