@@ -19,9 +19,9 @@ const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 const androidGradle = read("android/app/build.gradle");
 
-assert.equal(pkg.version, "55.1.0", "package version must match V55.1");
-assert.match(androidGradle, /versionCode 551\b/, "Android versionCode must match V55.1");
-assert.match(androidGradle, /versionName '55\.1'/, "Android versionName must match V55.1");
+assert.equal(pkg.version, "55.2.0", "package version must match V55.1");
+assert.match(androidGradle, /versionCode 552\b/, "Android versionCode must match V55.1");
+assert.match(androidGradle, /versionName '55\.2'/, "Android versionName must match V55.1");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
