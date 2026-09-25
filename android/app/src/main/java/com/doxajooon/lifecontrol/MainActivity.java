@@ -2,118 +2,201 @@ package com.doxajooon.lifecontrol;
 
 import android.Manifest;
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.graphics.Color;
+import android.provider.Settings;
 import android.view.View;
 import android.webkit.CookieManager;
-import android.provider.Settings;
 import android.webkit.JavascriptInterface;
+import android.webkit.ServiceWorkerClient;
+import android.webkit.ServiceWorkerController;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
 
-import java.util.Calendar;
-import java.util.Locale;
-
 public class MainActivity extends AppCompatActivity {
-    private WebView webView;
     private static final int REQ_NOTIFICATIONS = 42;
-    private static final String DOMAIN = "appassets.androidplatform.net";
+    private static final String ASSET_HOST = "appassets.androidplatform.net";
+    private static final String APP_URL = "https://" + ASSET_HOST + "/assets/index.html";
 
-    @Override public void onCreate(@Nullable Bundle savedInstanceState) {
+    private WebView webView;
+    private WebViewAssetLoader assetLoader;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        webView = new WebView(this);
-        setContentView(webView);
-        WebView.setWebContentsDebuggingEnabled(false);
-        CookieManager.getInstance().setAcceptCookie(true);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
-        WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
+
+        assetLoader = new WebViewAssetLoader.Builder()
+                .setDomain(ASSET_HOST)
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
                 .build();
-        webView.setWebViewClient(new WebViewClient() {
-            @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                return loader.shouldInterceptRequest(request.getUrl());
-            }
-            @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                return loader.shouldInterceptRequest(Uri.parse(url));
-            }
-            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri uri = request.getUrl();
-                String scheme = uri.getScheme();
-                String host = uri.getHost();
-                String path = uri.getPath();
-                // Supabase Auth redirects to the public GitHub Pages callback.
-                // Keep the user inside the native WebView and feed the callback
-                // query/hash back into the bundled offline-first app.
-                if ("https".equalsIgnoreCase(scheme)
-                        && "doxajooon.github.io".equalsIgnoreCase(host)
-                        && path != null
-                        && ("/life".equals(path) || "/life/".equals(path))) {
-                    StringBuilder local = new StringBuilder("https://")
-                            .append(DOMAIN).append("/assets/index.html");
-                    if (uri.getQuery() != null) local.append("?").append(uri.getQuery());
-                    if (uri.getFragment() != null) local.append("#").append(uri.getFragment());
-                    view.loadUrl(local.toString());
-                    return true;
-                }
-                if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) return false;
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                } catch (Exception ignored) {}
-                return true;
-            }
-            @Override public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                if (view.getUrl() == null || view.getUrl().equals(failingUrl)) {
-                    view.loadDataWithBaseURL(
-                        "https://" + DOMAIN + "/assets/",
-                        "<!doctype html><meta name='viewport' content='width=device-width,initial-scale=1'>" +
-                        "<body style='font-family:sans-serif;background:#101827;color:white;padding:24px'>" +
-                        "<h2>Life Control</h2><p>Не удалось загрузить приложение.</p>" +
-                        "<p style='opacity:.7'>Проверь интернет и нажми «Повторить».</p>" +
-                        "<button onclick='location.reload()' style='padding:12px 18px'>Повторить</button></body>",
-                        "text/html", "UTF-8", null
-                    );
-                }
-            }
-        });
-        webView.setWebChromeClient(new WebChromeClient());
+
+        webView = new WebView(this);
         webView.setBackgroundColor(Color.TRANSPARENT);
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setDatabaseEnabled(true);
-        webView.getSettings().setAllowFileAccess(false);
-        webView.getSettings().setAllowContentAccess(false);
-        webView.getSettings().setBuiltInZoomControls(false);
-        webView.getSettings().setDisplayZoomControls(false);
-        webView.getSettings().setSupportZoom(false);
-        webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
-        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
-        webView.getSettings().setSupportMultipleWindows(false);
-        webView.getSettings().setCacheMode(android.webkit.WebSettings.LOAD_DEFAULT);
-        if (Build.VERSION.SDK_INT >= 26) webView.getSettings().setSafeBrowsingEnabled(true);
-        if (Build.VERSION.SDK_INT >= 21) webView.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        webView.addJavascriptInterface(new AndroidBridge(this), "AndroidBridge");
+        setContentView(webView);
+
+        configureWebView();
+
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
+            if (webView.getUrl() == null) webView.loadUrl(APP_URL);
         } else {
-            webView.loadUrl("https://" + DOMAIN + "/assets/index.html");
+            webView.loadUrl(APP_URL);
         }
+
         requestNotificationPermission();
     }
 
+    private void configureWebView() {
+        WebView.setWebContentsDebuggingEnabled(false);
+
+        WebSettings s = webView.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);
+        s.setDatabaseEnabled(true);
+        s.setJavaScriptCanOpenWindowsAutomatically(false);
+        s.setSupportMultipleWindows(false);
+        s.setBuiltInZoomControls(false);
+        s.setDisplayZoomControls(false);
+        s.setSupportZoom(false);
+        s.setMediaPlaybackRequiresUserGesture(false);
+        s.setAllowFileAccess(false);
+        s.setAllowContentAccess(false);
+        s.setCacheMode(WebSettings.LOAD_DEFAULT);
+        s.setLoadsImagesAutomatically(true);
+        s.setBlockNetworkImage(false);
+        s.setGeolocationEnabled(false);
+        if (Build.VERSION.SDK_INT >= 26) s.setSafeBrowsingEnabled(true);
+        if (Build.VERSION.SDK_INT >= 21) s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+
+        CookieManager cookies = CookieManager.getInstance();
+        cookies.setAcceptCookie(true);
+        cookies.setAcceptThirdPartyCookies(webView, true);
+
+        // The app is offline-first, but Supabase/Auth/AI require HTTPS network access.
+        // Do not intercept normal HTTPS requests: WebView must be allowed to reach Supabase.
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                WebResourceResponse local = assetLoader.shouldInterceptRequest(request.getUrl());
+                return local != null ? local : super.shouldInterceptRequest(view, request);
+            }
+
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                WebResourceResponse local = assetLoader.shouldInterceptRequest(Uri.parse(url));
+                return local != null ? local : super.shouldInterceptRequest(view, url);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return handleNavigation(view, request.getUrl());
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                return handleNavigation(view, Uri.parse(url));
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (request.isForMainFrame()) showLoadError();
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // Re-apply the app viewport after auth redirects/restores.
+                view.evaluateJavascript(
+                        "try{document.documentElement.style.webkitOverflowScrolling='touch';window.scrollTo(0,0)}catch(e){}",
+                        null
+                );
+            }
+        });
+
+        webView.setWebChromeClient(new WebChromeClient());
+
+        // Service-worker requests must also be able to resolve bundled assets.
+        if (Build.VERSION.SDK_INT >= 24) {
+            ServiceWorkerController sw = ServiceWorkerController.getInstance();
+            sw.setServiceWorkerClient(new ServiceWorkerClient() {
+                @Override
+                public WebResourceResponse shouldInterceptRequest(WebResourceRequest request) {
+                    return assetLoader.shouldInterceptRequest(request.getUrl());
+                }
+            });
+        }
+
+        webView.addJavascriptInterface(new AndroidBridge(this), "AndroidBridge");
+    }
+
+    private boolean handleNavigation(WebView view, Uri uri) {
+        String scheme = uri.getScheme();
+        String host = uri.getHost();
+        String path = uri.getPath();
+
+        // Supabase Auth redirects here. Keep the callback inside the native app,
+        // preserving both query and hash tokens used by recovery/auth flows.
+        if ("https".equalsIgnoreCase(scheme)
+                && "doxajooon.github.io".equalsIgnoreCase(host)
+                && path != null
+                && ("/life".equals(path) || "/life/".equals(path))) {
+            Uri.Builder b = Uri.parse(APP_URL).buildUpon();
+            if (uri.getQuery() != null) b.encodedQuery(uri.getQuery());
+            if (uri.getFragment() != null) b.encodedFragment(uri.getFragment());
+            view.loadUrl(b.build().toString());
+            return true;
+        }
+
+        // Local bundled app navigation is handled by WebView.
+        if ("https".equalsIgnoreCase(scheme)
+                && ASSET_HOST.equalsIgnoreCase(host)) return false;
+
+        // HTTPS/HTTP external pages remain in WebView so OAuth and Supabase
+        // redirects can complete without leaving the app.
+        if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) return false;
+
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, uri));
+        } catch (Exception e) {
+            Toast.makeText(this, "Не удалось открыть ссылку", Toast.LENGTH_SHORT).show();
+        }
+        return true;
+    }
+
+    private void showLoadError() {
+        if (webView == null) return;
+        webView.loadDataWithBaseURL(
+                APP_URL,
+                "<!doctype html><meta name='viewport' content='width=device-width,initial-scale=1'>" +
+                        "<body style='font-family:sans-serif;background:#101827;color:white;padding:24px'>" +
+                        "<h2>Life Control</h2>" +
+                        "<p>Не удалось загрузить приложение.</p>" +
+                        "<p style='opacity:.7'>Повторная попытка загрузит локальную версию приложения.</p>" +
+                        "<button onclick='location.href=""+APP_URL+""' style='padding:12px 18px'>Повторить</button>" +
+                        "</body>",
+                "text/html", "UTF-8", null
+        );
+    }
+
     private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQ_NOTIFICATIONS);
         }
     }
@@ -136,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
     @Override protected void onDestroy() {
         if (webView != null) {
             webView.stopLoading();
+            webView.removeJavascriptInterface("AndroidBridge");
             webView.setWebChromeClient(null);
             webView.setWebViewClient(null);
             webView.destroy();
@@ -145,28 +229,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) webView.goBack(); else super.onBackPressed();
+        if (webView != null && webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
     }
 
     public static class AndroidBridge {
         private final MainActivity activity;
         private final Context ctx;
-        AndroidBridge(MainActivity activity) { this.activity = activity; this.ctx = activity.getApplicationContext(); }
+
+        AndroidBridge(MainActivity activity) {
+            this.activity = activity;
+            this.ctx = activity.getApplicationContext();
+        }
 
         @JavascriptInterface public void requestNotifications() {
-            if (Build.VERSION.SDK_INT >= 33) {
-                activity.runOnUiThread(activity::requestNotificationPermission);
-            }
-            if (Build.VERSION.SDK_INT >= 31) {
-                AlarmManager am = (AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE);
-                if (am != null && !am.canScheduleExactAlarms()) {
-                    try {
-                        Intent i = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:" + ctx.getPackageName()));
-                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        ctx.startActivity(i);
-                    } catch (Exception ignored) {}
+            activity.runOnUiThread(() -> {
+                if (Build.VERSION.SDK_INT >= 33) activity.requestNotificationPermission();
+                if (Build.VERSION.SDK_INT >= 31) {
+                    AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
+                    if (am != null && !am.canScheduleExactAlarms()) {
+                        try {
+                            Intent i = new Intent(
+                                    Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                                    Uri.parse("package:" + ctx.getPackageName())
+                            );
+                            activity.startActivity(i);
+                        } catch (Exception ignored) {}
+                    }
                 }
-            }
+            });
         }
 
         @JavascriptInterface public void notify(String title, String body) {
