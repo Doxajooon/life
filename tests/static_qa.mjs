@@ -110,7 +110,9 @@ assert.ok(fn.includes('body?.mode==="goal"'), "goal AI mode missing in Edge Func
 assert.ok(fn.includes("achievements"), "goal AI must receive achievements");
 assert.ok(html.includes('pulseDayCard') && html.includes('pulseDiscipline') && html.includes('dayProgressMetrics') && html.includes('runner-runner'), "interactive day progress runner missing");
 assert.ok(html.includes("state.version=56"), "runtime state version must be V56");
-assert.equal(html.includes("state.version=55"), false, "stale runtime state version remains");
+assert.ok(html.includes("s.version=56"), "normalize state version must be V56");
+assert.equal(html.includes("state.version=55;"), false, "stale runtime state version remains");
+assert.equal(html.includes("s.version=55;"), false, "stale normalize state version remains");
 assert.ok(html.includes("schema_version:56"), "cloud schema version must be V56");
 assert.equal(html.includes("schema_version:55"), false, "stale cloud schema version remains");
 assert.equal(html.includes("life-control-v55-1"), false, "stale BroadcastChannel remains");
