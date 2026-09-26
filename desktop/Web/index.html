@@ -417,8 +417,7 @@ h1{font-size:34px;font-weight:900}.date-main h1{font-weight:800}.date-head{margi
 </defs><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18h9a4 4 0 0 0 .4-8A5.5 5.5 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7.5 18Z" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol></svg>
 
 <div class="auth-lock" id="authLock" hidden><div class="auth-box">
-  <div class="auth-brand"><svg class="ui-icon"><use href="#i-card"></use></svg></div><div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="auth-intro">Твоя личная система. Вход открывает данные, облачную синхронизацию и AI.</div>
-  <div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="sub">Войди в аккаунт, чтобы открыть личные данные и AI.</div>
+  <div class="auth-brand"><svg class="ui-icon"><use href="#i-card"></use></svg></div><div class="eyebrow">PRIVATE ACCESS</div><h1>Life Control</h1><div class="sub">Войди в аккаунт, чтобы открыть личные данные и AI.</div>
   <div class="field"><label>Email</label><input id="gateEmail" type="email" autocomplete="username" value="" placeholder="you@example.com"></div>
   <div class="field"><label>Пароль</label><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Минимум 6 символов"></div>
   <div class="auth-actions"><button class="btn primary" id="gateLoginBtn"><svg class="ui-icon"><use href="#i-check"></use></svg><span>Войти</span></button><button class="btn" id="gateSignupBtn"><svg class="ui-icon"><use href="#i-people"></use></svg><span>Создать аккаунт</span></button><button class="btn ghost" id="gateResetBtn"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg><span>Забыли пароль?</span></button></div>
@@ -456,6 +455,7 @@ h1{font-size:34px;font-weight:900}.date-main h1{font-weight:800}.date-head{margi
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><div class="pulse-value" id="pulseGoal">0%</div><div class="pulse-bar"><i id="pulseGoalBar"></i></div></div>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Финансы</div><div class="pulse-value" id="pulseFinance">0%</div><div class="pulse-bar"><i id="pulseFinanceBar"></i></div></div>
       <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Долг</div><div class="pulse-value" id="pulseDebt">0%</div><div class="pulse-bar"><i id="pulseDebtBar"></i></div></div>
+      <div class="pulse-item"><div class="pulse-label"><span class="cell-icon"><svg class="ui-icon"><use href="#i-check"></use></svg></span>Дисциплина</div><div class="pulse-value" id="pulseDiscipline">0%</div><div class="pulse-bar"><i id="pulseDisciplineBar"></i></div></div>
     </div>
     <div class="pulse-note" id="pulseNote">—</div>
   </div>
@@ -631,7 +631,7 @@ const DAY_MS=86400000,TRASH_TTL=30*DAY_MS;
 const PROFIT_SOURCES=['Зарплата','Фриланс','Спортивная аналитика','Другое'];
 const PROFIT_ICONS={'Зарплата':'💼','Фриланс':'💻','Спортивная аналитика':'📊','Другое':'➕'};
 const DEFAULT={
-  version:55,
+  version:56,
   profile:{name:'',currency:'сомони'},
   wallet:{openingBalance:0},
   settings:{theme:'dark',preMinutes:10,notifications:true,fontScale:1.06,viewMode:''},
@@ -707,7 +707,7 @@ async function cloudPush(){
     const now=Date.now();if(now-_cloudConflictNoticeAt>10000){_cloudConflictNoticeAt=now;toast('Данные обновлены в облаке','Эта вкладка не перезаписала более новую версию Supabase.');}
     return false;
   }
-  state.version=55;const body={user_id:user.id,state,schema_version:55,device_id:getDeviceId()};
+  state.version=56;const body={user_id:user.id,state,schema_version:56,device_id:getDeviceId()};
   const saved=await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify(body)});
   const row=Array.isArray(saved)?saved[0]:saved;
   state[CLOUD_BASE_KEY]=row?.updated_at||new Date().toISOString();
@@ -936,7 +936,7 @@ async function restoreFromIndexedDB(options={render:true}){
 
 _persistFingerprint=stateFingerprint();
 function initPersistence(){
-  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v55-1');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
+  try{if('BroadcastChannel' in window){syncChannel=new BroadcastChannel('life-control-v56');syncChannel.onmessage=ev=>{try{const incoming=normalize(JSON.parse(ev.data?.payload||'{}'));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}}}}catch(e){}
   window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const incoming=normalize(JSON.parse(ev.newValue));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}});
   try{navigator.storage?.persist?.().then(ok=>{state._persistentStorageRequestedAt=new Date().toISOString();state._persistentStorageGranted=!!ok;queueAutosave()}).catch(()=>{});}catch(e){}
 }
@@ -1057,11 +1057,11 @@ function ensureDebtHistory(){state.debtHistory=Array.isArray(state.debtHistory)?
 function debtPulse(){const base=Number(state.debtBaseline)||0,cur=debtTotal();if(base<=0)return 0;return clamp(Math.round((1-cur/base)*100),0,100)}
 function reportHasFields(r){return ['done','block','future','tomorrow'].some(k=>String(r?.[k]||'').trim())}
 function goalPulse(){const m=milestonePct(),f=goalFinanceMetrics();return f.target>0?f.pct:m}
-function getLifePulse(){const day=scheduleDayMetrics();return {day:Math.round(day.pct),goal:goalPulse(),finance:financePulse(),debt:debtPulse()}}
+function getLifePulse(){const day=scheduleDayMetrics(),rep=dayReport(),steps=state.day.steps||[],done=steps.filter(s=>!!rep.steps?.[s.id]).length;return {day:Math.round(day.pct),goal:goalPulse(),finance:financePulse(),debt:debtPulse(),discipline:steps.length?Math.round(done/steps.length*100):0}}
 function effectiveDayMode(){const dow=new Date().getDay();if(dow===0||dow===6)return 'rest';const k=keyDay();const income=(state.profits||[]).filter(x=>x.dateKey===k).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);if(income>0)return 'normal';const m=nowMin(),start=timeToMin(state.day.steps?.[0]?.time||'08:30'),end=timeToMin(state.day.steps?.[state.day.steps.length-1]?.end||'22:00');return m>=start&&m<end?'heavy':'normal'}
 function applyAutoDayMode(){const d=dailyState(),mode=effectiveDayMode();if(d.mode!==mode){d.mode=mode;state.dayMode=mode;saveState()}return mode}
 function dayMood(){const mode=applyAutoDayMode(),income=(state.profits||[]).filter(x=>x.dateKey===keyDay()).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);return mode==='rest'?{emoji:'🏖️',label:'Выходной'}:income>0?{emoji:'😄',label:'Хороший день'}:{emoji:'😔',label:'Тяжёлый день'}}
-function renderLifePulse(){applyAutoDayMode();const p=getLifePulse();for(const [name,val] of Object.entries(p)){const cap=name.charAt(0).toUpperCase()+name.slice(1);setText('pulse'+cap,val+'%');setWidth('pulse'+cap+'Bar',val+'%')}const d=dailyState(),modeLabel={normal:'Нормальный день',heavy:'Тяжёлый день',rest:'Выходной'}[d.mode]||'Нормальный день',tips={normal:'Работа → семья → итог. Держи одно главное действие.',heavy:'Минимум на сегодня: обязательное → один шаг по цели → итог → сон.',rest:'Выходной: восстановление, семья и одно полезное действие без гонки.'};setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);const mood=dayMood();setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);setText('dayMoodEmoji',mood.emoji);setText('dayMoodLabel',mood.label);const mb=$('dayMoodBadge');if(mb)mb.className='day-mood '+(mood.mode==='rest'?'rest':mood.mode==='normal'?'good':'');const sel=$('dayMode');if(sel){sel.disabled=true;sel.value=d.mode}}
+function renderLifePulse(){applyAutoDayMode();const p=getLifePulse();for(const [name,val] of Object.entries(p)){const cap=name.charAt(0).toUpperCase()+name.slice(1);setText('pulse'+cap,val+'%');setWidth('pulse'+cap+'Bar',val+'%')}const d=dailyState(),modeLabel={normal:'Нормальный день',heavy:'Тяжёлый день',rest:'Выходной'}[d.mode]||'Нормальный день',tips={normal:'Работа → семья → итог. Держи одно главное действие.',heavy:'Минимум на сегодня: обязательное → один шаг по цели → итог → сон.',rest:'Выходной: восстановление, семья и одно полезное действие без гонки.'};setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);const mood=dayMood();setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);setText('dayMoodEmoji',mood.emoji);setText('dayMoodLabel',mood.label);const mb=$('dayMoodBadge');if(mb)mb.className='day-mood '+(d.mode==='rest'?'rest':d.mode==='normal'?'good':'');const sel=$('dayMode');if(sel){sel.disabled=true;sel.value=d.mode}}
 function profitsBefore(dt){const t=dt?.getTime?.()||Date.now();return (state.profits||[]).reduce((a,x)=>{const z=Date.parse(x.at||'');return a+(Number.isFinite(z)&&z<=t?Math.max(0,Number(x.amount)||0):0)},0)}
 function expensesBefore(dt){const t=dt?.getTime?.()||Date.now();return (state.expenses||[]).reduce((a,x)=>{const z=Date.parse(x.at||'');return a+(Number.isFinite(z)&&z<=t?Math.max(0,Number(x.amount)||0):0)},0)}
 function goalDistanceMetrics(){const f=goalFinanceMetrics(),now=new Date();let daysLeft=null,requiredMonth=null,actualRate=null,variance=null;const date=f.targetDate?new Date(f.targetDate+'T23:59:59'):null;if(date&&!Number.isNaN(date.getTime())){daysLeft=Math.max(0,Math.ceil((date-now)/DAY_MS));const months=Math.max(1,daysLeft/30.4375);requiredMonth=f.remaining/months}const contributions=Array.isArray(f.contributions)?f.contributions:[];if(f.startedAt){const start=new Date(f.startedAt),elapsed=Math.max(1,(Date.now()-start.getTime())/DAY_MS);const startCapital=Math.max(0,Number(state.wallet?.openingBalance)||0)+Math.max(0,Number(state.goal?.finance?.manualSavedAmount)||0)+profitsBefore(start)-expensesBefore(start);const currentAvailable=Math.max(0,goalFinanceMetrics().available);const delta=Math.max(0,currentAvailable-Math.max(0,startCapital));actualRate=delta/elapsed;if(daysLeft!==null&&daysLeft>0){const reqDay=f.remaining/daysLeft;variance=reqDay>0?((actualRate-reqDay)/reqDay*100):100}}return {daysLeft,requiredMonth,actualRate,variance,remaining:f.remaining,complete:f.completed,targetDate:f.targetDate}}
@@ -1902,7 +1902,7 @@ async function init(){
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
   let syncHeartbeatTimer=null;
   const runCloudHeartbeat=()=>{if(appReadyForSync&&document.visibilityState==='visible'&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})};
-  syncHeartbeatTimer=setInterval(runCloudHeartbeat,1000);
+  syncHeartbeatTimer=setInterval(runCloudHeartbeat,15000);
   runCloudHeartbeat();
   document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();restoreFromIndexedDB().finally(()=>{if(appReadyForSync&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})})}});
   window.addEventListener('pagehide',saveState);window.addEventListener('beforeunload',saveState);
