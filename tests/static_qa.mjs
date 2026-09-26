@@ -20,8 +20,8 @@ const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainAc
 const androidGradle = read("android/app/build.gradle");
 
 assert.equal(pkg.version, "56.0.0", "package version must match V56");
-assert.match(androidGradle, /versionCode 552\b/, "Android versionCode must match V55.1");
-assert.match(androidGradle, /versionName '55\.2'/, "Android versionName must match V55.1");
+assert.match(androidGradle, /versionCode 560\b/, "Android versionCode must match V56");
+assert.match(androidGradle, /versionName '56\.0'/, "Android versionName must match V56");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
