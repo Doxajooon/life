@@ -3,8 +3,8 @@
   "short_name": "Life Control",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f5f7fa",
-  "theme_color": "#f5f7fa",
+  "background_color": "#07111d",
+  "theme_color": "#07111d",
   "lang": "ru",
   "icons": [
     {
