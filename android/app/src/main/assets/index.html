@@ -771,7 +771,7 @@ function dayReport(){const k=keyDay();state.reports[k]=state.reports[k]||{done:'
 function purgeExpiredTrash(s){const before=(s.notesTrash||[]).length,cut=Date.now()-TRASH_TTL;s.notesTrash=(s.notesTrash||[]).filter(n=>Date.parse(n.deletedAt||0)>cut);return before-s.notesTrash.length}
 function normalize(s){
   const hadWallet=!!(s.wallet&&typeof s.wallet==='object'&&Object.prototype.hasOwnProperty.call(s.wallet,'openingBalance'));
-  s=merge(s,DEFAULT);s.version=55;s.settings=s.settings&&typeof s.settings==='object'?s.settings:clone(DEFAULT.settings);s.settings.fontScale=clamp(Number(s.settings.fontScale)||1.06,.98,1.12);
+  s=merge(s,DEFAULT);s.version=56;s.settings=s.settings&&typeof s.settings==='object'?s.settings:clone(DEFAULT.settings);s.settings.fontScale=clamp(Number(s.settings.fontScale)||1.06,.98,1.12);
   s.wallet=s.wallet&&typeof s.wallet==='object'?s.wallet:{openingBalance:0};
   s.wallet.openingBalance=Math.max(0,Number(s.wallet.openingBalance)||0);
   if(!hadWallet){
@@ -1819,7 +1819,7 @@ async function importJSON(ev){
   }catch(e){toast('Импорт не выполнен',e?.message||String(e))}
   finally{if(ev?.target)ev.target.value=''}
 }
-  state.version=55;saveState()
+  state.version=56;saveState()
 function openReportHistory(){
   const entries=Object.entries(state.reports||{}).filter(([,r])=>{if(!r)return false;const hasFields=['done','block','future','tomorrow'].some(k=>String(r[k]||'').trim());return hasFields||!!r.savedAt}).sort((a,b)=>b[0].localeCompare(a[0]));
   const html=entries.length?entries.slice(0,90).map(([day,r])=>{
