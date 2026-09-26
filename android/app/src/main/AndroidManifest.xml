@@ -8,7 +8,7 @@
         android:allowBackup="true"
         android:label="Life Control"
         android:theme="@style/Theme.LifeControl"
-        android:usesCleartextTraffic="false" android:extractNativeLibs="true" android:installLocation="auto">
+        android:usesCleartextTraffic="false" android:extractNativeLibs="true" android:installLocation="auto" android:hardwareAccelerated="true">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
