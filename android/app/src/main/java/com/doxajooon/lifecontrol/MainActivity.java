@@ -18,9 +18,6 @@ import android.webkit.ServiceWorkerController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.webkit.SslErrorHandler;
-import android.net.http.SslError;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -66,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureWebView() {
-        WebView.setWebContentsDebuggingEnabled(true);
+        WebView.setWebContentsDebuggingEnabled(false);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
@@ -91,8 +88,6 @@ public class MainActivity extends AppCompatActivity {
         cookies.setAcceptCookie(true);
         cookies.setAcceptThirdPartyCookies(webView, true);
 
-        // The app is offline-first, but Supabase/Auth/AI require HTTPS network access.
-        // Do not intercept normal HTTPS requests: WebView must be allowed to reach Supabase.
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -124,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                // Re-apply the app viewport after auth redirects/restores.
                 view.evaluateJavascript(
                         "try{document.documentElement.style.webkitOverflowScrolling='touch';window.scrollTo(0,0)}catch(e){}",
                         null
@@ -134,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
 
         webView.setWebChromeClient(new WebChromeClient());
 
-        // Service-worker requests must also be able to resolve bundled assets.
         if (Build.VERSION.SDK_INT >= 24) {
             ServiceWorkerController sw = ServiceWorkerController.getInstance();
             sw.setServiceWorkerClient(new ServiceWorkerClient() {
@@ -153,8 +146,6 @@ public class MainActivity extends AppCompatActivity {
         String host = uri.getHost();
         String path = uri.getPath();
 
-        // Supabase Auth redirects here. Keep the callback inside the native app,
-        // preserving both query and hash tokens used by recovery/auth flows.
         if ("https".equalsIgnoreCase(scheme)
                 && "doxajooon.github.io".equalsIgnoreCase(host)
                 && path != null
@@ -166,12 +157,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        // Local bundled app navigation is handled by WebView.
-        if ("https".equalsIgnoreCase(scheme)
-                && ASSET_HOST.equalsIgnoreCase(host)) return false;
-
-        // HTTPS/HTTP external pages remain in WebView so OAuth and Supabase
-        // redirects can complete without leaving the app.
+        if ("https".equalsIgnoreCase(scheme) && ASSET_HOST.equalsIgnoreCase(host)) return false;
         if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) return false;
 
         try {
