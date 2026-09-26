@@ -18,6 +18,7 @@ import android.webkit.ServiceWorkerController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -67,6 +68,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void configureWebView() {
         WebView.setWebContentsDebuggingEnabled(false);
+        WebSettings ws = webView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setDatabaseEnabled(true);
+        ws.setAllowFileAccess(false);
+        ws.setAllowContentAccess(false);
+        ws.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        ws.setMediaPlaybackRequiresUserGesture(false);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
