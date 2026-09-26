@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQ_NOTIFICATIONS = 42;
     private static final String ASSET_HOST = "appassets.androidplatform.net";
     private static final String APP_URL = "https://" + ASSET_HOST + "/assets/index.html";
+    // Supabase Auth/REST/Edge Functions are reached over HTTPS from the WebView; the browser session stays in WebView cookies/storage.
 
     private WebView webView;
     private WebViewAssetLoader assetLoader;
