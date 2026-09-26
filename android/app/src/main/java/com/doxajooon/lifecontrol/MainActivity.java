@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureWebView() {
-        WebView.setWebContentsDebuggingEnabled(false);
+        WebView.setWebContentsDebuggingEnabled(true);
 
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
