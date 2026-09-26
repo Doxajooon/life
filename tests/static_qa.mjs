@@ -78,7 +78,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v56"), "service worker cache must be V55.2");
+assert.ok(sw.includes("life-control-v56"), "service worker cache must be V56");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("WebViewAssetLoader"), "Android asset loader missing");
@@ -162,3 +162,5 @@ assert.ok(html.includes('id="moneyNextDay"') && html.includes('id="moneyPrevDay"
 assert.equal(/V52 delegated navigation|V54 reliable wheel fallback|mobileScrollGuard/.test(html), false, "legacy capture navigation/touch guards remain");
 assert.ok(html.includes(".ui-icon{pointer-events:none"), "icons must not intercept button pointer events");
 
+
+assert.ok(read("VERSION.txt").startsWith("Life Control V56"), "VERSION.txt must match V56");
