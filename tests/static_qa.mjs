@@ -19,7 +19,7 @@ const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 const androidGradle = read("android/app/build.gradle");
 
-assert.equal(pkg.version, "55.2.0", "package version must match V55.2");
+assert.equal(pkg.version, "56.0.0", "package version must match V56");
 assert.match(androidGradle, /versionCode 552\b/, "Android versionCode must match V55.1");
 assert.match(androidGradle, /versionName '55\.2'/, "Android versionName must match V55.1");
 for (const path of copies) {
@@ -78,7 +78,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v55-2"), "service worker cache must be V55.2");
+assert.ok(sw.includes("life-control-v56"), "service worker cache must be V55.2");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("WebViewAssetLoader"), "Android asset loader missing");
@@ -135,7 +135,7 @@ assert.ok(html.includes("modal-back.open{overflow-y:auto"), "modal backdrop scro
 assert.ok(html.includes("max-height:min(92dvh,92vh)"), "modal viewport sizing missing");
 assert.ok(html.includes("env(safe-area-inset-bottom"), "safe-area bottom padding missing");
 
-console.log("LIFE_CONTROL_V55_STATIC_QA_OK");
+console.log("LIFE_CONTROL_V56_STATIC_QA_OK");
 
 assert.ok(html.includes("stateFingerprint"), "change-driven persistence fingerprint missing");
 assert.ok(html.includes("async function importJSON"), "safe JSON import missing");
