@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.ServiceWorkerClient;
@@ -20,15 +21,19 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebResourceResponse;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.WebSettings;
-import android.webkit.CookieManager;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,7 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String APP_URL = "https://" + ASSET_HOST + "/assets/index.html";
     // Supabase Auth/REST/Edge Functions are reached over HTTPS from the WebView; the browser session stays in WebView cookies/storage.
 
+    private static final int BG_DARK = 0xFF0D1722;
+    private static final int BG_LIGHT = 0xFFF5F7FA;
+
     private WebView webView;
+    private FrameLayout rootView;
     private WebViewAssetLoader assetLoader;
 
     @Override
@@ -52,7 +61,33 @@ public class MainActivity extends AppCompatActivity {
         webView = new WebView(this);
         webView.setBackgroundColor(Color.TRANSPARENT);
         webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        setContentView(webView);
+
+        // Same edge-to-edge behaviour on every Android version: the window draws under the system bars
+        // and the root view pads the WebView by the bar / cutout / keyboard insets.
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        rootView = new FrameLayout(this);
+        rootView.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        ViewCompat.setOnApplyWindowInsetsListener(rootView, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars()
+                    | WindowInsetsCompat.Type.displayCutout()
+                    | WindowInsetsCompat.Type.ime());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+        setContentView(rootView);
+        applyBarTheme(getSharedPreferences("lc_ui", Context.MODE_PRIVATE).getBoolean("dark", true));
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() {
+                if (webView != null && webView.canGoBack()) {
+                    webView.goBack();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
 
         configureWebView();
 
@@ -77,10 +112,7 @@ public class MainActivity extends AppCompatActivity {
         ws.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         ws.setMediaPlaybackRequiresUserGesture(false);
 
-        WebSettings s = webView.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setDatabaseEnabled(true);
+        WebSettings s = ws;
         s.setJavaScriptCanOpenWindowsAutomatically(false);
         s.setSupportMultipleWindows(false);
         s.setBuiltInZoomControls(false);
@@ -195,6 +227,20 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    /** Keeps system bars and the area behind them in the same colour family as the in-app theme. */
+    void applyBarTheme(boolean dark) {
+        int bg = dark ? BG_DARK : BG_LIGHT;
+        if (rootView != null) rootView.setBackgroundColor(bg);
+        Window w = getWindow();
+        if (Build.VERSION.SDK_INT < 35) {
+            w.setStatusBarColor(bg);
+            w.setNavigationBarColor(bg);
+        }
+        WindowInsetsControllerCompat c = WindowCompat.getInsetsController(w, w.getDecorView());
+        c.setAppearanceLightStatusBars(!dark);
+        c.setAppearanceLightNavigationBars(!dark);
+    }
+
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33
                 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -229,11 +275,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    @Override public void onBackPressed() {
-        if (webView != null && webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
-    }
-
     public static class AndroidBridge {
         private final MainActivity activity;
         private final Context ctx;
@@ -259,6 +300,11 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+        }
+
+        @JavascriptInterface public void setTheme(boolean dark) {
+            ctx.getSharedPreferences("lc_ui", Context.MODE_PRIVATE).edit().putBoolean("dark", dark).apply();
+            activity.runOnUiThread(() -> activity.applyBarTheme(dark));
         }
 
         @JavascriptInterface public void notify(String title, String body) {

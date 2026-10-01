@@ -4,7 +4,7 @@
 create table if not exists public.life_state (
   user_id uuid primary key references auth.users(id) on delete cascade,
   state jsonb not null default '{}'::jsonb,
-  schema_version integer not null default 41,
+  schema_version integer not null default 56,
   device_id text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -50,3 +50,6 @@ for delete to authenticated
 using (user_id = (select auth.uid()));
 
 grant select, insert, update, delete on public.life_state to authenticated;
+
+-- Keep already-created tables in line with the current schema version.
+alter table public.life_state alter column schema_version set default 56;

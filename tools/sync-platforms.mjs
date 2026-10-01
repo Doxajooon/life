@@ -17,8 +17,8 @@ for(const target of targets){
 
 for(const targetRoot of ["public","android/app/src/main/assets","desktop-native/web","desktop/Web"]){
   for(const f of ["manifest.webmanifest","icon.svg","sw.js"]){
-    const sourcePath=resolve(root,"public",f);
-    try{cpSync(sourcePath,resolve(root,targetRoot,f));}catch{}
+    // Root files are the single source of truth. A missing source must fail loudly, not be skipped.
+    cpSync(resolve(root,f),resolve(root,targetRoot,f));
   }
 }
 

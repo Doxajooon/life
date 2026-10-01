@@ -22,7 +22,7 @@ public final class AlarmScheduler {
         i.putExtra("id",id); i.putExtra("time",String.format(java.util.Locale.US,"%02d:%02d",hh,mm)); i.putExtra("title",title); i.putExtra("body",body);
         PendingIntent pi=PendingIntent.getBroadcast(ctx,requestCode(id),i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         AlarmManager am=(AlarmManager)ctx.getSystemService(Context.ALARM_SERVICE); if(am==null)return;
-        if(Build.VERSION.SDK_INT>=31 && am.canScheduleExactAlarms()) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at.getTimeInMillis(),pi); else am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at.getTimeInMillis(),pi);
+        if(Build.VERSION.SDK_INT<31 || am.canScheduleExactAlarms()) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at.getTimeInMillis(),pi); else am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at.getTimeInMillis(),pi);
         ctx.getSharedPreferences(PREF,Context.MODE_PRIVATE).edit().putString(id,hh+":"+mm+"|"+title+"|"+body).apply();
     }
     static void cancel(Context ctx,String id) {

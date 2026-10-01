@@ -1,1 +1,5 @@
-<resources><color name="transparent">#00000000</color></resources>
+<resources>
+    <color name="transparent">#00000000</color>
+    <color name="ic_launcher_background">#2479AD</color>
+    <color name="ic_launcher_background_dark">#0D1722</color>
+</resources>

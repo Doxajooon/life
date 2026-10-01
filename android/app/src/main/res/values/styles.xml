@@ -2,8 +2,10 @@
     <style name="Theme.LifeControl" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:colorAccent">#2479ad</item>
-        <item name="android:navigationBarColor">#F5F7FA</item>
-        <item name="android:statusBarColor">#F5F7FA</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <!-- App default theme is dark; MainActivity.applyBarTheme() follows the in-app theme at runtime. -->
+        <item name="android:windowBackground">@color/ic_launcher_background_dark</item>
+        <item name="android:navigationBarColor">#0D1722</item>
+        <item name="android:statusBarColor">#0D1722</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

@@ -20,6 +20,8 @@ android {
         }
     }
 
+}
+
 configurations.all {
     resolutionStrategy.eachDependency { details ->
         if (details.requested.group == 'org.jetbrains.kotlin') {
@@ -27,7 +29,6 @@ configurations.all {
             details.because 'Keep Kotlin stdlib modules on one compatible version for AndroidX dependencies'
         }
     }
-}
 }
 
 dependencies {

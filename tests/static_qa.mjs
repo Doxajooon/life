@@ -160,3 +160,34 @@ assert.ok(html.includes('id="moneyNextDay"') && html.includes('id="moneyPrevDay"
 assert.equal(/V52 delegated navigation|V54 reliable wheel fallback|mobileScrollGuard/.test(html), false, "legacy capture navigation/touch guards remain");
 assert.ok(html.includes(".ui-icon{pointer-events:none"), "icons must not intercept button pointer events");
 
+
+// ---- V56.1 regression guards (found in audit) ----
+const symbolIds = new Set([...html.matchAll(/<symbol[^>]*\sid="([^"]+)"/g)].map(m => m[1]));
+const usedIcons = new Set([...html.matchAll(/<use href="#(i-[a-z0-9-]+)"/g)].map(m => m[1]));
+for (const icon of usedIcons) assert.ok(symbolIds.has(icon), `icon used but not defined in the sprite: ${icon}`);
+for (const id of ["debtChart", "debtChartNote", "moneyBestDayTitle", "moneyBestDayText", "moneyBestDayPct", "moneyBestDayBar"]) {
+  assert.ok(html.includes(`id="${id}"`), `markup for rendered element missing: ${id}`);
+}
+assert.ok(html.includes("renderDebtChart();"), "debt chart renderer is never called");
+assert.ok(html.includes("prefers-reduced-motion:reduce){*,*::before"), "global reduced-motion guard missing");
+assert.ok(html.includes("AndroidBridge.setTheme"), "Android system bar theme sync missing");
+for (const f of ["sw.js", "manifest.webmanifest", "icon.svg"]) {
+  for (const dir of ["public", "android/app/src/main/assets", "desktop-native/web", "desktop/Web"]) {
+    assert.equal(read(`${dir}/${f}`), read(f), `${dir}/${f} differs from root ${f}`);
+  }
+}
+const workflow = read(".github/workflows/release.yml");
+assert.equal(workflow.includes("ubuntu-latest"), false, "workflow must pin the runner image");
+assert.ok(workflow.includes("ubuntu-24.04"), "workflow runner must be pinned to ubuntu-24.04");
+const androidManifest = read("android/app/src/main/AndroidManifest.xml");
+assert.ok(androidManifest.includes('android:icon="@mipmap/ic_launcher"'), "Android launcher icon missing");
+for (const f of ["res/drawable/ic_launcher_foreground.xml", "res/drawable/ic_notification.xml", "res/mipmap-anydpi-v26/ic_launcher.xml", "res/mipmap-anydpi-v26/ic_launcher_round.xml"]) {
+  assert.ok(read(`android/app/src/main/${f}`).length > 50, `Android resource missing: ${f}`);
+}
+assert.ok(read("android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java").includes("R.drawable.ic_notification"), "notification icon not wired");
+assert.ok(read("SUPABASE_SETUP.sql").includes("default 56"), "SQL schema_version default must be 56");
+console.log("LIFE_CONTROL_V56_1_AUDIT_GUARDS_OK");
+
+// $() is getElementById; selectors must go through $$(). Passing one returned null and crashed the Finance tab.
+assert.equal(/(?<![\w$])\$\(\s*['"`]\[/.test(html), false, "$() called with a CSS selector; use $$()");
+console.log("LIFE_CONTROL_V56_1_SELECTOR_GUARD_OK");
