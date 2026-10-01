@@ -1,6 +1,6 @@
-Life Control V56
-Web: offline-first PWA
-Cloud: Supabase Auth + public.life_state
+Life Control V57
+Web: offline-first PWA, редизайн (12 экранов)
+Cloud: Supabase Auth + public.life_state (schema_version 57, миграция v56 → v57 в браузере)
 AI: Gemini 3.6 Flash via Supabase Edge Function
-Mobile: Android WebView bridge source + CI build
+Mobile: Android WebView bridge source + CI build (versionCode 570)
 Desktop: Windows WPF/WebView2 source + CI build
