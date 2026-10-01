@@ -19,9 +19,9 @@ const pkg = JSON.parse(read("package.json"));
 const android = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
 const androidGradle = read("android/app/build.gradle");
 
-assert.equal(pkg.version, "56.0.0", "package version must match V56");
-assert.match(androidGradle, /versionCode 560\b/, "Android versionCode must match V56");
-assert.match(androidGradle, /versionName '56\.0'/, "Android versionName must match V56");
+assert.equal(pkg.version, "57.0.0", "package version must match V57");
+assert.match(androidGradle, /versionCode 570\b/, "Android versionCode must match V57");
+assert.match(androidGradle, /versionName '57\.0'/, "Android versionName must match V57");
 for (const path of copies) {
   assert.equal(read(path), html, `${path} is out of sync with index.html`);
 }
@@ -78,7 +78,7 @@ assert.equal(fn.includes("SUPABASE_SERVICE_ROLE_KEY"), false, "service role key 
 assert.ok(config.includes("[functions.life-control-ai]"), "missing Edge Function config");
 assert.ok(config.includes("verify_jwt = true"), "AI Edge Function must require JWT");
 
-assert.ok(sw.includes("life-control-v56"), "service worker cache must be V55.2");
+assert.ok(sw.includes("life-control-v57"), "service worker cache must be V57");
 assert.ok(manifest.includes('"start_url": "./index.html"'), "PWA start_url is incorrect");
 assert.ok(android.includes("addJavascriptInterface"), "Android bridge missing");
 assert.ok(android.includes("WebViewAssetLoader"), "Android asset loader missing");
@@ -109,10 +109,10 @@ assert.equal(/Маркус Аврелий|Сенека|Конфуций|Имам
 assert.ok(fn.includes('body?.mode==="goal"'), "goal AI mode missing in Edge Function");
 assert.ok(fn.includes("achievements"), "goal AI must receive achievements");
 assert.ok(html.includes('pulseDayCard') && html.includes('pulseDiscipline') && html.includes('dayProgressMetrics') && html.includes('runner-runner'), "interactive day progress runner missing");
-assert.ok(html.includes("state.version=56"), "runtime state version must be V56");
-assert.equal(html.includes("state.version=55"), false, "stale runtime state version remains");
-assert.ok(html.includes("schema_version:56"), "cloud schema version must be V56");
-assert.equal(html.includes("schema_version:55"), false, "stale cloud schema version remains");
+assert.ok(html.includes("state.version=57"), "runtime state version must be V57");
+assert.equal(/state\.version=5[56]\b/.test(html), false, "stale runtime state version remains");
+assert.ok(html.includes("schema_version:57"), "cloud schema version must be V57");
+assert.equal(/schema_version:5[56]\b/.test(html), false, "stale cloud schema version remains");
 assert.equal(html.includes("life-control-v55-1"), false, "stale BroadcastChannel remains");
 assert.ok(html.includes("setInterval(runCloudHeartbeat,15000)"), "cloud heartbeat must not poll every second");
 assert.ok(html.includes('authProgressText') && html.includes('authProgressBar') && html.includes('auth-spinner'), "auth progress UI missing");
@@ -185,9 +185,57 @@ for (const f of ["res/drawable/ic_launcher_foreground.xml", "res/drawable/ic_not
   assert.ok(read(`android/app/src/main/${f}`).length > 50, `Android resource missing: ${f}`);
 }
 assert.ok(read("android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java").includes("R.drawable.ic_notification"), "notification icon not wired");
-assert.ok(read("SUPABASE_SETUP.sql").includes("default 56"), "SQL schema_version default must be 56");
+assert.ok(read("SUPABASE_SETUP.sql").includes("default 57"), "SQL schema_version default must be 57");
+assert.equal(read("SUPABASE_SETUP.sql").includes("default 56"), false, "stale SQL schema_version default remains");
 console.log("LIFE_CONTROL_V56_1_AUDIT_GUARDS_OK");
 
 // $() is getElementById; selectors must go through $$(). Passing one returned null and crashed the Finance tab.
 assert.equal(/(?<![\w$])\$\(\s*['"`]\[/.test(html), false, "$() called with a CSS selector; use $$()");
 console.log("LIFE_CONTROL_V56_1_SELECTOR_GUARD_OK");
+
+// ---- V57 redesign guards ----
+for (const view of ["viewToday","viewGoal","viewGoalEdit","viewMoney","viewNotes","viewNoteEdit","viewSettings","viewDisplay","viewNotifications","viewProfile"]) {
+  assert.ok(html.includes(`<section id="${view}" class="view`), `V57 screen missing: ${view}`);
+}
+for (const id of ["gateEyeBtn","gateRemember","pulseStatus","ringDay","ringGoal","ringFinance","ringDiscipline","ringDebt","tgCard","tmChart","taskList","addTaskBtn","goalList","addGoalBtn","geSave","geDelete","geMakeMain","moneyTabs","mvChart","qTransfer","txList","mcGrid","mcAdd","noteFilters","neBody","neSave","setDarkTheme","setFontScale","notifList","notifReadAll","pfDays","pfTasks","pfGoals","pfTx","pfExport","pfBackup","pfLogout","topChips","searchBtn"]) {
+  assert.ok(html.includes(`id="${id}"`), `V57 element missing: ${id}`);
+}
+const bottomNav = html.slice(html.indexOf('<nav class="bottom"'), html.indexOf("</nav>", html.indexOf('<nav class="bottom"')));
+assert.equal((bottomNav.match(/<button /g)||[]).length, 4, "bottom navigation must keep the four mockup items");
+assert.equal(bottomNav.includes("viewProfile"), false, "profile must not be in the bottom navigation");
+assert.ok(html.includes('id="setProfileRow"') && html.includes("showView('viewProfile')"), "profile must open from settings");
+assert.ok(html.includes('data-tab="viewToday"') && html.includes('data-tab="viewMoney"'), "top chip tabs missing");
+assert.ok(html.includes("life-control-v57") && html.includes("Life Control <span>V57</span>"), "V57 branding/channel missing");
+assert.ok(html.includes("const DEFAULT_AUTH_EMAIL='doxajooon@gmail.com'"), "default login email missing");
+// Login is Supabase email + password only: no Google / OAuth entry point.
+const authBlock = html.slice(html.indexOf('<div class="auth-lock"'), html.indexOf('<header class="topbar">'));
+assert.ok(authBlock.includes("gatePassword") && authBlock.includes("gateLoginBtn"), "auth block not found");
+assert.equal(/google/i.test(authBlock), false, "Google sign-in must not exist on the login screen");
+assert.equal(/signInWithOAuth|\/auth\/v1\/authorize|provider=google/i.test(html), false, "OAuth login must not exist");
+assert.equal(html.includes("/^\\\\S+@"), false, "password reset email regex is double-escaped");
+assert.ok(html.includes("backupPreV57(remote.state,'cloud')") && html.includes("backupPreV57(s,'local')"), "pre-V57 backups missing");
+assert.ok(html.includes("migrateV57(s,fromVersion)"), "V57 migration is not wired into normalize");
+
+// Run the real migration code against a V56 state.
+const migSrc = html.slice(html.indexOf("/* V57: goals[] / tasks[]"), html.indexOf("function normalize(s){"));
+const helpers = "function uid(){return 'id-'+Math.random().toString(36).slice(2)}function keyDay(d=new Date()){return d.toISOString().slice(0,10)}const localStorage={getItem(){return null},setItem(){}};function openLifeDB(){return Promise.resolve(null)}";
+const mig = new Function(helpers + migSrc + "return {migrateV57,syncMainGoalMirror,GOAL_COLORS,NOTE_CATS};")();
+const v56 = {version:56,profile:{name:"",currency:"сомони"},settings:{theme:"dark"},notificationsLog:[{title:"Пора: Работа",body:"",at:"2026-09-01T08:30:00Z"}],
+  reports:{"2026-05-02":{steps:{}}},profits:[{amount:100,at:"2026-06-01T10:00:00Z"}],expenses:[],notes:[],
+  goal:{title:"Купить квартиру",why:"Своё жильё",next:"",milestones:[],finance:{targetAmount:150000,savedAmount:20000,manualSavedAmount:15000,targetDate:"2027-06-01",startedAt:"2026-03-01T00:00:00Z",contributions:[{id:"c1",amount:5000,at:"2026-04-01T00:00:00Z"}]}}};
+const before = JSON.stringify(v56.goal);
+mig.migrateV57(v56, 56);
+assert.equal(v56.goals.length, 1, "migration must create exactly one goal from state.goal");
+assert.equal(v56.goals[0].main, true, "migrated goal must be the main goal");
+assert.equal(v56.goals[0].title, "Купить квартиру", "migrated goal must keep the title");
+assert.equal(v56.goals[0].targetAmount, 150000, "migrated goal must mirror the target amount");
+assert.equal(v56.goals[0].contributions.length, 0, "main goal money must stay only in state.goal.finance");
+assert.equal(JSON.stringify(v56.goal), before, "migration must not change state.goal");
+assert.ok(Array.isArray(v56.tasks) && v56.profile.createdAt.startsWith("2026-03-01"), "tasks/profile.createdAt migration failed");
+mig.migrateV57(v56, 57);
+assert.equal(v56.goals.length, 1, "repeated migration must not duplicate goals");
+v56.goal.title = "Новая формулировка"; mig.syncMainGoalMirror(v56);
+assert.equal(v56.goals[0].title, "Новая формулировка", "main goal changes must sync from state.goal");
+assert.ok(html.includes("function makeGoalMain(") && html.includes("syncMainGoalMirror();saveState()"), "main goal switch must sync state.goal");
+assert.ok(html.includes("category:NOTE_CATS[n.category]?n.category:'personal'"), "notes without category must default to «Личные»");
+console.log("LIFE_CONTROL_V57_REDESIGN_OK");
