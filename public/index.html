@@ -727,6 +727,122 @@ html[data-theme="light"] .auth-stars{display:none}
 @media(min-width:721px){.v-goal-list,.v-note-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(min-width:900px){body[data-layout="desktop"] .v-chips{display:none}body[data-layout="desktop"] .bottom{top:4.6rem!important}}
 @media(prefers-reduced-motion:reduce){.ring .ring-fg,.v-bar i,.v-minichart .tm-day i,.v-chart .vc-bar{transition:none!important;animation:none!important}}
+/* ===== V57 mockup pass (docs/mockup.png) ===== */
+.v-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.v-chips button{display:inline-flex;align-items:center;gap:.35rem}
+.v-chips button .ui-icon{width:.95rem;height:.95rem;flex:0 0 auto}
+.v-chips button{flex:1 1 0;min-width:0;justify-content:center;padding:.35rem .45rem;font-size:.78rem;white-space:nowrap}
+/* Sub-screens on phones: own «← Заголовок» line instead of the app header and bottom bar */
+body[data-layout="mobile"]:is([data-view="viewGoalEdit"],[data-view="viewNoteEdit"],[data-view="viewSettings"],[data-view="viewDisplay"],[data-view="viewNotifications"],[data-view="viewProfile"]) :is(.topbar,.bottom){display:none!important}
+body[data-layout="mobile"]:is([data-view="viewGoalEdit"],[data-view="viewNoteEdit"],[data-view="viewSettings"],[data-view="viewDisplay"],[data-view="viewNotifications"],[data-view="viewProfile"]) .shell{padding-top:calc(.7rem + env(safe-area-inset-top,0px))}
+.v-topline{grid-template-columns:auto minmax(0,1fr) auto}
+.v-topline .v-h1{text-align:left;font-size:1.15rem}
+.v-topline .v-back{border-color:transparent;background:transparent}
+.v-form .field label,.v-features span{text-transform:none!important;letter-spacing:0!important}
+.v-form .field label{font-size:.8rem!important;font-weight:700}
+#viewGoal .v-head .v-h1,#viewMoney .v-head .v-h1{font-size:1.2rem}
+
+/* Today: pulse */
+.v-title-ico{display:flex;align-items:center;gap:.45rem;min-width:0}
+.v-title-ico .ui-icon{width:1.05rem;height:1.05rem;color:var(--blue-dark);flex:0 0 auto}
+.v-pulse-head{align-items:center}
+.v-date{display:inline-flex;align-items:center;gap:.35rem;font-size:.74rem;color:var(--muted);font-weight:700;white-space:nowrap}
+.v-date .ui-icon{width:.9rem;height:.9rem}
+.v-pulse-sub{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.35rem}
+.v-pulse-sub .v-sub{margin:0}
+.ring-item{gap:.25rem}
+.ring circle{stroke-width:4.6}
+.ring-state{font-size:.6rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.1}
+
+/* Today: main goal card over mountains */
+.v-goal-card{position:relative;overflow:hidden;padding:0;isolation:isolate;border-color:color-mix(in srgb,var(--gc,var(--blue)) 30%,var(--line))}
+.v-goal-card .v-cover{position:absolute;inset:0;height:auto;border-radius:0;z-index:-1;background:linear-gradient(115deg,#0a1830 0%,#163463 55%,#b4612a 100%)}
+.v-goal-card .v-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,11,22,.88) 0%,rgba(5,11,22,.6) 55%,rgba(5,11,22,.15) 100%)}
+.v-goal-card .v-cover svg.v-mtn{height:62%}.v-goal-card .v-mtn circle,.v-goal-card .v-mtn path:nth-of-type(2){display:none}
+.v-goal-card .v-goal-body{padding:.9rem 1rem .85rem;color:#eaf1fb}
+.v-goal-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.82rem;font-weight:800}
+.v-goal-head .ui-icon{color:#7fb2ff}
+.v-goal-days{font-size:.72rem;color:rgba(234,241,251,.72);font-weight:700;white-space:nowrap}
+.v-goal-days b{color:#fff}
+.v-goal-card h3{margin:.6rem 0 0;font-size:1.05rem;font-weight:900;color:#fff}
+.v-goal-card .v-amount{margin-top:.1rem;color:rgba(234,241,251,.8)}
+.v-goal-card .v-amount b{color:#fff;font-size:1.2rem}
+.v-bar-row{display:flex;align-items:center;gap:.65rem;margin-top:.55rem}
+.v-bar-row .v-bar{flex:1 1 auto;margin-top:0}
+.v-goal-card .v-bar{background:rgba(255,255,255,.18)}
+.v-goal-card .v-pct{font-size:1.35rem;color:#60a5fa}
+.v-goal-card .v-goal-foot{color:rgba(234,241,251,.72);margin-top:.55rem}
+.v-goal-card .v-goal-foot b{color:#fff}
+
+/* Money figures: number, currency below — one row of four */
+.v-kpi4{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:.3rem}
+.v-kpi4 .v-kpi{background:transparent;border:0;padding:.15rem .1rem}
+.v-kpi4 .v-kpi span i{display:none}
+.v-kpi4 .v-kpi b{font-size:clamp(.92rem,4.3vw,1.25rem);line-height:1.15;margin-top:.15rem}
+.v-kpi b small{display:block;font-size:.62rem;color:var(--muted);font-weight:700;margin-top:.1rem}
+#moneyPaneOverview>.v-kpi4{padding:.75rem .7rem;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);box-shadow:var(--shadow)}
+
+/* Today: tasks */
+.v-tasks{gap:0}
+.v-task{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:.6rem .1rem}
+.v-task:first-child{border-top:0}
+.v-check{border-radius:.35rem}
+.v-check:checked{background:var(--blue);border-color:var(--blue)}
+
+/* Goals list */
+.v-goal-ico{width:3rem;height:3rem;border:0;color:#fff;background:linear-gradient(145deg,color-mix(in srgb,var(--gc) 70%,#fff),var(--gc));box-shadow:0 6px 16px color-mix(in srgb,var(--gc) 30%,transparent)}
+.v-goal-item .v-bar-row{margin-top:.5rem}
+.v-goal-item .v-goal-pct{font-size:.8rem;min-width:2.4rem;text-align:right;color:var(--text)}
+
+/* Goal editor */
+.v-cover.round{width:7rem;height:7rem;border-radius:50%;margin:.1rem auto .2rem;box-shadow:0 10px 30px color-mix(in srgb,var(--gc,#3b82f6) 35%,transparent)}
+.v-cover.round .v-cover-ico{width:2.6rem;height:2.6rem;border-radius:50%;margin-bottom:1.2rem}
+.v-cover.round .v-cover-ico .ui-icon{width:1.25rem;height:1.25rem}
+.v-icon-picker{display:flex!important;gap:.55rem;overflow-x:auto;scrollbar-width:none;padding:.15rem .1rem .3rem}
+.v-icon-picker::-webkit-scrollbar{display:none}
+.v-icon-picker button{flex:0 0 2.75rem;width:2.75rem;height:2.75rem;aspect-ratio:auto;border-radius:50%}
+.v-icon-picker button.active{background:var(--gc,var(--blue));border-color:var(--gc,var(--blue));color:#fff}
+.v-color-picker{gap:.7rem}
+.v-color-picker button{width:2.4rem;height:2.4rem}
+
+/* Money: quick add */
+.v-quick.solid{margin-top:.7rem}
+.v-quick.solid button{min-height:2.8rem;flex-direction:row;gap:.4rem;border:0;border-radius:.8rem;background:var(--qc);color:#fff;font-size:.85rem;box-shadow:0 6px 16px color-mix(in srgb,var(--qc) 30%,transparent)}
+.v-quick.solid button i{width:auto;height:auto;background:none;color:#fff}
+
+/* Notes */
+.v-notes-head{display:flex;gap:.5rem;align-items:center;margin-bottom:.7rem}
+.v-notes-head .v-search{flex:1 1 auto;min-width:0;margin:0}
+.v-notes-head .btn{min-height:2.5rem;flex:0 0 auto}
+
+/* Display mode */
+.v-display-card .v-radio{position:static;order:9;margin-top:.45rem;width:1.3rem;height:1.3rem}
+.v-features{display:grid;gap:.7rem;margin-top:.9rem}
+.v-features span{display:flex;align-items:center;gap:.6rem;font-size:.86rem;font-weight:700}
+.v-features .ui-icon{width:1.3rem;height:1.3rem;padding:.22rem;border-radius:50%;background:var(--green);color:#fff;flex:0 0 auto}
+
+/* Profile */
+.v-stat-val{font-size:1rem;font-weight:900}
+@media(max-width:380px){.v-goal-head{font-size:.74rem}.v-goal-days{font-size:.66rem}.v-chips button{font-size:.72rem;gap:.25rem}}
+
+/* Login: full-screen sunset mountains, no card */
+html[data-theme] .auth-lock{background:linear-gradient(180deg,#040a17 0%,#0a1832 40%,#1f2b4e 60%,#0a1428 100%)}
+html[data-theme="light"] .auth-stars{display:block}
+.auth-scene svg{height:62%}
+.auth-box{background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;text-align:center;padding:1rem .5rem;color:#eaf1fb}
+.auth-crown{width:auto;height:auto;background:none;box-shadow:none;color:#f5b120;margin:0 auto .2rem}
+.auth-crown .ui-icon{width:3.2rem;height:3.2rem;filter:drop-shadow(0 6px 18px rgba(245,158,11,.5))}
+.auth-title{color:#fff;font-size:2rem!important}
+.auth-title span{display:block;margin-top:.15rem;font-size:1rem;font-weight:800;color:#cbd5e1}
+.auth-box .auth-intro{color:#cbd5e1;line-height:1.55;margin:.75rem 0 1.2rem;font-size:.92rem}
+.auth-box .field label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.auth-input input{background:rgba(9,17,33,.72)!important;border:1px solid rgba(255,255,255,.16)!important;color:#fff!important}
+.auth-input input::placeholder{color:#94a3b8}
+.auth-row{justify-content:flex-start}
+.auth-remember{color:#e2e8f0}
+.auth-links{display:grid;justify-items:center;gap:.55rem;margin-top:1.1rem}
+.auth-links .auth-link{font-size:.9rem;color:#93c5fd}
+.auth-box .auth-progress{color:#94a3b8}
 </style>
 <style id="lcMotion">
 /* V56.1 motion layer: entrance, icon feedback, progress shimmer, sheets. All disabled by prefers-reduced-motion. */
@@ -825,16 +941,16 @@ html[data-theme="light"] .auth-stars{display:none}
 </defs><symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18h9a4 4 0 0 0 .4-8A5.5 5.5 0 0 0 6.2 9.1 4.5 4.5 0 0 0 7.5 18Z" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol></svg>
 
 <div class="auth-lock" id="authLock" hidden>
-  <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMax slice"><circle cx="252" cy="62" r="18" fill="#fde68a" opacity=".9"/><path d="M0 240V150l46-38 30 22 52-66 44 52 34-30 50 58 40-36 56 46 48-30v112z" fill="#3b6fb6" opacity=".55"/><path d="M128 68l14 18-10-3-12 9zM252 128l11 13-9-2-9 6z" fill="#fff" opacity=".75"/><path d="M0 240v-62l60-36 42 30 54-48 58 56 46-32 64 44 40-24 36 22v50z" fill="#16335f" opacity=".85"/><path d="M0 240v-32l78-30 64 26 70-34 72 30 66-22 50 18v44z" fill="#081426"/></svg></div>
+  <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="authGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0"/><stop offset=".6" stop-color="#f97316" stop-opacity=".5"/><stop offset="1" stop-color="#9a3412" stop-opacity=".15"/></linearGradient><linearGradient id="authRidge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3a5f"/><stop offset="1" stop-color="#0b1426"/></linearGradient></defs><rect x="0" y="36" width="400" height="150" fill="url(#authGlow)"/><path d="M0 320V150l38-30 26 18 48-62 40 48 30-26 46 54 36-34 52 44 44-28 40 26v130z" fill="#3b3f62" opacity=".8"/><path d="M0 320V190l56-34 40 28 52-46 54 52 44-30 60 42 38-22 56 30v110z" fill="url(#authRidge)"/><path d="M0 320v-70l74-30 62 24 68-34 70 30 64-22 62 22v80z" fill="#070e1c"/></svg></div>
   <div class="auth-box">
     <div class="auth-crown"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg></div>
     <h1 class="auth-title">Life Control <span>V57</span></h1>
-    <div class="auth-intro">Цели, деньги и день — под контролем. Войди, чтобы открыть личные данные.</div>
-    <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="you@example.com"></div></div>
-    <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Минимум 6 символов"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
-    <div class="auth-row"><label class="auth-remember"><input type="checkbox" id="gateRemember" checked> Запомнить меня</label><button type="button" class="auth-link" id="gateResetBtn"><span>Забыли пароль?</span></button></div>
+    <div class="auth-intro">Контролируй жизнь<br>Достигай цели<br>Будь лучше каждый день</div>
+    <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="Email"></div></div>
+    <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Пароль"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
+    <div class="auth-row"><label class="auth-remember"><input type="checkbox" id="gateRemember" checked> Запомнить меня</label></div>
     <div class="auth-actions"><button class="btn primary" id="gateLoginBtn" type="button"><span>Войти</span></button></div>
-    <div class="auth-alt">Нет аккаунта? <button type="button" class="auth-link" id="gateSignupBtn"><span>Создать аккаунт</span></button></div>
+    <div class="auth-links"><button type="button" class="auth-link" id="gateResetBtn"><span>Забыли пароль?</span></button><button type="button" class="auth-link" id="gateSignupBtn"><span>Создать аккаунт</span></button></div>
     <div class="auth-progress"><span>●</span><span id="authProgressText">Готово к входу</span></div><div class="auth-progress-bar"><i id="authProgressBar"></i></div><div class="auth-msg" id="gateMsg" aria-live="polite"></div>
   </div>
 </div>
@@ -846,17 +962,18 @@ html[data-theme="light"] .auth-stars{display:none}
     <button class="iconbtn" id="settingsBtn" type="button" aria-label="Настройки" title="Настройки"><svg class="ui-icon" aria-hidden="true"><use href="#i-settings"></use></svg></button>
   </div>
 </header>
-<nav class="v-chips" id="topChips" aria-label="Разделы"><button type="button" data-tab="viewToday" class="active">Сегодня</button><button type="button" data-tab="viewGoal">Цели</button><button type="button" data-tab="viewMoney">Деньги</button><button type="button" data-tab="viewNotes">Заметки</button></nav>
+<nav class="v-chips" id="topChips" aria-label="Разделы"><button type="button" data-tab="viewToday" class="active"><svg class="ui-icon" aria-hidden="true"><use href="#i-home"></use></svg>Сегодня</button><button type="button" data-tab="viewGoal"><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg>Цели</button><button type="button" data-tab="viewMoney"><svg class="ui-icon" aria-hidden="true"><use href="#i-wallet"></use></svg>Деньги</button><button type="button" data-tab="viewNotes"><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg>Заметки</button></nav>
 <main class="shell">
 <section id="viewToday" class="view active">
   <div class="card v-pulse">
-    <div class="v-pulse-head"><div><h2 class="v-title">Пульс жизни</h2><div class="v-sub"><span id="pulseStatus">—</span> · <span id="pulseDate">—</span></div></div><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">—</strong></div></div>
+    <div class="v-pulse-head"><h2 class="v-title v-title-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-runner"></use></svg>Пульс жизни</h2><span class="v-date"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg><span id="pulseDate">—</span></span></div>
+    <div class="v-pulse-sub"><span class="v-sub" id="pulseStatus">—</span><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">—</strong></div></div>
     <div class="ring-grid">
-      <button class="ring-item" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="День: открыть ход дня"><span class="ring" style="--rc:var(--blue)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDay" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDay">0%</b></span><span class="ring-label">День</span></button>
-      <button class="ring-item" type="button" data-ring="goal" aria-label="Цель"><span class="ring" style="--rc:var(--purple)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringGoal" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseGoal">0%</b></span><span class="ring-label">Цель</span></button>
-      <button class="ring-item" type="button" data-ring="finance" aria-label="Финансы"><span class="ring" style="--rc:var(--green)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringFinance" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseFinance">0%</b></span><span class="ring-label">Финансы</span></button>
-      <button class="ring-item" type="button" data-ring="discipline" aria-label="Дисциплина"><span class="ring" style="--rc:var(--cyan)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDiscipline" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDiscipline">0%</b></span><span class="ring-label">Дисциплина</span></button>
-      <button class="ring-item" type="button" data-ring="debt" aria-label="Долг"><span class="ring" style="--rc:var(--orange)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDebt" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDebt">0%</b></span><span class="ring-label">Долг</span></button>
+      <button class="ring-item" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="День: открыть ход дня"><span class="ring" style="--rc:var(--blue)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDay" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDay">0%</b></span><span class="ring-label">День</span><span class="ring-state" id="ringDayState">—</span></button>
+      <button class="ring-item" type="button" data-ring="goal" aria-label="Цель"><span class="ring" style="--rc:var(--purple)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringGoal" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseGoal">0%</b></span><span class="ring-label">Цель</span><span class="ring-state" id="ringGoalState">—</span></button>
+      <button class="ring-item" type="button" data-ring="finance" aria-label="Финансы"><span class="ring" style="--rc:var(--green)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringFinance" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseFinance">0%</b></span><span class="ring-label">Финансы</span><span class="ring-state" id="ringFinanceState">—</span></button>
+      <button class="ring-item" type="button" data-ring="discipline" aria-label="Дисциплина"><span class="ring" style="--rc:var(--cyan)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDiscipline" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDiscipline">0%</b></span><span class="ring-label">Дисциплина</span><span class="ring-state" id="ringDisciplineState">—</span></button>
+      <button class="ring-item" type="button" data-ring="debt" aria-label="Долг"><span class="ring" style="--rc:var(--orange)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDebt" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDebt">0%</b></span><span class="ring-label">Долг</span><span class="ring-state" id="ringDebtState">—</span></button>
     </div>
     <div class="pulse-note" id="pulseNote">—</div>
     <select id="dayMode" class="mode-select" hidden aria-hidden="true" tabindex="-1"><option value="normal">Нормальный день</option><option value="heavy">Тяжёлый день</option><option value="rest">Выходной</option></select>
@@ -865,10 +982,11 @@ html[data-theme="light"] .auth-stars{display:none}
   <div class="card v-goal-card" id="tgCard" role="button" tabindex="0" aria-label="Открыть главную цель">
     <div class="v-cover" id="tgCover"></div>
     <div class="v-goal-body">
-      <div class="row"><div style="min-width:0"><div class="v-eyebrow">Главная цель</div><h3 id="tgTitle">—</h3></div><b class="v-pct" id="tgPct">0%</b></div>
+      <div class="v-goal-head"><span class="v-title-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg>Моя главная цель</span><span class="v-goal-days"><span id="tgDaysLabel">Осталось</span> <b id="tgDays">—</b></span></div>
+      <h3 id="tgTitle">—</h3>
       <div class="v-amount" id="tgAmount">—</div>
-      <div class="v-bar"><i id="tgBar"></i></div>
-      <div class="v-trio"><div><span>Собрано</span><b id="tgSaved">0</b></div><div><span>Осталось</span><b id="tgLeft">0</b></div><div><span id="tgDaysLabel">Дней</span><b id="tgDays">—</b></div></div>
+      <div class="v-bar-row"><div class="v-bar"><i id="tgBar"></i></div><b class="v-pct" id="tgPct">0%</b></div>
+      <div class="v-goal-foot"><span>Собрано: <b id="tgSaved">0</b></span><span>Осталось: <b id="tgLeft">0</b></span></div>
     </div>
   </div>
 
@@ -1034,11 +1152,11 @@ html[data-theme="light"] .auth-stars{display:none}
 
 <section id="viewGoalEdit" class="view">
   <div class="v-topline"><button class="v-back" type="button" data-back aria-label="Назад"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button><h1 class="v-h1" id="geHeading">Новая цель</h1><button class="v-icon-btn primary" type="button" id="geSaveTop" aria-label="Сохранить цель"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg></button></div>
-  <div class="v-cover lg" id="geCover"></div>
+  <div class="v-cover round" id="geCover"></div>
   <div class="card v-form">
-    <div class="field"><label for="geName">Название</label><input id="geName" maxlength="120" placeholder="Например: Своя квартира"></div>
-    <div class="grid g2"><div class="field"><label for="geAmount">Целевая сумма</label><input id="geAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div><div class="field"><label for="geDate">Срок</label><input id="geDate" type="date"></div></div>
-    <div class="field"><label for="geDesc">Описание</label><textarea id="geDesc" maxlength="900" placeholder="Зачем эта цель и как ты поймёшь, что дошёл"></textarea></div>
+    <div class="field"><label for="geName">Название цели</label><input id="geName" maxlength="120" placeholder="Например: Переезд в Польшу"></div>
+    <div class="field"><label for="geAmount">Целевая сумма (<span id="geCurrency">сомони</span>)</label><input id="geAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div><div class="field"><label for="geDate">Срок достижения</label><input id="geDate" type="date"></div>
+    <div class="field"><label for="geDesc">Описание (необязательно)</label><textarea id="geDesc" maxlength="900" placeholder="Зачем эта цель и как ты поймёшь, что дошёл"></textarea></div>
     <div class="field"><label>Иконка</label><div class="v-icon-picker" id="geIcons"></div></div>
     <div class="field"><label>Цвет</label><div class="v-color-picker" id="geColors"></div></div>
     <div class="v-note-main" id="geInfo">—</div>
@@ -1063,11 +1181,11 @@ html[data-theme="light"] .auth-stars{display:none}
       <div class="v-chart" id="mvChart"></div>
       <div class="v-legend"><span><i style="--lc:var(--green)"></i>Доход</span><span><i style="--lc:var(--red)"></i>Расход</span><span><i class="line" style="--lc:var(--blue)"></i>Баланс</span></div>
     </div>
-    <div class="v-quick">
+    <div class="card"><h2 class="v-title">Быстрое добавление</h2><div class="v-quick solid">
       <button type="button" id="qIncome" style="--qc:var(--green)"><i><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></i>Доход</button>
       <button type="button" id="qExpense" style="--qc:var(--red)"><i><svg class="ui-icon" aria-hidden="true"><use href="#i-minus"></use></svg></i>Расход</button>
       <button type="button" id="qTransfer" style="--qc:var(--blue)"><i><svg class="ui-icon" aria-hidden="true"><use href="#i-transfer"></use></svg></i>Перевод</button>
-    </div>
+    </div></div>
     <div class="card">
       <div class="row"><h2 class="v-title">Последние транзакции</h2><button class="v-link" type="button" data-money-tab-go="tx">Все</button></div>
       <div class="v-tx-list" id="mvRecent"></div>
@@ -1123,8 +1241,8 @@ html[data-theme="light"] .auth-stars{display:none}
 </section>
 
 <section id="viewNotes" class="view">
-  <div class="v-head"><h1 class="v-h1">Заметки</h1><div style="display:flex;gap:.5rem;align-items:center"><button class="btn small" type="button" id="trashBtn" title="Корзина"><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg> <span id="trashCount">0</span></button><button class="v-add" type="button" id="addNoteBtn" aria-label="Новая заметка" title="Новая заметка"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div></div>
-  <div class="v-search"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg><input class="search" id="noteSearch" placeholder="Поиск по заметкам..." autocomplete="off"></div>
+  <h1 class="v-h1 v-sr">Заметки</h1>
+  <div class="v-notes-head"><div class="v-search"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg><input class="search" id="noteSearch" placeholder="Поиск по заметкам..." autocomplete="off"></div><button class="btn small" type="button" id="trashBtn" title="Корзина"><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg> <span id="trashCount">0</span></button><button class="v-add" type="button" id="addNoteBtn" aria-label="Новая заметка" title="Новая заметка"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div>
   <div class="v-seg chips" id="noteFilters" style="margin-bottom:.8rem"><button type="button" data-note-filter="all" class="active">Все</button><button type="button" data-note-filter="personal">Личные</button><button type="button" data-note-filter="work">Работа</button><button type="button" data-note-filter="ideas">Идеи</button></div>
   <div class="v-note-grid" id="notesList"></div>
 </section>
@@ -1132,10 +1250,10 @@ html[data-theme="light"] .auth-stars{display:none}
 <section id="viewNoteEdit" class="view">
   <div class="v-topline"><button class="v-back" type="button" data-back aria-label="Назад"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button><h1 class="v-h1" id="neHeading">Новая заметка</h1><button class="v-icon-btn primary" type="button" id="neSave" aria-label="Сохранить заметку" title="Сохранить"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg></button></div>
   <div class="card v-form" style="margin-top:0">
-    <input id="neTitle" class="v-title-input" maxlength="120" placeholder="Заголовок" aria-label="Заголовок заметки">
-    <div class="v-seg sm" id="neCats" aria-label="Категория"><button type="button" data-note-cat="personal">Личные</button><button type="button" data-note-cat="work">Работа</button><button type="button" data-note-cat="ideas">Идеи</button></div>
+    <div class="field"><label for="neTitle">Заголовок</label><input id="neTitle" maxlength="120" placeholder="Например: План переезда"></div>
+    <div class="field"><label>Категория</label><div class="v-seg sm" id="neCats" aria-label="Категория"><button type="button" data-note-cat="personal">Личные</button><button type="button" data-note-cat="work">Работа</button><button type="button" data-note-cat="ideas">Идеи</button></div></div>
+    <div class="field"><label for="neBody">Текст заметки</label><textarea id="neBody" class="v-note-text" maxlength="12000" placeholder="Пиши как есть..." aria-label="Текст заметки"></textarea></div>
     <div class="v-editor-bar" role="toolbar" aria-label="Форматирование"><button type="button" data-fmt="bold" aria-label="Жирный" title="Жирный"><svg class="ui-icon" aria-hidden="true"><use href="#i-bold"></use></svg></button><button type="button" data-fmt="italic" aria-label="Курсив" title="Курсив"><svg class="ui-icon" aria-hidden="true"><use href="#i-italic"></use></svg></button><button type="button" data-fmt="list" aria-label="Список" title="Список"><svg class="ui-icon" aria-hidden="true"><use href="#i-list"></use></svg></button><label class="v-pin"><input type="checkbox" id="nePinned"> Закрепить</label></div>
-    <textarea id="neBody" class="v-note-text" maxlength="12000" placeholder="Пиши как есть..." aria-label="Текст заметки"></textarea>
     <div class="v-sub" id="neMeta">—</div>
   </div>
   <div class="v-row-actions"><button class="btn red" type="button" id="neTrash"><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg> <span id="neTrashLabel">В корзину</span></button></div>
@@ -1179,6 +1297,7 @@ html[data-theme="light"] .auth-stars{display:none}
     <button class="v-display-card" type="button" data-layout-mode="mobile"><i class="v-radio"></i><span class="v-display-pic"><svg viewBox="0 0 60 100" aria-hidden="true"><rect x="6" y="2" width="48" height="96" rx="9" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="12" y="12" width="36" height="14" rx="3" fill="currentColor" opacity=".25"/><rect x="12" y="30" width="36" height="22" rx="3" fill="currentColor" opacity=".18"/><rect x="12" y="56" width="36" height="16" rx="3" fill="currentColor" opacity=".18"/><path d="M12 86h36" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".5"/></svg></span><b>Мобильный</b><small>Нижняя навигация, крупные элементы</small></button>
     <button class="v-display-card" type="button" data-layout-mode="desktop"><i class="v-radio"></i><span class="v-display-pic"><svg viewBox="0 0 120 90" aria-hidden="true"><rect x="4" y="4" width="112" height="66" rx="6" fill="none" stroke="currentColor" stroke-width="2.5"/><rect x="10" y="10" width="22" height="54" rx="3" fill="currentColor" opacity=".25"/><rect x="36" y="10" width="74" height="18" rx="3" fill="currentColor" opacity=".18"/><rect x="36" y="32" width="35" height="32" rx="3" fill="currentColor" opacity=".18"/><rect x="75" y="32" width="35" height="32" rx="3" fill="currentColor" opacity=".18"/><path d="M44 84h32M60 70v14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><b>ПК</b><small>Боковое меню, широкая сетка</small></button>
   </div>
+  <div class="card v-features"><span><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg>Адаптивный интерфейс</span><span><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg>Удобная навигация</span><span><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg>Оптимальный размер текста</span><span><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg>Все функции в обоих режимах</span></div>
 </section>
 
 <section id="viewNotifications" class="view">
@@ -1197,11 +1316,11 @@ html[data-theme="light"] .auth-stars{display:none}
     <button class="btn small" type="button" id="pfEditBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-pencil"></use></svg> Редактировать</button>
   </div>
   <div class="v-group-title">Статистика</div>
-  <div class="v-stat-grid">
-    <div class="v-stat"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><b id="pfDays">0</b><span>дней в приложении</span></div>
-    <div class="v-stat"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg></span><b id="pfTasks">0</b><span>выполнено задач</span></div>
-    <div class="v-stat"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-trophy"></use></svg></span><b id="pfGoals">0</b><span>достигнуто целей</span></div>
-    <div class="v-stat"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-transfer"></use></svg></span><b id="pfTx">0</b><span>всего транзакций</span></div>
+  <div class="v-group">
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>Дней в приложении</b></span><b class="v-stat-val" id="pfDays">0</b></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg></span><span class="v-row-main"><b>Выполнено задач</b></span><b class="v-stat-val" id="pfTasks">0</b></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-trophy"></use></svg></span><span class="v-row-main"><b>Достигнуто целей</b></span><b class="v-stat-val" id="pfGoals">0</b></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-transfer"></use></svg></span><span class="v-row-main"><b>Всего транзакций</b></span><b class="v-stat-val" id="pfTx">0</b></div>
   </div>
   <div class="v-group-title">Данные</div>
   <div class="v-group">
@@ -2515,29 +2634,36 @@ function goalProgress(g){
 function daysLeftText(p){if(p.done)return 'Цель достигнута';if(p.daysLeft===null)return 'Срок не задан';if(p.daysLeft===0)return 'Срок сегодня';return 'Осталось '+p.daysLeft+' '+plural(p.daysLeft,'день','дня','дней')}
 function plural(n,a,b,c){n=Math.abs(Math.round(n));const m10=n%10,m100=n%100;if(m10===1&&m100!==11)return a;if(m10>=2&&m10<=4&&(m100<12||m100>14))return b;return c}
 function fmtShort(n){const v=Number(n||0);return Math.abs(v)>=1e6?(v/1e6).toLocaleString('ru-RU',{maximumFractionDigits:1})+' млн':Math.abs(v)>=1e4?(v/1e3).toLocaleString('ru-RU',{maximumFractionDigits:1})+' тыс.':v.toLocaleString('ru-RU',{maximumFractionDigits:2})}
+function setMoneyKpi(id,v){const el=$(id);if(!el)return;const n=Number(v||0),html=esc((n<0?'−':'')+Math.abs(n).toLocaleString('ru-RU'))+'<small>'+esc(state.profile.currency||'сомони')+'</small>';if(el.innerHTML!==html)el.innerHTML=html}
 function noticeAllowed(kind){const k={tasks:'notifyTasks',finance:'notifyFinance',goals:'notifyGoals'}[kind];return !k||state.settings?.[k]!==false}
 
 /* ---- Today ---- */
 function setRing(id,pct){const el=$(id);if(!el)return;const v=clamp(Number(pct)||0,0,100);el.style.strokeDasharray=`${v} 100`;el.classList.toggle('zero',v<=0)}
+const RING_LEVELS=[[75,'Хорошо','var(--blue)'],[60,'Нормально','var(--cyan)'],[40,'В процессе','var(--orange)'],[25,'Слабо','#fb923c'],[0,'Критично','var(--red)']];
+function ringLevel(v){return RING_LEVELS.find(x=>v>=x[0])||RING_LEVELS[RING_LEVELS.length-1]}
+function setRingState(name,v,label){const ring=$('ring'+name),st=$('ring'+name+'State');const lv=ringLevel(clamp(Number(v)||0,0,100)),text=label||lv[1];if(ring)ring.closest('.ring')?.style.setProperty('--rc',lv[2]);if(st){st.textContent=text;st.style.color=lv[2]}}
+function pulseDateLabel(d){const wd=d.toLocaleDateString('ru-RU',{weekday:'short'}).replace('.',''),mon=d.toLocaleDateString('ru-RU',{month:'short'}).replace('.','');return wd.charAt(0).toUpperCase()+wd.slice(1)+', '+d.getDate()+' '+mon+' '+d.getFullYear()}
 function renderPulseRings(){
   const p=getLifePulse();setRing('ringDay',p.day);setRing('ringGoal',p.goal);setRing('ringFinance',p.finance);setRing('ringDiscipline',p.discipline);setRing('ringDebt',p.debt);
+  const mg=mainGoal(),gp=mg?goalProgress(mg):null;
+  setRingState('Day',p.day);setRingState('Goal',p.goal,gp?.done?'Достигнута':p.goal>0?'В процессе':'Не начата');setRingState('Finance',p.finance);setRingState('Discipline',p.discipline);setRingState('Debt',p.debt,debtTotal()<=0?'Нет долга':'');
   const avg=Math.round((p.goal+p.finance+p.discipline+p.debt)/4);
   setText('pulseStatus',avg>=70?'Отличный темп':avg>=45?'Стабильно':avg>=25?'Нужен шаг вперёд':'Начни с малого');
-  setText('pulseDate',new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}));
+  setText('pulseDate',pulseDateLabel(new Date()));
 }
 function greeting(){const h=new Date().getHours();return h<5?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер'}
 function renderTodayGoal(){
   const g=mainGoal();if(!g)return;const p=goalProgress(g),card=$('tgCard');if(!card)return;
-  card.style.setProperty('--gc',goalColor(g));const cover=$('tgCover');if(cover){cover.style.setProperty('--gc',goalColor(g));const html=coverHTML(g,'ГЛАВНАЯ');if(cover.dataset.sig!==g.icon+g.color){cover.innerHTML=html;cover.dataset.sig=g.icon+g.color}}
+  card.style.setProperty('--gc',goalColor(g));const cover=$('tgCover');if(cover){cover.style.setProperty('--gc',goalColor(g));if(cover.dataset.sig!==g.color){cover.innerHTML=mountainsSVG();cover.dataset.sig=g.color}}
   setText('tgTitle',state.goal.title||'Главная цель');setText('tgPct',p.pct+'%');setWidth('tgBar',p.pct+'%');
-  $('tgAmount').innerHTML=p.target?`<b>${esc(fmtMoney(p.collected))}</b> из ${esc(fmtMoney(p.target))}`:'Сумма цели не задана — нажми, чтобы указать';
+  $('tgAmount').innerHTML=p.target?`<b>${esc(fmtMoney(p.target))}</b>`:'Сумма цели не задана — нажми, чтобы указать';
   setText('tgSaved',fmtShort(p.collected));setText('tgLeft',fmtShort(p.remaining));
-  if(p.daysLeft!==null&&!p.done){setText('tgDaysLabel','Дней до срока');setText('tgDays',String(p.daysLeft))}else{const f=goalFinanceMetrics();setText('tgDaysLabel',p.done?'Собрано за':'Дней в пути');setText('tgDays',f.days?String(f.days):'—')}
+  if(p.done){setText('tgDaysLabel','Цель');setText('tgDays','достигнута')}else if(p.daysLeft!==null){setText('tgDaysLabel','Осталось');setText('tgDays',p.daysLeft+' '+plural(p.daysLeft,'день','дня','дней'))}else{const f=goalFinanceMetrics();setText('tgDaysLabel','В пути');setText('tgDays',f.days?f.days+' '+plural(f.days,'день','дня','дней'):'—')}
 }
 function monthDaily(year,month){const days=new Date(year,month+1,0).getDate(),inc=new Array(days).fill(0),out=new Array(days).fill(0);const add=(arr,list)=>{for(const x of list||[]){const d=validDate(x.at);if(!d||d.getFullYear()!==year||d.getMonth()!==month)continue;arr[d.getDate()-1]+=Math.max(0,Number(x.amount)||0)}};add(inc,state.profits);add(out,state.expenses);return {days,inc,out}}
 function renderTodayMoney(){
   const now=new Date(),wm=walletMetrics(),inc=monthSum(state.profits),out=monthSum(state.expenses);
-  setText('tmMonth',now.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}));setText('tmBalance',fmtMoney(wm.cash));setText('tmIncome',fmtMoney(inc));setText('tmExpense',fmtMoney(out));setText('tmDebt',fmtMoney(debtTotal()));
+  setText('tmMonth',now.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}));setMoneyKpi('tmBalance',wm.cash);setMoneyKpi('tmIncome',inc);setMoneyKpi('tmExpense',out);setMoneyKpi('tmDebt',debtTotal());
   const box=$('tmChart');if(!box)return;const md=monthDaily(now.getFullYear(),now.getMonth()),max=Math.max(1,...md.inc,...md.out),today=now.getDate();
   const html=md.inc.map((v,i)=>`<div class="tm-day${i+1===today?' today':''}" title="${i+1}: +${esc(fmtMoney(v))} / −${esc(fmtMoney(md.out[i]))}"><i class="mc-in" style="height:${v?Math.max(4,v/max*100):0}%"></i><i class="mc-out" style="height:${md.out[i]?Math.max(4,md.out[i]/max*100):0}%"></i></div>`).join('');
   if(box.dataset.sig!==html.length+':'+max+':'+today){box.innerHTML=html;box.dataset.sig=html.length+':'+max+':'+today}
@@ -2566,16 +2692,16 @@ function renderGoals(){
   const list=$('goalList');if(!list)return;
   const goals=[...(state.goals||[])].sort((a,b)=>Number(b.main)-Number(a.main)||Date.parse(a.createdAt||0)-Date.parse(b.createdAt||0));
   let doneCount=0;
-  list.innerHTML=goals.map(g=>{const p=goalProgress(g);if(p.done)doneCount++;const title=g.main?state.goal.title:g.title;return `<button class="card v-goal-item" type="button" data-goal-open="${esc(g.id)}" style="--gc:${goalColor(g)}"><span class="v-goal-ico">${svgIcon(ICON_IDS[g.icon]||'i-target')}</span><span style="min-width:0"><span class="v-goal-top"><span class="v-goal-name">${esc(title)}${g.main?'<span class="v-badge">Главная</span>':''}${p.done?'<span class="v-badge ok">Готово</span>':''}</span><span class="v-goal-pct">${p.pct}%</span></span><span class="v-goal-sum" style="display:block">${p.target?`<b>${esc(fmtMoney(p.collected))}</b> из ${esc(fmtMoney(p.target))}`:'Сумма не задана'}</span><span class="v-bar" style="display:block"><i style="width:${p.pct}%"></i></span><span class="v-goal-foot"><span>${esc(daysLeftText(p))}</span><span>${p.target&&!p.done?'Ещё '+esc(fmtMoney(p.remaining)):''}</span></span></span></button>`}).join('')||'<div class="v-empty">Целей пока нет.</div>';
+  list.innerHTML=goals.map(g=>{const p=goalProgress(g);if(p.done)doneCount++;const title=g.main?state.goal.title:g.title;return `<button class="card v-goal-item" type="button" data-goal-open="${esc(g.id)}" style="--gc:${goalColor(g)}"><span class="v-goal-ico">${svgIcon(ICON_IDS[g.icon]||'i-target')}</span><span style="min-width:0"><span class="v-goal-top"><span class="v-goal-name">${esc(title)}${g.main?'<span class="v-badge">Главная</span>':''}${p.done?'<span class="v-badge ok">Готово</span>':''}</span></span><span class="v-goal-sum" style="display:block">${p.target?`<b>${esc(fmtMoney(p.target))}</b> · собрано ${esc(fmtMoney(p.collected))}`:'Сумма не задана'}</span><span class="v-bar-row"><span class="v-bar" style="display:block"><i style="width:${p.pct}%"></i></span><span class="v-goal-pct">${p.pct}%</span></span><span class="v-goal-foot"><span>${esc(daysLeftText(p))}</span><span>${p.target&&!p.done?'Ещё '+esc(fmtMoney(p.remaining)):''}</span></span></span></button>`}).join('')||'<div class="v-empty">Целей пока нет.</div>';
   setText('goalsSummary',`${goals.length} ${plural(goals.length,'цель','цели','целей')} · достигнуто ${doneCount}`);
   $$('[data-goal-open]').forEach(b=>b.onclick=()=>openGoalEditor(b.dataset.goalOpen));
 }
 let geState={id:'',icon:'target',color:'blue'};
-function renderGoalEditorCover(){const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=coverHTML({icon:geState.icon},g?.main?'ГЛАВНАЯ':'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
+function renderGoalEditorCover(){const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=coverHTML({icon:geState.icon},'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
 function openGoalEditor(id=''){
   const g=id?goalById(id):null,isMain=!!g?.main,f=state.goal.finance||{};
   geState={id:g?g.id:'',icon:g?.icon||'target',color:g?.color||'blue'};
-  setText('geHeading',g?'Цель':'Новая цель');
+  setText('geHeading',g?'Цель':'Новая цель');setText('geCurrency',state.profile.currency||'сомони');
   $('geName').value=g?(isMain?state.goal.title:g.title):'';
   $('geAmount').value=g?(isMain?(f.targetAmount||''):(g.targetAmount||'')):'';
   $('geDate').value=g?(isMain?(f.targetDate||''):(g.targetDate||'')):'';
@@ -2708,7 +2834,7 @@ function barLineChartSVG(b){
 }
 function renderMoneyOverview(){
   const b=moneyBuckets(mvPeriod),inc=b.reduce((s,x)=>s+x.income,0),out=b.reduce((s,x)=>s+x.expense,0);
-  setText('mvBalance',fmtMoney(walletMetrics().cash));setText('mvIncome',fmtMoney(inc));setText('mvExpense',fmtMoney(out));setText('mvDebt',fmtMoney(debtTotal()));
+  setMoneyKpi('mvBalance',walletMetrics().cash);setMoneyKpi('mvIncome',inc);setMoneyKpi('mvExpense',out);setMoneyKpi('mvDebt',debtTotal());
   setText('mvRange',b.length?shortDateLabel(b[0].start)+' — '+shortDateLabel(b[b.length-1].end):'—');
   const chart=$('mvChart');if(chart)chart.innerHTML=(inc||out)?barLineChartSVG(b):'<div class="v-empty">За период операций нет — добавь доход или расход.</div>';
   $$('[data-mv-period]').forEach(x=>x.classList.toggle('active',Number(x.dataset.mvPeriod)===mvPeriod));
