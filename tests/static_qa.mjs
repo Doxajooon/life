@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "58.4.0");
-assert.match(gradle, /versionCode 584\b/); assert.match(gradle, /versionName '58\.4'/);
-assert.match(csproj, /<Version>58\.4\.0<\/Version>/);
+assert.equal(pkg.version, "58.5.0");
+assert.match(gradle, /versionCode 585\b/); assert.match(gradle, /versionName '58\.5'/);
+assert.match(csproj, /<Version>58\.5\.0<\/Version>/);
 assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V58'), "app version must be V58");
-assert.ok(sw.includes("jamal-life-v58-4"), "service worker cache must be V58");
+assert.ok(sw.includes("jamal-life-v58-5"), "service worker cache must be V58");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");

@@ -197,7 +197,7 @@ await test("Доход, расход, задача, заметка сохран�
   await page.evaluate(() => openMoneyForm("expense")); await page.fill("#moneyAmount", "250"); await page.click("#saveMoneyBtn");
   await page.evaluate(() => openTaskForm()); await page.fill("#taskTitle", "Позвонить"); await page.click("#saveTaskBtn");
   await page.evaluate(() => { showView("viewNotes"); openNoteEditor(); }); await page.fill("#neTitle", "Идея"); await page.fill("#neBody", "<img src=x onerror=window.__xss=1>"); await page.click("#neSave");
-  await page.waitForTimeout(400);
+  await page.waitForFunction(n => state.notes.length === n, n0.n + 1, { timeout: 5000 }).catch(() => {});
   const n1 = await page.evaluate(() => ({ p: state.profits.length, e: state.expenses.length, t: state.tasks.length, n: state.notes.length }));
   assert.deepEqual(n1, { p: n0.p + 1, e: n0.e + 1, t: n0.t + 1, n: n0.n + 1 });
   await page.evaluate(() => { showView("viewNotes"); renderNotes(); }); await page.waitForTimeout(200);
