@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     public MainWindow(bool startHidden)
     {
         InitializeComponent();
+        Browser.DefaultBackgroundColor = System.Drawing.Color.FromArgb(8, 18, 30);
         BuildTray();
         _startHidden = startHidden;
         Loaded += async (_, _) =>
