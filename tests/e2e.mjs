@@ -15,7 +15,7 @@ const results = [];
 let failed = 0;
 async function test(name, fn) {
   try { await fn(); results.push(["PASS", name]); console.log("PASS", name); }
-  catch (e) { failed++; results.push(["FAIL", name, e.message]); console.log("FAIL", name, "\n   ", e.message.split("\n")[0]); }
+  catch (e) { failed++; results.push(["FAIL", name, e.message]); console.log("FAIL", name, "\n   ", e.message.split("\n").slice(0, 6).join(" ")); }
 }
 
 // ---------- static server for the app ----------
@@ -78,7 +78,7 @@ function makeCloud() {
 }
 
 const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
-async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init } = {}) {
+async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock } = {}) {
   const ctx = await browser.newContext({ viewport, serviceWorkers: sw, locale: "ru-RU", timezoneId: "Asia/Dushanbe" });
   await ctx.route(/supabase\.co/, r => cloud.handle(r));
   if (session !== null) {
@@ -90,6 +90,7 @@ async function device(cloud, { viewport = { width: 390, height: 844 }, session, 
   page.errors = [];
   page.on("pageerror", e => page.errors.push(e.message));
   page.on("console", m => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) page.errors.push(m.text()); });
+  if (clock) await page.clock.install({ time: clock });
   await page.goto(APP);
   await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true, null, { timeout: 10000 });
   return { ctx, page };
@@ -297,6 +298,23 @@ await test("Напоминание о задаче: уведомление, ис
   await ctx.close();
 });
 
+await test("Ночь без ошибок: смена суток, напоминания нового дня, фоновая синхронизация", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { clock: new Date("2026-10-14T23:57:00+05:00") });
+  await page.evaluate(() => { state.tasks.push({ id: "mid", title: "Утренняя задача", time: "00:02", date: "2026-10-15", remind: 0 }); saveState(); });
+  const hitsBefore = cloud.hits.length;
+  await page.clock.runFor(6 * 60 * 1000); // 23:57 → 00:03
+  await page.waitForTimeout(500);
+  const r = await page.evaluate(() => ({ day: keyDay(), log: state.notificationsLog.map(n => n.title), sentDay: JSON.parse(localStorage.getItem("JL_REMINDERS_SENT_V1") || "{}").day }));
+  assert.equal(r.day, "2026-10-15");
+  assert.ok(r.log.some(t => /Утренняя задача/.test(t)), "reminder after midnight missing: " + r.log.join(" | "));
+  assert.equal(r.sentDay, "2026-10-15");
+  const fullFetches = cloud.hits.slice(hitsBefore).filter(h => h.startsWith("GET") && !h.endsWith("?meta")).length;
+  assert.ok(fullFetches <= 1, "background sync downloaded the full state " + fullFetches + " times");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await test("Android: задачи ставятся будильниками, без двойных уведомлений", async () => {
   const { ctx, page } = await device(makeCloud(), {
     init: () => {
@@ -326,7 +344,7 @@ await test("Android: задачи ставятся будильниками, б�
 
 await test("Windows: уведомление уходит в трей приложения", async () => {
   const { ctx, page } = await device(makeCloud(), { init: () => { window.__msgs = []; window.chrome = { webview: { postMessage: m => window.__msgs.push(m) } }; } });
-  const msgs = await page.evaluate(() => { notify("Пора: Работа", "Начни", "tasks"); return __msgs; });
+  const msgs = await page.evaluate(() => { __msgs.length = 0; notify("Пора: Работа", "Начни", "tasks"); return __msgs; });
   assert.equal(msgs[0]?.type, "notify"); assert.equal(msgs[0]?.title, "Пора: Работа");
   assert.equal(await page.evaluate(() => typeof window.__jlTick), "function");
   await ctx.close();

@@ -17,9 +17,9 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "58.0.0");
-assert.match(gradle, /versionCode 580\b/); assert.match(gradle, /versionName '58\.0'/);
-assert.match(csproj, /<Version>58\.0\.0<\/Version>/);
+assert.equal(pkg.version, "58.1.0");
+assert.match(gradle, /versionCode 581\b/); assert.match(gradle, /versionName '58\.1'/);
+assert.match(csproj, /<Version>58\.1\.0<\/Version>/);
 assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V58'), "app version must be V58");
 assert.ok(sw.includes("jamal-life-v58"), "service worker cache must be V58");
 

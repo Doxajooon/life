@@ -50,6 +50,8 @@ public partial class MainWindow : Window
             WindowState = WindowState.Minimized;
         }
         Closing += OnClosing;
+        // Windows logging off / shutting down: let the app close instead of hiding to the tray.
+        Application.Current.SessionEnding += (_, _) => { _exiting = true; _tray.Visible = false; };
         // Drive the app's reminder scheduler from the host: timers in a hidden window are throttled.
         _tick.Tick += async (_, _) =>
         {

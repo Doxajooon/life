@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self' https://riqmwueobjazfnhvvumy.supabase.co; worker-src 'self'; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#081120">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1287,6 +1288,9 @@ body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!im
   .jl-logo .jl-dot,#notifyBtn.has-unread .ui-icon,.v-remind .ui-icon,.v-task,.bottom button.active .ui-icon{animation:none}
   .ui-icon,.bottom{transition:none}
 }
+
+/* readable white text on coloured quick buttons (WCAG AA) */
+.v-quick.solid button{background:color-mix(in srgb,var(--qc) 66%,#000)}
 </style>
 
 
@@ -1823,7 +1827,7 @@ async function supaFetch(path,opts={},retried=false){
   Object.assign(headers,opts.headers||{});
   const res=await fetch(SUPABASE_CONFIG.url+path,{...opts,headers,cache:'no-store'});
   const raw=await res.text();let data=null;try{data=raw?JSON.parse(raw):null}catch(e){data=raw}
-  if(res.status===401&&!authCall&&!retried&&cloudAuth()?.refresh_token){
+  if((res.status===401||(res.status===403&&/jwt|token|expired/i.test(raw)))&&!authCall&&!retried&&cloudAuth()?.refresh_token){
     const fresh=await cloudRefresh();
     if(fresh?.access_token){const h={...(opts.headers||{})};delete h.Authorization;return supaFetch(path,{...opts,headers:h},true)}
   }
@@ -1902,6 +1906,7 @@ function mergeStates(base,local,remote){
   const strip=s=>{const x=clone(s||{});SYNC_META_KEYS.forEach(k=>delete x[k]);return x};
   const merged=mergeValue(strip(base),strip(local),strip(remote));
   for(const k of SYNC_META_KEYS)if(k in local)merged[k]=local[k];
+  if(Array.isArray(merged.notificationsLog)){const seen=new Set();merged.notificationsLog=merged.notificationsLog.filter(n=>{const k=(n?.title||'')+'|'+String(n?.at||'').slice(0,16);if(seen.has(k))return false;seen.add(k);return true}).slice(0,80)}
   return merged;
 }
 /* First contact of a device with the cloud (no common base yet): the cloud copy wins,
@@ -2388,15 +2393,18 @@ function autoCompleteExpiredStages(){
   if(changed){rep.savedAt=new Date().toISOString();saveState()}
   return changed;
 }
+const SENT_KEY='JL_REMINDERS_SENT_V1';
+let _sentMarks=null;
+function sentMarks(day){if(!_sentMarks){try{_sentMarks=JSON.parse(localStorage.getItem(SENT_KEY)||'null')}catch(e){}}if(!_sentMarks||_sentMarks.day!==day)_sentMarks={day,keys:{}};return _sentMarks}
+function markSent(day,key){const m=sentMarks(day);if(m.keys[key])return false;m.keys[key]=1;try{localStorage.setItem(SENT_KEY,JSON.stringify(m))}catch(e){}return true}
 const REMINDER_GRACE_MIN=10; // a reminder missed while the phone/PC was asleep still fires within 10 minutes
 const isDue=(m,t)=>t>=0&&m>=t&&m<t+REMINDER_GRACE_MIN;
 function taskLead(t){const v=t?.remind;if(v===0||v==='0')return 0;const n=Number(v);return Number.isFinite(n)&&n>0?n:Math.max(0,Number(state.settings?.preMinutes)||0)}
 function runScheduler(){
   const day=keyDay();
-  if(day!==lastDay){lastDay=day;state._sent={};saveState();renderAll()}
-  state._sent=state._sent&&typeof state._sent==='object'?state._sent:{};
+  if(day!==lastDay){lastDay=day;renderAll()}
   const autoDone=autoCompleteExpiredStages(),info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
-  const once=(key,fn)=>{if(state._sent[key])return;state._sent[key]=true;saveState();fn()};
+  const once=(key,fn)=>{if(markSent(day,key))fn()};
   for(let i=0;i<state.day.steps.length;i++){
     const s=state.day.steps[i],next=state.day.steps[i+1],previous=state.day.steps[i-1],st=timeToMin(s.time),en=timeToMin(s.end),pre=st-preMinutes;
     if(isDue(m,st))once('s|'+day+'|'+s.id,()=>notify('Пора: '+s.title,previous?'Этап «'+previous.title+'» завершён. Сейчас: '+(s.details?.[0]||s.text||s.title):(s.details?.[0]||s.text||s.title),'tasks',{native:true}));
