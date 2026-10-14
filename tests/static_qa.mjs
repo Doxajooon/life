@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "58.3.0");
-assert.match(gradle, /versionCode 583\b/); assert.match(gradle, /versionName '58\.3'/);
-assert.match(csproj, /<Version>58\.3\.0<\/Version>/);
+assert.equal(pkg.version, "58.4.0");
+assert.match(gradle, /versionCode 584\b/); assert.match(gradle, /versionName '58\.4'/);
+assert.match(csproj, /<Version>58\.4\.0<\/Version>/);
 assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V58'), "app version must be V58");
-assert.ok(sw.includes("jamal-life-v58-3"), "service worker cache must be V58");
+assert.ok(sw.includes("jamal-life-v58-4"), "service worker cache must be V58");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -64,5 +64,10 @@ for (const bad of ["SUPABASE_SERVICE_ROLE_KEY", "GEMINI_API_KEY", "sb_secret_"])
 assert.ok(fn.includes('Deno.env.get("GEMINI_API_KEY")') && fn.includes("auth.getUser"), "AI function auth/secret");
 assert.ok(fn.includes("ai_usage") && /thinking_level: "low",\n\s*generation_config/.test(fn), "AI function rate limit / request shape");
 assert.ok(read("supabase/config.toml").includes("verify_jwt = true"));
+
+// readability: nothing smaller than 11px, and the day never starts with a red «Критично»
+const tiny = [...html.matchAll(/font-size:\s*(\d*\.?\d+)(px|rem)\b/g)].map(m => (m[2] === "rem" ? +m[1] * 16 : +m[1])).filter(v => v >= 5 && v < 11);
+assert.deepEqual(tiny, [], "text smaller than 11px: " + tiny.join(", "));
+assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 
 console.log("JAMAL_LIFE_V58_STATIC_QA_OK");
