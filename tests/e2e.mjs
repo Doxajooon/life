@@ -135,6 +135,32 @@ await test("Все окна и диалоги открываются без ош
   await ctx.close();
 });
 
+await test("«Сегодня»: всё в одном потоке, без вкладок и дублей; кнопка «+» работает", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const info = await page.evaluate(() => ({
+    details: document.querySelectorAll("#viewToday details").length,
+    crown: !!document.querySelector(".brand-name .jl-crown"),
+    order: [...document.querySelectorAll("#viewToday > *")].map(e => e.id || e.className.split(" ").slice(0, 2).join(".")),
+    stageRowsInTasks: document.querySelectorAll("#taskList [data-task-stage]").length,
+    timeline: document.querySelectorAll("#timeline > *").length,
+    motivation: document.getElementById("motivationText").textContent.length,
+  }));
+  assert.equal(info.details, 0, "collapsible block still present");
+  assert.ok(info.crown, "crown missing next to the name");
+  assert.equal(info.stageRowsInTasks, 0, "stages duplicated in the task list");
+  assert.ok(info.timeline >= 1 && info.motivation > 5, "schedule or motivation not rendered on the main screen");
+  for (const [kind, sel] of [["task", "#taskTitle"], ["profit", "#moneyAmount"], ["expense", "#moneyAmount"], ["note", "#neTitle"]]) {
+    await page.evaluate(() => showView("viewToday"));
+    await page.locator("#quickAddBtn").click();           // real tap: fails if anything covers it
+    await page.locator(`[data-quick="${kind}"]`).click();
+    await page.waitForTimeout(250);
+    assert.ok(await page.locator(sel).isVisible(), kind + " form did not open");
+    await page.evaluate(() => { try { closeModal(); } catch (e) {} });
+  }
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await test("Кнопки «Сохранить» в формах не перекрыты нижней панелью (360/390/412 px)", async () => {
   for (const width of [360, 390, 412]) {
     const { ctx, page } = await device(makeCloud(), { viewport: { width, height: width * 2 } });

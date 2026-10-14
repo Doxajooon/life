@@ -1291,6 +1291,108 @@ body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!im
 
 /* readable white text on coloured quick buttons (WCAG AA) */
 .v-quick.solid button{background:color-mix(in srgb,var(--qc) 66%,#000)}
+
+/* ===== V58.2 «Сегодня»: один поток дня ===== */
+:root,html[data-theme="dark"]{--gold:#e3b04b;--gold-2:#f6d58a}
+html[data-theme="light"]{--gold:#b7841f;--gold-2:#e3b04b}
+
+/* crown next to the name */
+.jl-crown{width:19px;height:19px;vertical-align:-3px;margin-left:3px;color:var(--gold);filter:drop-shadow(0 1px 5px color-mix(in srgb,var(--gold) 55%,transparent))}
+
+/* hero: the one bold element — date, live clock, what to do now, the word of the day */
+.jl-hero{position:relative;overflow:hidden;border-radius:24px;padding:18px 18px 16px;color:#f3f7fc;
+  background:radial-gradient(120% 90% at 100% 0%,rgba(227,176,75,.20),transparent 55%),linear-gradient(160deg,#14304e 0%,#0b1a2c 72%);
+  border:1px solid rgba(227,176,75,.24);box-shadow:0 18px 40px rgba(8,18,30,.32)}
+.jl-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.jl-hero-date{all:unset;cursor:pointer;display:grid;gap:3px;border-radius:12px;padding:2px 4px;margin:-2px -4px}
+.jl-hero-date:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
+.jl-hero-date h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.01em;color:#fff;line-height:1.1}
+.jl-hero-date span{font-size:13px;color:#a9bdd3}
+.jl-hero-clock{text-align:right}
+.jl-hero .clock-time{font-size:clamp(34px,10.5vw,52px);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;color:#fff}
+.jl-hero .clock-state{font-size:12.5px;color:var(--gold-2);margin-top:6px;font-variant-numeric:tabular-nums}
+.jl-now{margin-top:16px;padding:14px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09)}
+.jl-now-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px}
+.jl-now-label{display:inline-flex;gap:6px;align-items:center;color:var(--gold-2);font-weight:700}
+.jl-now-label .ui-icon{width:14px;height:14px}
+.jl-now-status{color:#cfe0f2;font-weight:600}
+.jl-now-title{font-size:20px;font-weight:800;line-height:1.25;margin-top:6px;color:#fff}
+.jl-now-meta{font-size:13px;color:#a9bdd3;margin-top:4px}
+.jl-track{height:8px;border-radius:99px;background:rgba(255,255,255,.1);margin-top:12px;overflow:hidden}
+.jl-track .auto-fill{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#c8902c,var(--gold-2));transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.jl-now-foot{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:12.5px;color:#a9bdd3}
+.jl-now-details{margin-top:10px;color:#dbe7f3;font-size:13.5px}
+.jl-now-details *{color:inherit}
+.jl-quote{margin:14px 2px 0;padding:0 0 0 12px;border-left:2px solid #e3b04b}
+.jl-quote blockquote{margin:0;font-size:14.5px;line-height:1.55;color:#eef4fb}
+.jl-quote figcaption{margin-top:6px;font-size:12px;color:#9fb3c9}
+@media (prefers-reduced-motion:no-preference){
+  .jl-hero{animation:jlHeroIn .7s cubic-bezier(.2,.8,.2,1) both}
+  .jl-crown{animation:jlCrown 1.2s ease .3s both}
+}
+@keyframes jlHeroIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes jlCrown{0%{transform:translateY(-6px) rotate(-14deg);opacity:0}60%{transform:translateY(1px) rotate(4deg);opacity:1}100%{transform:none}}
+
+/* pulse: what matters now, under the rings */
+.jl-focus{display:grid;gap:8px;margin-top:12px}
+@media (min-width:700px){.jl-focus{grid-template-columns:1fr 1fr}}
+.jl-focus-item{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
+.jl-focus-item>.ui-icon{width:18px;height:18px;color:var(--fc);flex:none;margin-top:2px}
+.jl-focus-item span{display:block;font-size:12px;color:var(--muted)}
+.jl-focus-item b{display:block;font-size:14.5px;margin-top:1px}
+.jl-focus-item small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+/* rhythm, report */
+.jl-count{font-weight:800;font-variant-numeric:tabular-nums;padding:6px 11px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:13px;white-space:nowrap}
+.jl-rhythm .timeline{margin-top:12px}
+.jl-report-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.jl-analysis{display:flex;gap:8px;flex-wrap:wrap}
+
+/* money: today's result + the two actions people use most */
+.jl-money-today{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0 6px;padding:12px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
+.jl-money-today span{font-size:12px;color:var(--muted);display:block}
+.jl-money-today b{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}
+.jl-money-today small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.jl-money-actions{display:flex;flex-direction:column;gap:8px}
+
+/* buttons sized for a thumb (≥44px) */
+.jl-pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+.jl-pill .ui-icon{width:16px;height:16px}
+.jl-pill.green .ui-icon{color:var(--green)}
+.jl-pill.red .ui-icon{color:var(--red)}
+.jl-pill.gold{background:linear-gradient(135deg,#d9a441,#f2cd7c);color:#21170a;border:0}
+.jl-pill:focus-visible,.jl-fab:focus-visible,.jl-quick-grid button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+#viewToday .v-task{min-height:56px}
+#viewToday .v-check{width:24px;height:24px}
+
+/* quick add: in the thumb zone, above the navigation */
+.jl-fab{position:fixed;right:18px;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:310;width:60px;height:60px;border-radius:20px;border:0;display:grid;place-items:center;color:#21170a;
+  background:linear-gradient(140deg,#f6d58a,#d9a441);box-shadow:0 12px 26px rgba(183,132,31,.42),inset 0 1px 0 rgba(255,255,255,.55);cursor:pointer;transition:transform .2s ease,opacity .2s ease}
+.jl-fab .ui-icon{width:26px;height:26px}
+.jl-fab:active{transform:scale(.92)}
+body.modal-open .jl-fab{opacity:0;pointer-events:none}
+body[data-layout="desktop"] .jl-fab{bottom:28px;right:28px}
+.jl-quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.jl-quick-grid button{display:grid;justify-items:start;align-content:start;gap:4px;min-height:100px;padding:14px;border-radius:18px;border:1px solid color-mix(in srgb,var(--qc) 30%,var(--line));background:color-mix(in srgb,var(--qc) 9%,var(--panel));color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.jl-quick-grid .ui-icon{width:24px;height:24px;color:var(--qc)}
+.jl-quick-grid b{font-size:16px}
+.jl-quick-grid small{font-size:12.5px;color:var(--muted)}
+#viewToday{padding-bottom:84px}
+
+/* header polish: real-size logo, one navigation on phones (the bottom bar) */
+.jl-logo{flex:none;width:40px!important;height:40px!important;min-width:40px;border-radius:12px!important}
+.jl-crown{width:21px;height:21px}
+.jl-now-status{display:none}
+body[data-layout="mobile"] #topChips{display:none}
+@media (max-width:760px){#topChips{display:none}}
+
+#viewToday>.jl-hero+*{margin-top:.9rem}
+.jl-focus.one{grid-template-columns:1fr}
+
+/* active filter chips: white text readable on blue (WCAG AA) */
+[data-note-filter].active,[data-notif-filter].active,.v-chips button.active{background:#2563eb!important;border-color:#2563eb!important;color:#fff!important}
+#pfLogout{color:#ff8a8a}
+html[data-theme="light"] #pfLogout{color:#b91c1c}
 </style>
 
 
@@ -1380,7 +1482,7 @@ body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!im
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <span class="brand-ver">V58</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V58</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -1390,8 +1492,29 @@ body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!im
 <nav class="v-chips" id="topChips" aria-label="Разделы"><button type="button" data-tab="viewToday" class="active"><svg class="ui-icon" aria-hidden="true"><use href="#i-home"></use></svg>Сегодня</button><button type="button" data-tab="viewGoal"><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg>Цели</button><button type="button" data-tab="viewMoney"><svg class="ui-icon" aria-hidden="true"><use href="#i-wallet"></use></svg>Деньги</button><button type="button" data-tab="viewNotes"><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg>Заметки</button></nav>
 <main class="shell">
 <section id="viewToday" class="view active">
+  <div class="jl-hero" id="todayHero">
+    <div class="jl-hero-top">
+      <button class="jl-hero-date" id="calendarBtn" type="button" aria-label="Открыть календарь">
+        <h1 id="todayTitle">—</h1><span id="todayDate">—</span>
+      </button>
+      <div class="jl-hero-clock"><div class="clock-time" id="clock">00:00:00</div><div class="clock-state" id="clockState">—</div></div>
+    </div>
+    <div class="jl-now">
+      <div class="jl-now-head"><span class="jl-now-label"><svg class="ui-icon" aria-hidden="true"><use href="#i-play"></use></svg>Сейчас</span><span class="jl-now-status" id="currentStatus">—</span></div>
+      <div class="jl-now-title" id="currentAction">—</div>
+      <div class="jl-now-meta" id="currentWindow">—</div>
+      <div class="jl-track"><i class="auto-fill" id="autoProgress"></i></div>
+      <div class="jl-now-foot"><span id="currentProgressText">—</span><span id="nextAlertText">—</span></div>
+      <div class="detail-list jl-now-details" id="currentDetails"></div>
+    </div>
+    <figure class="jl-quote">
+      <blockquote id="motivationText">—</blockquote>
+      <figcaption id="motivationSource">—</figcaption>
+    </figure>
+  </div>
+
   <div class="card v-pulse">
-    <div class="v-pulse-head"><h2 class="v-title v-title-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-runner"></use></svg>Пульс жизни</h2><span class="v-date"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg><span id="pulseDate">—</span></span></div>
+    <div class="v-pulse-head"><h2 class="v-title v-title-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-runner"></use></svg>Пульс жизни</h2></div>
     <div class="v-pulse-sub"><span class="v-sub" id="pulseStatus">—</span><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">—</strong></div></div>
     <div class="ring-grid">
       <button class="ring-item" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="День: открыть ход дня"><span class="ring" style="--rc:var(--blue)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDay" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDay">0%</b></span><span class="ring-label">День</span><span class="ring-state" id="ringDayState">—</span></button>
@@ -1401,7 +1524,21 @@ body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!im
       <button class="ring-item" type="button" data-ring="debt" aria-label="Долг"><span class="ring" style="--rc:var(--orange)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDebt" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDebt">0%</b></span><span class="ring-label">Долг</span><span class="ring-state" id="ringDebtState">—</span></button>
     </div>
     <div class="pulse-note" id="pulseNote">—</div>
+    <div class="jl-focus one">
+      
+      <div class="jl-focus-item" style="--fc:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-wallet"></use></svg><div><span>Деньги</span><b id="dashFinancialTitle">—</b><small id="dashFinancialText">—</small></div></div>
+    </div>
     <select id="dayMode" class="mode-select" hidden aria-hidden="true" tabindex="-1"><option value="normal">Нормальный день</option><option value="heavy">Тяжёлый день</option><option value="rest">Выходной</option></select>
+  </div>
+
+  <div class="card jl-rhythm">
+    <div class="row"><div><h2 class="v-title">Ритм дня</h2><div class="v-sub">Этапы отмечаются сами, когда время этапа прошло</div></div><span class="jl-count" id="dayCompletion">0 / 3</span></div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+
+  <div class="card">
+    <div class="row"><div><h2 class="v-title">Задачи на сегодня</h2><div class="v-sub" id="taskSummary">—</div></div><button class="v-add sm" type="button" id="addTaskBtn" aria-label="Добавить задачу" title="Добавить задачу"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div>
+    <div class="v-tasks" id="taskList"></div>
   </div>
 
   <div class="card v-goal-card" id="tgCard" role="button" tabindex="0" aria-label="Открыть главную цель">
@@ -1423,65 +1560,14 @@ body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!im
       <div class="v-kpi" style="--kc:var(--red)"><span><i></i>Расход</span><b class="red-txt" id="tmExpense">0</b></div>
       <div class="v-kpi" style="--kc:var(--orange)"><span><i></i>Долг</span><b class="orange-txt" id="tmDebt">0</b></div>
     </div>
+    <div class="jl-money-today"><div><span>Сегодня</span><b id="todayBalance">0</b><small id="todayCashState">—</small><small id="dashDebtMeta" class="jl-debt-meta">—</small></div><div class="jl-money-actions"><button class="jl-pill green" type="button" id="todayAddProfitBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg>Доход</button><button class="jl-pill red" type="button" id="todayAddExpenseBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow-down"></use></svg>Расход</button></div></div>
     <div class="v-minichart" id="tmChart" role="img" aria-label="Доходы и расходы по дням месяца"></div>
     <div class="v-minilegend"><span id="tmChartStart">1</span><span><span class="green-txt">■</span> доход · <span class="red-txt">■</span> расход</span><span id="tmChartEnd">—</span></div>
   </div>
 
-  <div class="card">
-    <div class="row"><div><h2 class="v-title">Задачи на сегодня</h2><div class="v-sub" id="taskSummary">—</div></div><button class="v-add sm" type="button" id="addTaskBtn" aria-label="Добавить задачу" title="Добавить задачу"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div>
-    <div class="v-tasks" id="taskList"></div>
-  </div>
-
-  <details class="v-more" id="todayMore"><summary>Подробности дня: расписание, мотивация, итог</summary><div class="v-more-body">
-  <div class="date-head">
-    <div class="date-main"><div class="eyebrow cell-head"><button class="section-title-icon calendar-open" id="calendarBtn" type="button" title="Открыть календарь доходов" aria-label="Открыть календарь доходов"><svg class="ui-icon"><use href="#i-calendar"></use></svg></button>Сегодня</div><h1 id="todayTitle">—</h1><div class="sub" id="todayDate">—</div></div>
-    <div class="clock"><div class="clock-time" id="clock">00:00:00</div><div class="clock-state" id="clockState">—</div></div>
-  </div>
-
-  <div class="motivation section">
-    <div class="motivation-title"><svg class="ui-icon"><use href="#i-spark"></use></svg> Мотивация дня</div>
-    <div class="motivation-text" id="motivationText">—</div>
-    <div class="motivation-source" id="motivationSource">—</div>
-  </div>
-
-
-  <div class="card section" id="controlDashboard">
-    <div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Контрольная панель</div><h2>Ключевые показатели</h2><div class="sub">Фактическое состояние системы на текущий момент.</div></div><span class="small muted" id="controlUpdated">—</span></div>
-    <div class="kpi-row" style="margin-top:11px">
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Свободная касса</div><div class="value orange-txt" id="dashCash">0</div><div class="debt-kpi-note" id="dashCashMeta">—</div></div>
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Обязательства</div><div class="value red-txt" id="dashDebt">0</div><div class="debt-kpi-note" id="dashDebtMeta">—</div></div>
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><div class="value blue" id="dashGoal">0%</div><div class="debt-kpi-note" id="dashGoalMeta">—</div></div>
-      <div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-check"></use></svg></span>Дисциплина</div><div class="value" id="dashDiscipline">0%</div><div class="debt-kpi-note" id="dashDisciplineMeta">—</div></div>
-    </div>
-    <div class="grid g2" style="margin-top:10px">
-      <div class="pressure-box"><div class="eyebrow">Финансовый контроль</div><h3 id="dashFinancialTitle" style="margin:4px 0">—</h3><div class="sub" id="dashFinancialText">—</div></div>
-      <div class="pressure-box"><div class="eyebrow">Главный приоритет</div><h3 id="dashPriorityTitle" style="margin:4px 0">—</h3><div class="sub" id="dashPriorityText">—</div></div>
-    </div>
-  </div>
-
-  <div class="now-card card section">
-    <div class="now-top">
-      <div><div class="now-kicker"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Сейчас нужно сделать</div><div class="now-title" id="currentAction">—</div><div class="now-meta" id="currentWindow">—</div></div>
-      <div class="now-kicker" id="currentStatus">—</div>
-    </div>
-    <div class="auto-track"><i class="auto-fill" id="autoProgress"></i></div>
-    <div class="now-foot"><span id="currentProgressText">—</span><span id="nextAlertText">—</span></div>
-    <div class="detail-list" id="currentDetails" style="padding:0 15px 14px"></div>
-  </div>
-
-  <div class="card section"><div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg></span>Дальше</div><h2>По порядку</h2></div><span class="small muted">1 → 2 → 3</span></div><div class="future-list" id="nextList" style="margin-top:10px"></div></div>
-
-  <div class="card section"><div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>Ритм дня</div><h2>Три этапа</h2></div><span class="small muted" id="dayCompletion">0 / 3</span></div><div class="timeline" id="timeline" style="margin-top:10px"></div></div>
-
-  <div class="grid g2 section">
-    <div class="card"><div class="eyebrow cell-head"><span class="cell-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Главная цель</div><h2 id="miniGoal" style="margin-top:4px">—</h2><div class="sub" id="miniNext">—</div></div>
-    <div class="card"><div class="row"><div><div class="eyebrow cell-head"><span class="cell-title-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Баланс сегодня</div><div style="font-size:21px;font-weight:950;margin-top:4px" id="todayBalance">0</div><div class="sub">Прибыль − расходы</div><div class="sub" id="todayGoalSaved" style="margin-top:3px">На цель: 0</div><div class="sub" id="todayCashState" style="margin-top:3px">Касса: 0 · Общий капитал: 0</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn small primary" id="todayAddProfitBtn"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Прибыль</button><button class="btn small orange" id="todayAddExpenseBtn"><svg class="ui-icon"><use href="#i-arrow-down"></use></svg> Расход</button></div></div></div>
-  </div>
-
-  <div class="row section"><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small" id="lifeAnalysisBtn"><svg class="ui-icon"><use href="#i-spark"></use></svg> Анализировать мою жизнь</button><button class="btn small orange" id="aiAnalysisBtn"><svg class="ui-icon"><use href="#i-spark"></use></svg> AI-анализ</button></div><span class="small muted">Локальный анализ работает офлайн · AI отправляет только подтверждённые данные</span></div>
-
-  <div class="card section">
-    <div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Вечер</div><h2>Итог дня</h2><div class="sub">Спокойно закрыть день и определить одно действие на завтра.</div></div><div style="display:flex;align-items:center;gap:8px"><button class="btn small" id="historyBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> История</button><span class="small muted autosave-status" id="reportSaved" aria-live="polite">—</span></div></div>
+  <div class="card jl-report">
+    <div class="row"><div><h2 class="v-title">Итог дня</h2><div class="v-sub">Закрой день и выбери одно действие на завтра</div></div>
+      <button class="jl-pill" type="button" id="historyBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg>История</button></div>
     <div class="report-shell">
       <div class="report-grid">
         <div class="field"><label>Факт дня</label><textarea id="rDone" placeholder="Что реально сделал сегодня"></textarea></div>
@@ -1493,8 +1579,12 @@ body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!im
       </div>
       <div class="report-actions"><button class="btn primary" id="saveReportBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Зафиксировать итог</button></div>
     </div>
+    <div class="jl-report-foot"><span class="autosave-status" id="reportSaved" aria-live="polite">—</span>
+      <div class="jl-analysis"><button class="jl-pill" type="button" id="lifeAnalysisBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-report"></use></svg>Разбор дня</button>
+      <button class="jl-pill gold" type="button" id="aiAnalysisBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-spark"></use></svg>AI-анализ</button></div></div>
   </div>
-  </div></details>
+
+  <button class="jl-fab" type="button" id="quickAddBtn" aria-label="Быстро добавить: задачу, доход, расход или заметку"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button>
 </section>
 
 <section id="viewGoal" class="view">
@@ -2584,8 +2674,8 @@ function renderToday(){
   const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>x.i>(info.kind==='active'?info.i:-1));
   autoCompleteExpiredStages();const effectiveRep=dayReport();$('timeline').innerHTML=state.day.steps.map((s,i)=>{const expired=nowMin()>=timeToMin(s.end),done=!!effectiveRep.steps[s.id]||expired,current=info.kind==='active'&&info.i===i;const stagePct=done?100:(current?Math.round(info.pct):0);const icon=done?'i-check':(current?'i-play':'i-calendar');return `<div class="timeline-row ${current?'current':''} ${done?'done':''}"><div class="time-range">${esc(s.time)}<br>${esc(s.end)}</div><div><div class="t-title"><span class="stage-icon" aria-hidden="true"><svg class="ui-icon"><use href="#${icon}"></use></svg></span>Этап ${i+1} · ${esc(s.title)}</div><div class="t-note">${esc(s.text)}</div><div class="stage-pct">${done?'100% завершено':current?`${stagePct}% времени прошло`:'0% времени прошло'}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${done?'Этап завершён: '+s.title:'Завершить этап: '+s.title}"></div>`}).join('');
   $$('[data-day-step]').forEach(c=>{if(c.checked&&!c.disabled)c.classList.add('auto-complete-anim');c.onchange=()=>{rep.steps[c.dataset.dayStep]=c.checked;saveState();renderToday()}});
-  $('nextList').innerHTML=future.length?future.map(x=>`<div class="future-item"><div class="step-no">${x.i+1}</div><div><div class="future-title">${esc(x.s.title)}</div><div class="future-time">${esc(x.s.time)}–${esc(x.s.end)}</div></div><div class="future-arrow">→</div></div>`).join(''):'<div class="empty">После последнего этапа — отдых.</div>';
-  $('miniGoal').textContent=state.goal.title;$('miniNext').textContent=state.goal.next;$('todayBalance').textContent=fmtMoney(daySum(state.profits)-daySum(state.expenses));const wm=walletMetrics();setText('todayGoalSaved',`На цель: ${fmtMoney(wm.goal)}`);const fs=financialSnapshot();setText('todayCashState',`Касса: ${fmtMoney(fs.cash)} · На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`);
+  ($('nextList')||{}).innerHTML=future.length?future.map(x=>`<div class="future-item"><div class="step-no">${x.i+1}</div><div><div class="future-title">${esc(x.s.title)}</div><div class="future-time">${esc(x.s.time)}–${esc(x.s.end)}</div></div><div class="future-arrow">→</div></div>`).join(''):'<div class="empty">После последнего этапа — отдых.</div>';
+  setText('miniGoal',state.goal.title);setText('miniNext',state.goal.next);$('todayBalance').textContent=fmtMoney(daySum(state.profits)-daySum(state.expenses));const wm=walletMetrics();setText('todayGoalSaved',`На цель: ${fmtMoney(wm.goal)}`);const fs=financialSnapshot();setText('todayCashState',`Касса: ${fmtMoney(fs.cash)} · На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`);
   for(const k of ['done','block','future','tomorrow']){const el=$('r'+k[0].toUpperCase()+k.slice(1));if(el&&document.activeElement!==el)el.value=rep[k]||''}
   $('reportSaved').textContent=rep.savedAt?`Сохранено ${fmtDateTime(new Date(rep.savedAt))}`:'Не сохранено';
   renderPulseRings();renderTodayGoal();renderTodayMoney();renderTasks();setText('brandSub',greeting()+(state.profile.name?', '+state.profile.name:''));
@@ -3299,11 +3389,22 @@ function renderTasks(){
   const list=$('taskList');if(!list)return;const rep=dayReport(),m=nowMin(),info=getStageInfo();
   const stages=(state.day.steps||[]).map((s,i)=>{const expired=m>=timeToMin(s.end),done=!!rep.steps?.[s.id]||expired,current=info.kind==='active'&&info.i===i;return `<div class="v-task stage ${done?'done':''}"><input class="v-check" type="checkbox" data-task-stage="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${esc('Этап: '+s.title)}"><div><div class="v-task-title">${esc(s.title)}</div><div class="v-task-meta">${current?'Сейчас · ':''}Этап ${i+1} расписания</div></div><span class="v-task-time">${esc(s.time)}–${esc(s.end)}</span><span></span></div>`});
   const tasks=todayTasks().map(t=>{const late=!t.done&&t.time&&m>=timeToMin(t.time),lead=taskLead(t);return `<div class="v-task ${t.done?'done':''} ${late?'overdue':''}"><input class="v-check" type="checkbox" data-task-id="${esc(t.id)}" ${t.done?'checked':''} aria-label="${esc('Задача: '+t.title)}"><div><div class="v-task-title">${esc(t.title)}</div><div class="v-task-meta">${t.done&&t.doneAt?'Выполнено в '+esc(new Date(t.doneAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})):late?'Время прошло — отметь или перенеси':t.time?`<span class="v-remind">${svgIcon('i-bell')} ${lead?'за '+lead+' мин и ':''}в ${esc(t.time)}</span>`:'Задача'}</div></div><span class="v-task-time">${esc(t.time||'')}</span><button class="v-task-del" type="button" data-task-del="${esc(t.id)}" aria-label="Удалить задачу">${svgIcon('i-x')}</button></div>`});
-  list.innerHTML=[...tasks,...stages].join('')||'<div class="v-empty">Задач на сегодня нет.</div>';
+  list.innerHTML=tasks.join('')||'<div class="v-empty">Задач на сегодня нет — нажми «+», чтобы добавить.</div>';
   const all=todayTasks(),doneCount=all.filter(t=>t.done).length;setText('taskSummary',all.length?`${doneCount} из ${all.length} задач выполнено`:'Добавь задачу кнопкой «+»');
   $$('[data-task-id]').forEach(c=>c.onchange=()=>{const t=(state.tasks||[]).find(x=>x.id===c.dataset.taskId);if(!t)return;t.done=c.checked;t.doneAt=c.checked?new Date().toISOString():'';saveState();renderTasks();scheduleNativeTasks();if(c.checked)toast('Задача выполнена',t.title)});
   $$('[data-task-stage]').forEach(c=>c.onchange=()=>{rep.steps[c.dataset.taskStage]=c.checked;saveState();renderToday()});
   $$('[data-task-del]').forEach(b=>b.onclick=()=>{state.tasks=(state.tasks||[]).filter(x=>x.id!==b.dataset.taskDel);saveState();renderTasks();scheduleNativeTasks();toast('Задача удалена')});
+}
+function openQuickAdd(){
+  openModal(`<div class="close-row"><div><h2>Добавить</h2><div class="sub">Что записать?</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
+  <div class="jl-quick-grid">
+    <button type="button" data-quick="task" style="--qc:var(--blue)">${svgIcon('i-check')}<b>Задача</b><small>с напоминанием</small></button>
+    <button type="button" data-quick="profit" style="--qc:var(--green)">${svgIcon('i-arrow-up')}<b>Доход</b><small>пришли деньги</small></button>
+    <button type="button" data-quick="expense" style="--qc:var(--red)">${svgIcon('i-arrow-down')}<b>Расход</b><small>потратил</small></button>
+    <button type="button" data-quick="note" style="--qc:var(--gold)">${svgIcon('i-note')}<b>Заметка</b><small>мысль, идея</small></button>
+  </div>`);
+  $('closeModalBtn').onclick=closeModal;
+  $$('[data-quick]').forEach(b=>b.onclick=()=>{const k=b.dataset.quick;closeModal();if(k==='task')openTaskForm();else if(k==='note'){showView('viewNotes');openNoteEditor()}else openMoneyForm(k)});
 }
 function openTaskForm(){
   openModal(`<div class="close-row"><div><div class="eyebrow">Сегодня</div><h2>Новая задача</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Что сделать</label><input id="taskTitle" maxlength="140" placeholder="Например: позвонить в банк"></div><div class="grid g2"><div class="field"><label>Время (необязательно)</label><input id="taskTime" type="time"></div><div class="field"><label>Дата</label><input id="taskDate" type="date" value="${esc(keyDay())}"></div></div><div class="field"><label>Напомнить</label><select id="taskRemind"><option value="0">В момент задачи</option><option value="5">За 5 минут</option><option value="10">За 10 минут</option><option value="15">За 15 минут</option><option value="30">За 30 минут</option><option value="60">За час</option></select></div><div class="sub">Если указать время, Jamal Life напомнит со звуком — даже когда приложение закрыто (Android и Windows).</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveTaskBtn">${svgIcon('i-check')} Добавить</button></div></div>`);
@@ -3628,7 +3729,7 @@ function bindV57(){
   $$('[data-fmt]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>noteFormat(b.dataset.fmt)});
   ['neTitle','neBody'].forEach(id=>$(id).addEventListener('input',noteEditorSync));$('nePinned').addEventListener('change',noteEditorSync);$('neSave').onclick=noteEditorSave;
   $('neTrash').onclick=()=>{if(noteEditId){const id=noteEditId;noteEditId='';showView('viewNotes');moveToTrash(id)}else{clearDraft('note');showView('viewNotes');toast('Черновик удалён')}};
-  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('Jamal Life','Так звучат напоминания.');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:'Jamal Life',body:'Так звучат напоминания.'});return}}catch(e){}showWebNotification('Jamal Life','Так звучат напоминания.');toast('Jamal Life','Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
+  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('Jamal Life','Так звучат напоминания.');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:'Jamal Life',body:'Так звучат напоминания.'});return}}catch(e){}showWebNotification('Jamal Life','Так звучат напоминания.');toast('Jamal Life','Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
   $('setDarkTheme').onchange=e=>{state.settings.theme=e.target.checked?'dark':'light';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');
