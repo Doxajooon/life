@@ -23,6 +23,7 @@ public class ActionReceiver extends BroadcastReceiver {
         if (DONE.equals(i.getAction())) {
             PendingActions.add(ctx, "done", task);
             AlarmScheduler.cancelTask(ctx, task);
+            JamalWidget.markDone(ctx, task);
             MainActivity.deliverActions();
         } else if (SNOOZE.equals(i.getAction())) {
             String title = i.getStringExtra("title"), body = i.getStringExtra("body");

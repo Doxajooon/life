@@ -515,6 +515,67 @@ await test("Разбор недели от AI", async () => {
   await ctx.close();
 });
 
+// ================= V60 =================
+await test("Привычки: отметка, серия и объединение между устройствами", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud), B = await device(cloud);
+  await A.page.click('[data-habit-idea="0"]');
+  const hid = await A.page.evaluate(() => state.habits[0].id);
+  await A.page.evaluate(id => { const d = new Date(); state.habitLog[id] = {}; for (let i = 1; i <= 4; i++) { d.setDate(d.getDate() - 1); state.habitLog[id][keyDay(d)] = 1; } saveState(); renderHabits(); }, hid);
+  await A.page.click(`[data-habit-check="${hid}"]`);
+  const a = await A.page.evaluate(id => ({ on: document.querySelector(`[data-habit-check="${id}"]`).getAttribute("aria-pressed"), sub: document.querySelector(`[data-habit-edit="${id}"] small`).textContent, sum: document.getElementById("habitSummary").textContent }), hid);
+  assert.deepEqual(a, { on: "true", sub: "каждый день · 🔥 5 дней", sum: "Сегодня 1 из 1" });
+  await sync(A.page); await sync(B.page);
+  // B adds a second habit and ticks it; A unticks today's mark — both changes must survive
+  await B.page.evaluate(() => { addHabit("Спорт", "weekly", 3); const h = state.habits.find(x => x.title === "Спорт"); toggleHabit(h.id); });
+  await A.page.evaluate(id => toggleHabit(id), hid);
+  await sync(A.page); await sync(B.page); await sync(A.page);
+  for (const d of [A, B]) {
+    const r = await d.page.evaluate(id => ({ n: state.habits.length, todayFirst: !!state.habitLog[id]?.[keyDay()], past: Object.keys(state.habitLog[id] || {}).length, sport: Object.keys(state.habitLog[state.habits.find(x => x.title === "Спорт").id] || {}).length }), hid);
+    assert.deepEqual(r, { n: 2, todayFirst: false, past: 4, sport: 1 });
+  }
+  assert.deepEqual(A.page.errors, []); assert.deepEqual(B.page.errors, []);
+  await A.ctx.close(); await B.ctx.close();
+});
+
+await test("Экраны «Деньги» и «Цель»: главное сверху, остальное в «Подробнее»", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    showView("viewMoney"); const mb = document.querySelector('[data-more="moneyMore"]');
+    const hiddenBefore = document.getElementById("moneyMore").hidden; mb.click();
+    const shown = !document.getElementById("moneyMore").hidden && document.getElementById("mvChart").innerHTML.length > 0;
+    showView("viewGoal");
+    const goalText = document.getElementById("viewGoal").innerText;
+    const title = state.goal.title, count = goalText.split(title).length - 1;
+    return { hiddenBefore, shown, label: mb.textContent.trim(), noAnalysis: !document.getElementById("financeAnalysis"), count, mainInList: !!document.querySelector('#goalList [data-goal-open="' + state.goals.find(g => g.main)?.id + '"]') };
+  });
+  assert.deepEqual(r, { hiddenBefore: true, shown: true, label: "Скрыть", noAnalysis: true, count: 1, mainInList: false });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Виджет Android и резервные копии", async () => {
+  const { ctx, page } = await device(makeCloud(), {
+    init: () => { window.__w = []; window.__launch = "quickadd"; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { if (k === "updateWidget") window.__w.push(JSON.parse(a[0])); if (k === "takeLaunch") { const v = window.__launch; window.__launch = ""; return v; } return k === "bridgeVersion" ? 4 : undefined; } }); },
+  });
+  await page.waitForTimeout(400);
+  const w = await page.evaluate(() => { const last = __w.at(-1); return { steps: last?.steps?.length, quick: document.body.classList.contains("modal-open") }; });
+  assert.equal(w.steps, 3); assert.equal(w.quick, true, "widget «+» did not open quick add");
+  const n = await page.evaluate(async () => { closeModal(); state.tasks.push({ id: "wt", title: "Позвонить", time: "23:59", date: keyDay() }); saveState(); renderTasks(); return __w.at(-1).tasks.some(t => t.id === "wt" && t.title === "Позвонить"); });
+  assert.ok(n, "widget did not get the new task");
+  // daily backup: exists, and restore brings an older state back
+  const b = await page.evaluate(async () => {
+    await mirrorToIndexedDB(JSON.stringify(state), new Date().toISOString());
+    const rows = await listDailyBackups(); const before = state.notes.length;
+    state.notes.push({ id: "late", title: "после копии", body: "x", at: new Date().toISOString(), category: "personal" }); saveState();
+    window.confirm = () => true; await openBackups(); document.querySelector("[data-bk]").click(); await new Promise(r => setTimeout(r, 400));
+    return { rows: rows.length, restored: state.notes.length === before && !state.notes.some(n => n.id === "late") };
+  });
+  assert.deepEqual(b, { rows: 1, restored: true });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

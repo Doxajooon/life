@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "59.0.0");
-assert.match(gradle, /versionCode 590\b/); assert.match(gradle, /versionName '59\.0'/);
-assert.match(csproj, /<Version>59\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V59'), "app version must be V59 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v59-0"), "service worker cache must be V59");
+assert.equal(pkg.version, "60.0.0");
+assert.match(gradle, /versionCode 600\b/); assert.match(gradle, /versionName '60\.0'/);
+assert.match(csproj, /<Version>60\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V60'), "app version must be V60 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v60-0"), "service worker cache must be V60");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -70,4 +70,4 @@ const tiny = [...html.matchAll(/font-size:\s*(\d*\.?\d+)(px|rem)\b/g)].map(m => 
 assert.deepEqual(tiny, [], "text smaller than 11px: " + tiny.join(", "));
 assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 
-console.log("JAMAL_LIFE_V59_STATIC_QA_OK");
+console.log("JAMAL_LIFE_V60_STATIC_QA_OK");

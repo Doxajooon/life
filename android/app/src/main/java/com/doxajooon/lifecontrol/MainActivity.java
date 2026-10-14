@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean unlocked = false, prompting = false;
     private long stoppedAt = 0, promptEndedAt = 0;
     private static WeakReference<MainActivity> resumed = new WeakReference<>(null);
+    private String launchAction = null; // «+» on the widget → quick add in the web app
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -118,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
             webView.loadUrl(APP_URL);
         }
 
+        if (JamalWidget.QUICK_ADD.equals(getIntent().getAction())) launchAction = "quickadd";
         requestNotificationPermission();
         AlarmScheduler.dropLegacy(getApplicationContext());
         NotificationUtil.ensureChannel(getApplicationContext());
@@ -292,6 +294,15 @@ public class MainActivity extends AppCompatActivity {
         if (resumed.get() == this) resumed = new WeakReference<>(null);
         if (webView != null) webView.onPause();
         super.onPause();
+    }
+
+    @Override protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (JamalWidget.QUICK_ADD.equals(intent.getAction()) && webView != null) {
+            launchAction = "quickadd";
+            webView.evaluateJavascript("window.__jlLaunch&&window.__jlLaunch()", null);
+        }
     }
 
     @Override protected void onStop() {
@@ -470,6 +481,14 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
-        @JavascriptInterface public int bridgeVersion() { return 3; }
+        /** Schedule and tasks for the home-screen widget (JSON). */
+        @JavascriptInterface public void updateWidget(String json) { JamalWidget.save(ctx, json); }
+
+        /** What the app was opened for (widget «+» → "quickadd"), read once. */
+        @JavascriptInterface public String takeLaunch() {
+            String a = activity.launchAction; activity.launchAction = null; return a == null ? "" : a;
+        }
+
+        @JavascriptInterface public int bridgeVersion() { return 4; }
     }
 }

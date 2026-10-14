@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Jamal Life</string>
+    <string name="widget_desc">Текущий этап дня, следующая задача и быстрое добавление</string>
 </resources>

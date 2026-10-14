@@ -9,6 +9,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         String id = intent.getStringExtra("id"), kind = intent.getStringExtra("kind"), time = intent.getStringExtra("time");
         String title = intent.getStringExtra("title"), body = intent.getStringExtra("body");
         NotificationUtil.show(ctx, title, body, (id == null ? "alarm" : id).hashCode(), taskOf(id));
+        JamalWidget.updateAll(ctx);
         if (id == null) return;
         if ("daily".equals(kind) && time != null) AlarmScheduler.schedule(ctx, id, time, title, body);
         else AlarmScheduler.fired(ctx, id, kind);
