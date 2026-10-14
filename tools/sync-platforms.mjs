@@ -2,8 +2,9 @@
 // CI runs this before every build; the copies are git-ignored, so they can never drift.
 import { cpSync, mkdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = resolve(new URL("..", import.meta.url).pathname);
+const root = fileURLToPath(new URL("..", import.meta.url)); // works on Windows too (no "/D:/" paths)
 const files = ["index.html", "sw.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"];
 const targets = ["android/app/src/main/assets", "desktop/Web"];
 

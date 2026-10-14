@@ -6,9 +6,10 @@ import { chromium } from "playwright";
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 
-const ROOT = path.resolve(new URL("..", import.meta.url).pathname);
+const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const UID = "11111111-1111-1111-1111-111111111111";
 const results = [];
 let failed = 0;
