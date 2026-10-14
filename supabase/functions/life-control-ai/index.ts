@@ -24,6 +24,25 @@ function promptRules() {
   return ["Ты — Jamal Life AI, персональный аналитический агент.","Работай только с фактами из переданных данных Jamal Life. Не придумывай суммы, даты, достижения, события или причины.","Отделяй факт от предположения.","Не давай мелких общих советов вроде «будь дисциплинированнее», «отдыхай больше», «продолжай работать» без конкретного действия.","Каждый вывод должен приводить к практическому решению.","Дай короткий управленческий разбор и затем КОНКРЕТНЫЙ ПЛАН ДЕЙСТВИЙ.","План должен содержать 3–5 действий с приоритетом P1/P2/P3, конкретным сроком, измеримым результатом и основанием из данных.","P1 — действие, которое нужно сделать первым и которое сильнее всего влияет на текущую проблему.","Если есть долги или финансовое давление, отдельно укажи конкретное действие по деньгам: сумму/лимит, срок или правило, только если это можно вывести из данных. Не придумывай возможность платить больше, чем позволяют данные.","Если есть цель, свяжи действия с ближайшим измеримым этапом цели.","Для режима goal обязательно отдельно покажи: ЧТО УЖЕ ДОСТИГНУТО — закрытые этапы и реальные результаты; ЧТО УЖЕ ЕСТЬ — собранный капитал, доступная касса и другие подтверждённые ресурсы; ЧТО МЕШАЕТ — один главный ограничитель; ЗАТЕМ ПЛАН — 3–5 конкретных действий.","Если есть незавершённые задачи или препятствия из отчётов, преврати наиболее существенное препятствие в конкретное действие.","Заверши блоком «ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ» — ровно одно действие, которое пользователь может выполнить сразу.","Не предлагай десять действий. Отсекай второстепенное.","Для денег показывай арифметику; не обещай гарантированный результат.","Спортивную аналитику не выдавай за гарантированный доход и не советуй ставки для закрытия долгов.","Пиши по-русски, прямо, серьёзно и без мотивационной воды.","Не изменяй данные пользователя."].join("\n");
 }
 
+// WEEK mode: short Sunday review of the last 7 days (strong side, weak spot, one step).
+function weekRules() {
+  return ["Ты — Jamal Life AI, личный наставник по итогам недели.","Работай только с фактами из переданных данных за последние 7 дней. Не придумывай суммы, события и причины.","Пиши по-русски, коротко, прямо, по-человечески, без воды и без markdown (#, **, списков).","Спортивную аналитику не выдавай за гарантированный доход и не советуй ставки для закрытия долгов."].join("\n");
+}
+// deno-lint-ignore no-explicit-any
+function weekContext(s: any, today: string): any {
+  const since = Date.now() - 7 * 86400000, inWeek = (x: any) => Date.parse(x?.at || "") >= since, amt = (x: any) => Math.max(0, Number(x?.amount) || 0);
+  const p = (Array.isArray(s?.profits) ? s.profits : []).filter(inWeek), e = (Array.isArray(s?.expenses) ? s.expenses : []).filter((x: any) => inWeek(x) && !x?.transfer);
+  const cat: Record<string, number> = {}; for (const x of e) { const k = clip(x?.category || "Другое", 60); cat[k] = (cat[k] || 0) + amt(x); }
+  // Report keys are the user's local dates, so the app sends its own "today".
+  const days: any[] = []; const d = new Date((/^\d{4}-\d{2}-\d{2}$/.test(today) ? today : new Date().toISOString().slice(0, 10)) + "T12:00:00Z");
+  for (let i = 0; i < 7; i++) { const k = d.toISOString().slice(0, 10), r = s?.reports?.[k]; days.push({ day: k, closed: !!(r?.closedAt || String(r?.done || "").trim()), done: clip(r?.done, 500), block: clip(r?.block, 500), tomorrow: clip(r?.tomorrow, 300) }); d.setUTCDate(d.getUTCDate() - 1); }
+  const tasks = (Array.isArray(s?.tasks) ? s.tasks : []).filter((t: any) => Date.parse((t?.date || "") + "T12:00:00") >= since - 86400000);
+  const budgets = (Array.isArray(s?.budgets) ? s.budgets : []).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthLimit: Number(b?.planned) || 0 }));
+  return { currency: String(s?.profile?.currency || "сомони"), goal: clip(s?.goal?.title, 200), days, closedDays: days.filter((x) => x.closed).length,
+    money: { income: p.reduce((a: number, x: any) => a + amt(x), 0), spent: e.reduce((a: number, x: any) => a + amt(x), 0), byCategory: cat, debt: (Number(s?.debts?.bank) || 0) + (Number(s?.debts?.firms) || 0), monthlyPayment: Number(s?.debts?.monthlyPayment) || 0, limits: budgets },
+    tasks: { total: tasks.length, done: tasks.filter((t: any) => t?.done).length, open: tasks.filter((t: any) => !t?.done).slice(0, 10).map((t: any) => clip(t?.title, 120)) } };
+}
+
 // Only the sections the user ticked are sent to the model, trimmed to sane sizes.
 // deno-lint-ignore no-explicit-any
 function context(s: any, c: any): any {
@@ -59,13 +78,13 @@ async function allowRequest(sb: any, userId: string) {
   return true;
 }
 
-async function gemini(input: string, useSearch: boolean) {
+async function gemini(input: string, useSearch: boolean, system = promptRules()) {
   const key = Deno.env.get("GEMINI_API_KEY") || "";
   if (!key) return { error: "GEMINI_API_KEY не настроен в Supabase Secrets.", status: 503 };
   // deno-lint-ignore no-explicit-any
   const payload: any = {
     model: MODEL,
-    system_instruction: promptRules(),
+    system_instruction: system,
     input,
     store: false,
     thinking_level: "low",
@@ -117,14 +136,16 @@ Deno.serve(async (req) => {
         : json({ error: "GEMINI_API_KEY не настроен в Supabase Secrets." }, 503);
     }
     if (!(await allowRequest(a.sb, a.user.id))) return json({ error: "Слишком много запросов AI за час. Попробуй позже." }, 429);
-    const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : "life";
+    const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return json({ error: "Не удалось прочитать данные Jamal Life из Supabase." }, 500);
-    const ctx = context(row?.state || {}, sc);
-    const p = mode === "goal"
+    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : context(row?.state || {}, sc);
+    const p = mode === "week"
+      ? weekRules() + "\n\nРЕЖИМ: WEEK. Подведи итог последних 7 дней ровно тремя блоками, каждый с новой строки и начинается с названия заглавными буквами:\nСИЛЬНАЯ СТОРОНА — 1–2 предложения: что реально получилось, с цифрой или фактом из данных.\nСЛАБОЕ МЕСТО — 1–2 предложения: что чаще всего мешало (смотри block в днях, траты, незакрытые дни и задачи).\nШАГ НА НЕДЕЛЮ — ровно одно конкретное действие на следующие 7 дней, которое можно проверить (время, сумма или количество).\nНичего кроме этих трёх блоков. Если данных почти нет, честно скажи это в СЛАБОМ МЕСТЕ и дай шаг: закрывать день каждый вечер.\n\nДанные:\n" + JSON.stringify(ctx)
+      : mode === "goal"
       ? promptRules() + "\n\nРЕЖИМ: GOAL. Проанализируй именно главную цель пользователя. Ответь в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — 2–3 подтверждённых факта.\n2) ЧТО УЖЕ ДОСТИГНУТО — только закрытые этапы и реальные результаты из данных.\n3) ЧТО УЖЕ ЕСТЬ — капитал в цели, свободная касса, доходы/расходы и другие подтверждённые ресурсы.\n4) ГЛАВНАЯ ПРОБЛЕМА — один главный ограничитель.\n5) ГЛАВНЫЙ ФОКУС — один приоритет на ближайшие 7 дней.\n6) ПЛАН ДЕЙСТВИЙ — 3–5 строк в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n7) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — ровно одно действие.\n\nНе выдумывай отсутствующие данные. Если цель не имеет суммы или срока, прямо укажи это и дай ближайшее измеримое действие без выдуманной цифры.\n\nДанные:\n" + JSON.stringify(ctx)
       : promptRules() + "\n\nРЕЖИМ: LIFE. Проанализируй систему пользователя в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — максимум 3 факта.\n2) ГЛАВНАЯ ПРОБЛЕМА — одна проблема, которая сейчас сильнее всего ограничивает движение.\n3) ФИНАНСОВАЯ СИТУАЦИЯ — только подтверждённые цифры и арифметика.\n4) ГЛАВНЫЙ ФОКУС НА 7 ДНЕЙ — один приоритет.\n5) ПЛАН ДЕЙСТВИЙ — 3–5 конкретных действий в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n6) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — одно действие, без альтернатив.\n7) КОНТРОЛЬНАЯ ТОЧКА — что проверить через 7 дней и по какому числу/факту понять результат.\n\nНе выдумывай отсутствующие данные. Если для конкретного действия не хватает данных, прямо укажи, чего не хватает, вместо выдумывания.\n\nДанные:\n" + JSON.stringify(ctx);
-    const r = await gemini(p, sc.webSearch);
+    const r = mode === "week" ? await gemini(p, false, weekRules()) : await gemini(p, sc.webSearch);
     if ("error" in r) return json({ error: r.error }, r.status);
     return json({ ok: true, model: MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
   } catch (e) {

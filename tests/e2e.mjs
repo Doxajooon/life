@@ -57,7 +57,12 @@ function makeCloud() {
     }
     if (url.pathname === "/auth/v1/user" && m === "PUT") { cloud.newPassword = JSON.parse(req.postData() || "{}").password; return ok(req.headers().authorization) ? send(200, { id: UID, email: "me@test.tj" }) : send(401, { msg: "expired" }); }
     if (url.pathname === "/auth/v1/user") return ok(req.headers().authorization) ? send(200, { id: UID, email: "me@test.tj" }) : send(401, { msg: "expired" });
-    if (url.pathname.startsWith("/functions/")) return ok(req.headers().authorization) ? send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] }) : send(401, { error: "auth" });
+    if (url.pathname.startsWith("/functions/")) {
+      if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
+      const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
+      if (b.mode === "week") return send(200, { ok: true, model: "mock", output_text: "СИЛЬНАЯ СТОРОНА — закрыл 5 дней.\nСЛАБОЕ МЕСТО — **телефон** <img src=x onerror=window.__xss=1>\nШАГ НА НЕДЕЛЮ — после 21:00 телефон на зарядку.", sources: [] });
+      return send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] });
+    }
     if (url.pathname === "/rest/v1/life_state") {
       if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
       if (m === "GET") {
@@ -383,7 +388,8 @@ await test("Android: задачи ставятся будильниками, б�
     const cancelled = __calls.filter(c => c[0] === "cancel").map(c => c[1]);
     return { once, dup, cancelled };
   });
-  assert.deepEqual(res.once.sort(), ["task_fut", "taskpre_fut"]);
+  assert.deepEqual(res.once.filter(x => x.includes("fut")).sort(), ["task_fut", "taskpre_fut"]);
+  assert.ok(res.once.includes("closeday"), "evening «close the day» alarm missing");
   assert.equal(res.dup, 0, "native reminder was notified twice");
   assert.deepEqual(res.cancelled.sort(), ["task_fut", "taskpre_fut"]);
   await ctx.close();
@@ -416,6 +422,95 @@ await test("Нагрузка: 3000 операций и 500 заметок", asyn
   });
   assert.ok(t.render < 600, "render " + t.render.toFixed(0) + " ms");
   assert.ok(t.save < 200, "save " + t.save.toFixed(0) + " ms");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+
+// ================= V59 =================
+await test("Напоминание: кнопки «Готово» и «Через 15 мин» (Android и браузер)", async () => {
+  const { ctx, page } = await device(makeCloud(), {
+    init: () => {
+      window.__calls = []; window.__pending = JSON.stringify([{ a: "done", task: "t1", at: Date.now() }]);
+      window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); if (k === "takeActions") { const v = window.__pending; window.__pending = "[]"; return v; } return k === "bridgeVersion" ? 3 : undefined; } });
+    },
+  });
+  const r = await page.evaluate(() => {
+    const k = keyDay();
+    state.tasks.push({ id: "t1", title: "Позвонить в банк", time: "23:59", date: k }, { id: "t2", title: "Английский", time: "23:58", date: k });
+    __calls.length = 0;
+    pullNativeActions();
+    const t1 = state.tasks.find(t => t.id === "t1").done;
+    notify("Задача: Английский", "Время: 23:58", "tasks", { taskId: "t2" });
+    const nt = __calls.find(c => c[0] === "notifyTask");
+    applyReminderAction("snooze", "t2");
+    const sn = Date.parse(state.tasks.find(t => t.id === "t2").snoozeAt) - Date.now();
+    return { t1, nt, sn, scheduled: __calls.filter(c => c[0] === "scheduleOnce").map(c => c[1]) };
+  });
+  assert.equal(r.t1, true, "«Готово» from the notification did not close the task");
+  assert.deepEqual(r.nt?.slice(1), ["Задача: Английский", "Время: 23:58", "t2"]);
+  assert.ok(r.sn > 14 * 60000 && r.sn <= 15 * 60000, "snooze is not 15 minutes");
+  assert.ok(!r.scheduled.includes("task_t1") && r.scheduled.includes("task_t2"), "a done task must not get alarms: " + r.scheduled);
+  // browser: the link from a notification button
+  const done = await page.evaluate(async () => { state.tasks.push({ id: "t3", title: "Тест", time: "23:57", date: keyDay() }); saveState(); history.replaceState(null, "", location.pathname + "?jlact=done&task=t3"); handleActionLink(); return { done: state.tasks.find(t => t.id === "t3").done, url: location.search }; });
+  assert.deepEqual(done, { done: true, url: "" });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Закрыть день: три вопроса и серия дней", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    const d = new Date(); const keys = [];
+    for (let i = 1; i <= 3; i++) { d.setDate(d.getDate() - 1); keys.push(keyDay(d)); }
+    for (const k of keys) state.reports[k] = { done: "x", block: "", tomorrow: "y", closedAt: new Date().toISOString(), steps: {} };
+    renderToday();
+    const before = document.getElementById("streakDays").textContent;
+    return { before, fields: ["rDone", "rBlock", "rTomorrow"].every(id => document.getElementById(id)), future: !!document.getElementById("rFuture") };
+  });
+  assert.equal(r.before, "3"); assert.ok(r.fields); assert.equal(r.future, false);
+  await page.fill("#rDone", "Закрыл все заявки"); await page.fill("#rTomorrow", "Отложить 2 000 на долг");
+  await page.click("#saveReportBtn");
+  const after = await page.evaluate(() => ({ days: document.getElementById("streakDays").textContent, word: document.getElementById("streakWord").textContent, closed: !!state.reports[keyDay()].closedAt, label: document.getElementById("closeDayLabel").textContent }));
+  assert.deepEqual(after, { days: "4", word: "дня", closed: true, label: "День закрыт · обновить" });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("План выплаты долга и лимиты на месяц", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    state.debts = { bank: 100000, firms: 120000, monthlyPayment: 4000 }; state.debtBaseline = 220000;
+    state.budgets = [{ id: "b1", name: "Еда", planned: 1000 }];
+    state.expenses.push({ id: "e1", amount: 850, category: "Еда", at: new Date().toISOString() });
+    saveState(); renderAll(); showView("viewMoney"); renderMoney();
+    const plan = document.getElementById("debtPlan").innerText;
+    const range = document.getElementById("dpRange");
+    range.value = range.max; range.dispatchEvent(new Event("input"));
+    const gain = document.getElementById("dpAltGain").textContent;
+    return { plan, gain, budget: document.getElementById("budgetList").innerText, log: state.notificationsLog.slice(0, 3).map(n => n.title), today: document.getElementById("todayLimitMeta").textContent, dash: document.getElementById("dashDebtMeta")?.textContent || "" };
+  });
+  assert.match(r.plan, /через 4 года 7 мес\./, r.plan);
+  assert.match(r.gain, /раньше/);
+  assert.match(r.budget, /Осталось 150 сомони на \d+ (день|дня|дней) — около \d+ сомони в день/);
+  assert.ok(r.log.some(t => /Лимит «Еда»: 85%/.test(t)), JSON.stringify(r.log));
+  assert.match(r.today, /^Еда: осталось 150/);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Разбор недели от AI", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await page.evaluate(() => { state.ai.enabled = true; renderToday(); });
+  await page.click("#wkRun");
+  await page.waitForFunction(() => !!state.ai.weekly?.[weekKey()], null, { timeout: 8000 });
+  const r = await page.evaluate(() => ({ html: document.getElementById("wkText").innerHTML, label: document.getElementById("wkRunLabel").textContent }));
+  assert.match(r.html, /<b>СИЛЬНАЯ СТОРОНА<\/b>/); assert.match(r.html, /<b>ШАГ НА НЕДЕЛЮ<\/b>/);
+  assert.ok(!/\*\*/.test(r.html), "markdown leaked");
+  assert.equal(r.label, "Обновить разбор");
+  assert.equal(await page.evaluate(() => window.__xss), undefined, "XSS executed");
+  assert.equal(cloud.aiBodies.at(-1).mode, "week"); assert.match(cloud.aiBodies.at(-1).today, /^\d{4}-\d{2}-\d{2}$/);
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

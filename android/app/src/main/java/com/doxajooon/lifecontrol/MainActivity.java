@@ -10,6 +10,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.os.SystemClock;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.webkit.CookieManager;
@@ -23,12 +26,20 @@ import android.webkit.WebSettings;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
+import java.lang.ref.WeakReference;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -48,6 +59,14 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private FrameLayout rootView;
     private WebViewAssetLoader assetLoader;
+
+    // Fingerprint / phone PIN lock (optional, per device).
+    private static final int AUTH = BiometricManager.Authenticators.BIOMETRIC_WEAK | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+    private static final long RELOCK_AFTER_MS = 60_000;
+    private View lockView;
+    private boolean unlocked = false, prompting = false;
+    private long stoppedAt = 0, promptEndedAt = 0;
+    private static WeakReference<MainActivity> resumed = new WeakReference<>(null);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             return WindowInsetsCompat.CONSUMED;
         });
         setContentView(rootView);
+        if (lockEnabled()) showLockView();
         applyBarTheme(getSharedPreferences("lc_ui", Context.MODE_PRIVATE).getBoolean("dark", true));
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -254,11 +274,109 @@ public class MainActivity extends AppCompatActivity {
     @Override protected void onResume() {
         super.onResume();
         if (webView != null) webView.onResume();
+        resumed = new WeakReference<>(this);
+        if (lockEnabled()) {
+            if (stoppedAt > 0 && SystemClock.elapsedRealtime() - stoppedAt > RELOCK_AFTER_MS) unlocked = false;
+            if (!unlocked) {
+                showLockView();
+                if (!prompting && SystemClock.elapsedRealtime() - promptEndedAt > 1500) promptUnlock();
+            }
+        } else {
+            unlocked = true;
+            hideLockView();
+        }
+        deliverActions();
     }
 
     @Override protected void onPause() {
+        if (resumed.get() == this) resumed = new WeakReference<>(null);
         if (webView != null) webView.onPause();
         super.onPause();
+    }
+
+    @Override protected void onStop() {
+        super.onStop();
+        if (!prompting) stoppedAt = SystemClock.elapsedRealtime();
+    }
+
+    /** Hands «Готово» pressed in a notification to the web app if it is on screen right now. */
+    static void deliverActions() {
+        MainActivity a = resumed.get();
+        if (a == null || a.webView == null) return;
+        a.runOnUiThread(() -> { if (a.webView != null) a.webView.evaluateJavascript("window.__jlNativeActions&&window.__jlNativeActions()", null); });
+    }
+
+    // ---------- fingerprint lock ----------
+    boolean lockEnabled() { return getSharedPreferences("lc_ui", Context.MODE_PRIVATE).getBoolean("biometric", false); }
+
+    static String biometricStatus(Context ctx) {
+        int r = BiometricManager.from(ctx).canAuthenticate(AUTH);
+        if (r == BiometricManager.BIOMETRIC_SUCCESS) return "ok";
+        if (r == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) return "not_enrolled";
+        return "none";
+    }
+
+    private int dp(int v) { return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, getResources().getDisplayMetrics()); }
+
+    private void showLockView() {
+        if (lockView == null) {
+            LinearLayout box = new LinearLayout(this);
+            box.setOrientation(LinearLayout.VERTICAL);
+            box.setGravity(Gravity.CENTER);
+            box.setBackgroundColor(BG_DARK);
+            box.setClickable(true);
+            box.setPadding(dp(32), dp(32), dp(32), dp(32));
+            ImageView logo = new ImageView(this);
+            logo.setImageResource(R.mipmap.ic_launcher);
+            box.addView(logo, new LinearLayout.LayoutParams(dp(88), dp(88)));
+            TextView name = new TextView(this);
+            name.setText("Jamal Life");
+            name.setTextColor(0xFFF3F7FC);
+            name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+            name.setTypeface(name.getTypeface(), android.graphics.Typeface.BOLD);
+            name.setGravity(Gravity.CENTER);
+            name.setPadding(0, dp(18), 0, dp(6));
+            box.addView(name);
+            TextView sub = new TextView(this);
+            sub.setText("Приложение защищено отпечатком");
+            sub.setTextColor(0xFFA9BDD3);
+            sub.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+            sub.setGravity(Gravity.CENTER);
+            box.addView(sub);
+            Button open = new Button(this);
+            open.setText("Открыть");
+            open.setAllCaps(false);
+            open.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            open.setOnClickListener(v -> promptUnlock());
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(220), dp(56));
+            lp.topMargin = dp(28);
+            box.addView(open, lp);
+            lockView = box;
+            rootView.addView(lockView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        }
+        lockView.setVisibility(View.VISIBLE);
+        lockView.bringToFront();
+    }
+
+    private void hideLockView() { if (lockView != null) lockView.setVisibility(View.GONE); }
+
+    private void promptUnlock() {
+        if (!"ok".equals(biometricStatus(this))) { unlocked = true; hideLockView(); return; } // nothing to check with — never lock the owner out
+        prompting = true;
+        BiometricPrompt p = new BiometricPrompt(this, ContextCompat.getMainExecutor(this), new BiometricPrompt.AuthenticationCallback() {
+            @Override public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult r) {
+                prompting = false; promptEndedAt = SystemClock.elapsedRealtime(); unlocked = true; stoppedAt = 0; hideLockView();
+            }
+            @Override public void onAuthenticationError(int code, CharSequence msg) {
+                prompting = false; promptEndedAt = SystemClock.elapsedRealtime();
+            }
+        });
+        BiometricPrompt.PromptInfo info = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Jamal Life")
+                .setSubtitle("Приложи палец, чтобы открыть")
+                .setAllowedAuthenticators(AUTH)
+                .build();
+        try { p.authenticate(info); } catch (Exception e) { prompting = false; unlocked = true; hideLockView(); }
     }
 
     @Override protected void onSaveInstanceState(Bundle outState) {
@@ -331,6 +449,27 @@ public class MainActivity extends AppCompatActivity {
             AlarmScheduler.cancel(ctx, id);
         }
 
-        @JavascriptInterface public int bridgeVersion() { return 2; }
+        /** Same as notify, with the buttons «Готово» and «Через 15 мин» for a task. */
+        @JavascriptInterface public void notifyTask(String title, String body, String taskId) {
+            NotificationUtil.show(ctx, title, body, ("task_" + taskId).hashCode(), taskId);
+        }
+
+        /** Buttons pressed in notifications while the app was closed (JSON array), cleared on read. */
+        @JavascriptInterface public String takeActions() { return PendingActions.take(ctx); }
+
+        @JavascriptInterface public String biometricStatus() { return MainActivity.biometricStatus(ctx); }
+
+        @JavascriptInterface public boolean isBiometricOn() {
+            return ctx.getSharedPreferences("lc_ui", Context.MODE_PRIVATE).getBoolean("biometric", false);
+        }
+
+        @JavascriptInterface public boolean setBiometric(boolean on) {
+            if (on && !"ok".equals(MainActivity.biometricStatus(ctx))) return false;
+            ctx.getSharedPreferences("lc_ui", Context.MODE_PRIVATE).edit().putBoolean("biometric", on).apply();
+            if (on) activity.runOnUiThread(() -> activity.unlocked = true); // already inside: don't lock right now
+            return true;
+        }
+
+        @JavascriptInterface public int bridgeVersion() { return 3; }
     }
 }

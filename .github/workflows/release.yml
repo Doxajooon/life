@@ -120,8 +120,8 @@ jobs:
       - name: Publish release with download links
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v58.5.${{ github.run_number }}
-          name: Jamal Life v58.5 (сборка ${{ github.run_number }})
+          tag_name: v59.0.${{ github.run_number }}
+          name: Jamal Life v59.0 (сборка ${{ github.run_number }})
           make_latest: true
           body: |
             **Скачать**

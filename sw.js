@@ -1,7 +1,7 @@
 // Jamal Life service worker: offline shell only.
 // It never touches requests to other origins (Supabase, Gemini): those must always hit the network,
 // otherwise a cached "session OK" answer hides an expired login and blocks sync.
-const CACHE = 'jamal-life-v58-5';
+const CACHE = 'jamal-life-v59-0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => e.waitUntil(
@@ -46,11 +46,18 @@ self.addEventListener('fetch', e => {
 });
 
 // Tapping a reminder opens (or focuses) the app.
+// Buttons «Готово» / «Через 15 мин» on a task reminder are handed to the open app,
+// or the app is opened with the action in the link.
 self.addEventListener('notificationclick', e => {
+  const act = e.action, task = e.notification.data && e.notification.data.taskId;
   e.notification.close();
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       const open = list.find(c => 'focus' in c);
+      if (task && (act === 'done' || act === 'snooze')) {
+        if (open) { open.postMessage({ type: 'jl-action', a: act, task }); return; }
+        return self.clients.openWindow('./index.html?jlact=' + act + '&task=' + encodeURIComponent(task));
+      }
       return open ? open.focus() : self.clients.openWindow('./index.html');
     })
   );

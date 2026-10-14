@@ -71,6 +71,10 @@ public final class AlarmScheduler {
         prefs(ctx).edit().remove(id).apply();
     }
 
+    static void cancelTask(Context ctx, String task) {
+        cancel(ctx, "task_" + task); cancel(ctx, "taskpre_" + task); cancel(ctx, "tasksnz_" + task);
+    }
+
     private static void save(Context ctx, String id, String kind, String time, long at, String title, String body) {
         try {
             JSONObject o = new JSONObject();

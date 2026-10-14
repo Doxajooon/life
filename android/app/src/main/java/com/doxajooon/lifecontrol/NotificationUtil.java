@@ -45,7 +45,10 @@ public final class NotificationUtil {
         nm.createNotificationChannel(ch);
     }
 
-    static void show(Context ctx, String title, String body, int id) {
+    static void show(Context ctx, String title, String body, int id) { show(ctx, title, body, id, null); }
+
+    /** taskId != null adds the buttons «Готово» and «Через 15 мин». */
+    static void show(Context ctx, String title, String body, int id, String taskId) {
         ensureChannel(ctx);
         if (Build.VERSION.SDK_INT >= 33 && ctx.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
         Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -63,6 +66,19 @@ public final class NotificationUtil {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSound(chimeUri(ctx))
                 .setVibrate(VIBRATION);
-        NotificationManagerCompat.from(ctx).notify(id == 0 ? (int) (System.currentTimeMillis() & 0x7fffffff) : id, b.build());
+        int nid = id == 0 ? (int) (System.currentTimeMillis() & 0x7fffffff) : id;
+        if (taskId != null && !taskId.isEmpty()) {
+            b.addAction(0, "Готово", action(ctx, ActionReceiver.DONE, taskId, nid, title, text));
+            b.addAction(0, "Через 15 мин", action(ctx, ActionReceiver.SNOOZE, taskId, nid, title, text));
+        }
+        NotificationManagerCompat.from(ctx).notify(nid, b.build());
+    }
+
+    private static PendingIntent action(Context ctx, String act, String taskId, int nid, String title, String body) {
+        Intent i = new Intent(ctx, ActionReceiver.class).setAction(act)
+                .setData(Uri.parse("jamal://task/" + Uri.encode(taskId) + "/" + act))
+                .putExtra("task", taskId).putExtra("nid", nid).putExtra("title", title).putExtra("body", body);
+        return PendingIntent.getBroadcast(ctx, (act + taskId).hashCode() & 0x7fffffff, i,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 }
