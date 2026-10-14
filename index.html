@@ -2095,7 +2095,8 @@ async function cloudSignUp(email,password){const data=await supaFetch('/auth/v1/
 async function cloudRecover(email){return await supaFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(AUTH_REDIRECT_URL),{method:'POST',body:JSON.stringify({email})})}
 async function cloudUpdatePassword(password){const a=cloudAuth();if(!a?.access_token)throw new Error('Ссылка восстановления недействительна или истекла. Запроси новое письмо.');return await supaFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+a.access_token},body:JSON.stringify({password})})}
 function clearAuthHash(){try{history.replaceState({},document.title,location.pathname+location.search)}catch(e){location.hash=''}}
-function recoverySessionFromUrl(){try{const q=new URLSearchParams(location.hash.slice(1));const at=q.get('access_token'),rt=q.get('refresh_token'),type=q.get('type');if(at&&rt&&(type==='recovery'||q.get('type')==='recovery')){setCloudAuth({access_token:at,refresh_token:rt,token_type:q.get('token_type')||'bearer',expires_in:Number(q.get('expires_in')||0),user:null});clearAuthHash();return true}}catch(e){}return false}
+let _recoveryPending=false;
+function recoverySessionFromUrl(){try{const q=new URLSearchParams(location.hash.slice(1));const at=q.get('access_token'),rt=q.get('refresh_token'),type=q.get('type');if(at&&rt&&(type==='recovery'||q.get('type')==='recovery')){setCloudAuth({access_token:at,refresh_token:rt,token_type:q.get('token_type')||'bearer',expires_in:Number(q.get('expires_in')||0),user:null});clearAuthHash();_recoveryPending=true;return true}}catch(e){}return false}
 async function openPasswordRecovery(){
   openModal('<div class="close-row"><div><div class="eyebrow">Jamal Life</div><h2>Новый пароль</h2><div class="sub">Ссылка восстановления приняла сессию. Задай новый пароль для аккаунта.</div></div></div><div class="stack" style="margin-top:12px"><div class="field"><label>Новый пароль</label><input id="recoveryPassword1" type="password" autocomplete="new-password" placeholder="Минимум 6 символов"></div><div class="field"><label>Повтори пароль</label><input id="recoveryPassword2" type="password" autocomplete="new-password" placeholder="Повтори пароль"></div><button class="btn primary" id="recoverySaveBtn">Сохранить новый пароль</button></div>');
   $('recoverySaveBtn').onclick=async()=>{const a=$('recoveryPassword1').value,b=$('recoveryPassword2').value;if(a.length<6){toast('Пароль слишком короткий','Минимум 6 символов.');return}if(a!==b){toast('Пароли не совпадают');return}try{await cloudUpdatePassword(a);const u=await cloudUser();const auth=cloudAuth();if(auth) setCloudAuth({...auth,user:u||auth.user});closeModal();toast('Пароль изменён','Теперь можно войти в Jamal Life с новым паролем.')}catch(e){toast('Не удалось сменить пароль',e.message)}};
@@ -3796,6 +3797,8 @@ async function init(){
   const authError=authErrorFromUrl();
   const recovery=await requireAuth();
   if(!cloudAuth()&&!recovery)return;
+  // Came from the «reset password» e-mail: ask for the new password right away.
+  if(_recoveryPending)setTimeout(()=>{try{openPasswordRecovery()}catch(e){}},700);
   bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();appReadyForSync=true;queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);

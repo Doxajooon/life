@@ -8,8 +8,8 @@ android {
         applicationId 'com.doxajooon.lifecontrol'
         minSdk 26
         targetSdk 35
-        versionCode 582
-        versionName '58.2'
+        versionCode 583
+        versionName '58.3'
     }
 
     buildFeatures { buildConfig true }

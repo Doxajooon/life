@@ -53,6 +53,7 @@ function makeCloud() {
       }
       return send(200, cloud.session());
     }
+    if (url.pathname === "/auth/v1/user" && m === "PUT") { cloud.newPassword = JSON.parse(req.postData() || "{}").password; return ok(req.headers().authorization) ? send(200, { id: UID, email: "me@test.tj" }) : send(401, { msg: "expired" }); }
     if (url.pathname === "/auth/v1/user") return ok(req.headers().authorization) ? send(200, { id: UID, email: "me@test.tj" }) : send(401, { msg: "expired" });
     if (url.pathname.startsWith("/functions/")) return ok(req.headers().authorization) ? send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] }) : send(401, { error: "auth" });
     if (url.pathname === "/rest/v1/life_state") {
@@ -121,6 +122,22 @@ for (const [label, viewport] of [["телефон", { width: 390, height: 844 }]
     await ctx.close();
   });
 }
+
+await test("Ссылка из письма «сброс пароля» сразу просит новый пароль и сохраняет его", async () => {
+  const cloud = makeCloud();
+  const ctx = await browser.newContext({ serviceWorkers: "block", locale: "ru-RU" });
+  await ctx.route(/supabase\.co/, r => cloud.handle(r));
+  const page = await ctx.newPage(); const errs = []; page.on("pageerror", e => errs.push(e.message));
+  const sess = cloud.session();
+  await page.goto(`${APP}#access_token=${sess.access_token}&refresh_token=${sess.refresh_token}&expires_in=3600&token_type=bearer&type=recovery`);
+  await page.locator("#recoveryPassword1").waitFor({ timeout: 5000 });
+  await page.fill("#recoveryPassword1", "newpass123"); await page.fill("#recoveryPassword2", "newpass123");
+  await page.click("#recoverySaveBtn"); await page.waitForTimeout(600);
+  assert.equal(cloud.newPassword, "newpass123", "password was not sent to Supabase");
+  assert.ok(!(await page.evaluate(() => location.hash.includes("access_token"))), "token left in the address bar");
+  assert.deepEqual(errs, []);
+  await ctx.close();
+});
 
 await test("Все окна и диалоги открываются без ошибок", async () => {
   const { ctx, page } = await device(makeCloud());
