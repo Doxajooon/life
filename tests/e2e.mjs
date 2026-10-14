@@ -14,8 +14,10 @@ const UID = "11111111-1111-1111-1111-111111111111";
 const results = [];
 let failed = 0;
 async function test(name, fn) {
+  if (process.env.ONLY && !name.includes(process.env.ONLY)) return;
   try { await fn(); results.push(["PASS", name]); console.log("PASS", name); }
-  catch (e) { failed++; results.push(["FAIL", name, e.message]); console.log("FAIL", name, "\n   ", e.message.split("\n").slice(0, 6).join(" ")); }
+  catch (e) { failed++; results.push(["FAIL", name, e.message]); console.log("FAIL", name, "\n   ", e.message.split("\n").slice(0, 6).join(" "));
+    if (process.env.GITHUB_ACTIONS) console.log(`::error title=E2E failed::${name} — ${e.message.replace(/\s+/g, " ").slice(0, 600)}`); }
 }
 
 // ---------- static server for the app ----------
@@ -88,6 +90,7 @@ async function device(cloud, { viewport = { width: 390, height: 844 }, session, 
   }
   if (init) await ctx.addInitScript(init);
   const page = await ctx.newPage();
+  if (process.env.CPU_SLOW) { const cdp = await ctx.newCDPSession(page); await cdp.send("Emulation.setCPUThrottlingRate", { rate: Number(process.env.CPU_SLOW) }); }
   page.errors = [];
   page.on("pageerror", e => page.errors.push(e.message));
   page.on("console", m => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) page.errors.push(m.text()); });
@@ -199,7 +202,8 @@ await test("Доход, расход, задача, заметка сохран�
   await page.evaluate(() => { showView("viewNotes"); openNoteEditor(); }); await page.fill("#neTitle", "Идея"); await page.fill("#neBody", "<img src=x onerror=window.__xss=1>"); await page.click("#neSave");
   await page.waitForFunction(n => state.notes.length === n, n0.n + 1, { timeout: 5000 }).catch(() => {});
   const n1 = await page.evaluate(() => ({ p: state.profits.length, e: state.expenses.length, t: state.tasks.length, n: state.notes.length }));
-  assert.deepEqual(n1, { p: n0.p + 1, e: n0.e + 1, t: n0.t + 1, n: n0.n + 1 });
+  const dbg = n1.n === n0.n + 1 ? "" : JSON.stringify(await page.evaluate(() => ({ view: currentView, title: document.getElementById("neTitle")?.value, body: document.getElementById("neBody")?.value, draft: JSON.stringify(state.drafts?.note || null), toast: document.getElementById("toast")?.textContent })));
+  assert.deepEqual(n1, { p: n0.p + 1, e: n0.e + 1, t: n0.t + 1, n: n0.n + 1 }, dbg);
   await page.evaluate(() => { showView("viewNotes"); renderNotes(); }); await page.waitForTimeout(200);
   assert.equal(await page.evaluate(() => window.__xss), undefined, "XSS executed");
   await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
