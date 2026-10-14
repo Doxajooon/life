@@ -1,25 +1,18 @@
-import { cpSync, mkdirSync } from "node:fs";
+// Copies the web app (root files = the only source of truth) into the Android and Windows projects.
+// CI runs this before every build; the copies are git-ignored, so they can never drift.
+import { cpSync, mkdirSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-const root=resolve(new URL("..",import.meta.url).pathname);
-const source=resolve(root,"index.html");
-const targets=[
-  "public/index.html",
-  "android/app/src/main/assets/index.html",
-  "desktop-native/web/index.html",
-  "desktop/Web/index.html"
-];
+const root = resolve(new URL("..", import.meta.url).pathname);
+const files = ["index.html", "sw.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"];
+const targets = ["android/app/src/main/assets", "desktop/Web"];
 
-for(const target of targets){
-  mkdirSync(resolve(root,target,".."),{recursive:true});
-  cpSync(source,resolve(root,target));
-}
-
-for(const targetRoot of ["public","android/app/src/main/assets","desktop-native/web","desktop/Web"]){
-  for(const f of ["manifest.webmanifest","icon.svg","sw.js"]){
-    // Root files are the single source of truth. A missing source must fail loudly, not be skipped.
-    cpSync(resolve(root,f),resolve(root,targetRoot,f));
+for (const dir of targets) {
+  mkdirSync(resolve(root, dir), { recursive: true });
+  for (const f of files) {
+    const src = resolve(root, f);
+    if (!existsSync(src)) throw new Error(`missing web file: ${f}`);
+    cpSync(src, resolve(root, dir, f));
   }
 }
-
-console.log("Synced web → public, Android, desktop-native and desktop Web.");
+console.log(`Synced ${files.length} web files → ${targets.join(", ")}`);

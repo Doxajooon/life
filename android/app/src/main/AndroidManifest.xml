@@ -8,7 +8,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:label="Life Control"
+        android:label="@string/app_name"
         android:theme="@style/Theme.LifeControl"
         android:usesCleartextTraffic="false" android:extractNativeLibs="true" android:installLocation="auto" android:hardwareAccelerated="true">
         <activity android:name=".MainActivity" android:exported="true">

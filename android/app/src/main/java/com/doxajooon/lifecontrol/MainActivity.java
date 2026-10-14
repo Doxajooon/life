@@ -99,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         requestNotificationPermission();
+        AlarmScheduler.dropLegacy(getApplicationContext());
+        NotificationUtil.ensureChannel(getApplicationContext());
     }
 
     private void configureWebView() {
@@ -202,7 +204,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if ("https".equalsIgnoreCase(scheme) && ASSET_HOST.equalsIgnoreCase(host)) return false;
-        if ("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)) return false;
+        // Any other site (AI sources, help links) opens in the phone's browser, never inside the app:
+        // pages inside this WebView would get access to AndroidBridge.
 
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
@@ -218,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 APP_URL,
                 "<!doctype html><meta name='viewport' content='width=device-width,initial-scale=1'>" +
                         "<body style='font-family:sans-serif;background:#101827;color:white;padding:24px'>" +
-                        "<h2>Life Control</h2>" +
+                        "<h2>Jamal Life</h2>" +
                         "<p>Не удалось загрузить приложение.</p>" +
                         "<p style='opacity:.7'>Повторная попытка загрузит локальную версию приложения.</p>" +
                         "<a href='" + APP_URL + "' style='display:inline-block;padding:12px 18px;background:#fff;color:#101827;text-decoration:none;border-radius:8px'>Повторить</a>" +
@@ -318,5 +321,16 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface public void cancelDaily(String id) {
             AlarmScheduler.cancel(ctx, id);
         }
+
+        /** One-off reminder (tasks): fires at the given moment even if the app is closed. */
+        @JavascriptInterface public void scheduleOnce(String id, double atMillis, String title, String body) {
+            AlarmScheduler.scheduleOnce(ctx, id, atMillis, title, body);
+        }
+
+        @JavascriptInterface public void cancel(String id) {
+            AlarmScheduler.cancel(ctx, id);
+        }
+
+        @JavascriptInterface public int bridgeVersion() { return 2; }
     }
 }

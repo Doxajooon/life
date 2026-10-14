@@ -8,4 +8,4 @@ android/app/build/
 android/build/
 desktop/bin/
 desktop/obj/
-node_modules/
+node_modules
