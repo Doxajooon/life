@@ -1477,6 +1477,111 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-hero .clock-time{transition:opacity .2s}
 .num{font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.view.active>*{animation:none}.ring circle,.v-bar i,.jl-track .auto-fill{transition:none}}
+
+.jl-hweek{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.jl-hweek:empty{display:none}
+.jl-hw-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.jl-hw-head b{font-size:.88rem}.jl-hw-head small{font-size:.72rem;color:var(--muted)}
+.jl-hw-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px}
+.jl-hw-col{display:grid;justify-items:center;gap:5px}
+.jl-hw-bar{width:100%;max-width:30px;height:56px;border-radius:9px;background:var(--soft);border:1px solid var(--line);display:flex;align-items:flex-end;overflow:hidden}
+.jl-hw-bar i{display:block;width:100%;border-radius:7px;background:linear-gradient(0deg,var(--blue),var(--cyan,#22d3ee));transform-origin:bottom;animation:jlGrowY .8s cubic-bezier(.2,.8,.2,1) backwards}
+.jl-hw-col:nth-child(2) i{animation-delay:.05s}.jl-hw-col:nth-child(3) i{animation-delay:.1s}.jl-hw-col:nth-child(4) i{animation-delay:.15s}.jl-hw-col:nth-child(5) i{animation-delay:.2s}.jl-hw-col:nth-child(6) i{animation-delay:.25s}.jl-hw-col:nth-child(7) i{animation-delay:.3s}
+.jl-hw-col small{font-size:.72rem;color:var(--muted);text-transform:lowercase}
+.jl-hw-col.today small{color:var(--text);font-weight:800}
+.jl-hw-col.today .jl-hw-bar{border-color:color-mix(in srgb,var(--green) 55%,var(--line))}
+@keyframes jlGrowY{from{transform:scaleY(0)}}
+@media (prefers-reduced-motion:reduce){.jl-hw-bar i{animation:none}}
+/* ===== V64 living rhythm, tasks and habits ===== */
+.jl-head-act{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.jl-miniring{position:relative;width:46px;height:46px;display:grid;place-items:center}
+.jl-miniring[hidden]{display:none!important}
+.jl-miniring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.jl-miniring circle{fill:none;stroke-width:3.4}
+.jl-miniring .bg{stroke:var(--line)}
+.jl-miniring .fg{stroke:var(--green);stroke-linecap:round;transition:stroke-dasharray 1s cubic-bezier(.2,.8,.2,1)}
+.jl-miniring b{position:relative;font-size:.72rem;font-weight:800;font-variant-numeric:tabular-nums}
+.jl-miniring.full{animation:jlPop .6s cubic-bezier(.34,1.56,.64,1)}
+.jl-miniring.full b{font-size:1.05rem}
+/* day strip chart */
+.jl-daystrip{margin-top:14px}
+.jl-strip{position:relative;height:34px;border-radius:12px;background:var(--soft);border:1px solid var(--line);overflow:visible}
+.jl-seg{position:absolute;top:3px;bottom:3px;border-radius:9px;background:color-mix(in srgb,var(--blue) 16%,var(--panel));border:1px solid color-mix(in srgb,var(--blue) 30%,var(--line));display:grid;place-items:center;overflow:hidden;z-index:1}
+.jl-seg+.jl-seg{margin-left:2px}
+.jl-seg em{font-style:normal;font-size:.95rem;line-height:1}
+.jl-seg.done{background:color-mix(in srgb,var(--green) 26%,var(--panel));border-color:color-mix(in srgb,var(--green) 45%,var(--line))}
+.jl-seg.current{background:color-mix(in srgb,var(--gold) 24%,var(--panel));border-color:var(--gold);box-shadow:0 0 14px color-mix(in srgb,var(--gold) 35%,transparent)}
+.jl-seg.current em{animation:jlFloatY 2.4s ease-in-out infinite}
+.jl-strip-fill{position:absolute;left:0;top:0;bottom:0;border-radius:12px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--gold) 14%,transparent));pointer-events:none;z-index:2;transition:width 1s ease}
+.jl-strip-now{position:absolute;top:-7px;bottom:-7px;width:3px;margin-left:-1.5px;border-radius:3px;background:var(--gold);z-index:3;box-shadow:0 0 10px var(--gold)}
+.jl-strip-now span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;padding:1px 6px;border-radius:6px;background:var(--gold);color:#1a1405;font-size:.7rem;font-weight:800;white-space:nowrap}
+.jl-daystrip .jl-strip{margin-top:16px}
+.jl-strip-legend{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.jl-strip-legend span:nth-child(2){text-align:center;color:var(--text);font-weight:700}
+.jl-strip-now.r span{left:auto;right:0;transform:none}.jl-strip-now.l span{left:0;transform:none}
+@keyframes jlFloatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+/* stepper */
+.jl-rsteps{display:grid;gap:12px;margin-top:14px}
+.jl-rstep{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:12px;align-items:start;padding:10px 10px 10px 4px;border-radius:16px;transition:background .3s ease}
+.jl-rstep::before,.jl-rstep::after{content:"";position:absolute;left:23px;top:52px;width:3px;height:calc(100% - 30px);border-radius:3px;background:var(--line)}
+.jl-rstep::after{background:linear-gradient(var(--green),var(--gold));transform-origin:top;transform:scaleY(var(--p,0));transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.jl-rstep:last-child::before,.jl-rstep:last-child::after{display:none}
+.jl-rstep-dot{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:1.15rem;font-weight:800;background:var(--panel);border:2px solid var(--line);color:var(--muted);transition:all .35s cubic-bezier(.34,1.56,.64,1)}
+.jl-rstep.done .jl-rstep-dot{background:var(--green);border-color:var(--green);color:#fff;font-size:1rem;animation:jlPop .5s cubic-bezier(.34,1.56,.64,1) backwards}
+.jl-rstep.current{background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.jl-rstep.current .jl-rstep-dot{border-color:var(--gold);animation:jlRingPulse 2s ease-in-out infinite}
+.jl-rstep-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.jl-rstep-top b{font-size:.98rem;line-height:1.3}
+.jl-rstep.done .jl-rstep-top b{color:var(--muted)}
+.jl-rstep-time{font-size:.78rem;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.jl-rstep.current .jl-rstep-time{color:var(--gold)}
+.jl-rstep-meta{display:block;font-size:.8rem;color:var(--muted);margin-top:3px}
+.jl-rstep.current .jl-rstep-meta{color:var(--text);font-weight:700}
+.jl-rstep-bar{height:6px;border-radius:6px;background:var(--line);margin-top:8px;overflow:hidden}
+.jl-rstep-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--gold),#ffd77a);transition:width 1s ease;position:relative;overflow:hidden}
+.jl-rstep-bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-100%);animation:jlShine 2.6s ease-in-out infinite}
+@keyframes jlShine{to{transform:translateX(100%)}}
+.jl-rstep-note{font-size:.84rem;color:var(--muted);margin-top:6px;line-height:1.45}
+.jl-rstep.done .jl-rstep-note,.jl-rstep.todo .jl-rstep-note{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.jl-rstep .check{margin-top:5px}
+/* tasks */
+#viewToday .v-task{grid-template-columns:auto minmax(0,1fr) auto auto}
+.v-task .v-check{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.v-task{position:relative}
+.jl-task-emo{width:44px;height:44px;border-radius:14px;border:1.5px solid var(--line);background:var(--soft);display:grid;place-items:center;font-size:1.3rem;line-height:1;cursor:pointer;padding:0;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .25s ease,border-color .25s ease,box-shadow .25s ease}
+.jl-task-emo:hover{transform:translateY(-2px) rotate(-6deg)}
+.jl-task-emo:active{transform:scale(.88)}
+.jl-task-emo:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.v-task.done .jl-task-emo{background:color-mix(in srgb,var(--green) 20%,var(--panel));border-color:color-mix(in srgb,var(--green) 55%,var(--line))}
+.v-task.soon .jl-task-emo{border-color:var(--orange);animation:jlBell 1.6s ease-in-out infinite}
+.v-task.late .jl-task-emo,.v-task.overdue .jl-task-emo{border-color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--panel))}
+.v-task.just-done .jl-task-emo{animation:jlDoneBurst .6s cubic-bezier(.34,1.56,.64,1)}
+.v-task-title{background:linear-gradient(currentColor,currentColor) left 55%/0 2px no-repeat;transition:background-size .45s ease,color .3s ease}
+.v-task.done .v-task-title{background-size:100% 2px;text-decoration:none!important;color:var(--muted)}
+.v-task.soon .jl-task-bar i{animation:jlBarGlow 1.4s ease-in-out infinite}
+@keyframes jlBell{0%,100%{transform:rotate(0)}10%{transform:rotate(-12deg)}20%{transform:rotate(10deg)}30%{transform:rotate(-6deg)}40%{transform:rotate(0)}}
+@keyframes jlDoneBurst{0%{transform:scale(.6);box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 60%,transparent)}60%{transform:scale(1.15)}100%{transform:scale(1);box-shadow:0 0 0 14px transparent}}
+@keyframes jlBarGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+/* habits */
+.jl-habit{grid-template-columns:auto minmax(0,1fr) auto;transition:background .3s ease}
+.jl-habit-name .jl-dots{margin-top:7px}
+.v-task-title{width:fit-content;max-width:100%}
+.jl-habit-emo{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:var(--soft);display:grid;place-items:center;font-size:1.3rem;line-height:1;cursor:pointer;padding:0;position:relative;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .25s ease,background .25s ease}
+.jl-habit-emo:active{transform:scale(.88)}
+.jl-habit-emo:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.jl-habit.is-done .jl-habit-emo{border-color:var(--green);background:color-mix(in srgb,var(--green) 18%,var(--panel))}
+.jl-habit.is-due .jl-habit-emo{animation:jlRingPulseG 2.4s ease-in-out infinite}
+.jl-fl{display:inline-block;font-style:normal;transform-origin:50% 90%;animation:jlFlame 1.2s ease-in-out infinite alternate}
+.jl-habit-emo.hot{border-color:color-mix(in srgb,var(--orange) 60%,var(--line))}
+.jl-habit.just-done .jl-habit-emo{animation:jlDoneBurst .6s cubic-bezier(.34,1.56,.64,1)}
+.jl-habit.just-done .jl-dots i.today{animation:jlPop .5s .1s cubic-bezier(.34,1.56,.64,1)}
+.jl-dots i.today:not(.on){animation:jlDotBlink 1.8s ease-in-out infinite}
+.jl-dots i{transition:background .3s ease,border-color .3s ease,transform .3s ease}
+@keyframes jlRingPulseG{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 40%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
+@keyframes jlFlame{from{transform:scale(1) rotate(-6deg)}to{transform:scale(1.2) rotate(6deg)}}
+@keyframes jlDotBlink{0%,100%{opacity:1}50%{opacity:.45}}
+@media (max-width:420px){.jl-dots i{width:10px;height:10px}.jl-dots{gap:3px}.jl-habit{gap:8px}.jl-miniring{width:40px;height:40px}}
+@media (prefers-reduced-motion:reduce){.jl-rstep::after,.jl-rstep-dot,.jl-rstep-bar i::after,.jl-seg em,.jl-task-emo,.jl-habit-emo,.jl-fl,.jl-dots i,.jl-miniring{animation:none!important;transition:none!important}}
 </style>
 
 
@@ -1555,7 +1660,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
   <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="authGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0"/><stop offset=".6" stop-color="#f97316" stop-opacity=".5"/><stop offset="1" stop-color="#9a3412" stop-opacity=".15"/></linearGradient><linearGradient id="authRidge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3a5f"/><stop offset="1" stop-color="#0b1426"/></linearGradient></defs><rect x="0" y="36" width="400" height="150" fill="url(#authGlow)"/><path d="M0 320V150l38-30 26 18 48-62 40 48 30-26 46 54 36-34 52 44 44-28 40 26v130z" fill="#3b3f62" opacity=".8"/><path d="M0 320V190l56-34 40 28 52-46 54 52 44-30 60 42 38-22 56 30v110z" fill="url(#authRidge)"/><path d="M0 320v-70l74-30 62 24 68-34 70 30 64-22 62 22v80z" fill="#070e1c"/></svg></div>
   <div class="auth-box">
     <div class="auth-crown"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg></div>
-    <h1 class="auth-title">Jamal Life <span>V63</span></h1>
+    <h1 class="auth-title">Jamal Life <span>V64</span></h1>
     <div class="auth-intro">Контролируй жизнь<br>Достигай цели<br>Будь лучше каждый день</div>
     <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="Email"></div></div>
     <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Пароль"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
@@ -1566,7 +1671,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V63</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V64</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -1598,18 +1703,20 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
   </div>
 
   <div class="card">
-    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">✅</span>Задачи на сегодня</h2><div class="v-sub" id="taskSummary">—</div></div><button class="v-add sm" type="button" id="addTaskBtn" aria-label="Добавить задачу" title="Добавить задачу"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div>
+    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">✅</span>Задачи на сегодня</h2><div class="v-sub" id="taskSummary">—</div></div><div class="jl-head-act"><span class="jl-miniring" id="taskRing" aria-hidden="true"></span><button class="v-add sm" type="button" id="addTaskBtn" aria-label="Добавить задачу" title="Добавить задачу"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div></div>
     <div class="v-tasks" id="taskList"></div>
   </div>
 
   <div class="card jl-habits">
-    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🔥</span>Привычки</h2><div class="v-sub" id="habitSummary">Отмечай каждый день — серия растёт</div></div><button class="v-add sm" type="button" id="addHabitBtn" aria-label="Добавить привычку" title="Добавить привычку"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div>
+    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🔥</span>Привычки</h2><div class="v-sub" id="habitSummary">Отмечай каждый день — серия растёт</div></div><div class="jl-head-act"><span class="jl-miniring" id="habitRing" aria-hidden="true"></span><button class="v-add sm" type="button" id="addHabitBtn" aria-label="Добавить привычку" title="Добавить привычку"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div></div>
     <div class="jl-habit-list" id="habitList"></div>
+    <div class="jl-hweek" id="habitWeek" aria-label="Привычки за 7 дней"></div>
   </div>
 
   <div class="card jl-rhythm">
     <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🗓️</span>Ритм дня</h2><div class="v-sub">Этапы отмечаются сами, когда время этапа прошло</div></div><span class="jl-count" id="dayCompletion">0 / 3</span></div>
-    <div class="timeline" id="timeline"></div>
+    <div class="jl-daystrip" id="dayStrip" aria-hidden="true"></div>
+    <div class="timeline jl-rsteps" id="timeline"></div>
     <div class="jl-free" id="freePlan"></div>
   </div>
 
@@ -1868,7 +1975,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">63.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">64.0</span></div>
   </div>
 </section>
 
@@ -2109,6 +2216,7 @@ async function cloudPushNow(user,baseStamp){
 }
 async function cloudSync(){
   const user=await cloudUser();if(!user)return {ok:false,logged:false};
+  const owner=deviceOwner();if(owner&&owner!==user.id)resetForNewOwner();setDeviceOwner(user.id);
   const q='/rest/v1/life_state?user_id=eq.'+encodeURIComponent(user.id)+'&limit=1&select=';
   for(let attempt=0;attempt<3;attempt++){
     const meta=(await supaFetch(q+'updated_at'))?.[0]||null;
@@ -2168,7 +2276,24 @@ async function openPasswordRecovery(){
   openModal('<div class="close-row"><div><div class="eyebrow">Jamal Life</div><h2>Новый пароль</h2><div class="sub">Ссылка восстановления приняла сессию. Задай новый пароль для аккаунта.</div></div></div><div class="stack" style="margin-top:12px"><div class="field"><label>Новый пароль</label><input id="recoveryPassword1" type="password" autocomplete="new-password" placeholder="Минимум 6 символов"></div><div class="field"><label>Повтори пароль</label><input id="recoveryPassword2" type="password" autocomplete="new-password" placeholder="Повтори пароль"></div><button class="btn primary" id="recoverySaveBtn">Сохранить новый пароль</button></div>');
   $('recoverySaveBtn').onclick=async()=>{const a=$('recoveryPassword1').value,b=$('recoveryPassword2').value;if(a.length<6){toast('Пароль слишком короткий','Минимум 6 символов.');return}if(a!==b){toast('Пароли не совпадают');return}try{await cloudUpdatePassword(a);const u=await cloudUser();const auth=cloudAuth();if(auth) setCloudAuth({...auth,user:u||auth.user});closeModal();toast('Пароль изменён','Теперь можно войти в Jamal Life с новым паролем.')}catch(e){toast('Не удалось сменить пароль',e.message)}};
 }
-async function cloudLogout(){clearCloudDirty();const a=cloudAuth();try{if(a?.access_token)await supaFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+a.access_token}})}catch(e){}setCloudAuth(null);try{localStorage.removeItem(CLOUD_BASE_KEY)}catch(e){}location.reload()}
+const OWNER_KEY='JL_DEVICE_OWNER_V64';var _wipingDevice=false;
+function deviceOwner(){try{return localStorage.getItem(OWNER_KEY)||''}catch(e){return ''}}
+function setDeviceOwner(id){try{if(id)localStorage.setItem(OWNER_KEY,id)}catch(e){}}
+/* Another account signed in on this device: its data must never be mixed with the previous owner's records. */
+function resetForNewOwner(){state=normalize(clone(DEFAULT));state[CLOUD_BASE_KEY]='';_cloudBaseState=null;_cloudBaseFingerprint='';_persistFingerprint='';clearCloudDirty();saveState()}
+async function wipeLocalData(){
+  _wipingDevice=true;
+  try{[KEY,BACKUP_KEY,BACKUP2_KEY,CLOUD_DIRTY_KEY,OWNER_KEY,'JL_PENDING_ACTIONS_V1'].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  try{const db=await openLifeDB();if(db)await new Promise(res=>{try{const tx=db.transaction(['state','backups'],'readwrite');tx.objectStore('state').clear();tx.objectStore('backups').clear();tx.oncomplete=res;tx.onerror=res;tx.onabort=res}catch(e){res()}})}catch(e){}
+  try{window.AndroidBridge?.updateWidget?.('{}')}catch(e){}
+}
+async function cloudLogout(){
+  let synced=!isCloudDirty();
+  if(!synced){try{synced=await cloudAutoSync()}catch(e){synced=false}}
+  if(!synced&&!confirm('Последние изменения ещё не ушли в облако (нет сети?). Выйти всё равно? Тогда данные останутся на этом устройстве до следующего входа.'))return;
+  clearCloudDirty();const a=cloudAuth();try{if(a?.access_token)await supaFetch('/auth/v1/logout',{method:'POST',headers:{Authorization:'Bearer '+a.access_token}})}catch(e){}setCloudAuth(null);try{localStorage.removeItem(CLOUD_BASE_KEY)}catch(e){}
+  if(synced)await wipeLocalData(); // everything is safe in the cloud — nothing personal stays on the device
+  location.reload()}
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
 
 const $=id=>document.getElementById(id), $$=sel=>Array.from(document.querySelectorAll(sel));
@@ -2311,7 +2436,7 @@ function stateFingerprint(){try{const x=clone(state);delete x._lastSavedAt;delet
 function markCloudDirty(){_localDirtySinceCloud=true;try{localStorage.setItem(CLOUD_DIRTY_KEY,'1')}catch(e){}}
 function clearCloudDirty(){_localDirtySinceCloud=false;try{localStorage.removeItem(CLOUD_DIRTY_KEY)}catch(e){}}
 function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(appReadyForSync&&cloudAuth()&&_persistFingerprint)cloudAutoSync().catch(()=>{})},2500)}
-function saveState(){
+function saveState(){if(_wipingDevice)return;
   try{
     const purgedTrashCount=purgeExpiredTrash(state);
     const fingerprint=stateFingerprint();
@@ -2619,7 +2744,7 @@ function runScheduler(){
     if(isDue(m,tm))once('t|'+day+'|'+t.id,()=>{notify('⏰ Пора: '+t.title,'Задача на '+t.time+' — отметь «Готово», когда сделаешь','tasks',{native:true,taskId:t.id,due});if(currentView==='viewToday')renderTasks()});
   }
   for(const sl of twoHourSlots())if(isDue(m,sl.min))once('2h|'+day+'|'+sl.time,()=>notify(sl.title,sl.body,'tasks',{native:true}));
-  if(m!==_lastMinute){_lastMinute=m;if(currentView==='viewToday'){updateTaskBars();renderFreePlan();renderGoalDeadline()}}
+  if(m!==_lastMinute){_lastMinute=m;if(currentView==='viewToday'){updateTaskBars();renderRhythm(info);renderFreePlan();renderGoalDeadline()}}
   const cdm=timeToMin(closeDayTime());
   if(isDue(m,cdm)&&!dayClosed(state.reports?.[day],day))once('cd|'+day,()=>notify('Закрой день','2 минуты: что сделал, что помешало и один шаг на завтра.','tasks',{native:true}));
   if(new Date().getDay()===0&&isDue(m,timeToMin(WEEK_REVIEW_TIME))&&!state.ai?.weekly?.[weekKey()])once('wk|'+day,()=>notify('Разбор недели','Воскресенье: AI подведёт итог недели и даст один шаг.','tasks',{native:true}));
@@ -2800,8 +2925,7 @@ function renderToday(){
   $('todayTitle').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});$('todayDate').textContent=d.toLocaleDateString('ru-RU',{weekday:'long'})+' · '+d.getFullYear();
   const mo=motivation();$('motivationText').textContent=mo.text;$('motivationSource').textContent=`${mo.author} — ${mo.source}`;
   renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
-  autoCompleteExpiredStages();const effectiveRep=dayReport();$('timeline').innerHTML=state.day.steps.map((s,i)=>{const expired=nowMin()>=timeToMin(s.end),done=!!effectiveRep.steps[s.id]||expired,current=info.kind==='active'&&info.i===i;const stagePct=done?100:(current?Math.round(info.pct):0);const icon=done?'i-check':(current?'i-play':'i-calendar');return `<div class="timeline-row ${current?'current':''} ${done?'done':''}"><div class="time-range">${esc(s.time)}<br>${esc(s.end)}</div><div><div class="t-title"><span class="stage-icon" aria-hidden="true"><svg class="ui-icon"><use href="#${icon}"></use></svg></span>Этап ${i+1} · ${esc(s.title)}</div><div class="t-note">${esc(s.text)}</div><div class="stage-pct">${done?'100% завершено':current?`${stagePct}% времени прошло`:'0% времени прошло'}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${done?'Этап завершён: '+s.title:'Завершить этап: '+s.title}"></div>`}).join('');
-  $$('[data-day-step]').forEach(c=>{if(c.checked&&!c.disabled)c.classList.add('auto-complete-anim');c.onchange=()=>{rep.steps[c.dataset.dayStep]=c.checked;saveState();renderToday()}});
+  autoCompleteExpiredStages();renderRhythm(info);
   setText('todayBalance',fmtMoney(daySum(state.profits)-daySum(state.expenses)));const fs=financialSnapshot();setText('todayCashState',`Касса: ${fmtMoney(fs.cash)} · На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`);
   for(const k of ['done','block','tomorrow']){const el=$('r'+k[0].toUpperCase()+k.slice(1));if(el&&document.activeElement!==el)el.value=rep[k]||''}
   $('reportSaved').textContent=rep.closedAt?`Закрыт в ${new Date(rep.closedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`:(rep.done||rep.block||rep.tomorrow)?'Черновик сохранён':'';
@@ -2809,6 +2933,36 @@ function renderToday(){
   renderPulseRings();renderTodayGoal();renderTodayMoney();renderTasks();setText('brandSub',greeting()+(state.profile.name?', '+state.profile.name:''));
 }
 
+function stageEmoji(s,i){const t=String(s?.title||'').toLowerCase();
+  if(/итог|вечер|сон|спать|ноч/.test(t))return '🌙';if(/работ|офис|смен|бизнес/.test(t))return '💼';if(/дом|семь|отдых/.test(t))return '🏡';
+  if(/утр|подъём|подъем|завтрак/.test(t))return '🌅';if(/учёб|учеб|курс|англ|чтен/.test(t))return '📚';if(/спорт|трен|зал/.test(t))return '🏃';if(/намаз|молит/.test(t))return '🕌';
+  return ['🌅','💼','🏡','🌙','⭐'][i%5]}
+function durText(min){min=Math.max(0,Math.round(min));const h=Math.floor(min/60),m=min%60;return h?(m?`${h} ч ${m} мин`:`${h} ч`):`${m} мин`}
+function renderRhythm(info=getStageInfo()){
+  const box=$('timeline');if(!box)return;const steps=state.day.steps||[],rep=dayReport(),now=Math.floor(nowMin());
+  const rows=steps.map((s,i)=>{const a=timeToMin(s.time),b=timeToMin(s.end),expired=now>=b,done=!!rep.steps[s.id]||expired,current=!done&&info.kind==='active'&&info.i===i;
+    const pct=done?100:current?clamp(Math.round(info.pct),0,100):0;const len=b-a;
+    const p=done?1:current?pct/100:0;const cls=done?'done':current?'current':'todo';
+    const meta=done?'✅ Пройден':current?`🔥 Сейчас · ещё ${durText(b-now)}`:(a>now?`⏳ через ${durText(a-now)}`:'⏳ Впереди');
+    return `<div class="jl-rstep ${cls}" style="--p:${p.toFixed(3)}"><span class="jl-rstep-dot" aria-hidden="true">${done?'✓':stageEmoji(s,i)}</span><div class="jl-rstep-body"><div class="jl-rstep-top"><b>${esc(s.title)}</b><span class="jl-rstep-time">${esc(s.time)}–${esc(s.end)}</span></div><small class="jl-rstep-meta">${meta}${current?'':' · '+durText(len)}</small>${current?`<div class="jl-rstep-bar"><i style="width:${pct}%"></i></div>`:''}<div class="jl-rstep-note">${esc(s.text)}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${done?'Этап завершён: '+esc(s.title):'Завершить этап: '+esc(s.title)}"></div>`});
+  box.innerHTML=rows.join('')||'<div class="v-empty">Этапов дня нет.</div>';
+  $$('[data-day-step]').forEach(c=>{c.onchange=()=>{const r=dayReport();r.steps=r.steps||{};r.steps[c.dataset.dayStep]=c.checked;saveState();if(c.checked)haptic(16);renderToday()}});
+  renderDayStrip(info);
+}
+function renderDayStrip(info=getStageInfo()){
+  const el=$('dayStrip');if(!el)return;const steps=state.day.steps||[];if(!steps.length){el.innerHTML='';return}
+  const start=Math.min(...steps.map(s=>timeToMin(s.time))),end=Math.max(...steps.map(s=>timeToMin(s.end))),span=Math.max(1,end-start),now=Math.floor(nowMin());
+  const nowPct=clamp((now-start)/span*100,0,100),rep=dayReport();
+  const segs=steps.map((s,i)=>{const a=timeToMin(s.time),b=timeToMin(s.end),done=!!rep.steps[s.id]||now>=b,cur=!done&&info.kind==='active'&&info.i===i;
+    return `<span class="jl-seg ${done?'done':cur?'current':''}" style="left:${((a-start)/span*100).toFixed(2)}%;width:${((b-a)/span*100).toFixed(2)}%" title="${esc(s.title)} ${esc(s.time)}–${esc(s.end)}">${(b-a)/span>.07?`<em>${stageEmoji(s,i)}</em>`:''}</span>`}).join('');
+  const inDay=now>=start&&now<=end;const hh=String(Math.floor(now/60)).padStart(2,'0'),mm=String(now%60).padStart(2,'0');
+  const left=clamp(end-now,0,span);
+  el.innerHTML=`<div class="jl-strip">${segs}<i class="jl-strip-fill" style="width:${nowPct.toFixed(2)}%"></i>${inDay?`<b class="jl-strip-now ${nowPct>82?'r':nowPct<18?'l':''}" style="left:${nowPct.toFixed(2)}%"><span>${hh}:${mm}</span></b>`:''}</div><div class="jl-strip-legend"><span>${esc(steps[0].time)}</span><span>${now<start?'день ещё не начался':now>end?'день завершён 🎉':`осталось ${durText(left)}`}</span><span>${esc(steps[steps.length-1].end)}</span></div>`;
+}
+function miniRing(id,done,total){const el=$(id);if(!el)return;if(!total){el.innerHTML='';el.hidden=true;return}el.hidden=false;const p=Math.round(done/total*100);
+  el.innerHTML=`<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" pathLength="100" style="stroke-dasharray:${p} 100"/></svg><b>${p===100?'🏆':p+'%'}</b>`;el.classList.toggle('full',p===100)}
+function taskEmoji(t){const x=String(t||'').toLowerCase();const m=[[/позвон|звон|созвон/,'📞'],[/оплат|заплат|плат[её]ж|долг|кредит/,'💳'],[/купи|покуп|магаз/,'🛒'],[/подар/,'🎁'],[/отчёт|отчет|отправ|письм|почт|док/,'📄'],[/встреч|собран/,'🤝'],[/врач|клиник|аптек|лекар/,'💊'],[/спорт|трен|бег|зал/,'🏃'],[/учи|англ|урок|курс|чита|книг/,'📚'],[/убор|дом|ремонт/,'🧹'],[/машин|авто|бензин|заправ/,'🚗'],[/намаз|мечет/,'🕌'],[/мам|пап|семь|дет/,'👨‍👩‍👧'],[/интернет|телефон|связ/,'📶'],[/еда|приготов|ужин|обед/,'🍲'],[/банк/,'🏦']];for(const [r,e] of m)if(r.test(x))return e;return '📌'}
+function habitEmoji(h){if(h?.emoji)return h.emoji;const x=String(h?.title||'').toLowerCase();const m=[[/намаз|молит|коран/,'🕌'],[/англ|язык|учи|урок/,'🗣️'],[/спорт|трен|бег|зал|отжим/,'🏃'],[/чтен|чита|книг/,'📚'],[/вод/,'💧'],[/сон|спать|подъ/,'😴'],[/медит|дыха/,'🧘'],[/день|деньг|эконом|трат/,'💰'],[/сладк|сахар|еда|питан/,'🥗'],[/телефон|соцсет|экран/,'📵']];for(const [r,e] of m)if(r.test(x))return e;return '✨'}
 function renderTodayLight(){const d=new Date();$('clock').textContent=d.toLocaleTimeString('ru-RU',{hour12:false})}
 function goalContributionTotal(f){return (Array.isArray(f.contributions)?f.contributions:[]).reduce((sum,x)=>sum+(Number(x.amount)||0),0)}
 function syncGoalFinanceCompletion(){
@@ -3575,31 +3729,37 @@ function habitStreak(h){
 function habitSub(h){
   const st=habitStreak(h),unit=h.kind==='weekly'?plural(st,'неделя','недели','недель'):plural(st,'день','дня','дней');
   const base=h.kind==='weekly'?`${habitWeekCount(h)} из ${Math.max(1,Number(h.target)||1)} на этой неделе`:HABIT_KINDS[h.kind]||'каждый день';
-  return esc(base)+(st>1?` · <span class="jl-flame-mini">🔥 ${st} ${unit}</span>`:'');
+  return esc(base)+(st>1?` · <span class="jl-flame-mini"><i class="jl-fl" aria-hidden="true">🔥</i> ${st} ${unit}</span>`:'');
 }
 function renderHabits(){
   const box=$('habitList');if(!box)return;const list=state.habits||[],today=new Date(),tk=keyDay(today);
   if(!list.length){
     box.innerHTML='<div class="v-sub" style="margin-top:4px">Добавь первую привычку — в один тап:</div><div class="jl-habit-ideas">'+HABIT_IDEAS.map((x,i)=>`<button class="jl-pill" type="button" data-habit-idea="${i}">${svgIcon('i-plus')}${esc(x[0])}</button>`).join('')+'</div>';
     $$('[data-habit-idea]').forEach(b=>b.onclick=()=>{const [title,kind,target]=HABIT_IDEAS[Number(b.dataset.habitIdea)];addHabit(title,kind,target)});
-    setText('habitSummary','Отмечай каждый день — серия растёт');return;
+    setText('habitSummary','Отмечай каждый день — серия растёт');miniRing('habitRing',0,0);const hw=$('habitWeek');if(hw)hw.innerHTML='';return;
   }
   let doneToday=0,dueToday=0;
   box.innerHTML=list.map(h=>{
     const due=habitDue(h,today),done=habitDoneOn(h,tk);if(due){dueToday++;if(done)doneToday++}
     const d=new Date(today);d.setDate(d.getDate()-6);let dots='';
     for(let i=0;i<7;i++){const k=keyDay(d),on=habitDoneOn(h,k),dd=habitDue(h,d);dots+=`<i class="${on?'on':''}${!dd&&!on?' off':''}${i===6?' today':''}" title="${esc(d.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric'}))}${on?' — выполнено':''}"></i>`;d.setDate(d.getDate()+1)}
-    return `<div class="jl-habit"><button class="jl-habit-name" type="button" data-habit-edit="${esc(h.id)}"><b>${esc(h.title)}</b><small>${habitSub(h)}</small></button><span class="jl-dots" aria-hidden="true">${dots}</span><button class="jl-habit-check ${done?'on':''}" type="button" data-habit-check="${esc(h.id)}" aria-pressed="${done}" aria-label="${esc((done?'Снять отметку: ':'Отметить сегодня: ')+h.title)}">${svgIcon('i-check')}</button></div>`;
+    const st=habitStreak(h);return `<div class="jl-habit ${done?'is-done':''} ${due&&!done?'is-due':''}" data-habit-row="${esc(h.id)}"><button class="jl-habit-emo ${st>=3?'hot':''}" type="button" data-habit-emo="${esc(h.id)}" aria-label="${esc((done?'Снять отметку: ':'Отметить сегодня: ')+h.title)}">${habitEmoji(h)}</button><button class="jl-habit-name" type="button" data-habit-edit="${esc(h.id)}"><b>${esc(h.title)}</b><small>${habitSub(h)}</small><span class="jl-dots" aria-hidden="true">${dots}</span></button><button class="jl-habit-check ${done?'on':''}" type="button" data-habit-check="${esc(h.id)}" aria-pressed="${done}" aria-label="${esc((done?'Снять отметку: ':'Отметить сегодня: ')+h.title)}">${svgIcon('i-check')}</button></div>`;
   }).join('');
-  setText('habitSummary',dueToday?`Сегодня ${doneToday} из ${dueToday}`:'Сегодня можно отдохнуть');
+  setText('habitSummary',dueToday?(doneToday===dueToday?`Сегодня всё выполнено — ${dueToday} из ${dueToday} 🔥`:`Сегодня ${doneToday} из ${dueToday}`):'Сегодня можно отдохнуть');miniRing('habitRing',doneToday,dueToday);renderHabitWeek();
+  $$('[data-habit-emo]').forEach(b=>b.onclick=()=>toggleHabit(b.dataset.habitEmo));
   $$('[data-habit-check]').forEach(b=>b.onclick=()=>toggleHabit(b.dataset.habitCheck));
   $$('[data-habit-edit]').forEach(b=>b.onclick=()=>openHabitEditor(b.dataset.habitEdit));
 }
+function renderHabitWeek(){const el=$('habitWeek');if(!el)return;const list=state.habits||[];if(!list.length){el.innerHTML='';return}
+  const d=new Date();d.setDate(d.getDate()-6);let bars='';
+  for(let i=0;i<7;i++){const k=keyDay(d);let due=0,ok=0;for(const h of list){const on=habitDoneOn(h,k);if(habitDue(h,d)||on){due++;if(on)ok++}}
+    const p=due?Math.round(ok/due*100):0;bars+=`<div class="jl-hw-col ${i===6?'today':''}" title="${esc(d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric'}))}: ${ok} из ${due}"><span class="jl-hw-bar"><i style="height:${Math.max(p,4)}%;${p===100?'background:var(--green)':''}"></i></span><small>${esc(d.toLocaleDateString('ru-RU',{weekday:'short'}).replace('.',''))}</small></div>`;d.setDate(d.getDate()+1)}
+  el.innerHTML=`<div class="jl-hw-head"><b>📊 Неделя привычек</b><small>столбик — сколько выполнено в этот день</small></div><div class="jl-hw-grid">${bars}</div>`}
 function toggleHabit(id){
   const h=(state.habits||[]).find(x=>x.id===id);if(!h)return;const k=keyDay();
   state.habitLog=state.habitLog&&typeof state.habitLog==='object'?state.habitLog:{};const log=state.habitLog[id]=state.habitLog[id]||{};
   const on=!log[k];if(on)log[k]=1;else delete log[k];
-  saveState();renderHabits();const b=document.querySelector(`[data-habit-check="${CSS.escape(id)}"]`);if(b&&on){b.classList.add('pop')}
+  saveState();renderHabits();const b=document.querySelector(`[data-habit-check="${CSS.escape(id)}"]`);if(b&&on){b.classList.add('pop');b.closest('.jl-habit')?.classList.add('just-done')}
   haptic(on?16:8);if(on){const st=habitStreak(h);toast(h.title,st>1?`${st} ${h.kind==='weekly'?plural(st,'неделя','недели','недель'):plural(st,'день','дня','дней')} подряд`:'Отмечено на сегодня')}
 }
 function addHabit(title,kind='daily',target=7){
@@ -3934,10 +4094,11 @@ function renderTodayMoney(){
 function todayTasks(){const k=keyDay();return (state.tasks||[]).filter(t=>t.date===k).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')||Date.parse(a.createdAt||0)-Date.parse(b.createdAt||0))}
 function renderTasks(){if(appReadyForSync)carryOverTasks();pushWidget();
   const list=$('taskList');if(!list)return;const rep=dayReport(),m=nowMin();
-  const tasks=todayTasks().map(t=>{const late=!t.done&&t.time&&m>=timeToMin(t.time),lead=taskLead(t);return `<div class="v-task ${t.done?'done':''} ${late?'overdue':''} ${t.time&&!t.done?'timed':''}"><input class="v-check" type="checkbox" data-task-id="${esc(t.id)}" ${t.done?'checked':''} aria-label="${esc('Задача: '+t.title)}"><div><div class="v-task-title">${esc(t.title)}</div><div class="v-task-meta">${t.done&&t.doneAt?'Выполнено в '+esc(new Date(t.doneAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})):late?'Время прошло — отметь или перенеси':t.time?`<span class="v-remind">${svgIcon('i-bell')} <span data-task-left>в ${esc(t.time)}</span></span>`:(t.carriedFrom?'↪️ перенесено с '+esc(new Date(t.carriedFrom+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})):'Задача')}</div>${t.time&&!t.done?`<div class="jl-task-bar" data-task-bar="${esc(t.id)}"><i></i></div>`:''}</div><span class="v-task-time">${esc(t.time||'')}</span><button class="v-task-del" type="button" data-task-del="${esc(t.id)}" aria-label="Удалить задачу">${svgIcon('i-x')}</button></div>`});
+  const tasks=todayTasks().map(t=>{const late=!t.done&&t.time&&m>=timeToMin(t.time),lead=taskLead(t);return `<div class="v-task ${t.done?'done':''} ${late?'overdue':''} ${t.time&&!t.done?'timed':''}" data-task-row="${esc(t.id)}"><input class="v-check" type="checkbox" data-task-id="${esc(t.id)}" ${t.done?'checked':''} aria-label="${esc('Задача: '+t.title)}"><button class="jl-task-emo" type="button" data-task-emo="${esc(t.id)}" aria-label="${esc((t.done?'Вернуть: ':'Готово: ')+t.title)}">${t.done?'✅':taskEmoji(t.title)}</button><div><div class="v-task-title">${esc(t.title)}</div><div class="v-task-meta">${t.done&&t.doneAt?'Выполнено в '+esc(new Date(t.doneAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})):late?'Время прошло — отметь или перенеси':t.time?`<span class="v-remind">${svgIcon('i-bell')} <span data-task-left>в ${esc(t.time)}</span></span>`:(t.carriedFrom?'↪️ перенесено с '+esc(new Date(t.carriedFrom+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})):'Задача')}</div>${t.time&&!t.done?`<div class="jl-task-bar" data-task-bar="${esc(t.id)}"><i></i></div>`:''}</div><span class="v-task-time">${esc(t.time||'')}</span><button class="v-task-del" type="button" data-task-del="${esc(t.id)}" aria-label="Удалить задачу">${svgIcon('i-x')}</button></div>`});
   list.innerHTML=tasks.join('')||'<div class="v-empty">Задач на сегодня нет — нажми «+», чтобы добавить.</div>';
-  const all=todayTasks(),doneCount=all.filter(t=>t.done).length;setText('taskSummary',all.length?`${doneCount} из ${all.length} задач выполнено`:'Добавь задачу кнопкой «+»');
-  $$('[data-task-id]').forEach(c=>c.onchange=()=>{const t=(state.tasks||[]).find(x=>x.id===c.dataset.taskId);if(!t)return;t.done=c.checked;t.doneAt=c.checked?new Date().toISOString():'';saveState();renderTasks();scheduleNativeTasks();if(c.checked)toast('Задача выполнена',t.title)});
+  const all=todayTasks(),doneCount=all.filter(t=>t.done).length;setText('taskSummary',all.length?(doneCount===all.length?`Все ${all.length} готовы — отличный день 🎉`:`${doneCount} из ${all.length} задач выполнено`):'Добавь задачу кнопкой «+»');miniRing('taskRing',doneCount,all.length);
+  $$('[data-task-emo]').forEach(b=>b.onclick=()=>{const c=document.querySelector(`[data-task-id="${CSS.escape(b.dataset.taskEmo)}"]`);if(c){c.checked=!c.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}});
+  $$('[data-task-id]').forEach(c=>c.onchange=()=>{const t=(state.tasks||[]).find(x=>x.id===c.dataset.taskId);if(!t)return;t.done=c.checked;t.doneAt=c.checked?new Date().toISOString():'';saveState();renderTasks();scheduleNativeTasks();if(c.checked){const row=document.querySelector(`[data-task-row="${CSS.escape(t.id)}"]`);row?.classList.add('just-done');const a=todayTasks();if(a.length>1&&a.every(x=>x.done)){celebrate();toast('Все задачи на сегодня готовы','Сильный день 💪')}else toast('Задача выполнена',t.title)}});
   $$('[data-task-del]').forEach(b=>b.onclick=()=>{state.tasks=(state.tasks||[]).filter(x=>x.id!==b.dataset.taskDel);saveState();renderTasks();scheduleNativeTasks();toast('Задача удалена')});
 updateTaskBars();}
 function openQuickAdd(){
@@ -4294,7 +4455,7 @@ function bindV57(){
   [['setNotifyAll','notifications'],['setNotifyTasks','notifyTasks'],['setNotifyFinance','notifyFinance'],['setNotifyGoals','notifyGoals'],['setNotifySound','sound']].forEach(([id,key])=>$(id).onchange=e=>{state.settings[key]=e.target.checked;saveState();if(key==='notifications'||key==='notifyTasks')scheduleNative()});
   $('setNotifyPermission').onclick=requestNotifications;$('setAdvancedRow').onclick=openSettings;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;
-  $('pfLogout').onclick=()=>{if(confirm('Выйти из Jamal Life? Данные в Supabase сохранятся.'))cloudLogout()};
+  $('pfLogout').onclick=()=>{if(confirm('Выйти из Jamal Life? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};
   $$('[data-layout-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный'),0)));
   // Android «Назад» walks this history: first closes an open sheet, then returns to the previous screen.
   window.addEventListener('popstate',e=>{if($('modalBack').classList.contains('open')){closeModal();try{history.pushState({lcView:currentView},'')}catch(err){}return}navDepth=Math.max(0,navDepth-1);showView(e.state?.lcView||'viewToday',{push:false})});

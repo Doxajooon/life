@@ -524,7 +524,7 @@ await test("Привычки: отметка, серия и объединени
   await A.page.evaluate(id => { const d = new Date(); state.habitLog[id] = {}; for (let i = 1; i <= 4; i++) { d.setDate(d.getDate() - 1); state.habitLog[id][keyDay(d)] = 1; } saveState(); renderHabits(); }, hid);
   await A.page.click(`[data-habit-check="${hid}"]`);
   const a = await A.page.evaluate(id => ({ on: document.querySelector(`[data-habit-check="${id}"]`).getAttribute("aria-pressed"), sub: document.querySelector(`[data-habit-edit="${id}"] small`).textContent, sum: document.getElementById("habitSummary").textContent }), hid);
-  assert.deepEqual(a, { on: "true", sub: "каждый день · 🔥 5 дней", sum: "Сегодня 1 из 1" });
+  assert.deepEqual(a, { on: "true", sub: "каждый день · 🔥 5 дней", sum: "Сегодня всё выполнено — 1 из 1 🔥" });
   await sync(A.page); await sync(B.page);
   // B adds a second habit and ticks it; A unticks today's mark — both changes must survive
   await B.page.evaluate(() => { addHabit("Спорт", "weekly", 3); const h = state.habits.find(x => x.title === "Спорт"); toggleHabit(h.id); });
@@ -713,6 +713,64 @@ await test("Цель: кольцо, отставание и живые этап�
   });
   assert.equal(r.hidden, false); assert.match(r.lag, /Отстаёшь на/);
   assert.deepEqual(r.steps.slice(0, 2), ["done", "current"]); assert.ok(Number(r.ring) > 0); assert.ok(r.chartOnMain);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Безопасность: другой аккаунт на этом телефоне не видит чужие записи", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud);
+  await A.page.evaluate(() => { state.expenses.push({ id: "own", amount: 50, category: "Еда", at: new Date().toISOString() }); saveState(); });
+  await sync(A.page);
+  // the phone still holds records of a different account (signed out without network)
+  await A.page.evaluate(() => { localStorage.setItem("JL_DEVICE_OWNER_V64", "someone-else"); state.expenses.push({ id: "foreign", amount: 999, category: "Чужое", at: new Date().toISOString() }); state[CLOUD_BASE_KEY] = ""; saveState(); });
+  await sync(A.page);
+  const r = await A.page.evaluate(() => ({ ids: state.expenses.map(e => e.id), owner: localStorage.getItem("JL_DEVICE_OWNER_V64") }));
+  assert.deepEqual(r.ids, ["own"], "foreign records leaked into the account");
+  assert.equal(r.owner, UID);
+  assert.ok(!JSON.stringify(cloud.row.state).includes("foreign"), "foreign records were uploaded");
+  assert.deepEqual(A.page.errors, []);
+  await A.ctx.close();
+});
+
+await test("Выход из аккаунта: телефон очищается, после входа всё возвращается", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud);
+  await A.page.evaluate(() => { state.notes.push({ id: "secret", title: "Личное", body: "пин от домофона", at: new Date().toISOString(), category: "personal" }); saveState(); });
+  await sync(A.page);
+  await A.page.evaluate(() => { window.confirm = () => true; });
+  // the test harness signs the page in again on reload; keep the cloud offline to see what the device itself kept
+  cloud.down = true;
+  await Promise.all([A.page.waitForEvent("load"), A.page.evaluate(() => cloudLogout())]);
+  await A.page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true);
+  await A.page.waitForTimeout(600);
+  const after = await A.page.evaluate(() => ({ notes: state.notes.map(n => n.id), ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")) }));
+  assert.deepEqual(after.notes, [], "personal data stayed on the device after logout");
+  assert.deepEqual(after.ls, []);
+  cloud.down = false;
+  await sync(A.page);
+  const back = await A.page.evaluate(() => state.notes.map(n => n.id));
+  assert.ok(back.includes("secret"), "data did not come back after login");
+  await A.ctx.close();
+});
+
+await test("Сегодня: ритм дня этапами, задачи и привычки с живыми иконками", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-15T19:05:00+05:00") });
+  const r = await page.evaluate(() => {
+    const k = keyDay();
+    state.tasks = [{ id: "a", title: "Позвонить в банк", date: k, time: "", createdAt: new Date().toISOString() }, { id: "b", title: "Купить хлеб", date: k, time: "", createdAt: new Date().toISOString() }];
+    state.habits = [{ id: "h", title: "Пять намазов", kind: "daily", target: 7 }]; state.habitLog = {};
+    saveState(); renderAll(); showView("viewToday");
+    return { steps: [...document.querySelectorAll("#timeline .jl-rstep")].map(x => x.className.replace("jl-rstep ", "")), strip: document.querySelectorAll("#dayStrip .jl-seg").length,
+      emo: document.querySelector('[data-task-emo="a"]').textContent, hemo: document.querySelector('[data-habit-emo="h"]').textContent, week: document.querySelectorAll("#habitWeek .jl-hw-col").length };
+  });
+  assert.deepEqual(r.steps, ["done", "current", "todo"]); assert.equal(r.strip, 3); assert.equal(r.emo, "📞"); assert.equal(r.hemo, "🕌"); assert.equal(r.week, 7);
+  await page.click('[data-task-emo="a"]');
+  await page.click('[data-habit-emo="h"]');
+  const s = await page.evaluate(() => ({ done: state.tasks.find(t => t.id === "a").done, ring: document.querySelector("#taskRing b").textContent, habit: !!state.habitLog.h?.[keyDay()], hring: document.querySelector("#habitRing b").textContent }));
+  assert.equal(s.done, true); assert.equal(s.ring, "50%"); assert.equal(s.habit, true); assert.equal(s.hring, "🏆");
+  await page.click('[data-task-emo="b"]');
+  assert.equal(await page.evaluate(() => document.querySelector("#taskRing b").textContent), "🏆");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

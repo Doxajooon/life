@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "63.0.0");
-assert.match(gradle, /versionCode 630\b/); assert.match(gradle, /versionName '63\.0'/);
-assert.match(csproj, /<Version>63\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V63'), "app version must be V63 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v63-0"), "service worker cache must be V63");
+assert.equal(pkg.version, "64.0.0");
+assert.match(gradle, /versionCode 640\b/); assert.match(gradle, /versionName '64\.0'/);
+assert.match(csproj, /<Version>64\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V64'), "app version must be V64 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v64-0"), "service worker cache must be V64");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -73,4 +73,7 @@ assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 // Gemini Interactions API: thinking_level must sit inside generation_config (top-level → HTTP 400)
 { assert.ok(/generation_config:\s*\{[^}]*thinking_level/.test(fn) && !/\n\s*thinking_level:/.test(fn), "thinking_level must be inside generation_config");
   for (const m of ["week", "deep", "goal"]) assert.ok(fn.includes(`body?.mode === "${m}"`), "AI mode missing: " + m); }
-console.log("JAMAL_LIFE_V63_STATIC_QA_OK");
+assert.ok(html.includes("function resetForNewOwner") && html.includes("OWNER_KEY") && /owner&&owner!==user\.id\)resetForNewOwner\(\)/.test(html), "another account must never get the previous owner's records");
+assert.ok(html.includes("if(synced)await wipeLocalData()"), "logout must clear personal data from the device once it is safe in the cloud");
+assert.ok(html.includes("function renderRhythm") && html.includes("function renderDayStrip") && html.includes("function renderHabitWeek"), "living rhythm, day strip and habit week chart");
+console.log("JAMAL_LIFE_V64_STATIC_QA_OK");
