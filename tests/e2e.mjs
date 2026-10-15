@@ -999,7 +999,7 @@ await test("Цель: автоэтапы — переключатель в «И�
   const { ctx, page } = await device(makeCloud());
   // the stage «закрыть основную часть долгов» closes itself once half the debt is paid
   const setup = () => page.evaluate(() => {
-    state.debtBaseline = 100000; state.debts = { bank: 40000, firms: 0, monthlyPayment: 1000 };
+    state.debtBaseline = 100000; state.debts = { bank: 90000, firms: 0, monthlyPayment: 1000 }; // not yet half paid
     state.goal.milestones = [{ id: "m1", title: "Закрыть основную часть долгов", done: false }, { id: "m2", title: "Купить машину", done: false }];
     saveState();
   });
@@ -1007,20 +1007,20 @@ await test("Цель: автоэтапы — переключатель в «И�
   await setup();
   await page.evaluate(() => { showView("viewGoal"); openGoalEdit(); });
   assert.equal(await page.isChecked('[data-ms-auto="m1"]'), true, "auto-close is on by default");
-  await page.click('[data-ms-auto="m1"]', { force: true });
-  await page.evaluate(() => { closeModal(); autoMilestones(); renderGoal(); });
+  await page.$eval('[data-ms-auto="m1"]', el => el.click());
+  await page.evaluate(() => { closeModal(); state.debts.bank = 40000; saveState(); autoMilestones(); renderGoal(); }); // now 60% paid
   let m1 = await page.evaluate(() => state.goal.milestones[0]);
-  assert.equal(m1.autoOff, true); assert.equal(m1.done, false, "a stage with auto-close off must not close itself");
+  assert.equal(m1.autoOff, true, "switch off: " + JSON.stringify(m1)); assert.equal(m1.done, false, "a stage with auto-close off must not close itself: " + JSON.stringify(m1));
   // switched back on → closes by the numbers
   await page.evaluate(() => openGoalEdit());
-  await page.click('[data-ms-auto="m1"]', { force: true });
+  await page.$eval('[data-ms-auto="m1"]', el => el.click());
   m1 = await page.evaluate(() => { closeModal(); return state.goal.milestones[0]; });
-  assert.equal(m1.done, true); assert.equal(m1.auto, true); assert.ok(!("autoOff" in m1));
+  assert.equal(m1.done, true, "switch on: " + JSON.stringify(m1)); assert.equal(m1.auto, true); assert.ok(!("autoOff" in m1));
   // 2) an auto-closed stage unticked by hand stays open for good
   await page.evaluate(() => { showView("viewGoal"); renderGoal(); });
-  await page.click('[data-ms="m1"]', { force: true });
+  await page.$eval('[data-ms="m1"]', el => el.click());
   m1 = await page.evaluate(() => { autoMilestones(); renderAll(); return state.goal.milestones[0]; });
-  assert.equal(m1.done, false); assert.equal(m1.autoOff, true);
+  assert.equal(m1.done, false, "unticked by hand: " + JSON.stringify(m1)); assert.equal(m1.autoOff, true);
   // editing the stage list in the textarea keeps the flag
   await page.evaluate(() => openGoalEdit());
   await page.fill("#gMilestones", "[ ] Закрыть основную часть долгов\n[ ] Купить машину\n[ ] Новый этап");
