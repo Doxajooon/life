@@ -1807,6 +1807,7 @@ b,strong{font-weight:600}
 .jl-quote.open blockquote{-webkit-line-clamp:unset;display:block}
 .jl-quote figcaption{margin-top:6px!important;font-size:.72rem!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jl-quote.open figcaption{white-space:normal}
+.jl-quote:focus-visible,.debt-bar-wrap:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.jl-quick3 .ui-icon,.jl-receipt,.jl-receipt-ico,.jl-dh-row,.jl-src-tiles button i{animation:none!important}}
 
 .jl-ai-result>b{display:block;margin-bottom:10px}
@@ -1927,7 +1928,7 @@ b,strong{font-weight:600}
       <div class="jl-now-foot"><span id="currentProgressText">—</span><span id="nextAlertText">—</span></div>
       <div class="detail-list jl-now-details" id="currentDetails"></div>
     </div>
-    <figure class="jl-quote">
+    <figure class="jl-quote" role="button" tabindex="0" aria-expanded="false" aria-label="Цитата дня — раскрыть полностью">
       <blockquote id="motivationText">—</blockquote>
       <figcaption id="motivationSource">—</figcaption>
     </figure>
@@ -2120,7 +2121,7 @@ b,strong{font-weight:600}
         <h2 class="v-title" style="margin-top:18px"><span class="jl-emo" aria-hidden="true">💼</span>Откуда приходят</h2><div class="source-list" id="profitSourceList"></div><div class="sub" id="profitSourceNote" style="margin-top:9px">Источники появятся после первой записи дохода.</div>
       </div>
     <div class="jl-debt-block"><div class="row jl-section-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📉</span>Долг</h2><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div><div class="jl-debtplan" id="debtPlan"></div></div>
-    <div class="card"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📋</span>История долга</h2><div id="debtSummary" style="margin-top:10px"></div><div class="debt-chart" id="debtChart" role="img" aria-label="Динамика долга по последним записям"></div><div class="debt-chart-note" id="debtChartNote"></div></div>
+    <div class="card"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📋</span>История долга</h2><div id="debtSummary" style="margin-top:10px"></div><div class="debt-chart" id="debtChart" role="group" aria-label="Динамика долга по последним записям"></div><div class="debt-chart-note" id="debtChartNote"></div></div>
 
     <div class="card">
       <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🧾</span>Последние операции</h2><div class="v-sub">← смахни операцию влево, чтобы удалить</div></div><button class="v-link" type="button" data-money-tab-go="tx">Все</button></div>
@@ -3445,7 +3446,7 @@ function renderGoal(){autoMilestones();
   $('achievements').innerHTML=state.achievements.length?state.achievements.slice().sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).map(a=>`<div class="note"><div class="note-title">Результат</div><div class="note-body">${esc(a.text)}</div><div class="note-time">${esc(fmtDateTime(new Date(a.at)))}</div></div>`).join(''):'<div class="empty">Здесь остаются реальные завершённые результаты.</div>';
 }
 
-function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){chart.innerHTML='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);chart.innerHTML=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap" role="button" tabindex="0" data-debt-open="all" title="Открыть историю долга"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
+function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){chart.innerHTML='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);chart.innerHTML=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap" role="button" tabindex="0" data-debt-open="all" title="Открыть историю долга" aria-label="Долг ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}: ${esc(fmtMoney(x.total))} — открыть историю"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
 function normalizeProfitSource(v){
   const raw=String(v||'').trim();
   const s=raw.toLowerCase();
@@ -3676,7 +3677,10 @@ function openAchievement(){
   const d=state.drafts?.achievement||{};openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-spark"></use></svg></span>Результат</div><h2>Зафиксировать</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Что конкретно достиг</label><textarea id="achInput" placeholder="Например: закрыл этап, накопил сумму, закончил часть работы...">${esc(d.text||'')}</textarea></div><div class="sub">Текст сохраняется автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveAchBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить результат</button></div></div>`);$('closeModalBtn').onclick=closeModal;$('achInput').addEventListener('input',()=>saveDraft('achievement',{text:$('achInput').value}));$('saveAchBtn').onclick=()=>{const t=$('achInput').value.trim();if(!t){toast('Добавь факт');return}state.achievements.push({id:uid(),text:t,at:new Date().toISOString()});clearDraft('achievement');saveState();closeModal();renderGoal();toast('Результат сохранён')};focusSoon('achInput',50)
 }
 document.addEventListener('click',e=>{const b=e.target.closest?.('#debtChart [data-debt-open]');if(b)openDebtHistory('all')});
-document.addEventListener('click',e=>{const q=e.target.closest?.('.jl-quote');if(q)q.classList.toggle('open')});
+function toggleQuote(q){q.setAttribute('aria-expanded',String(q.classList.toggle('open')))}
+document.addEventListener('click',e=>{const q=e.target.closest?.('.jl-quote');if(q)toggleQuote(q)});
+// Keyboard: Enter/Space opens debt-chart bars and the quote, like a click.
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const b=e.target.closest?.('#debtChart [data-debt-open]'),q=e.target.closest?.('.jl-quote');if(!b&&!q)return;e.preventDefault();if(b)openDebtHistory('all');else toggleQuote(q)});
 function openDebtHistory(focus='all'){
   ensureDebtHistory();
   const who=focus==='bank'||focus==='firms'?focus:'',name={bank:'Банк',firms:'Фирмы'};

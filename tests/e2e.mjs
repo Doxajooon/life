@@ -900,6 +900,36 @@ await test("AI: разбор понимает markdown и нумерацию; п
   await ctx.close();
 });
 
+await test("Клавиатура: столбики долга и цитата открываются Enter/Space; axe без нарушений", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const AXE = fs.readFileSync(path.join(ROOT, "node_modules/axe-core/axe.min.js"), "utf8");
+  // quote on Today
+  await page.evaluate(() => showView("viewToday"));
+  await page.focus(".jl-quote");
+  assert.equal(await page.getAttribute(".jl-quote", "aria-expanded"), "false");
+  await page.keyboard.press("Enter");
+  assert.equal(await page.getAttribute(".jl-quote", "aria-expanded"), "true");
+  await page.keyboard.press(" ");
+  assert.equal(await page.getAttribute(".jl-quote", "aria-expanded"), "false");
+  assert.equal(await page.evaluate(() => document.querySelector(".jl-quote").classList.contains("open")), false);
+  // debt bars on Money
+  await page.evaluate(() => { state.debts = { bank: 9000, firms: 1000, monthlyPayment: 500 }; ensureDebtHistory(); saveState(); showView("viewMoney"); renderAll(); });
+  await page.waitForSelector("#debtChart [data-debt-open]");
+  for (const key of ["Enter", " "]) {
+    await page.focus("#debtChart [data-debt-open]");
+    await page.keyboard.press(key);
+    assert.ok(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), "debt history did not open with " + JSON.stringify(key));
+    await page.evaluate(() => closeModal());
+  }
+  await page.addScriptTag({ content: AXE });
+  const run = sel => page.evaluate(sel => axe.run(sel, { runOnly: ["wcag2a", "wcag2aa"], rules: { "color-contrast": { enabled: false } } }).then(r => r.violations.map(v => v.id + ": " + v.nodes.map(n => n.target.join(" ")).slice(0, 3).join(", "))), sel);
+  assert.deepEqual(await run("#debtChart"), []);
+  await page.evaluate(() => showView("viewToday"));
+  assert.deepEqual(await run(".jl-quote"), []);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
