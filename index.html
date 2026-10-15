@@ -798,6 +798,7 @@ html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,5
 .mc-dots{display:flex;gap:2px;height:.3rem}
 .mc-dots i{width:.3rem;height:.3rem;border-radius:50%;background:var(--dc)}
 .mc-day.sel .mc-dots i{box-shadow:0 0 0 1px rgba(255,255,255,.85)}
+.jl-debtpay{margin-top:.6rem;padding:8px 12px;border-radius:12px;background:color-mix(in srgb,var(--orange) 10%,var(--soft));font-size:.84rem;color:var(--text)}.jl-debtpay b{color:var(--orange-dark,var(--orange));font-variant-numeric:tabular-nums}
 .mc-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:.9rem}
 .mc-sum .v-kpi b{font-size:.84rem}
 .v-form .v-note-text{min-height:16rem!important}
@@ -1979,6 +1980,7 @@ b,strong{font-weight:600}
       <div class="v-kpi" style="--kc:var(--red)"><span><i></i>Расход</span><b class="red-txt" id="tmExpense">0</b></div>
       <div class="v-kpi" style="--kc:var(--orange)"><span><i></i>Долг</span><b class="orange-txt" id="tmDebt">0</b></div>
     </div>
+    <div class="jl-debtpay" id="tmDebtPay" hidden></div>
     <div class="jl-money-today"><div><span>Сегодня</span><b id="todayBalance">0</b><small id="todayCashState">—</small><small id="dashDebtMeta" class="jl-debt-meta">—</small><small id="todayLimitMeta" class="jl-limit-meta" hidden></small></div><div class="jl-money-actions"><button class="jl-pill green" type="button" id="todayAddProfitBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg>Доход</button><button class="jl-pill red" type="button" id="todayAddExpenseBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow-down"></use></svg>Расход</button></div></div>
     <div class="v-minichart" id="tmChart" role="img" aria-label="Доходы и расходы по дням месяца"></div>
     <div class="v-minilegend"><span id="tmChartStart">1</span><span><span class="green-txt">■</span> доход · <span class="red-txt">■</span> расход</span><span id="tmChartEnd">—</span></div>
@@ -2105,6 +2107,7 @@ b,strong{font-weight:600}
       <div class="v-kpi" style="--kc:var(--red)"><span><i></i>Расход</span><b class="red-txt" id="mvExpense">0</b></div>
       <div class="v-kpi" style="--kc:var(--orange)"><span><i></i>Долг</span><b class="orange-txt" id="mvDebt">0</b></div>
     </div>
+    <div class="jl-debtpay" id="mvDebtPay" hidden></div>
     <div class="jl-quick3">
       <button type="button" class="jl-pill green" id="qIncome"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg>Доход</button>
       <button type="button" class="jl-pill red" id="qExpense"><svg class="ui-icon" aria-hidden="true"><use href="#i-minus"></use></svg>Расход</button>
@@ -2146,6 +2149,7 @@ b,strong{font-weight:600}
         <div class="v-kpi" style="--kc:var(--red)"><span><i></i>Расход</span><b class="red-txt" id="mcExpense">0</b></div>
         <div class="v-kpi" style="--kc:var(--blue)"><span><i></i>Баланс</span><b id="mcNet">0</b></div>
       </div>
+      <div class="jl-debtpay" id="mcDebtPay" hidden></div>
     </div>
     <div class="card">
       <div class="row"><div><h2 class="v-title" id="mcDayTitle">—</h2><div class="v-sub" id="mcDaySum">—</div></div></div>
@@ -3006,12 +3010,15 @@ function renderStagePercents(info=getStageInfo()){
 }
 function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${state.day.steps.length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info)}
 function daySum(arr,key=keyDay()){return arr.filter(x=>x.dateKey===key).reduce((a,x)=>a+Number(x.amount||0),0)}
+// A debt payment is not spending: «Расход» never counts it, it is shown as its own line «Платежи по долгу».
+const spendOnly=list=>(list||[]).filter(x=>!x.debtPayment),debtPaysOnly=list=>(list||[]).filter(x=>x.debtPayment);
+function debtPayLine(id,sum){const el=$(id);if(!el)return;el.hidden=!(sum>0);el.innerHTML=sum>0?`<span aria-hidden="true">🏦</span> Платежи по долгу: <b>${esc(fmtMoney(sum))}</b>`:''}
 function monthSum(arr,d=new Date()){const y=d.getFullYear(),m=d.getMonth();return arr.filter(x=>{const z=new Date(x.at);return z.getFullYear()===y&&z.getMonth()===m}).reduce((a,x)=>a+Number(x.amount||0),0)}
 
 function dailyState(){const k=keyDay();state.daily=state.daily&&typeof state.daily==='object'?state.daily:{};state.daily[k]=state.daily[k]||{mainAction:'',mainDone:false,mode:state.dayMode||'normal'};return state.daily[k]}
 function scheduleDayMetrics(){const first=state.day.steps[0],last=state.day.steps[state.day.steps.length-1];if(!first||!last)return {pct:0,start:0,end:1440,m:0};const start=timeToMin(first.time),end=Math.max(timeToMin(last.end),start+1),m=nowMin();return {pct:clamp((m-start)/(end-start)*100,0,100),start,end,m}}
 function milestonePct(){const total=state.goal.milestones.length,done=state.goal.milestones.filter(m=>m.done).length;return total?Math.round(done/total*100):0}
-function financePulse(){const planned=Math.max(0,Number(state.income)||0),actual=monthSum(state.profits),income=actual>0?actual:planned,payment=Math.max(0,Number(state.debts.monthlyPayment)||0),expenses=monthSum(state.expenses),cash=walletMetrics().cash;if(income<=0)return cash>0?100:0;const monthlyHealth=(income-payment-expenses)/income*100;const cashBuffer=clamp((cash/Math.max(income,1))*100,0,100);return clamp(Math.round((monthlyHealth*0.65)+(cashBuffer*0.35)),0,100)}
+function financePulse(){const planned=Math.max(0,Number(state.income)||0),actual=monthSum(state.profits),income=actual>0?actual:planned,payment=Math.max(0,Number(state.debts.monthlyPayment)||0),expenses=monthSum(spendOnly(state.expenses)),cash=walletMetrics().cash;if(income<=0)return cash>0?100:0;const monthlyHealth=(income-payment-expenses)/income*100;const cashBuffer=clamp((cash/Math.max(income,1))*100,0,100);return clamp(Math.round((monthlyHealth*0.65)+(cashBuffer*0.35)),0,100)}
 function debtTotal(){return Math.max(0,Number(state.debts.bank||0)+Number(state.debts.firms||0))}
 function ensureDebtHistory(){state.debtHistory=Array.isArray(state.debtHistory)?state.debtHistory:[];const total=debtTotal();if(!(Number(state.debtBaseline)>0)&&total>0)state.debtBaseline=total;const k=keyDay(),last=state.debtHistory[state.debtHistory.length-1];if(!last||last.day!==k)state.debtHistory.push({day:k,total,at:new Date().toISOString()});else if(Number(last.total)!==total){last.total=total;last.at=new Date().toISOString()}state.debtHistory=state.debtHistory.slice(-120)}
 function debtPulse(){const base=Number(state.debtBaseline)||0,cur=debtTotal();if(base<=0)return 0;return clamp(Math.round((1-cur/base)*100),0,100)}
@@ -4358,13 +4365,13 @@ function renderCalendarRange(byAll){
   const box=$('mcRangeBox');if(!box)return;
   if(!mcRange){box.innerHTML='';return}
   const rows=allTransactions().filter(t=>t.dateKey>=mcRange.from&&t.dateKey<=mcRange.to);
-  const inc=rows.filter(t=>t.kind==='income').reduce((a,t)=>a+t.amount,0),out=rows.filter(t=>t.kind==='expense'||t.kind==='debt').reduce((a,t)=>a+t.amount,0);
-  const cats={};for(const t of rows)if(t.kind==='expense'||t.kind==='debt'){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
+  const inc=rows.filter(t=>t.kind==='income').reduce((a,t)=>a+t.amount,0),out=rows.filter(t=>t.kind==='expense').reduce((a,t)=>a+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((a,t)=>a+t.amount,0);
+  const cats={};for(const t of rows)if(t.kind==='expense'){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
   const top=Object.entries(cats).sort((a,b)=>b[1].v-a[1].v).slice(0,6),days=Math.round((Date.parse(mcRange.to)-Date.parse(mcRange.from))/DAY_MS)+1;
   const f=d=>new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
   box.innerHTML=`<div class="jl-range"><div class="jl-range-head"><b>📅 ${esc(f(mcRange.from))} — ${esc(f(mcRange.to))}</b><small>${days} ${plural(days,'день','дня','дней')} · ${rows.length} ${plural(rows.length,'операция','операции','операций')}</small><button class="jl-icon-btn plain" type="button" id="mcRangeClear" aria-label="Сбросить период">${svgIcon('i-x')}</button></div>
   <div class="jl-deep-kpis"><div><span>Доход</span><b class="green-txt">${esc(fmtNum(inc))}</b></div><div><span>Расход</span><b class="red-txt">${esc(fmtNum(out))}</b></div><div><span>В день</span><b>${esc(fmtNum(Math.round(out/Math.max(1,days))))}</b></div></div>
-  ${top.length?top.map(([k,x])=>`<div class="jl-deep-cat"><span class="jl-emo">${esc(x.e)}</span><span>${esc(k)}</span><div class="budget-track"><i class="budget-fill" style="width:${out?Math.round(x.v/out*100):0}%"></i></div><b>${esc(fmtNum(x.v))}</b></div>`).join(''):'<div class="v-sub">Расходов за период нет.</div>'}</div>`;
+  ${top.length?top.map(([k,x])=>`<div class="jl-deep-cat"><span class="jl-emo">${esc(x.e)}</span><span>${esc(k)}</span><div class="budget-track"><i class="budget-fill" style="width:${out?Math.round(x.v/out*100):0}%"></i></div><b>${esc(fmtNum(x.v))}</b></div>`).join(''):'<div class="v-sub">Расходов за период нет.</div>'}${dp>0?`<div class="jl-debtpay"><span aria-hidden="true">🏦</span> Платежи по долгу: <b>${esc(fmtMoney(dp))}</b></div>`:''}</div>`;
   $('mcRangeClear').onclick=()=>{mcRangeMode=false;mcSetRange(null)};
 }
 
@@ -4437,9 +4444,9 @@ function renderTodayGoal(){
   setText('tgSaved',fmtShort(p.collected));setText('tgLeft',fmtShort(p.remaining));
   if(p.done){setText('tgDaysLabel','Цель');setText('tgDays','достигнута')}else if(p.daysLeft!==null){setText('tgDaysLabel','Осталось');setText('tgDays',p.daysLeft+' '+plural(p.daysLeft,'день','дня','дней'))}else{const f=goalFinanceMetrics();setText('tgDaysLabel','В пути');setText('tgDays',f.days?f.days+' '+plural(f.days,'день','дня','дней'):'—')}
 }
-function monthDaily(year,month){const days=new Date(year,month+1,0).getDate(),inc=new Array(days).fill(0),out=new Array(days).fill(0);const add=(arr,list)=>{for(const x of list||[]){const d=validDate(x.at);if(!d||d.getFullYear()!==year||d.getMonth()!==month)continue;arr[d.getDate()-1]+=Math.max(0,Number(x.amount)||0)}};add(inc,state.profits);add(out,state.expenses);return {days,inc,out}}
+function monthDaily(year,month){const days=new Date(year,month+1,0).getDate(),inc=new Array(days).fill(0),out=new Array(days).fill(0);const add=(arr,list)=>{for(const x of list||[]){const d=validDate(x.at);if(!d||d.getFullYear()!==year||d.getMonth()!==month)continue;arr[d.getDate()-1]+=Math.max(0,Number(x.amount)||0)}};add(inc,state.profits);add(out,spendOnly(state.expenses));return {days,inc,out}}
 function renderTodayMoney(){
-  const now=new Date(),wm=walletMetrics(),inc=monthSum(state.profits),out=monthSum(state.expenses);
+  const now=new Date(),wm=walletMetrics(),inc=monthSum(state.profits),out=monthSum(spendOnly(state.expenses));debtPayLine('tmDebtPay',monthSum(debtPaysOnly(state.expenses)));
   setText('tmMonth',now.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}));setMoneyKpi('tmBalance',wm.cash);setMoneyKpi('tmIncome',inc);setMoneyKpi('tmExpense',out);setMoneyKpi('tmDebt',debtTotal());
   const box=$('tmChart');if(!box)return;const md=monthDaily(now.getFullYear(),now.getMonth()),max=Math.max(1,...md.inc,...md.out),today=now.getDate();
   const html=md.inc.map((v,i)=>`<div class="tm-day${i+1===today?' today':''}" title="${i+1}: +${esc(fmtMoney(v))} / −${esc(fmtMoney(md.out[i]))}"><i class="mc-in" style="height:${v?Math.max(4,v/max*100):0}%"></i><i class="mc-out" style="height:${md.out[i]?Math.max(4,md.out[i]/max*100):0}%"></i></div>`).join('');
@@ -4635,7 +4642,8 @@ function moneyBuckets(period){
   else if(period<=90){for(let i=12;i>=0;i--){const e=new Date(now);e.setDate(now.getDate()-i*7);const s=new Date(e);s.setDate(e.getDate()-6);out.push({start:keyDay(s),end:keyDay(e),endTs:new Date(e.getFullYear(),e.getMonth(),e.getDate(),23,59,59,999).getTime(),label:shortDateLabel(keyDay(e))})}}
   else{for(let i=11;i>=0;i--){const s=new Date(now.getFullYear(),now.getMonth()-i,1),e=new Date(s.getFullYear(),s.getMonth()+1,0,23,59,59,999);out.push({start:keyDay(s),end:keyDay(e),endTs:Math.min(e.getTime(),Date.now()),label:s.toLocaleDateString('ru-RU',{month:'short'}).replace('.','')})}}
   const cashAt=cashSeriesFn();
-  return out.map(b=>({...b,income:sumMoneyRange(state.profits,b.start,b.end),expense:sumMoneyRange(state.expenses,b.start,b.end),balance:cashAt(b.endTs)}));
+  const spend=spendOnly(state.expenses),pays=debtPaysOnly(state.expenses);
+  return out.map(b=>({...b,income:sumMoneyRange(state.profits,b.start,b.end),expense:sumMoneyRange(spend,b.start,b.end),debt:sumMoneyRange(pays,b.start,b.end),balance:cashAt(b.endTs)}));
 }
 function barLineChartSVG(b){
   const ax=v=>{const a=Math.abs(v);return a>=1e6?(v/1e6).toLocaleString('ru-RU',{maximumFractionDigits:1})+'м':a>=1e3?(v/1e3).toLocaleString('ru-RU',{maximumFractionDigits:1})+'к':Math.round(v).toLocaleString('ru-RU')};
@@ -4652,7 +4660,7 @@ function barLineChartSVG(b){
   return svg+'</svg>';
 }
 function renderMoneyOverview(){
-  const b=moneyBuckets(mvPeriod),inc=b.reduce((s,x)=>s+x.income,0),out=b.reduce((s,x)=>s+x.expense,0);
+  const b=moneyBuckets(mvPeriod),inc=b.reduce((s,x)=>s+x.income,0),out=b.reduce((s,x)=>s+x.expense,0);debtPayLine('mvDebtPay',b.reduce((s,x)=>s+x.debt,0));
   setMoneyKpi('mvBalance',walletMetrics().cash);setMoneyKpi('mvIncome',inc);setMoneyKpi('mvExpense',out);setMoneyKpi('mvDebt',debtTotal());
   setText('mvRange',b.length?shortDateLabel(b[0].start)+' — '+shortDateLabel(b[b.length-1].end):'—');
   const chart=$('mvChart');if(chart)chart.innerHTML=(inc||out)?barLineChartSVG(b):'<div class="v-empty">За период операций нет — добавь доход или расход.</div>';
@@ -4666,8 +4674,8 @@ function renderTxList(){
   const shown=rows.slice(0,txLimit);let html='',last='';
   for(const t of shown){if(t.dateKey!==last){last=t.dateKey;html+=`<div class="v-tx-date">${esc(new Date(t.dateKey+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}</div>`}html+=txRowHTML(t)}
   box.innerHTML=html||'<div class="v-empty">Ничего не найдено.</div>';bindTxRows(box);
-  const inc=rows.filter(t=>t.kind==='income').reduce((s,t)=>s+t.amount,0),out=rows.filter(t=>t.kind==='expense'||t.kind==='debt').reduce((s,t)=>s+t.amount,0);
-  setText('txSummary',`${rows.length} ${plural(rows.length,'операция','операции','операций')} · доход ${fmtMoney(inc)} · расход ${fmtMoney(out)}`);
+  const inc=rows.filter(t=>t.kind==='income').reduce((s,t)=>s+t.amount,0),out=rows.filter(t=>t.kind==='expense').reduce((s,t)=>s+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((s,t)=>s+t.amount,0);
+  setText('txSummary',`${rows.length} ${plural(rows.length,'операция','операции','операций')} · доход ${fmtMoney(inc)} · расход ${fmtMoney(out)}${dp>0?' · долг '+fmtMoney(dp):''}`);
   const more=$('txMore');if(more)more.hidden=rows.length<=txLimit;
   $$('[data-tx-filter]').forEach(b=>b.classList.toggle('active',b.dataset.txFilter===txFilter));
 }
@@ -4675,12 +4683,12 @@ function renderMoneyCalendar(){
   const grid=$('mcGrid');if(!grid)return;const first=new Date(mcYear,mcMonth,1),days=new Date(mcYear,mcMonth+1,0).getDate(),lead=(first.getDay()+6)%7,today=keyDay(),monthPrefix=calendarMonthKey(first);
   if(!mcSelected.startsWith(monthPrefix))mcSelected=today.startsWith(monthPrefix)?today:keyDay(first);
   setText('mcTitle',first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}));
-  const byDay=new Map();for(const t of allTransactions()){if(!t.dateKey.startsWith(monthPrefix))continue;const d=byDay.get(t.dateKey)||{income:0,expense:0,transfer:0,list:[]};if(t.kind==='income')d.income+=t.amount;else if(t.kind==='transfer')d.transfer+=t.amount;else d.expense+=t.amount;d.list.push(t);byDay.set(t.dateKey,d)}
+  const byDay=new Map();for(const t of allTransactions()){if(!t.dateKey.startsWith(monthPrefix))continue;const d=byDay.get(t.dateKey)||{income:0,expense:0,debt:0,transfer:0,list:[]};if(t.kind==='income')d.income+=t.amount;else if(t.kind==='transfer')d.transfer+=t.amount;else if(t.kind==='debt')d.debt+=t.amount;else d.expense+=t.amount;d.list.push(t);byDay.set(t.dateKey,d)}
   let html=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(w=>`<div class="mc-week">${w}</div>`).join('');for(let i=0;i<lead;i++)html+='<div class="mc-day empty" aria-hidden="true"></div>';
-  for(let day=1;day<=days;day++){const k=keyDay(new Date(mcYear,mcMonth,day)),d=byDay.get(k),dots=d?[d.income?'<i style="--dc:var(--green)"></i>':'',d.expense?'<i style="--dc:var(--red)"></i>':'',d.transfer?'<i style="--dc:var(--blue)"></i>':''].join(''):'';const inR=mcRange&&k>=mcRange.from&&k<=mcRange.to;html+=`<button type="button" class="mc-day${k===today?' today':''}${k===mcSelected&&!mcRange?' sel':''}${inR?' inrange':''}${mcRange&&(k===mcRange.from||k===mcRange.to)?' edge':''}" data-mc-day="${k}" aria-label="${esc(new Date(k+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}))}">${day}<span class="mc-dots">${dots}</span></button>`}
+  for(let day=1;day<=days;day++){const k=keyDay(new Date(mcYear,mcMonth,day)),d=byDay.get(k),dots=d?[d.income?'<i style="--dc:var(--green)"></i>':'',d.expense||d.debt?'<i style="--dc:var(--red)"></i>':'',d.transfer?'<i style="--dc:var(--blue)"></i>':''].join(''):'';const inR=mcRange&&k>=mcRange.from&&k<=mcRange.to;html+=`<button type="button" class="mc-day${k===today?' today':''}${k===mcSelected&&!mcRange?' sel':''}${inR?' inrange':''}${mcRange&&(k===mcRange.from||k===mcRange.to)?' edge':''}" data-mc-day="${k}" aria-label="${esc(new Date(k+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}))}">${day}<span class="mc-dots">${dots}</span></button>`}
   grid.innerHTML=html;$$('[data-mc-day]').forEach(b=>b.onclick=()=>{const k=b.dataset.mcDay;if(mcRangeMode){if(!mcRange||mcRange.from!==mcRange.to||mcRange._fresh!==true){mcRange={from:k,to:k,_fresh:true};renderMoneyCalendar();toast('Выбери последний день периода')}else{mcRangeMode=false;mcSetRange(mcRange.from,k);$('mcRangeBtn')?.classList.remove('active')}return}mcRange=null;mcSelected=k;renderMoneyCalendar()});
   renderCalendarRange();
-  let inc=0,out=0;byDay.forEach(d=>{inc+=d.income;out+=d.expense});setText('mcIncome',fmtShort(inc));setText('mcExpense',fmtShort(out));setText('mcNet',(inc-out<0?'−':'')+fmtShort(Math.abs(inc-out)));$('mcIncome').title=fmtMoney(inc);$('mcExpense').title=fmtMoney(out);$('mcNet').title=fmtMoney(inc-out);
+  let inc=0,out=0,dp=0;byDay.forEach(d=>{inc+=d.income;out+=d.expense;dp+=d.debt});const net=inc-out-dp;setText('mcIncome',fmtShort(inc));setText('mcExpense',fmtShort(out));setText('mcNet',(net<0?'−':'')+fmtShort(Math.abs(net)));$('mcIncome').title=fmtMoney(inc);$('mcExpense').title=fmtMoney(out);$('mcNet').title=fmtMoney(net);debtPayLine('mcDebtPay',dp);
   const sel=byDay.get(mcSelected);setText('mcDayTitle',new Date(mcSelected+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}));
   setText('mcDaySum',sel?`Доход ${fmtMoney(sel.income)} · расход ${fmtMoney(sel.expense)}${sel.transfer?' · переводы '+fmtMoney(sel.transfer):''}`:'Операций нет');
   const list=$('mcDayList');list.innerHTML=sel?sel.list.map(t=>txRowHTML(t)).join(''):'<div class="v-empty">В этот день операций нет.</div>';bindTxRows(list);

@@ -969,6 +969,32 @@ await test("Светлая тема: новые компоненты читаю�
   await ctx.close();
 });
 
+await test("Деньги: платёж по долгу не входит в «Расход», показан отдельной строкой", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const r = await page.evaluate(async () => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
+    state.expenses.push({ id: "e300", amount: 300, category: "Еда", at: now, dateKey: k }, { id: "d4000", amount: 4000, category: "Долг", debtPayment: "bank", at: now, dateKey: k });
+    saveState(); showView("viewToday"); renderAll(); await new Promise(r => setTimeout(r, 1500));
+    const n = id => (document.getElementById(id)?.title || document.getElementById(id)?.textContent || "").replace(/\s/g, " ");
+    const line = id => { const el = document.getElementById(id); return el && !el.hidden ? el.textContent.replace(/\s/g, " ") : ""; };
+    const today = { exp: n("tmExpense"), line: line("tmDebtPay") };
+    showView("viewMoney"); renderAll(); await new Promise(r => setTimeout(r, 1500));
+    const overview = { exp: n("mvExpense"), line: line("mvDebtPay") };
+    document.querySelector('[data-money-tab="cal"]')?.click(); renderMoneyCalendar();
+    const cal = { exp: document.getElementById("mcExpense").title.replace(/\s/g, " "), line: line("mcDebtPay") };
+    const a = analyzeLife(); return { today, overview, cal, analysis: a.spend ?? a.month?.spend ?? a };
+  });
+  for (const [k, v] of Object.entries({ today: r.today, overview: r.overview, cal: r.cal })) {
+    assert.match(v.exp, /^300\b/, k + " «Расход» must be 300: " + JSON.stringify(v));
+    assert.match(v.line, /Платежи по долгу: 4 000/, k + " " + JSON.stringify(v));
+  }
+  assert.equal(r.analysis, 300);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
