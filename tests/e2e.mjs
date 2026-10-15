@@ -966,6 +966,7 @@ await test("Светлая тема: новые компоненты читаю�
     await page.evaluate(() => { closeModal(); showView("viewGoal"); renderGoal(); }); await check("goal-milestones", "#milestones");
     await page.evaluate(() => { const d = document.createElement("div"); d.id = "aiProbe"; d.className = "analysis-item jl-ai-result"; d.innerHTML = aiTextHtml(state.ai.history[0].result); document.getElementById("milestones").after(d); d.scrollIntoView(); });
     await check("ai-cards", "#aiProbe"); await page.evaluate(() => document.getElementById("aiProbe").remove());
+    await page.evaluate(() => { showView("viewToday"); renderWeek(); document.getElementById("weekCard").scrollIntoView(); }); await check("week-card", "#weekCard");
   }
   if (bad.length) console.log(bad.join("\n"));
   assert.deepEqual(bad, [], bad.join("\n"));
