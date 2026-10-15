@@ -101,8 +101,8 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
     system_instruction: system,
     input,
     store: false,
-    thinking_level: "low",
-    generation_config: { max_output_tokens: 1800 },
+    // thinking_level lives inside generation_config (a top-level field makes Gemini answer 400)
+    generation_config: { max_output_tokens: 2048, thinking_level: "low" },
   };
   if (useSearch) payload.tools = [{ type: "google_search" }];
   let r: Response;
@@ -119,6 +119,7 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
   // deno-lint-ignore no-explicit-any
   let d: any = {};
   try { d = JSON.parse(raw || "{}"); } catch { /* ignore */ }
+  if (!r.ok) console.error("gemini error", r.status, raw.slice(0, 600));
   if (!r.ok) return { error: clip(d?.error?.message || "", 900) || "Gemini HTTP " + r.status, status: r.status };
   if (d?.status && d.status !== "completed") return { error: "Gemini не завершил ответ (статус: " + String(d.status) + ").", status: 502 };
   const parts: string[] = [];

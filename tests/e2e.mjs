@@ -621,6 +621,50 @@ await test("Планшет и компьютер: свой вид на кажд�
   assert.ok(r.every(x => !x.wide && !x.synced), JSON.stringify(r));
 });
 
+// ================= V62 audit =================
+await test("Безопасность: вредный текст в любом поле не выполняется", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(async () => {
+    const X = '<img src=x onerror="window.__xss=(window.__xss||0)+1">"><svg onload="window.__xss=9">', now = new Date().toISOString(), k = keyDay();
+    state.profile.name = X; state.goal.title = X; state.goal.why = X; state.goal.next = X; state.goal.milestones.forEach(m => m.title = X);
+    state.tasks.push({ id: "x1", title: X, time: "23:00", date: k, createdAt: now }, { id: "x2", title: X, time: "", date: "2026-01-01", carriedFrom: X });
+    state.habits = [{ id: "hx", title: X, kind: "daily", target: 7 }];
+    state.notes.push({ id: "nx", title: X, body: X + "\n**" + X + "**", at: now, category: "personal" });
+    state.budgets = [{ id: "bx", name: X, planned: 100, tops: [] }];
+    state.expenses.push({ id: "ex", amount: 50, category: X, note: X, at: now, customCategory: X });
+    state.profits.push({ id: "px", amount: 50, sourceGroup: X, note: X, at: now });
+    state.goals.push({ id: "gx", title: X, description: X, icon: "target", color: "blue", target: 1000, createdAt: now });
+    state.achievements.push({ id: "ax", text: X, at: now });
+    state.reports[k] = { done: X, block: X, tomorrow: X, steps: {} };
+    state.day.steps[0].title = X; state.day.steps[0].details = [X]; state.day.steps[0].text = X;
+    state.notificationsLog.unshift({ id: "lx", title: X, body: X, kind: "tasks", at: now });
+    state.ai.weekly = { [weekKey()]: { at: now, text: "СИЛЬНАЯ СТОРОНА — " + X } };
+    saveState(); renderAll();
+    for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile", "viewNotifications"]) { showView(v); document.querySelectorAll("[data-more]").forEach(b => b.getAttribute("aria-expanded") !== "true" && b.click()); }
+    for (const op of [() => openLifeAnalysis(), () => openReportHistory(), () => openHabitEditor("hx"), () => openBankTopup("bx"), () => openMoveDevice(), () => openNoteEditor("nx"), () => openGoalEditor("gx"), () => openMoneyForm("expense", X), () => openSettings()]) { try { closeModal(); op(); } catch (e) { return "THROW " + e.message; } }
+    await new Promise(r => setTimeout(r, 500));
+    return window.__xss;
+  });
+  assert.equal(r, undefined, "script ran from user text: " + r);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Офлайн: записи сохраняются без интернета и уходят в облако после", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await sync(page);
+  cloud.down = true;
+  await page.evaluate(() => { state.expenses.push({ id: "off1", amount: 77, category: "Еда", at: new Date().toISOString() }); saveState(); });
+  await page.evaluate(() => cloudAutoSync().catch(() => {}));
+  await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
+  assert.ok(await page.evaluate(() => state.expenses.some(x => x.id === "off1")), "lost offline record after reload");
+  cloud.down = false;
+  await sync(page);
+  assert.ok(cloud.row.state.expenses.some(x => x.id === "off1"), "offline record never reached the cloud");
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
