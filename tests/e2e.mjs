@@ -995,6 +995,44 @@ await test("Деньги: платёж по долгу не входит в «Р
   await ctx.close();
 });
 
+await test("Цель: автоэтапы — переключатель в «Изменить цель» и ручное снятие", async () => {
+  const { ctx, page } = await device(makeCloud());
+  // the stage «закрыть основную часть долгов» closes itself once half the debt is paid
+  const setup = () => page.evaluate(() => {
+    state.debtBaseline = 100000; state.debts = { bank: 40000, firms: 0, monthlyPayment: 1000 };
+    state.goal.milestones = [{ id: "m1", title: "Закрыть основную часть долгов", done: false }, { id: "m2", title: "Купить машину", done: false }];
+    saveState();
+  });
+  // 1) switch off in the editor → the stage stays open
+  await setup();
+  await page.evaluate(() => { showView("viewGoal"); openGoalEdit(); });
+  assert.equal(await page.isChecked('[data-ms-auto="m1"]'), true, "auto-close is on by default");
+  await page.click('[data-ms-auto="m1"]', { force: true });
+  await page.evaluate(() => { closeModal(); autoMilestones(); renderGoal(); });
+  let m1 = await page.evaluate(() => state.goal.milestones[0]);
+  assert.equal(m1.autoOff, true); assert.equal(m1.done, false, "a stage with auto-close off must not close itself");
+  // switched back on → closes by the numbers
+  await page.evaluate(() => openGoalEdit());
+  await page.click('[data-ms-auto="m1"]', { force: true });
+  m1 = await page.evaluate(() => { closeModal(); return state.goal.milestones[0]; });
+  assert.equal(m1.done, true); assert.equal(m1.auto, true); assert.ok(!("autoOff" in m1));
+  // 2) an auto-closed stage unticked by hand stays open for good
+  await page.evaluate(() => { showView("viewGoal"); renderGoal(); });
+  await page.click('[data-ms="m1"]', { force: true });
+  m1 = await page.evaluate(() => { autoMilestones(); renderAll(); return state.goal.milestones[0]; });
+  assert.equal(m1.done, false); assert.equal(m1.autoOff, true);
+  // editing the stage list in the textarea keeps the flag
+  await page.evaluate(() => openGoalEdit());
+  await page.fill("#gMilestones", "[ ] Закрыть основную часть долгов\n[ ] Купить машину\n[ ] Новый этап");
+  m1 = await page.evaluate(() => { closeModal(); return state.goal.milestones; });
+  assert.equal(m1[0].autoOff, true); assert.equal(m1.length, 3); assert.equal(m1[2].autoOff, undefined);
+  // 3) old data without the new fields works and is normalized
+  const old = await page.evaluate(() => { const s = clone(state); s.goal.milestones = [{ id: "o1", title: "Старый этап", done: true }, { id: "o2", title: "Ещё", done: false, autoOff: "x" }]; const n = normalize(s); return n.goal.milestones; });
+  assert.equal(old[0].done, true); assert.ok(!("autoOff" in old[1]));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
