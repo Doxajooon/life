@@ -1,9 +1,15 @@
 // @ts-nocheck — compact JSON shaping code; runtime is covered by the app tests.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-// Jamal Life AI — analysis of the user's own data with Gemini (Interactions API).
+// Jamal Life AI — analysis of the user's own data with Gemini (generateContent).
 // The Gemini key lives only in Supabase Secrets (GEMINI_API_KEY).
-const MODEL = "gemini-3.6-flash";
+// Free-tier quotas are per model, so when one model answers 429 (quota) or is not available
+// for this key, the next model is tried automatically. The first model that answers is remembered.
+const PREFERRED = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-3.6-flash", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-2.5-flash-lite"];
+let MODEL = PREFERRED[0];
+let goodModel = "";
+let modelList: string[] = [];
+let modelListAt = 0;
 const MAX_REQUESTS_PER_HOUR = 10;
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -92,48 +98,72 @@ async function allowRequest(sb: any, userId: string) {
   return true;
 }
 
+const API = "https://generativelanguage.googleapis.com/v1beta";
+
+// Models this key can really use (cached for an hour), ordered by preference.
+async function candidates(key: string): Promise<string[]> {
+  if (!modelList.length || Date.now() - modelListAt > 3600_000) {
+    try {
+      const r = await fetch(API + "/models?pageSize=200", { headers: { "x-goog-api-key": key } });
+      const d = await r.json().catch(() => ({}));
+      const names = (Array.isArray(d?.models) ? d.models : [])
+        .filter((m: any) => (m?.supportedGenerationMethods || []).includes("generateContent"))
+        .map((m: any) => String(m?.name || "").replace(/^models\//, ""))
+        .filter((n: string) => /^gemini-.*flash/.test(n) && !/(image|tts|audio|live|embedding|vision|computer|robotics|thinking-exp)/.test(n));
+      if (names.length) { modelList = names; modelListAt = Date.now(); }
+    } catch { /* fall back to the static list */ }
+  }
+  const avail = modelList.length ? modelList : PREFERRED;
+  const rank = (n: string) => { const i = PREFERRED.indexOf(n); if (i >= 0) return i; const v = Number((n.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || 0); return 100 - v * 10 + (/lite/.test(n) ? 5 : 0) + (/preview|exp/.test(n) ? 3 : 0); };
+  const list = [...new Set(avail)].sort((a, b) => rank(a) - rank(b));
+  if (goodModel && list.includes(goodModel)) list.unshift(...list.splice(list.indexOf(goodModel), 1));
+  return list.slice(0, 6);
+}
+
+function ruError(status: number, raw: string) {
+  if (status === 429 || /quota|rate.?limit|exhausted/i.test(raw)) return "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей. Он обновится около 12:00–13:00 по Душанбе. Пока работает «Полный разбор» на телефоне — он считает всё сам, без интернета. Чтобы лимита не было совсем, включи оплату ключа в Google AI Studio (aistudio.google.com → Billing).";
+  if (status === 400 && /api key|API_KEY_INVALID/i.test(raw)) return "Ключ Gemini недействителен. Создай новый ключ в Google AI Studio и замени GEMINI_API_KEY в Supabase → Edge Functions → Secrets.";
+  if (status === 403) return "Ключ Gemini не имеет доступа к модели. Проверь ключ в Google AI Studio.";
+  return "Gemini сейчас не отвечает (" + status + "). Попробуй через минуту.";
+}
+
 async function gemini(input: string, useSearch: boolean, system = promptRules()) {
   const key = Deno.env.get("GEMINI_API_KEY") || "";
   if (!key) return { error: "GEMINI_API_KEY не настроен в Supabase Secrets.", status: 503 };
-  // deno-lint-ignore no-explicit-any
-  const payload: any = {
-    model: MODEL,
-    system_instruction: system,
-    input,
-    store: false,
-    // thinking_level lives inside generation_config (a top-level field makes Gemini answer 400)
-    generation_config: { max_output_tokens: 2048, thinking_level: "low" },
+  const body: any = {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: [{ role: "user", parts: [{ text: input }] }],
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.6 },
   };
-  if (useSearch) payload.tools = [{ type: "google_search" }];
-  let r: Response;
-  try {
-    r = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify(payload),
-    });
-  } catch {
-    return { error: "Не удалось связаться с Gemini.", status: 502 };
-  }
-  const raw = await r.text();
-  // deno-lint-ignore no-explicit-any
-  let d: any = {};
-  try { d = JSON.parse(raw || "{}"); } catch { /* ignore */ }
-  if (!r.ok) console.error("gemini error", r.status, raw.slice(0, 600));
-  if (!r.ok) return { error: clip(d?.error?.message || "", 900) || "Gemini HTTP " + r.status, status: r.status };
-  if (d?.status && d.status !== "completed") return { error: "Gemini не завершил ответ (статус: " + String(d.status) + ").", status: 502 };
-  const parts: string[] = [];
-  const sources: { title: string; url: string }[] = [];
-  for (const st of Array.isArray(d?.steps) ? d.steps : []) {
-    for (const part of Array.isArray(st?.content) ? st.content : []) {
-      if (part?.type === "text" && typeof part?.text === "string") parts.push(part.text);
-      for (const an of Array.isArray(part?.annotations) ? part.annotations : []) {
-        if (an?.type === "url_citation" && an?.url && !sources.some((x) => x.url === an.url)) sources.push({ title: clip(an?.title || an.url, 180), url: an.url });
-      }
+  if (useSearch) body.tools = [{ google_search: {} }];
+  let lastStatus = 502, lastRaw = "";
+  for (const m of await candidates(key)) {
+    let r: Response;
+    try {
+      r = await fetch(`${API}/models/${m}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body) });
+    } catch { lastStatus = 502; lastRaw = "network"; continue; }
+    const raw = await r.text();
+    let d: any = {};
+    try { d = JSON.parse(raw || "{}"); } catch { /* ignore */ }
+    if (!r.ok) {
+      console.error("gemini error", m, r.status, raw.slice(0, 300));
+      lastStatus = r.status; lastRaw = raw;
+      if (r.status === 400 && /api key|API_KEY_INVALID/i.test(raw)) break; // a bad key fails on every model
+      if (goodModel === m) goodModel = "";
+      continue; // 429 quota, 404 unknown model, 403, 5xx → next model
     }
+    const cand = d?.candidates?.[0];
+    const out = (Array.isArray(cand?.content?.parts) ? cand.content.parts : []).filter((p: any) => typeof p?.text === "string" && !p?.thought).map((p: any) => p.text).join("").trim();
+    if (!out) { lastStatus = 502; lastRaw = "empty " + (cand?.finishReason || ""); console.error("gemini empty", m, cand?.finishReason); continue; }
+    const sources: { title: string; url: string }[] = [];
+    for (const ch of Array.isArray(cand?.groundingMetadata?.groundingChunks) ? cand.groundingMetadata.groundingChunks : []) {
+      const u = ch?.web?.uri; if (u && !sources.some((x) => x.url === u)) sources.push({ title: clip(ch?.web?.title || u, 180), url: u });
+    }
+    goodModel = m; MODEL = m;
+    console.log("gemini ok", m);
+    return { output_text: out, sources: useSearch ? sources.slice(0, 8) : [], model: m };
   }
-  const out = (typeof d?.output_text === "string" ? d.output_text : parts.join("\n")).trim();
-  return out ? { output_text: out, sources: useSearch ? sources.slice(0, 8) : [] } : { error: "Gemini вернул пустой ответ.", status: 502 };
+  return { error: ruError(lastStatus, lastRaw), status: lastStatus === 429 ? 429 : 502 };
 }
 
 Deno.serve(async (req) => {
@@ -145,12 +175,12 @@ Deno.serve(async (req) => {
     if (req.method === "GET") return json({ ok: true, configured: configured(), model: MODEL });
     if (req.method !== "POST") return json({ error: "Method not allowed." }, 405);
     const body = await req.json().catch(() => ({}));
+    if (!configured()) return json({ error: "GEMINI_API_KEY не настроен в Supabase Secrets." }, 503);
+    if (!(await allowRequest(a.sb, a.user.id))) return json({ error: "Слишком много запросов AI за час (лимит 10). Попробуй позже." }, 429);
     if (body?.ping === true) {
-      return configured()
-        ? json({ ok: true, model: MODEL, output_text: "Подключение Jamal Life AI работает.", sources: [] })
-        : json({ error: "GEMINI_API_KEY не настроен в Supabase Secrets." }, 503);
+      const t = await gemini("Ответь ровно двумя словами: «AI работает».", false, "Ты отвечаешь коротко по-русски.");
+      return "error" in t ? json({ error: t.error }, t.status) : json({ ok: true, model: t.model, output_text: "Подключение работает · модель " + t.model, sources: [] });
     }
-    if (!(await allowRequest(a.sb, a.user.id))) return json({ error: "Слишком много запросов AI за час. Попробуй позже." }, 429);
     const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return json({ error: "Не удалось прочитать данные Jamal Life из Supabase." }, 500);
@@ -164,7 +194,7 @@ Deno.serve(async (req) => {
       : promptRules() + "\n\nРЕЖИМ: LIFE. Проанализируй систему пользователя в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — максимум 3 факта.\n2) ГЛАВНАЯ ПРОБЛЕМА — одна проблема, которая сейчас сильнее всего ограничивает движение.\n3) ФИНАНСОВАЯ СИТУАЦИЯ — только подтверждённые цифры и арифметика.\n4) ГЛАВНЫЙ ФОКУС НА 7 ДНЕЙ — один приоритет.\n5) ПЛАН ДЕЙСТВИЙ — 3–5 конкретных действий в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n6) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — одно действие, без альтернатив.\n7) КОНТРОЛЬНАЯ ТОЧКА — что проверить через 7 дней и по какому числу/факту понять результат.\n\nНе выдумывай отсутствующие данные. Если для конкретного действия не хватает данных, прямо укажи, чего не хватает, вместо выдумывания.\n\nДанные:\n" + JSON.stringify(ctx);
     const r = mode === "week" ? await gemini(p, false, weekRules()) : mode === "deep" ? await gemini(p, false, deepRules()) : await gemini(p, sc.webSearch);
     if ("error" in r) return json({ error: r.error }, r.status);
-    return json({ ok: true, model: MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
+    return json({ ok: true, model: r.model || MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Неизвестная ошибка функции." }, 500);
   }

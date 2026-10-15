@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "65.0.0");
-assert.match(gradle, /versionCode 650\b/); assert.match(gradle, /versionName '65\.0'/);
-assert.match(csproj, /<Version>65\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V65'), "app version must be V65 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v65-0"), "service worker cache must be V65");
+assert.equal(pkg.version, "66.0.0");
+assert.match(gradle, /versionCode 660\b/); assert.match(gradle, /versionName '66\.0'/);
+assert.match(csproj, /<Version>66\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V66'), "app version must be V66 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v66-0"), "service worker cache must be V66");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -70,10 +70,12 @@ const tiny = [...html.matchAll(/font-size:\s*(\d*\.?\d+)(px|rem)\b/g)].map(m => 
 assert.deepEqual(tiny, [], "text smaller than 11px: " + tiny.join(", "));
 assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 
-// Gemini Interactions API: thinking_level must sit inside generation_config (top-level → HTTP 400)
-{ assert.ok(/generation_config:\s*\{[^}]*thinking_level/.test(fn) && !/\n\s*thinking_level:/.test(fn), "thinking_level must be inside generation_config");
+// Gemini: models are tried one after another on quota (429) or unknown model; errors reach the user in Russian
+{ assert.ok(/:generateContent/.test(fn) && /async function candidates/.test(fn) && /continue; \/\/ 429 quota/.test(fn) && /function ruError/.test(fn), "AI must fall back to another model when one model's quota is exhausted");
   for (const m of ["week", "deep", "goal"]) assert.ok(fn.includes(`body?.mode === "${m}"`), "AI mode missing: " + m); }
 assert.ok(html.includes("function resetForNewOwner") && html.includes("OWNER_KEY") && /owner&&owner!==user\.id\)resetForNewOwner\(\)/.test(html), "another account must never get the previous owner's records");
 assert.ok(html.includes("if(synced)await wipeLocalData()"), "logout must clear personal data from the device once it is safe in the cloud");
 assert.ok(html.includes("function renderRhythm") && html.includes("function renderDayStrip") && html.includes("function renderHabitWeek"), "living rhythm, day strip and habit week chart");
-console.log("JAMAL_LIFE_V65_STATIC_QA_OK");
+assert.ok(existsSync(new URL("../fonts/inter-cyrillic.woff2", import.meta.url)) && html.includes('url("fonts/inter-cyrillic.woff2")') && sw.includes("inter-cyrillic.woff2"), "Inter font must ship with the app (offline)");
+assert.ok(!html.includes("data-more=") && !html.includes('class="jl-more"'), "Money and Goal show everything — no hidden «Подробнее» blocks");
+console.log("JAMAL_LIFE_V66_STATIC_QA_OK");

@@ -44,7 +44,7 @@ button,input,textarea,select{-webkit-user-select:text;user-select:text}
 ::selection{background:color-mix(in srgb,var(--blue) 28%,transparent);color:var(--text)}
 
 .goal-finance-kpis .kpi{background:var(--panel)}
-.stage-pct{font-size:0.7188rem;color:var(--blue-dark);font-weight:850;margin-top:4px}
+.stage-pct{font-size:0.7188rem;color:var(--blue-dark);font-weight:700;margin-top:4px}
 .timeline-row.done .stage-pct{color:var(--muted)}
 html{background:var(--bg);color-scheme:light}
 html[data-theme="dark"]{color-scheme:dark}
@@ -55,7 +55,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 24%,transparent);outline-offset:1px}
 .topbar{position:sticky;top:0;z-index:40;display:flex;justify-content:space-between;align-items:center;background:color-mix(in srgb,var(--bg) 98%,transparent);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.logo{display:grid;place-items:center;font-weight:950}
+.logo{display:grid;place-items:center;font-weight:700}
 .brand-sub{color:var(--muted);margin-top:2px}
 .actions{display:flex}
 .iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);display:grid;place-items:center;font-size:1.0625rem;position:relative}
@@ -76,7 +76,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 
 
 
-.btn{min-height:42px;border:1px solid var(--line);color:var(--text);padding:9px 13px;font-weight:850;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease}
+.btn{min-height:42px;border:1px solid var(--line);color:var(--text);padding:9px 13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease}
 .btn:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(23,34,45,.08);border-color:color-mix(in srgb,var(--blue) 34%,var(--line))}
 .btn:active{transform:translateY(0);box-shadow:none}
 .btn.primary{color:white}
@@ -87,7 +87,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .iconbtn{transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
 .iconbtn:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(23,34,45,.08);border-color:color-mix(in srgb,var(--blue) 34%,var(--line))}
 .clock{text-align:right}
-.clock-time{font-size:2rem;font-weight:950;letter-spacing:.03em;line-height:1}
+.clock-time{font-size:2rem;font-weight:700;letter-spacing:.03em;line-height:1}
 .clock-state{font-size:0.7188rem;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.08em}
 .motivation{border-left:4px solid var(--orange);background:var(--soft);padding:15px;border-radius:12px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
 .auto-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--orange));transition:width .8s linear}
@@ -104,11 +104,11 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .timeline-row:hover{transform:translateY(-1px)}
 .timeline-row.current{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 10%,transparent)}
 .timeline-row.done{background:color-mix(in srgb,var(--blue-soft) 70%,var(--panel));border-color:color-mix(in srgb,var(--blue) 26%,var(--line))}
-.time-range{font-size:0.7188rem;color:var(--muted);font-weight:850}
-.t-title{font-size:0.7812rem;font-weight:850;display:flex;align-items:center;gap:7px}
+.time-range{font-size:0.7188rem;color:var(--muted);font-weight:700}
+.t-title{font-size:0.7812rem;font-weight:700;display:flex;align-items:center;gap:7px}
 .t-note{font-size:0.7188rem;color:var(--muted);margin-top:2px}
 .check{appearance:none;width:30px;height:30px;margin:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:grid;place-items:center;position:relative;cursor:pointer;transition:transform .18s ease,background .22s ease,border-color .22s ease,box-shadow .22s ease,color .22s ease}
-.check::after{content:"✓";font-size:1.0625rem;line-height:1;font-weight:950;color:transparent;transform:scale(.65) rotate(-8deg);transition:transform .2s ease,color .2s ease}
+.check::after{content:"✓";font-size:1.0625rem;line-height:1;font-weight:700;color:transparent;transform:scale(.65) rotate(-8deg);transition:transform .2s ease,color .2s ease}
 .check:hover{transform:scale(1.05);border-color:var(--blue);box-shadow:0 6px 16px color-mix(in srgb,var(--blue) 14%,transparent)}
 .check:active{transform:scale(.94)}
 .check:checked{background:#eaf8ee;border-color:#4caf68;box-shadow:0 0 0 3px rgba(76,175,104,.10)}
@@ -124,7 +124,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .timeline-row.done .stage-icon{color:#2f9b54;border-color:#9bd2ac;background:#eaf8ee}
 @keyframes lcStagePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 0%,transparent)}50%{transform:scale(1.06);box-shadow:0 0 0 5px color-mix(in srgb,var(--blue) 10%,transparent)}}
 @media (prefers-reduced-motion:reduce){.timeline-row,.check,.stage-icon,.check::after{transition:none!important;animation:none!important}}
-.goal-title{line-height:1.12;font-weight:950;letter-spacing:-.03em}
+.goal-title{line-height:1.12;font-weight:700;letter-spacing:-.03em}
 .goal-why{font-size:0.75rem;color:var(--muted);margin-top:7px}
 
 .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
@@ -147,9 +147,9 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .goal-saving-list{display:grid;gap:7px;margin-top:10px}
 .saving-item{display:grid;grid-template-columns:1fr auto 32px;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .saving-main{min-width:0}
-.saving-title{font-size:0.75rem;font-weight:850}
+.saving-title{font-size:0.75rem;font-weight:700}
 .saving-meta{font-size:0.6875rem;color:var(--muted);margin-top:2px}
-.saving-amount{font-size:0.7812rem;font-weight:950;color:var(--blue-dark);white-space:nowrap}
+.saving-amount{font-size:0.7812rem;font-weight:700;color:var(--blue-dark);white-space:nowrap}
 .goal-finance-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
 
 @media (max-width:720px){
@@ -168,7 +168,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .kpi-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .kpi{border:1px solid var(--line)}
 .kpi .label{font-size:0.6875rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.kpi .value{font-weight:950;margin-top:3px}
+.kpi .value{font-weight:700;margin-top:3px}
 .blue{color:var(--blue-dark)}
 
 
@@ -188,7 +188,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .note-time{font-size:0.7812rem;color:var(--muted);margin-top:3px}
 .note-body{font-weight:700;line-height:1.5;margin-top:9px;white-space:pre-wrap;overflow-wrap:anywhere}
 .note-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.mini-action{min-height:32px;padding:6px 8px;border:1px solid var(--line);background:var(--soft);color:var(--text);border-radius:8px;font-size:0.75rem;font-weight:800}
+.mini-action{min-height:32px;padding:6px 8px;border:1px solid var(--line);background:var(--soft);color:var(--text);border-radius:8px;font-size:0.75rem;font-weight:700}
 .report-shell{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
 
 .field{display:grid;gap:5px}
@@ -197,7 +197,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .field textarea{min-height:94px;resize:vertical}
 
 .bottom{position:fixed;left:0;right:0;bottom:0;bottom:env(safe-area-inset-bottom,0px);width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;background:var(--bg);border-top:1px solid var(--line);transform:translate3d(0,0,0);-webkit-transform:translate3d(0,0,0);isolation:isolate}
-.bottom button{border:1px solid transparent;background:transparent;color:var(--muted);font-weight:850;display:grid;place-items:center;gap:2px}
+.bottom button{border:1px solid transparent;background:transparent;color:var(--muted);font-weight:700;display:grid;place-items:center;gap:2px}
 .bottom button b{font-size:1.1875rem;line-height:1;color:var(--text)}
 .bottom button.active{border-color:var(--line);box-shadow:var(--shadow)}
 .toast{position:fixed;z-index:120;left:50%;bottom:calc(82px + var(--safe));transform:translate(-50%,18px);opacity:0;pointer-events:none;transition:.2s;max-width:min(92vw,520px);width:max-content;background:var(--text);color:var(--bg);padding:11px 13px;border-radius:11px;box-shadow:var(--shadow);font-size:0.75rem}
@@ -206,13 +206,13 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .toast div{margin-top:2px;opacity:.8}
 .calendar-modal{max-width:760px}
 .calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.calendar-month{font-size:1.1875rem;font-weight:900;text-transform:capitalize}
+.calendar-month{font-size:1.1875rem;font-weight:700;text-transform:capitalize}
 .calendar-nav{display:flex;gap:6px}
 .calendar-nav .iconbtn{width:38px;height:38px}
 .calendar-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .calendar-kpi{padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}
 .calendar-kpi .label{font-size:0.6875rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.calendar-kpi .value{font-size:1.0625rem;font-weight:950;margin-top:3px}
+.calendar-kpi .value{font-size:1.0625rem;font-weight:700;margin-top:3px}
 .calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:12px}
 .calendar-week{font-size:0.6875rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);text-align:center;padding:4px 0}
 .calendar-day{min-height:72px;padding:8px 6px;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:border-color .15s ease,transform .15s ease}
@@ -221,8 +221,8 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .calendar-day.today{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--blue) 45%,transparent)}
 .calendar-day.selected{border-color:var(--blue);background:var(--blue-soft)}
 .calendar-day.earned{border-color:color-mix(in srgb,var(--orange) 42%,var(--line))}
-.calendar-num{font-size:0.7812rem;font-weight:900}
-.calendar-earned{font-size:0.75rem;font-weight:950;color:var(--blue-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-num{font-size:0.7812rem;font-weight:700}
+.calendar-earned{font-size:0.75rem;font-weight:700;color:var(--blue-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .calendar-earned::before{content:"+ ";color:var(--orange)}
 .calendar-day-noearn{font-size:0.7188rem;color:var(--muted)}
 .calendar-selected{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
@@ -247,7 +247,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .goal-ai-item{padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .goal-ai-item b{font-size:0.75rem}
 .goal-ai-item div{font-size:0.7188rem;color:var(--muted);margin-top:3px}
-.goal-ai-badge{font-size:0.6875rem;font-weight:950;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-dark)}
+.goal-ai-badge{font-size:0.6875rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-dark)}
 @media (max-width:720px){.calendar-range-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
 .goal-ai-head{align-items:stretch;flex-direction:column}}
 .modal-back{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center;padding:12px}
@@ -264,12 +264,12 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .day-mood.good{border-color:var(--blue)}
 .day-mood.rest{border-color:var(--orange)}
 .pulse-note{font-size:0.7188rem;color:var(--muted);margin-top:9px}
-.mode-select{min-height:34px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);padding:6px 9px;font-size:0.75rem;font-weight:800}
+.mode-select{min-height:34px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);padding:6px 9px;font-size:0.75rem;font-weight:700}
 .goal-distance{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--soft)}
 .goal-distance-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
 .distance-kpi{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .distance-kpi .label{font-size:0.6875rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
-.distance-kpi .value{font-size:1rem;font-weight:950;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.distance-kpi .value{font-size:1rem;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tempo-alert{margin-top:9px;padding:10px 11px;border-radius:10px;border:1px solid var(--line);font-size:0.75rem;background:var(--panel)}
 .tempo-alert.warn{border-color:color-mix(in srgb,var(--orange) 45%,var(--line));background:var(--orange-soft);color:var(--orange-dark)}
 .tempo-alert.ok{border-color:color-mix(in srgb,var(--blue) 45%,var(--line));background:var(--blue-soft);color:var(--blue-dark)}
@@ -305,19 +305,19 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .donut-layout{display:grid;grid-template-columns:180px 1fr;gap:14px;align-items:center;margin-top:11px}
 .donut{width:170px;height:170px;border-radius:50%;position:relative;display:grid;place-items:center;flex:none}
 .donut::after{content:"";width:94px;height:94px;border-radius:50%;background:var(--panel);border:1px solid var(--line)}
-.donut-center{position:absolute;z-index:1;inset:0;display:grid;place-items:center;text-align:center;padding:35px;font-size:0.7188rem;color:var(--muted);font-weight:800}
+.donut-center{position:absolute;z-index:1;inset:0;display:grid;place-items:center;text-align:center;padding:35px;font-size:0.7188rem;color:var(--muted);font-weight:700}
 .donut-center b{display:block;font-size:1rem;color:var(--text);line-height:1.1}
 .chart-legend{display:grid;gap:7px;max-height:200px;overflow:auto}
 .legend-row{display:grid;grid-template-columns:10px 1fr auto;gap:7px;align-items:center;font-size:0.7188rem}
 .legend-dot{width:9px;height:9px;border-radius:3px}
 .legend-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.legend-val{font-weight:900;white-space:nowrap}
+.legend-val{font-weight:700;white-space:nowrap}
 .source-list{display:grid;gap:9px;margin-top:11px}
 .source-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
-.source-name{font-size:0.7188rem;font-weight:850}
+.source-name{font-size:0.7188rem;font-weight:700}
 .source-track{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:5px}
 .source-fill{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue),var(--orange))}
-.source-val{font-size:0.75rem;font-weight:950;white-space:nowrap}
+.source-val{font-size:0.75rem;font-weight:700;white-space:nowrap}
 
 
 
@@ -341,7 +341,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 
 .debt-kpi-note{font-size:0.6875rem;color:var(--muted);margin-top:2px}
 .goal-potential-box{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:10px;background:var(--soft)}
-.goal-potential-main{font-size:0.75rem;font-weight:950}
+.goal-potential-main{font-size:0.75rem;font-weight:700}
 .goal-potential-sub{font-size:0.7188rem;color:var(--muted);margin-top:3px}
 .debt-payment-toggle{display:flex;align-items:center;gap:7px;font-size:0.75rem;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}
 @media (max-width:820px){
@@ -365,7 +365,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 
 
 .expense-quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:8px}
-.expense-quick{display:flex;align-items:center;gap:7px;padding:9px 9px;border:1px solid var(--line);border-radius:11px;background:var(--soft);font-size:0.75rem;font-weight:850;cursor:pointer;transition:transform .12s ease,border-color .12s ease,background .12s ease}
+.expense-quick{display:flex;align-items:center;gap:7px;padding:9px 9px;border:1px solid var(--line);border-radius:11px;background:var(--soft);font-size:0.75rem;font-weight:700;cursor:pointer;transition:transform .12s ease,border-color .12s ease,background .12s ease}
 .expense-quick:hover{transform:translateY(-1px);border-color:var(--blue);background:var(--panel)}
 .expense-quick.active{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 12%,transparent);background:var(--blue-soft)}
 .expense-quick .ico{font-size:1rem;line-height:1}
@@ -414,7 +414,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .day-progress-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .day-progress-kpi{padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--soft)}
 .day-progress-kpi .label{font-size:0.7188rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
-.day-progress-kpi .value{font-size:1.25rem;font-weight:950;margin-top:3px}
+.day-progress-kpi .value{font-size:1.25rem;font-weight:700;margin-top:3px}
 .runner-stage{padding:16px 12px;border:1px solid var(--line);border-radius:13px;background:var(--soft);margin-top:12px}
 .runner-track{height:56px;position:relative;border-bottom:2px solid var(--line);margin:0 12px}
 .runner-track::before{content:"";position:absolute;left:0;right:0;bottom:-2px;height:3px;background:linear-gradient(90deg,var(--blue),var(--orange));transform-origin:left;transform:scaleX(calc(var(--runner-progress,0) / 100));transition:transform .5s ease}
@@ -422,7 +422,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .runner-runner .ui-icon{width:34px;height:34px;color:var(--blue-dark)}
 @keyframes runner-bob{from{transform:translate(-50%,2px)}to{transform:translate(-50%,-3px)}}
 .day-progress-main{text-align:center}
-.day-progress-percent{font-size:2.25rem;font-weight:950;letter-spacing:-.04em;color:var(--blue-dark)}
+.day-progress-percent{font-size:2.25rem;font-weight:700;letter-spacing:-.04em;color:var(--blue-dark)}
 .day-progress-sub{font-size:0.7812rem;color:var(--muted);margin-top:3px}
 @media (max-width:720px){.day-progress-kpis{grid-template-columns:1fr 1fr}
 .day-progress-kpi:last-child{grid-column:1/-1}}
@@ -564,8 +564,8 @@ body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Ari
 @keyframes lcViewIn{from{opacity:.88;transform:translateY(4px)}to{opacity:1;transform:none}}
 .card{border-color:color-mix(in srgb,var(--blue) 10%,var(--line));padding:18px}
 .card:hover{border-color:color-mix(in srgb,var(--blue) 24%,var(--line))}
-h1{font-size:2.125rem;font-weight:900}
-.eyebrow{font-weight:850;color:var(--muted)}
+h1{font-size:2.125rem;font-weight:700}
+.eyebrow{font-weight:700;color:var(--muted)}
 .section-title-icon,.cell-icon,.cell-title-icon,.kpi-icon,.distance-icon{background:var(--blue-soft);border-color:color-mix(in srgb,var(--blue) 22%,var(--line));color:var(--blue-dark)}
 .kpi-row{gap:10px}
 .kpi{padding:13px;border-radius:14px;background:linear-gradient(145deg,var(--soft),var(--panel));border-color:var(--line)}
@@ -634,27 +634,27 @@ body{background:radial-gradient(1200px 600px at 50% -200px,color-mix(in srgb,var
 .topbar{padding:.6rem 1rem;gap:.6rem}
 .logo{width:2.4rem;height:2.4rem;border-radius:.8rem;background:linear-gradient(140deg,#fbbf24,#f59e0b 55%,#b45309);border:0;color:#1b1203;box-shadow:0 6px 18px rgba(245,158,11,.28)}
 .logo .ui-icon{width:1.3rem;height:1.3rem}
-.brand-name{font-size:.95rem;letter-spacing:.01em;text-transform:none;font-weight:900;white-space:nowrap}
-.brand-ver{display:inline-block;margin-left:.25rem;padding:.05rem .4rem;border-radius:.5rem;background:var(--blue-soft);color:var(--blue-dark);font-size:0.75rem;font-weight:900;vertical-align:.08rem}
+.brand-name{font-size:.95rem;letter-spacing:.01em;text-transform:none;font-weight:700;white-space:nowrap}
+.brand-ver{display:inline-block;margin-left:.25rem;padding:.05rem .4rem;border-radius:.5rem;background:var(--blue-soft);color:var(--blue-dark);font-size:0.75rem;font-weight:700;vertical-align:.08rem}
 .brand-sub{font-size:0.7812rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
 .iconbtn{width:2.5rem;height:2.5rem;border-radius:.8rem}
-.bell-dot{width:auto;height:1.05rem;min-width:1.05rem;padding:0 .25rem;border-radius:99px;background:var(--red);color:#fff;font-size:0.7188rem;font-weight:900;font-style:normal;line-height:1.05rem;text-align:center;right:-.2rem;top:-.2rem;border:2px solid var(--bg)}
+.bell-dot{width:auto;height:1.05rem;min-width:1.05rem;padding:0 .25rem;border-radius:99px;background:var(--red);color:#fff;font-size:0.7188rem;font-weight:700;font-style:normal;line-height:1.05rem;text-align:center;right:-.2rem;top:-.2rem;border:2px solid var(--bg)}
 .v-chips{position:sticky;top:3.65rem;z-index:35;display:flex;gap:.45rem;overflow-x:auto;scrollbar-width:none;padding:.55rem 1rem;background:var(--bg)}
 .v-chips::-webkit-scrollbar{display:none}
-.v-chips button{min-height:2.1rem;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-weight:800;touch-action:manipulation}
+.v-chips button{min-height:2.1rem;border-radius:99px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-weight:700;touch-action:manipulation}
 .v-chips button.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--blue) 30%,transparent)}
 body.auth-locked>.v-chips{visibility:hidden;pointer-events:none}
 body[data-view="viewGoalEdit"] .v-chips,body[data-view="viewNoteEdit"] .v-chips,body[data-view="viewSettings"] .v-chips,body[data-view="viewDisplay"] .v-chips,body[data-view="viewNotifications"] .v-chips,body[data-view="viewProfile"] .v-chips{display:none}
 .shell{padding-top:.9rem}
 .v-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin:.2rem 0 .9rem}
-.v-h1{margin:0;font-size:1.6rem;font-weight:900;letter-spacing:-.02em;line-height:1.15}
-.v-title{margin:0;font-size:1.05rem;font-weight:850}
+.v-h1{margin:0;font-size:1.6rem;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.v-title{margin:0;font-size:1.05rem;font-weight:700}
 .v-sub{color:var(--muted);font-size:.8rem;margin-top:.15rem}
 .view>.card+.card,.view>.card+.v-quick,.view>.v-quick+.card,.money-pane>.card+.card,.money-pane>*+*{margin-top:.9rem}
 .v-add{width:2.5rem;height:2.5rem;flex:0 0 auto;border-radius:.85rem;border:0;background:var(--blue);color:#fff;display:grid;place-items:center;box-shadow:0 8px 18px color-mix(in srgb,var(--blue) 32%,transparent)}
 .v-add .ui-icon{width:1.2rem;height:1.2rem}
 .v-add.sm{width:2.1rem;height:2.1rem;border-radius:.7rem}
-.v-link{border:0;background:none;color:var(--blue-dark);font-weight:800;font-size:.82rem;padding:.3rem}
+.v-link{border:0;background:none;color:var(--blue-dark);font-weight:700;font-size:.82rem;padding:.3rem}
 .v-wide{width:100%;margin-top:.9rem;min-height:3rem;font-size:.95rem}
 .v-row-actions{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.7rem}
 .v-row-actions .btn{flex:1 1 9rem}
@@ -664,7 +664,7 @@ body[data-view="viewGoalEdit"] .v-chips,body[data-view="viewNoteEdit"] .v-chips,
 .v-back .ui-icon,.v-icon-btn .ui-icon{width:1.15rem;height:1.15rem}
 .v-seg{display:flex;gap:.25rem;padding:.25rem;border:1px solid var(--line);border-radius:.85rem;background:var(--soft);overflow-x:auto;scrollbar-width:none}
 .v-seg::-webkit-scrollbar{display:none}
-.v-seg button{flex:1 0 auto;min-height:2.2rem;padding:.3rem .7rem;border:0;border-radius:.65rem;background:transparent;color:var(--muted);font-size:.82rem;font-weight:800;white-space:nowrap}
+.v-seg button{flex:1 0 auto;min-height:2.2rem;padding:.3rem .7rem;border:0;border-radius:.65rem;background:transparent;color:var(--muted);font-size:.82rem;font-weight:700;white-space:nowrap}
 .v-seg button.active{background:var(--panel);color:var(--text);box-shadow:0 3px 10px rgba(0,0,0,.18)}
 html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,51,.1)}
 .v-seg.sm button{min-height:1.9rem;font-size:.76rem}
@@ -690,26 +690,26 @@ html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,5
 .ring circle{fill:none}
 .ring .ring-bg{stroke:color-mix(in srgb,var(--line) 85%,var(--bg))}
 .ring .ring-fg{stroke:var(--rc,var(--blue));stroke-linecap:round;stroke-dasharray:0 100;transition:stroke-dasharray .9s cubic-bezier(.2,.8,.2,1)}
-.ring b{position:relative;font-size:.82rem;font-weight:900}
-.ring-label{font-size:0.7812rem;color:var(--muted);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ring b{position:relative;font-size:.82rem;font-weight:700}
+.ring-label{font-size:0.7812rem;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .ring-item:hover .ring{transform:translateY(-1px)}
 .v-pulse .pulse-note{font-size:.75rem;margin-top:.7rem}
 .v-cover{position:relative;height:7.2rem;border-radius:.9rem;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--gc,#3b82f6) 85%,#fff 15%),color-mix(in srgb,var(--gc,#3b82f6) 55%,#050b16));display:grid;place-items:center}
 .v-cover svg.v-mtn{position:absolute;inset:auto 0 0 0;width:100%;height:78%}
 .v-cover .v-cover-ico{position:relative;z-index:1;width:3.2rem;height:3.2rem;border-radius:1rem;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;color:#fff;border:1px solid rgba(255,255,255,.3);margin-bottom:1.6rem}
 .v-cover .v-cover-ico .ui-icon{width:1.6rem;height:1.6rem}
-.v-cover .v-cover-badge{position:absolute;z-index:1;left:.7rem;top:.7rem;padding:.2rem .55rem;border-radius:99px;background:rgba(0,0,0,.32);color:#fff;font-size:0.75rem;font-weight:900;letter-spacing:.04em}
+.v-cover .v-cover-badge{position:absolute;z-index:1;left:.7rem;top:.7rem;padding:.2rem .55rem;border-radius:99px;background:rgba(0,0,0,.32);color:#fff;font-size:0.75rem;font-weight:700;letter-spacing:.04em}
 .v-goal-card{cursor:pointer}
 .v-goal-body{padding:.75rem .35rem .2rem}
-.v-goal-body h3{margin:.15rem 0 0;font-size:1.05rem;font-weight:850;line-height:1.25}
-.v-pct{font-size:1.15rem;font-weight:900;color:var(--gc,var(--blue-dark))}
+.v-goal-body h3{margin:.15rem 0 0;font-size:1.05rem;font-weight:700;line-height:1.25}
+.v-pct{font-size:1.15rem;font-weight:700;color:var(--gc,var(--blue-dark))}
 .v-amount{margin-top:.35rem;font-size:.85rem;color:var(--muted)}
 .v-amount b{color:var(--text);font-size:1.05rem}
 .v-kpi4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:.8rem}
 .v-kpi{padding:.6rem .55rem;border-radius:.8rem;background:var(--soft);border:1px solid var(--line);min-width:0}
-.v-kpi span{display:flex;align-items:center;gap:.3rem;font-size:0.75rem;color:var(--muted);font-weight:800}
+.v-kpi span{display:flex;align-items:center;gap:.3rem;font-size:0.75rem;color:var(--muted);font-weight:700}
 .v-kpi span i{width:.45rem;height:.45rem;border-radius:50%;background:var(--kc,var(--blue));flex:0 0 auto}
-.v-kpi b{display:block;margin-top:.2rem;font-size:.9rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-kpi b{display:block;margin-top:.2rem;font-size:.9rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v-minichart{display:flex;align-items:flex-end;gap:2px;height:4.2rem;margin-top:.8rem;padding:.3rem .1rem 0;border-bottom:1px solid var(--line)}
 .v-minichart .tm-day{flex:1 1 0;min-width:0;height:100%;display:flex;align-items:flex-end;justify-content:center;gap:1px}
 .v-minichart .tm-day i{display:block;width:45%;border-radius:2px 2px 0 0;transform-origin:bottom;animation:lcGrow .6s cubic-bezier(.2,.8,.2,1) both}
@@ -725,9 +725,9 @@ html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,5
 .v-check:checked::after{transform:rotate(45deg) scale(1)}
 .v-check:disabled{cursor:default;opacity:.85}
 .v-check{min-height:0!important;flex:0 0 auto;padding:0}
-.v-task-title{font-size:.88rem;font-weight:750;line-height:1.3;overflow-wrap:anywhere}
+.v-task-title{font-size:.88rem;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .v-task-meta{font-size:0.7812rem;color:var(--muted);margin-top:.1rem}
-.v-task-time{font-size:.75rem;font-weight:800;color:var(--blue-dark);white-space:nowrap}
+.v-task-time{font-size:.75rem;font-weight:700;color:var(--blue-dark);white-space:nowrap}
 .v-task-del{width:1.8rem;height:1.8rem;border-radius:.55rem;border:0;background:transparent;color:var(--muted);display:grid;place-items:center}
 .v-task-del .ui-icon{width:.95rem;height:.95rem}
 .v-task.stage .v-task-time{color:var(--muted)}
@@ -736,12 +736,12 @@ html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,5
 .v-goal-ico{border-radius:.9rem;display:grid;place-items:center;background:color-mix(in srgb,var(--gc) 20%,transparent)}
 .v-goal-ico .ui-icon{width:1.35rem;height:1.35rem}
 .v-goal-top{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
-.v-goal-name{font-weight:850;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.v-goal-pct{font-weight:900;color:var(--gc);font-size:.9rem}
+.v-goal-name{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v-goal-pct{font-weight:700;color:var(--gc);font-size:.9rem}
 .v-goal-sum{font-size:.78rem;color:var(--muted);margin-top:.15rem}
 .v-goal-sum b{color:var(--text)}
 .v-goal-foot{display:flex;justify-content:space-between;gap:.5rem;font-size:0.7812rem;color:var(--muted);margin-top:.45rem}
-.v-badge{display:inline-flex;align-items:center;gap:.2rem;padding:.08rem .45rem;border-radius:99px;font-size:0.7188rem;font-weight:900;background:var(--orange-soft);color:var(--orange-dark);vertical-align:.1rem;margin-left:.3rem}
+.v-badge{display:inline-flex;align-items:center;gap:.2rem;padding:.08rem .45rem;border-radius:99px;font-size:0.7188rem;font-weight:700;background:var(--orange-soft);color:var(--orange-dark);vertical-align:.1rem;margin-left:.3rem}
 .v-badge.ok{background:var(--green-soft);color:var(--green)}
 .v-form{display:grid;gap:.8rem;margin-top:.9rem}
 .v-form .field label{letter-spacing:.04em}
@@ -772,26 +772,26 @@ html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,5
 .v-legend i{width:.7rem;height:.7rem;border-radius:.2rem;background:var(--lc)}
 .v-legend i.line{height:.2rem;border-radius:2px}
 .v-quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}
-.v-quick button{min-height:4.6rem;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;font-weight:850;font-size:.82rem;box-shadow:var(--shadow)}
+.v-quick button{min-height:4.6rem;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;font-weight:700;font-size:.82rem;box-shadow:var(--shadow)}
 .v-quick button i{width:2.2rem;height:2.2rem;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--qc) 18%,transparent);color:var(--qc)}
 .v-quick button i .ui-icon{width:1.1rem;height:1.1rem}
 .v-tx-list{display:grid;gap:.15rem;margin-top:.5rem}
-.v-tx-date{font-size:0.7812rem;color:var(--muted);font-weight:800;margin:.7rem .2rem .2rem;text-transform:capitalize}
+.v-tx-date{font-size:0.7812rem;color:var(--muted);font-weight:700;margin:.7rem .2rem .2rem;text-transform:capitalize}
 .v-tx{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.7rem;padding:.6rem .35rem;border-radius:.8rem;cursor:pointer;border:0;background:none;color:inherit;font:inherit;text-align:left;width:100%}
 .v-tx:hover{background:var(--soft)}
 .v-tx-ico{width:2.4rem;height:2.4rem;border-radius:.8rem;display:grid;place-items:center;font-size:1.05rem;background:color-mix(in srgb,var(--tc) 16%,transparent);color:var(--tc)}
 .v-tx-ico .ui-icon{width:1.05rem;height:1.05rem}
-.v-tx-title{font-size:.88rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-tx-title{font-size:.88rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v-tx-meta{font-size:0.7812rem;color:var(--muted);margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.v-tx-amt{font-size:.9rem;font-weight:900;white-space:nowrap}
+.v-tx-amt{font-size:.9rem;font-weight:700;white-space:nowrap}
 .v-search{position:relative;margin-bottom:.7rem}
 .v-search .ui-icon{position:absolute;left:.8rem;top:50%;transform:translateY(-50%);color:var(--muted);width:1rem;height:1rem}
 .v-search input{width:100%;padding-left:2.4rem!important;min-height:2.7rem;border-radius:.85rem;font-size:.9rem}
 .mc-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
 .mc-head h2{margin:0;font-size:1.05rem;text-transform:capitalize}
 .mc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.3rem;margin-top:.8rem}
-.mc-week{font-size:0.75rem;color:var(--muted);text-align:center;font-weight:800;padding:.2rem 0}
-.mc-day{aspect-ratio:1;min-height:2.3rem;border-radius:.7rem;border:1px solid transparent;background:var(--soft);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;font-size:.82rem;font-weight:800;cursor:pointer;padding:0}
+.mc-week{font-size:0.75rem;color:var(--muted);text-align:center;font-weight:700;padding:.2rem 0}
+.mc-day{aspect-ratio:1;min-height:2.3rem;border-radius:.7rem;border:1px solid transparent;background:var(--soft);color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;font-size:.82rem;font-weight:700;cursor:pointer;padding:0}
 .mc-day.empty{background:transparent;cursor:default}
 .mc-day.today{border-color:color-mix(in srgb,var(--blue) 55%,transparent)}
 .mc-day.sel{background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -808,18 +808,18 @@ html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,5
 .v-note-ico{width:2.5rem;height:2.5rem;border-radius:.8rem;display:grid;place-items:center;background:color-mix(in srgb,var(--nc) 18%,transparent);color:var(--nc)}
 .v-note-ico .ui-icon{width:1.1rem;height:1.1rem}
 .v-note-top{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
-.v-note-title{font-weight:850;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v-note-title{font-weight:700;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .v-note-date{font-size:0.7812rem;color:var(--muted);white-space:nowrap}
 .v-note-prev{font-size:.82rem;color:var(--muted);margin-top:.25rem;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .v-note-prev b{color:var(--text)}
-.v-note-tag{display:inline-block;margin-top:.4rem;font-size:0.75rem;font-weight:900;color:var(--nc);background:color-mix(in srgb,var(--nc) 14%,transparent);padding:.1rem .45rem;border-radius:99px}
+.v-note-tag{display:inline-block;margin-top:.4rem;font-size:0.75rem;font-weight:700;color:var(--nc);background:color-mix(in srgb,var(--nc) 14%,transparent);padding:.1rem .45rem;border-radius:99px}
 .v-editor-bar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;padding:.35rem;border:1px solid var(--line);border-radius:.8rem;background:var(--soft)}
 .v-editor-bar button{width:2.2rem;height:2.2rem;border-radius:.6rem;border:0;background:transparent;color:var(--text);display:grid;place-items:center}
 .v-editor-bar button:hover{background:var(--panel)}
 .v-editor-bar .ui-icon{width:1rem;height:1rem}
 .v-editor-bar .v-pin{margin-left:auto;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:.35rem;padding-right:.4rem}
 .v-note-text{width:100%;min-height:16rem;border:1px solid var(--line);border-radius:.85rem;background:var(--soft);color:var(--text);padding:.8rem;font-size:.95rem;line-height:1.55;resize:vertical}
-.v-group-title{font-size:0.7812rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:850;margin:1.1rem .3rem .45rem}
+.v-group-title{font-size:0.7812rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;margin:1.1rem .3rem .45rem}
 .v-group{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);overflow:hidden}
 .v-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.75rem;width:100%;padding:.75rem .85rem;border:0;border-top:1px solid var(--line);background:transparent;color:var(--text);font:inherit;text-align:left}
 .v-group>.v-row:first-child{border-top:0}
@@ -828,7 +828,7 @@ button.v-row:hover,label.v-row:hover{background:var(--soft)}
 .v-row-ico{width:2.1rem;height:2.1rem;border-radius:.65rem;display:grid;place-items:center;background:color-mix(in srgb,var(--c,var(--blue)) 18%,transparent);color:var(--c,var(--blue))}
 .v-row-ico .ui-icon{width:1rem;height:1rem}
 .v-row-main{min-width:0}
-.v-row-main b{display:block;font-size:.9rem;font-weight:800}
+.v-row-main b{display:block;font-size:.9rem;font-weight:700}
 .v-row-main small{display:block;font-size:0.7812rem;color:var(--muted);margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v-row-val{font-size:.8rem;color:var(--muted);text-align:right;white-space:nowrap;display:flex;align-items:center;gap:.3rem}
 .v-row-val .ui-icon{width:.9rem;height:.9rem}
@@ -854,16 +854,16 @@ button.v-row:hover,label.v-row:hover{background:var(--soft)}
 .v-notif.unread{border-color:color-mix(in srgb,var(--blue) 40%,var(--line));background:color-mix(in srgb,var(--blue-soft) 45%,var(--panel))}
 .v-notif-ico{width:2.3rem;height:2.3rem;border-radius:.75rem;display:grid;place-items:center;background:color-mix(in srgb,var(--nc) 18%,transparent);color:var(--nc)}
 .v-notif-ico .ui-icon{width:1rem;height:1rem}
-.v-notif-title{font-size:.86rem;font-weight:850}
+.v-notif-title{font-size:.86rem;font-weight:700}
 .v-notif-body{font-size:.76rem;color:var(--muted);margin-top:.15rem;overflow-wrap:anywhere}
 .v-notif-time{font-size:0.75rem;color:var(--muted);white-space:nowrap}
 .v-unread-dot{display:block;width:.5rem;height:.5rem;border-radius:50%;background:var(--blue);margin:.35rem 0 0 auto}
 .v-profile{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.9rem;align-items:center}
 .v-profile .btn{grid-column:1/-1}
-.v-avatar{width:4.2rem;height:4.2rem;border-radius:50%;display:grid;place-items:center;font-size:1.4rem;font-weight:900;color:#fff;background:linear-gradient(140deg,var(--blue),var(--purple));box-shadow:0 8px 22px color-mix(in srgb,var(--blue) 30%,transparent)}
+.v-avatar{width:4.2rem;height:4.2rem;border-radius:50%;display:grid;place-items:center;font-size:1.4rem;font-weight:700;color:#fff;background:linear-gradient(140deg,var(--blue),var(--purple));box-shadow:0 8px 22px color-mix(in srgb,var(--blue) 30%,transparent)}
 .v-profile h2{margin:0;font-size:1.2rem;overflow:hidden;text-overflow:ellipsis}
 .v-search-results{display:grid;gap:.3rem;margin-top:.7rem;max-height:60vh;overflow:auto}
-.v-search-group{font-size:0.7812rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:850;margin:.6rem .2rem .1rem}
+.v-search-group{font-size:0.7812rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin:.6rem .2rem .1rem}
 .auth-lock{background:linear-gradient(180deg,#071026 0%,#0d2147 45%,#1a3a6e 70%,#0a1428 100%);overflow:hidden;padding:1rem}
 html[data-theme="light"] .auth-lock{background:linear-gradient(180deg,#bcd3f5 0%,#e1ebfb 55%,#f3f6fb 100%)}
 .auth-scene{position:absolute;inset:0;pointer-events:none}
@@ -871,7 +871,7 @@ html[data-theme="light"] .auth-lock{background:linear-gradient(180deg,#bcd3f5 0%
 .auth-stars{position:absolute;inset:0 0 45% 0;background-image:radial-gradient(1px 1px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 32% 8%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 68% 14%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 84% 26%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 52% 30%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 22% 36%,#fff 50%,transparent 51%);opacity:.7}
 .auth-box{position:relative;z-index:1;width:min(25rem,100%);border-radius:1.4rem}
 .auth-crown{border-radius:1.1rem;display:grid;place-items:center}
-.auth-title{margin:0;text-align:center;font-weight:900}
+.auth-title{margin:0;text-align:center;font-weight:700}
 .auth-box .auth-intro{text-align:center}
 .auth-box .field{margin-top:.8rem}
 .auth-box .field label{font-size:0.7812rem;letter-spacing:.04em}
@@ -883,7 +883,7 @@ html[data-theme="light"] .auth-lock{background:linear-gradient(180deg,#bcd3f5 0%
 .auth-row{display:flex;align-items:center;gap:.5rem;margin-top:.75rem;font-size:.82rem}
 .auth-remember{display:flex;align-items:center;gap:.45rem;cursor:pointer}
 .auth-remember input{width:1.05rem;height:1.05rem;accent-color:var(--blue);margin:0}
-.auth-link{border:0;background:none;color:var(--blue-dark);font-weight:800;font-size:.82rem;padding:.2rem;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem}
+.auth-link{border:0;background:none;color:var(--blue-dark);font-weight:700;font-size:.82rem;padding:.2rem;cursor:pointer;display:inline-flex;align-items:center;gap:.3rem}
 .auth-box .auth-actions{margin-top:1rem}
 .auth-box .auth-actions .btn{min-height:3rem;font-size:1rem;border-radius:.9rem}
 .auth-box .auth-progress{justify-content:center;font-size:0.7812rem}
@@ -922,18 +922,18 @@ body[data-layout="mobile"]:is([data-view="viewGoalEdit"],[data-view="viewNoteEdi
 .v-pulse-sub .v-sub{margin:0}
 .ring-item{gap:.25rem}
 .ring circle{stroke-width:4.6}
-.ring-state{font-size:0.7188rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.1}
+.ring-state{font-size:0.7188rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;line-height:1.1}
 .v-goal-card{position:relative;overflow:hidden;padding:0;isolation:isolate;border-color:color-mix(in srgb,var(--gc,var(--blue)) 30%,var(--line))}
 .v-goal-card .v-cover{position:absolute;inset:0;height:auto;border-radius:0;z-index:-1;background:linear-gradient(115deg,#0a1830 0%,#163463 55%,#b4612a 100%)}
 .v-goal-card .v-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,11,22,.88) 0%,rgba(5,11,22,.6) 55%,rgba(5,11,22,.15) 100%)}
 .v-goal-card .v-cover svg.v-mtn{height:62%}
 .v-goal-card .v-mtn circle,.v-goal-card .v-mtn path:nth-of-type(2){display:none}
 .v-goal-card .v-goal-body{padding:.9rem 1rem .85rem;color:#eaf1fb}
-.v-goal-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.82rem;font-weight:800}
+.v-goal-head{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.82rem;font-weight:700}
 .v-goal-head .ui-icon{color:#7fb2ff}
 .v-goal-days{font-size:0.7812rem;color:rgba(234,241,251,.72);font-weight:700;white-space:nowrap}
 .v-goal-days b{color:#fff}
-.v-goal-card h3{margin:.6rem 0 0;font-size:1.05rem;font-weight:900;color:#fff}
+.v-goal-card h3{margin:.6rem 0 0;font-size:1.05rem;font-weight:700;color:#fff}
 .v-goal-card .v-amount{margin-top:.1rem;color:rgba(234,241,251,.8)}
 .v-goal-card .v-amount b{color:#fff;font-size:1.2rem}
 .v-bar-row{display:flex;align-items:center;gap:.65rem;margin-top:.55rem}
@@ -975,7 +975,7 @@ body[data-layout="mobile"]:is([data-view="viewGoalEdit"],[data-view="viewNoteEdi
 .v-features{display:grid;gap:.7rem;margin-top:.9rem}
 .v-features span{display:flex;align-items:center;gap:.6rem;font-size:.86rem;font-weight:700}
 .v-features .ui-icon{width:1.3rem;height:1.3rem;padding:.22rem;border-radius:50%;background:var(--green);color:#fff;flex:0 0 auto}
-.v-stat-val{font-size:1rem;font-weight:900}
+.v-stat-val{font-size:1rem;font-weight:700}
 @media (max-width:380px){.v-goal-head{font-size:0.7812rem}
 .v-goal-days{font-size:0.75rem}
 .v-chips button{font-size:0.7812rem;gap:.25rem}}
@@ -986,7 +986,7 @@ html[data-theme="light"] .auth-stars{display:block}
 .auth-crown{width:auto;height:auto;background:none;box-shadow:none;color:#f5b120;margin:0 auto .2rem}
 .auth-crown .ui-icon{width:3.2rem;height:3.2rem;filter:drop-shadow(0 6px 18px rgba(245,158,11,.5))}
 .auth-title{color:#fff;font-size:2rem!important}
-.auth-title span{display:block;margin-top:.15rem;font-size:1rem;font-weight:800;color:#cbd5e1}
+.auth-title span{display:block;margin-top:.15rem;font-size:1rem;font-weight:700;color:#cbd5e1}
 .auth-box .auth-intro{color:#cbd5e1;line-height:1.55;margin:.75rem 0 1.2rem;font-size:.92rem}
 .auth-box .field label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .auth-input input{background:rgba(9,17,33,.72)!important;border:1px solid rgba(255,255,255,.16)!important;color:#fff!important}
@@ -1098,17 +1098,17 @@ html[data-theme="light"]{--gold:#b7841f;--gold-2:#e3b04b}
 .jl-hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .jl-hero-date{all:unset;cursor:pointer;display:grid;gap:3px;border-radius:12px;padding:2px 4px;margin:-2px -4px}
 .jl-hero-date:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
-.jl-hero-date h1{margin:0;font-size:1.5rem;font-weight:800;letter-spacing:-.01em;color:#fff;line-height:1.1}
+.jl-hero-date h1{margin:0;font-size:1.5rem;font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.1}
 .jl-hero-date span{font-size:0.8125rem;color:#a9bdd3}
 .jl-hero-clock{text-align:right}
-.jl-hero .clock-time{font-size:clamp(34px,10.5vw,52px);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;color:#fff}
+.jl-hero .clock-time{font-size:clamp(34px,10.5vw,52px);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;color:#fff}
 .jl-hero .clock-state{font-size:0.7812rem;color:var(--gold-2);margin-top:6px;font-variant-numeric:tabular-nums}
 .jl-now{margin-top:16px;padding:14px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09)}
 .jl-now-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:0.7812rem}
 .jl-now-label{display:inline-flex;gap:6px;align-items:center;color:var(--gold-2);font-weight:700}
 .jl-now-label .ui-icon{width:14px;height:14px}
 .jl-now-status{color:#cfe0f2;font-weight:600}
-.jl-now-title{font-size:1.25rem;font-weight:800;line-height:1.25;margin-top:6px;color:#fff}
+.jl-now-title{font-size:1.25rem;font-weight:700;line-height:1.25;margin-top:6px;color:#fff}
 .jl-now-meta{font-size:0.8125rem;color:#a9bdd3;margin-top:4px}
 .jl-track{height:8px;border-radius:99px;background:rgba(255,255,255,.1);margin-top:12px;overflow:hidden}
 .jl-track .auto-fill{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#c8902c,var(--gold-2));transition:width .9s cubic-bezier(.2,.8,.2,1)}
@@ -1129,14 +1129,14 @@ html[data-theme="light"]{--gold:#b7841f;--gold-2:#e3b04b}
 .jl-focus-item span{display:block;font-size:0.75rem;color:var(--muted)}
 .jl-focus-item b{display:block;font-size:0.9062rem;margin-top:1px}
 .jl-focus-item small{display:block;font-size:0.7812rem;color:var(--muted);margin-top:2px;line-height:1.4}
-.jl-count{font-weight:800;font-variant-numeric:tabular-nums;padding:6px 11px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:0.8125rem;white-space:nowrap}
+.jl-count{font-weight:700;font-variant-numeric:tabular-nums;padding:6px 11px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:0.8125rem;white-space:nowrap}
 .jl-rhythm .timeline{margin-top:12px}
 .jl-report-foot #reportSaved{flex:1 1 100%}.jl-report-foot #reportSaved:empty{display:none}
 .jl-report-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
 .jl-analysis{display:flex;gap:8px;flex-wrap:wrap}
 .jl-money-today{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0 6px;padding:12px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
 .jl-money-today span{font-size:0.75rem;color:var(--muted);display:block}
-.jl-money-today b{font-size:1.3125rem;font-weight:800;font-variant-numeric:tabular-nums}
+.jl-money-today b{font-size:1.3125rem;font-weight:700;font-variant-numeric:tabular-nums}
 .jl-money-today small{display:block;font-size:0.75rem;color:var(--muted);margin-top:2px}
 .jl-money-actions{display:flex;flex-direction:column;gap:8px}
 .jl-pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit;font-weight:700;font-size:0.875rem;cursor:pointer;white-space:nowrap}
@@ -1176,7 +1176,7 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 
 /* ===== V59: закрыть день, серия, разбор недели, план долга, лимиты ===== */
 .jl-streak{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:16px;background:var(--soft);border:1px solid var(--line)}
-.jl-streak b{display:block;font-size:1.0625rem;font-weight:800;font-variant-numeric:tabular-nums}
+.jl-streak b{display:block;font-size:1.0625rem;font-weight:700;font-variant-numeric:tabular-nums}
 .jl-streak small{display:block;font-size:0.7812rem;color:var(--muted);margin-top:2px}
 .jl-flame{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--orange) 16%,transparent)}
 .jl-flame svg{width:24px;height:24px;fill:var(--orange)}
@@ -1192,11 +1192,11 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 .jl-week.sunday{box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 55%,transparent),0 14px 34px rgba(0,0,0,.25)}
 .jl-week-head{display:flex;align-items:center;gap:8px;color:#f6d58a}
 .jl-week-head .ui-icon{width:18px;height:18px}
-.jl-week-head b{font-size:0.875rem;font-weight:800}
+.jl-week-head b{font-size:0.875rem;font-weight:700}
 .jl-week-head small{margin-left:auto;font-size:0.75rem;color:#a9bdd3}
 .jl-week-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px;text-align:center}
 .jl-week-stats>div{padding:10px 4px;border-radius:14px;background:rgba(255,255,255,.07)}
-.jl-week-stats b{display:block;font-size:1.125rem;font-weight:800;font-variant-numeric:tabular-nums;color:#fff}
+.jl-week-stats b{display:block;font-size:1.125rem;font-weight:700;font-variant-numeric:tabular-nums;color:#fff}
 .jl-week-stats span{display:block;font-size:0.7188rem;color:#a9bdd3;margin-top:2px}
 .jl-week-text{font-size:0.875rem;line-height:1.55;margin-top:12px;color:#e6eef7;white-space:pre-wrap}
 .jl-week-text:empty{display:none}
@@ -1209,7 +1209,7 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 .jl-debtplan:empty{display:none}
 .jl-debtplan{margin-top:12px;border-radius:22px;padding:16px;color:#f3f7fc;background:linear-gradient(160deg,#14304e 0%,#0b1a2c 72%);border:1px solid rgba(227,176,75,.3)}
 .dp-label{font-size:0.8125rem;color:#a9bdd3}
-.dp-sum{font-size:clamp(28px,8vw,36px);font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.1;color:#fff}
+.dp-sum{font-size:clamp(28px,8vw,36px);font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px;line-height:1.1;color:#fff}
 .dp-sum small{font-size:0.9375rem;color:#a9bdd3;font-weight:600;margin-left:4px}
 .dp-track{height:10px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:14px;overflow:hidden}
 .dp-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#c8902c,#f6d58a);transition:width 1s cubic-bezier(.2,.8,.2,1)}
@@ -1218,7 +1218,7 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 .dp-cell{padding:12px;border-radius:16px;background:rgba(255,255,255,.07)}
 .dp-cell>span{display:block;font-size:0.75rem;color:#a9bdd3}
 .dp-cell #dpAltPay{white-space:nowrap}
-.dp-cell b{display:block;font-size:1.0625rem;font-weight:800;margin-top:4px;color:#fff}
+.dp-cell b{display:block;font-size:1.0625rem;font-weight:700;margin-top:4px;color:#fff}
 .dp-cell small{display:block;font-size:0.7188rem;color:#a9bdd3;margin-top:2px}
 .dp-cell.gold{background:rgba(227,176,75,.16);border:1px solid rgba(246,213,138,.35)}
 .dp-cell.gold>span,.dp-cell.gold small{color:#f6d58a}
@@ -1276,7 +1276,7 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 .jl-goalhero-label .ui-icon{width:15px;height:15px}
 .jl-icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center;cursor:pointer}
 .jl-icon-btn .ui-icon{width:18px;height:18px}
-.jl-goalhero .goal-title{font-size:clamp(20px,6vw,24px);font-weight:800;line-height:1.25;margin-top:6px;color:#fff}
+.jl-goalhero .goal-title{font-size:clamp(20px,6vw,24px);font-weight:700;line-height:1.25;margin-top:6px;color:#fff}
 .jl-goalhero .goal-why{font-size:0.8438rem;color:#a9bdd3;margin-top:4px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .jl-goalhero .goal-why:empty{display:none}
 
@@ -1349,7 +1349,7 @@ body{line-height:1.45}
 .jl-bank-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}
 .jl-bank-top .jl-emo{font-size:1.5rem;margin:0}
 .jl-bank-name b{display:block;font-size:0.9375rem}.jl-bank-name small{display:block;font-size:0.75rem;color:var(--muted);margin-top:3px}
-.jl-bank-sum{text-align:right}.jl-bank-sum b{display:block;font-size:1.25rem;font-weight:800;font-variant-numeric:tabular-nums}.jl-bank-sum small{display:block;font-size:0.7188rem;color:var(--muted)}
+.jl-bank-sum{text-align:right}.jl-bank-sum b{display:block;font-size:1.25rem;font-weight:700;font-variant-numeric:tabular-nums}.jl-bank-sum small{display:block;font-size:0.7188rem;color:var(--muted)}
 .jl-bank.warn .jl-bank-sum b{color:var(--orange-dark)}.jl-bank.over .jl-bank-sum b{color:var(--red)}
 .jl-bank-actions{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
 .jl-bank-actions .jl-pill{min-height:40px;font-size:0.8438rem;padding:0 10px}
@@ -1403,13 +1403,13 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-swipe>.v-tx{position:relative;z-index:1;background:var(--panel);touch-action:pan-y;will-change:auto}
 .jl-swipe:not(.open):not(.drag) .jl-swipe-actions{visibility:hidden}
 .jl-swipe-actions{position:absolute;inset:0 0 0 auto;width:148px;display:grid;grid-template-columns:56px 1fr;z-index:0}
-.jl-swipe-actions button{border:0;font:inherit;font-weight:800;font-size:.85rem;color:#fff;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer}
+.jl-swipe-actions button{border:0;font:inherit;font-weight:700;font-size:.85rem;color:#fff;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer}
 .jl-swipe-actions [data-sw-edit]{background:var(--blue);font-size:1.1rem}
 .jl-swipe-actions [data-sw-del]{background:var(--red)}
 .jl-swipe-actions [data-sw-del] span{font-size:.8rem}
 .jl-snack{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:400;display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;background:#14233a;color:#fff;box-shadow:0 14px 34px rgba(0,0,0,.35);transition:all .3s cubic-bezier(.2,.8,.2,1);font-weight:600;max-width:calc(100vw - 32px)}
 .jl-snack.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
-.jl-snack button{border:0;background:transparent;color:#f6d58a;font:inherit;font-weight:800;cursor:pointer;min-height:40px}
+.jl-snack button{border:0;background:transparent;color:#f6d58a;font:inherit;font-weight:700;cursor:pointer;min-height:40px}
 .jl-bank-name{all:unset;cursor:pointer;min-width:0;display:block}
 .jl-bank-name:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
 .jl-bank-empty{display:grid;justify-items:center;text-align:center;gap:6px;padding:14px 8px}
@@ -1437,14 +1437,14 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-goalring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .gr-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:10}
 .gr-fill{fill:none;stroke:url(#goldGrad);stroke:#e3b04b;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)}
-.jl-goalring b{position:absolute;inset:auto 0 18px;text-align:center;font-size:1.05rem;font-weight:800;color:#fff}
+.jl-goalring b{position:absolute;inset:auto 0 18px;text-align:center;font-size:1.05rem;font-weight:700;color:#fff}
 .jl-goalring-ico{position:absolute;left:50%;top:22px;transform:translateX(-50%);width:24px;height:24px;display:grid;place-items:center;animation:jlFloat 3s ease-in-out infinite}
 .jl-goalring-ico .ui-icon{width:22px;height:22px}
 @keyframes jlFloat{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-3px)}}
 .jl-goalring-info{display:grid;gap:5px;min-width:0}
 .jl-goalring-info span{font-size:.95rem;color:#fff;font-weight:700}
 .jl-goalring-info small{font-size:.8rem;color:#a9bdd3}
-.jl-lag{justify-self:start;padding:4px 10px;border-radius:999px;font-size:.78rem!important;font-weight:800}
+.jl-lag{justify-self:start;padding:4px 10px;border-radius:999px;font-size:.78rem!important;font-weight:700}
 .jl-lag.behind{background:rgba(239,68,68,.18);color:#ffb4b4!important}
 .jl-lag.ahead{background:rgba(34,197,94,.18);color:#a7f3c4!important}
 .milestones{position:relative;display:grid;gap:10px;margin-top:12px;padding-left:4px}
@@ -1452,7 +1452,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .milestones::after{content:"";position:absolute;left:21px;top:22px;width:3px;height:calc((100% - 44px) * var(--f,0));border-radius:3px;background:linear-gradient(var(--green),var(--gold));transform-origin:top;transform:scaleY(0);animation:jlLine 1.2s .2s cubic-bezier(.2,.8,.2,1) forwards;transition:height .8s cubic-bezier(.2,.8,.2,1)}
 @keyframes jlLine{to{transform:scaleY(1)}}
 .jl-step{position:relative;z-index:1;display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px 10px 0;border-radius:14px;transition:background .3s ease}
-.jl-step-dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--panel);border:2px solid var(--line);color:var(--muted);transition:all .35s cubic-bezier(.34,1.56,.64,1)}
+.jl-step-dot{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--panel);border:2px solid var(--line);color:var(--muted);transition:all .35s cubic-bezier(.34,1.56,.64,1)}
 .jl-step.done .jl-step-dot{background:var(--green);border-color:var(--green);color:#fff;animation:jlPop .5s cubic-bezier(.34,1.56,.64,1) backwards}
 .jl-step.current{background:color-mix(in srgb,var(--gold) 10%,transparent)}
 .jl-step.current .jl-step-dot{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 50%,transparent);animation:jlRingPulse 2s ease-in-out infinite}
@@ -1488,7 +1488,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-hw-bar i{display:block;width:100%;border-radius:7px;background:linear-gradient(0deg,var(--blue),var(--cyan,#22d3ee));transform-origin:bottom;animation:jlGrowY .8s cubic-bezier(.2,.8,.2,1) backwards}
 .jl-hw-col:nth-child(2) i{animation-delay:.05s}.jl-hw-col:nth-child(3) i{animation-delay:.1s}.jl-hw-col:nth-child(4) i{animation-delay:.15s}.jl-hw-col:nth-child(5) i{animation-delay:.2s}.jl-hw-col:nth-child(6) i{animation-delay:.25s}.jl-hw-col:nth-child(7) i{animation-delay:.3s}
 .jl-hw-col small{font-size:.72rem;color:var(--muted);text-transform:lowercase}
-.jl-hw-col.today small{color:var(--text);font-weight:800}
+.jl-hw-col.today small{color:var(--text);font-weight:700}
 .jl-hw-col.today .jl-hw-bar{border-color:color-mix(in srgb,var(--green) 55%,var(--line))}
 @keyframes jlGrowY{from{transform:scaleY(0)}}
 @media (prefers-reduced-motion:reduce){.jl-hw-bar i{animation:none}}
@@ -1500,7 +1500,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-miniring circle{fill:none;stroke-width:3.4}
 .jl-miniring .bg{stroke:var(--line)}
 .jl-miniring .fg{stroke:var(--green);stroke-linecap:round;transition:stroke-dasharray 1s cubic-bezier(.2,.8,.2,1)}
-.jl-miniring b{position:relative;font-size:.72rem;font-weight:800;font-variant-numeric:tabular-nums}
+.jl-miniring b{position:relative;font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums}
 .jl-miniring.full{animation:jlPop .6s cubic-bezier(.34,1.56,.64,1)}
 .jl-miniring.full b{font-size:1.05rem}
 /* day strip chart */
@@ -1514,7 +1514,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-seg.current em{animation:jlFloatY 2.4s ease-in-out infinite}
 .jl-strip-fill{position:absolute;left:0;top:0;bottom:0;border-radius:12px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--gold) 14%,transparent));pointer-events:none;z-index:2;transition:width 1s ease}
 .jl-strip-now{position:absolute;top:-7px;bottom:-7px;width:3px;margin-left:-1.5px;border-radius:3px;background:var(--gold);z-index:3;box-shadow:0 0 10px var(--gold)}
-.jl-strip-now span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;padding:1px 6px;border-radius:6px;background:var(--gold);color:#1a1405;font-size:.7rem;font-weight:800;white-space:nowrap}
+.jl-strip-now span{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;padding:1px 6px;border-radius:6px;background:var(--gold);color:#1a1405;font-size:.7rem;font-weight:700;white-space:nowrap}
 .jl-daystrip .jl-strip{margin-top:16px}
 .jl-strip-legend{display:flex;justify-content:space-between;gap:8px;margin-top:6px;font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .jl-strip-legend span:nth-child(2){text-align:center;color:var(--text);font-weight:700}
@@ -1526,14 +1526,14 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-rstep::before,.jl-rstep::after{content:"";position:absolute;left:23px;top:52px;width:3px;height:calc(100% - 30px);border-radius:3px;background:var(--line)}
 .jl-rstep::after{background:linear-gradient(var(--green),var(--gold));transform-origin:top;transform:scaleY(var(--p,0));transition:transform 1s cubic-bezier(.2,.8,.2,1)}
 .jl-rstep:last-child::before,.jl-rstep:last-child::after{display:none}
-.jl-rstep-dot{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:1.15rem;font-weight:800;background:var(--panel);border:2px solid var(--line);color:var(--muted);transition:all .35s cubic-bezier(.34,1.56,.64,1)}
+.jl-rstep-dot{position:relative;z-index:1;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:1.15rem;font-weight:700;background:var(--panel);border:2px solid var(--line);color:var(--muted);transition:all .35s cubic-bezier(.34,1.56,.64,1)}
 .jl-rstep.done .jl-rstep-dot{background:var(--green);border-color:var(--green);color:#fff;font-size:1rem;animation:jlPop .5s cubic-bezier(.34,1.56,.64,1) backwards}
 .jl-rstep.current{background:color-mix(in srgb,var(--gold) 10%,transparent)}
 .jl-rstep.current .jl-rstep-dot{border-color:var(--gold);animation:jlRingPulse 2s ease-in-out infinite}
 .jl-rstep-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .jl-rstep-top b{font-size:.98rem;line-height:1.3}
 .jl-rstep.done .jl-rstep-top b{color:var(--muted)}
-.jl-rstep-time{font-size:.78rem;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.jl-rstep-time{font-size:.78rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
 .jl-rstep.current .jl-rstep-time{color:var(--gold)}
 .jl-rstep-meta{display:block;font-size:.8rem;color:var(--muted);margin-top:3px}
 .jl-rstep.current .jl-rstep-meta{color:var(--text);font-weight:700}
@@ -1619,7 +1619,7 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
 /* shared form layout */
 .jl-form{display:grid;gap:22px;margin-top:16px}
 .jl-fsec{display:grid;gap:12px}
-.jl-fsec-h{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:800;color:var(--text);letter-spacing:.01em}
+.jl-fsec-h{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:700;color:var(--text);letter-spacing:.01em}
 .jl-fsec-h>span:first-child{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;background:color-mix(in srgb,var(--gc,var(--blue)) 22%,var(--soft));color:var(--gc,var(--blue));flex:0 0 auto}
 .jl-fsec-h em{font-style:normal;font-weight:600;color:var(--muted);font-size:.78rem}
 .jl-fsec input,.jl-fsec textarea{min-height:54px;font-size:1.02rem!important;padding:14px 16px!important;border-radius:14px!important;transition:border-color .2s ease,box-shadow .2s ease}
@@ -1653,7 +1653,7 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
 .ge-pv-text{display:grid;gap:6px;justify-items:center}
 .ge-pv-text b{font-size:1.3rem;line-height:1.3;max-width:28ch;overflow-wrap:anywhere}
 .ge-pv-text span{font-size:.88rem;color:var(--muted);line-height:1.45}
-.ge-pv-text em{font-style:normal;font-weight:800;font-size:.85rem;padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--gc,var(--blue)) 20%,transparent);color:color-mix(in srgb,var(--gc,var(--blue)) 70%,#fff)}
+.ge-pv-text em{font-style:normal;font-weight:700;font-size:.85rem;padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--gc,var(--blue)) 20%,transparent);color:color-mix(in srgb,var(--gc,var(--blue)) 70%,#fff)}
 .ge-pv-text em[hidden]{display:none}
 .ge-cur{font-weight:600;color:var(--muted)}
 .ge-date-note{font-size:.82rem;color:var(--muted);line-height:1.45}
@@ -1671,6 +1671,44 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
 .ge-colors button.active .ui-icon{opacity:1;transform:scale(1)}
 @media (max-width:380px){.ge-colors{grid-template-columns:repeat(4,minmax(0,1fr))}.ge-icons{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){.jl-stickers button,.jl-stickers button i,.ge-preview .v-cover-ico,.jl-bank-preview-emo{animation:none!important}}
+
+/* ===== V66 typography: Inter everywhere (bundled, works offline), calm weights,
+   headings a step bigger, running text a step smaller ===== */
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:url("fonts/inter-cyrillic.woff2") format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:url("fonts/inter-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+html,body,button,input,select,textarea,.note-title,.note-time,.note-body,.lc-axis,.v-chart .vc-axis{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif!important}
+body{font-size:.94rem;letter-spacing:-.003em;font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.v-h1{font-size:1.75rem!important;font-weight:700;letter-spacing:-.025em}
+#viewGoal .v-head .v-h1,#viewMoney .v-head .v-h1,.v-topline .v-h1{font-size:1.5rem!important}
+.v-title,.card h2,.modal h2{font-size:1.2rem!important;font-weight:700!important;letter-spacing:-.015em;line-height:1.3!important}
+.v-sub,.sub,.analytics-sub,.goal-why{font-size:.84rem!important;line-height:1.55!important}
+.v-task-title,.jl-habit-name b,.jl-rstep-top b,.jl-step-body b{font-weight:600!important}
+.v-task-meta,.jl-habit-name small,.jl-rstep-meta,.jl-rstep-note,.v-tx small,.jl-step-body small{font-size:.8rem!important}
+.eyebrow,.field label,.jl-now-label,.kpi .label,.distance-kpi .label{letter-spacing:.04em!important}
+b,strong{font-weight:600}
+.clock-time,.dp-sum,.jl-bank-sum b,.v-kpi b,.kpi .value{font-weight:700!important;font-variant-numeric:tabular-nums}
+/* Today hero: the stage is a calm headline, not a banner */
+.jl-now-title{font-size:1.15rem!important;font-weight:700!important;line-height:1.35!important;margin-top:6px}
+.jl-now-meta,.jl-now-foot{font-size:.82rem!important}
+.jl-quote blockquote{font-family:"Inter",system-ui,sans-serif!important;font-style:normal!important;font-size:.98rem!important;font-weight:450;line-height:1.65!important}
+.jl-quote figcaption{font-size:.78rem!important;font-weight:500!important}
+/* AI failure card */
+.jl-ai-fail b{display:block;margin-bottom:6px}
+.jl-ai-fail div{line-height:1.55}
+/* goal money: empty state instead of zeros */
+.jl-goal-empty{display:grid;justify-items:center;text-align:center;gap:8px;padding:18px 12px 6px}
+.jl-goal-empty[hidden],.jl-goal-money[hidden],#goalChartCard[hidden]{display:none!important}
+.jl-debt-block{margin-top:18px}
+@media (min-width:900px){.v-kpi4 .v-kpi b{font-size:1.4rem!important}.v-kpi4 .v-kpi span{font-size:.85rem}}
+.v-goal-body h3+*{margin-top:6px!important;display:block}.jl-debt-block>.row{margin-bottom:10px}
+.jl-goal-empty .jl-emo{font-size:2rem;margin:0}
+.jl-goal-empty b{font-size:1rem}
+.jl-goal-empty small{color:var(--muted);font-size:.84rem;line-height:1.5;max-width:34ch}
+.jl-goal-money .goal-distance-grid{margin-top:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.jl-goal-money-card .goal-finance-kpis{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+.jl-goal-money-card .goal-finance-kpis .kpi,.jl-goal-money .distance-kpi{min-width:0}
+.jl-goal-money .distance-kpi .value{font-size:1rem!important;overflow-wrap:anywhere}
+.jl-goal-money .distance-kpi .label{font-size:.7rem!important}
 </style>
 
 
@@ -1749,7 +1787,7 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
   <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="authGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0"/><stop offset=".6" stop-color="#f97316" stop-opacity=".5"/><stop offset="1" stop-color="#9a3412" stop-opacity=".15"/></linearGradient><linearGradient id="authRidge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3a5f"/><stop offset="1" stop-color="#0b1426"/></linearGradient></defs><rect x="0" y="36" width="400" height="150" fill="url(#authGlow)"/><path d="M0 320V150l38-30 26 18 48-62 40 48 30-26 46 54 36-34 52 44 44-28 40 26v130z" fill="#3b3f62" opacity=".8"/><path d="M0 320V190l56-34 40 28 52-46 54 52 44-30 60 42 38-22 56 30v110z" fill="url(#authRidge)"/><path d="M0 320v-70l74-30 62 24 68-34 70 30 64-22 62 22v80z" fill="#070e1c"/></svg></div>
   <div class="auth-box">
     <div class="auth-crown"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg></div>
-    <h1 class="auth-title">Jamal Life <span>V65</span></h1>
+    <h1 class="auth-title">Jamal Life <span>V66</span></h1>
     <div class="auth-intro">Контролируй жизнь<br>Достигай цели<br>Будь лучше каждый день</div>
     <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="Email"></div></div>
     <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Пароль"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
@@ -1760,7 +1798,7 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V65</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V66</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -1896,17 +1934,8 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
     <div class="bar" style="margin-top:12px"><i id="goalBar"></i></div><span class="v-sr" id="goalPct">0%</span>
     <div class="milestones" id="milestones"></div></div>
 
-  <div class="card analytics-card">
-      <div class="analytics-head"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📈</span>Как растёт капитал</h2><div class="analytics-sub">Линия — доступно к цели. Пунктир — нужный темп до срока.</div></div><span class="small muted" id="goalChartStatus">—</span></div>
-      <div class="lc-chart-wrap" id="goalChart"></div>
-      <div class="lc-legend"><span><i></i>Доступно к цели</span><span><i class="plan"></i>Нужный темп</span></div>
-    </div>
-  <div class="card"><div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🎯</span>Другие цели</h2><div class="v-sub">Нажми на цель, чтобы изменить или пополнить</div></div></div><div class="v-goal-list" id="goalList"></div></div>
-
-  <button class="jl-more-btn" type="button" data-more="goalMore" aria-expanded="false" aria-controls="goalMore"><span>Подробнее о главной цели</span><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg></button>
-  <div class="jl-more" id="goalMore" hidden>
-    <div class="card">
-      <h2 class="v-title"><span class="jl-emo" aria-hidden="true">💎</span>Капитал цели</h2>
+  <div class="card goal-distance jl-goal-money-card">
+      <div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">💎</span>Деньги цели</h2><span class="small muted" id="goalDistanceState">—</span></div><div class="jl-goal-empty" id="goalMoneyEmpty" hidden><span class="jl-emo" aria-hidden="true">🎯</span><b>Задай сумму и срок цели</b><small>Тогда здесь появятся: сколько нужно, сколько уже есть, сколько откладывать в месяц и успеваешь ли ты.</small><button class="btn primary small" type="button" id="goalMoneySetBtn">Задать сумму и срок</button></div><div class="jl-goal-money" id="goalMoneyBody">
       <div class="kpi-row goal-finance-kpis" style="margin-top:11px">
         <div class="kpi"><div class="label">Нужно</div><div class="value" id="goalTargetAmount">0</div></div>
         <div class="kpi"><div class="label">В цели</div><div class="value blue" id="goalSavedAmount">0</div></div>
@@ -1917,24 +1946,28 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
       <div class="sub" id="goalGlobalBalance" style="margin-top:4px">—</div>
       <div class="goal-potential-box"><div class="goal-potential-main" id="goalPotentialText">—</div><div class="goal-potential-sub" id="goalPotentialSub">—</div></div>
       <div class="goal-saving-list" id="goalSavingList"></div>
-    </div>
-    <div class="card goal-distance">
-      <div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📏</span>Расстояние до цели</h2><span class="small muted" id="goalDistanceState">—</span></div>
+          
       <div class="goal-distance-grid">
         <div class="distance-kpi"><div class="label"><svg class="ui-icon"><use href="#i-clock"></use></svg>Осталось дней</div><div class="value" id="goalDistanceDays">—</div></div>
-        <div class="distance-kpi"><div class="label"><svg class="ui-icon"><use href="#i-money"></use></svg>Осталось денег</div><div class="value" id="goalDistanceMoney">—</div></div>
         <div class="distance-kpi"><div class="label"><svg class="ui-icon"><use href="#i-calendar"></use></svg>Нужно / месяц</div><div class="value" id="goalRequiredMonth">—</div></div>
         <div class="distance-kpi"><div class="label"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg>Темп / день</div><div class="value" id="goalActualRate">—</div></div>
       </div>
       <div class="tempo-alert" id="goalTempoAlert">Задай срок цели и начни фиксировать накопления — тогда система сравнит темп.</div>
+          </div>
     </div>
-    <div class="card goal-ai-card" id="goalAiCard">
+  <div class="card analytics-card" id="goalChartCard">
+      <div class="analytics-head"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📈</span>Как растёт капитал</h2><div class="analytics-sub">Линия — доступно к цели. Пунктир — нужный темп до срока.</div></div><span class="small muted" id="goalChartStatus">—</span></div>
+      <div class="lc-chart-wrap" id="goalChart"></div>
+      <div class="lc-legend"><span><i></i>Доступно к цели</span><span><i class="plan"></i>Нужный темп</span></div>
+    </div>
+  <div class="card goal-ai-card" id="goalAiCard">
       <div class="goal-ai-head"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🤖</span>AI-стратегия цели</h2><div class="goal-ai-status" id="goalAiState">План появится после задания цели.</div></div><button class="btn small primary" id="goalAiBtn"><svg class="ui-icon"><use href="#i-spark"></use></svg> Обновить</button></div>
       <div class="goal-ai-summary" id="goalAiSummary">AI покажет, что уже достигнуто и какие действия нужны дальше.</div>
       <div class="goal-ai-plan" id="goalAiPlan"></div>
     </div>
-    <div class="card"><div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🏆</span>Достигнуто</h2><button class="btn small" id="addAchBtn"><svg class="ui-icon"><use href="#i-plus"></use></svg> Результат</button></div><div class="stack" id="achievements" style="margin-top:10px"></div></div>
-  </div>
+  <div class="card"><div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🏆</span>Достигнуто</h2><button class="btn small" id="addAchBtn"><svg class="ui-icon"><use href="#i-plus"></use></svg> Результат</button></div><div class="stack" id="achievements" style="margin-top:10px"></div></div>
+  
+  <div class="card"><div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🎯</span>Другие цели</h2><div class="v-sub">Нажми на цель, чтобы изменить или пополнить</div></div></div><div class="v-goal-list" id="goalList"></div></div>
 </section>
 
 <section id="viewGoalEdit" class="view">
@@ -1972,24 +2005,22 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
       <button type="button" class="jl-pill blue" id="qTransfer"><svg class="ui-icon" aria-hidden="true"><use href="#i-transfer"></use></svg>Перевод</button>
     </div>
     <div class="card"><div class="budget-head"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🏦</span>Банки на расходы</h2><div class="v-sub">Ты сам решаешь, сколько на что тратить</div></div><button class="btn small" id="addBudgetBtn"><svg class="ui-icon"><use href="#i-plus"></use></svg> Банк</button></div><div class="budget-list" id="budgetList"></div></div>
-    <div class="jl-debt-block"><div class="row jl-section-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📉</span>Долг</h2><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div><div class="jl-debtplan" id="debtPlan"></div></div>
     <div class="card">
-      <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🧾</span>Последние операции</h2><div class="v-sub">← смахни операцию влево, чтобы удалить</div></div><button class="v-link" type="button" data-money-tab-go="tx">Все</button></div>
-      <div class="v-tx-list" id="mvRecent"></div>
-    </div>
-    <button class="jl-more-btn" type="button" data-more="moneyMore" aria-expanded="false" aria-controls="moneyMore"><span>Подробнее: графики и аналитика</span><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-down"></use></svg></button>
-    <div class="jl-more" id="moneyMore" hidden>
-      <div class="card">
         <div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📊</span>Доход и расход</h2><span class="v-sub" id="mvRange">—</span></div>
         <div class="v-seg sm" id="mvPeriods" style="margin-top:.7rem"><button type="button" data-mv-period="7" class="active">7 дней</button><button type="button" data-mv-period="30">30 дней</button><button type="button" data-mv-period="90">3 месяца</button><button type="button" data-mv-period="365">Год</button></div>
         <div class="v-chart" id="mvChart"></div>
         <div class="v-legend"><span><i style="--lc:var(--green)"></i>Доход</span><span><i style="--lc:var(--red)"></i>Расход</span><span><i class="line" style="--lc:var(--blue)"></i>Баланс</span></div>
       </div>
-      <div class="card analytics-card"><div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🍩</span>Куда уходят деньги</h2><span class="small muted">этот месяц</span></div>
+    <div class="card analytics-card"><div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🍩</span>Куда уходят деньги</h2><span class="small muted">этот месяц</span></div>
         <div class="donut-layout" style="margin-top:12px"><div class="donut" id="expenseDonut"><div class="donut-center" id="expenseDonutCenter">Нет данных</div></div><div class="chart-legend" id="expenseLegend"></div></div><div class="sub" id="expenseChartNote" style="margin-top:9px">Добавь расходы — распределение появится автоматически.</div>
         <h2 class="v-title" style="margin-top:18px"><span class="jl-emo" aria-hidden="true">💼</span>Откуда приходят</h2><div class="source-list" id="profitSourceList"></div><div class="sub" id="profitSourceNote" style="margin-top:9px">Источники появятся после первой записи дохода.</div>
       </div>
-      <div class="card"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📋</span>Долги подробно</h2><div id="debtSummary" style="margin-top:10px"></div><div class="debt-chart" id="debtChart" role="img" aria-label="Динамика долга по последним записям"></div><div class="debt-chart-note" id="debtChartNote"></div></div>
+    <div class="jl-debt-block"><div class="row jl-section-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📉</span>Долг</h2><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div><div class="jl-debtplan" id="debtPlan"></div></div>
+    <div class="card"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📋</span>История долга</h2><div id="debtSummary" style="margin-top:10px"></div><div class="debt-chart" id="debtChart" role="img" aria-label="Динамика долга по последним записям"></div><div class="debt-chart-note" id="debtChartNote"></div></div>
+
+    <div class="card">
+      <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🧾</span>Последние операции</h2><div class="v-sub">← смахни операцию влево, чтобы удалить</div></div><button class="v-link" type="button" data-money-tab-go="tx">Все</button></div>
+      <div class="v-tx-list" id="mvRecent"></div>
     </div>
   </div>
   <div class="money-pane" id="moneyPaneTx" hidden>
@@ -2068,7 +2099,7 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">65.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">66.0</span></div>
   </div>
 </section>
 
@@ -2399,7 +2430,7 @@ function keyDay(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1
 function validDate(d){const x=d instanceof Date?d:new Date(d);return !Number.isNaN(x.getTime())?x:null}
 
 function fmtDateTime(d){const x=validDate(d);return x?x.toLocaleString('ru-RU',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'}
-function fmtMoney(n){return Number(n||0).toLocaleString('ru-RU')+' '+(state.profile.currency||'сомони')}
+function fmtMoney(n){const v=Number(n)||0;return v.toLocaleString('ru-RU',{maximumFractionDigits:Math.abs(v)>=1000?0:2})+' '+(state.profile.currency||'сомони')}
 function timeToMin(v){const [h,m]=String(v).split(':').map(Number);return (Number(h)||0)*60+(Number(m)||0)}
 function nowMin(){const d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60}
 function fmtDuration(mins){mins=Math.max(0,Math.round(mins));const h=Math.floor(mins/60),m=mins%60;return h?`${h} ч ${String(m).padStart(2,'0')} мин`:`${m} мин`}
@@ -2469,6 +2500,7 @@ function syncMainGoalMirror(s=state){
 function normalize(s){
   const fromVersion=Number(s?.version)||0;
   if(fromVersion<57&&s&&typeof s==='object'&&(s.goal||Array.isArray(s.profits)))backupPreV57(s,'local');
+  if(s&&Array.isArray(s.runtimeErrors)){const lim=Date.now()-14*DAY_MS;s.runtimeErrors=s.runtimeErrors.filter(e=>Date.parse(e?.at)>lim).slice(0,20)} // old errors of fixed versions are not today's problems
   const hadWallet=!!(s.wallet&&typeof s.wallet==='object'&&Object.prototype.hasOwnProperty.call(s.wallet,'openingBalance'));
   s=merge(s,DEFAULT);s.version=58;s.settings=s.settings&&typeof s.settings==='object'?s.settings:clone(DEFAULT.settings);s.settings.fontScale=clamp(({0.98:1,1.06:1.1,1.12:1.2})[Number(s.settings.fontScale)]||Number(s.settings.fontScale)||1.1,1,1.22);
   s.wallet=s.wallet&&typeof s.wallet==='object'?s.wallet:{openingBalance:0};
@@ -3190,11 +3222,11 @@ function renderExpenseDonut(){
 }
 function renderProfitSources(){
   const list=$('profitSourceList');if(!list)return;
-  const map=new Map(PROFIT_SOURCES.map(s=>[s,0]));
-  for(const p of state.profits||[]){const raw=String(p.sourceGroup||p.source||'').trim();const k=normalizeProfitSource(raw);map.set(k,(map.get(k)||0)+(Number(p.amount)||0))}
-  const rows=PROFIT_SOURCES.map(k=>[k,map.get(k)||0]);const total=rows.reduce((a,[,v])=>a+v,0);
-  list.innerHTML=rows.map(([k,v])=>{const pct=total>0?Math.round(v/total*100):0;return `<div class="source-row"><div><div class="source-name"><span class="source-ico">${esc(PROFIT_ICONS[k]||'💠')}</span>${esc(k)}</div><div class="source-track"><i class="source-fill" style="width:${pct}%"></i></div></div><div class="source-val">${esc(fmtMoney(v))} <span class="small muted">${pct}%</span></div></div>`}).join('');
-  setText('profitSourceNote',total?`Три источника считаются из всех сохранённых поступлений: ${fmtMoney(total)}.`:'Три источника готовы к учёту: зарплата, фриланс и спортивная аналитика.');
+  const now=new Date(),y=now.getFullYear(),mo=now.getMonth(),map=new Map();
+  for(const p of state.profits||[]){const d=new Date(p.at);if(d.getFullYear()!==y||d.getMonth()!==mo)continue;const raw=String(p.sourceGroup||p.source||'').trim();let k=normalizeProfitSource(raw);if(!PROFIT_SOURCES.includes(k))k='Другое';map.set(k,(map.get(k)||0)+(Number(p.amount)||0))}
+  const rows=[...map.entries()].filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);const total=rows.reduce((a,[,v])=>a+v,0);
+  list.innerHTML=total?rows.map(([k,v])=>{const pct=Math.round(v/total*100);return `<div class="source-row"><div><div class="source-name"><span class="source-ico">${esc(PROFIT_ICONS[k]||'💠')}</span>${esc(k)}</div><div class="source-track"><i class="source-fill" style="width:${pct}%"></i></div></div><div class="source-val">${esc(fmtMoney(v))} <span class="small muted">${pct}%</span></div></div>`}).join(''):'<div class="v-empty">В этом месяце доходов ещё нет — нажми «+ Доход».</div>';
+  setText('profitSourceNote',total?`Всего доходов за месяц: ${fmtMoney(total)}.`:'');
 }
 function renderMoneyCharts(){renderExpenseDonut();renderProfitSources()}
 
@@ -3236,6 +3268,7 @@ function renderGoal(){
   const total=state.goal.milestones.length,done=state.goal.milestones.filter(m=>m.done).length,p=total?Math.round(done/total*100):0;
   setText('goalTitle',state.goal.title);setText('goalWhy',state.goal.why);setText('goalPct',p+'%');setWidth('goalBar',p+'%');setText('goalNext',state.goal.next);setText('goalCount',`${done} / ${total}`);
   const f=goalFinanceMetrics();
+  {const noT=!(Number(f.target)>0),em=$('goalMoneyEmpty'),bd=$('goalMoneyBody');if(em)em.hidden=!noT;if(bd)bd.hidden=noT;const gc=$('goalChartCard');if(gc)gc.hidden=noT;const sb=$('goalMoneySetBtn');if(sb)sb.onclick=()=>openGoalFinanceEdit()}
   setText('goalTargetAmount',fmtMoney(f.target));setText('goalSavedAmount',fmtMoney(f.saved));setText('goalCashAmount',fmtMoney(f.cash));setText('goalRemainingAmount',fmtMoney(f.remaining));setText('goalFinancePct',f.target?`${f.pct}%`:'—');
   setText('goalFinanceStatus',f.target?(f.completed?'Капитала достаточно — цель закрыта':`Собрано ${fmtMoney(Math.min(f.target,f.available))} из ${fmtMoney(f.target)}`):'Задай сумму — увидишь, сколько осталось');
   setText('goalGlobalBalance',`Касса: ${fmtMoney(f.cash)} · Общий капитал: ${fmtMoney(f.available)}`);
@@ -3467,7 +3500,7 @@ function aiSourceConsent(){
 function normalizeAIError(data,status){
   const raw=String(data?.error||data?.message||'').trim();
   if(status===401||status===403)return 'Нужен вход в Jamal Life. Войди в аккаунт и повтори запрос.';
-  if(status===429)return raw||'AI временно ограничен бесплатным лимитом. Попробуй позже.';
+  if(status===429||/quota|rate.?limit|exceeded/i.test(raw))return /[а-яё]/i.test(raw)?raw:'Бесплатный лимит Gemini на сегодня исчерпан. Он обновится около 12:00–13:00. Пока работает «Полный разбор» — он считает всё на телефоне сам.';
   if(status===503)return raw||'Gemini API-ключ ещё не настроен в Supabase Secrets.';
   return raw||('AI HTTP '+status);
 }
@@ -3508,7 +3541,7 @@ function openGeminiAnalysis(){
   openModal('<div class="close-row"><div><div class="eyebrow">Jamal Life AI</div><h2>Анализ моей жизни</h2><div class="sub">AI получает только выбранные данные из твоего аккаунта. Запрос запускается только вручную.</div></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="card" style="margin-top:12px;padding:13px;background:var(--soft)"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Что использовать</div><div class="stack" style="margin-top:8px"><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span><input id="aiGoal" type="checkbox" '+(consent.goal?'checked':'')+'> Цель и её прогресс</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span><input id="aiMoney" type="checkbox" '+(consent.money?'checked':'')+'> Деньги, доходы, расходы и долги</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span><input id="aiReports" type="checkbox" '+(consent.reports?'checked':'')+'> Итоги и этапы дня</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-note"></use></svg></span><input id="aiNotes" type="checkbox" '+(consent.notes?'checked':'')+'> Заметки (последние 15)</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg></span><input id="aiWeb" type="checkbox" '+(state.ai?.webSearch?'checked':'')+'> Проверять актуальные внешние факты через Google</label></div><div class="sub" style="margin-top:8px">Основные данные сервер читает из твоей строки life_state в Supabase. Полный JSON состояния из браузера не отправляется.</div></div><div style="margin-top:10px"><button class="btn primary" id="aiRunBtn" style="width:100%"><svg class="ui-icon"><use href="#i-spark"></use></svg> Запустить AI-анализ</button></div><div class="ai-result" id="aiResult" style="margin-top:12px"></div>');
   $('closeModalBtn').onclick=closeModal;
   $('aiWeb').onchange=()=>{state.ai.webSearch=$('aiWeb').checked;saveState()};
- $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult');$('aiRunBtn').disabled=true;box.innerHTML='<div class="empty">Gemini анализирует выбранные данные…</div>';try{const data=await callAI({scope:c}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item"><b>Результат Gemini</b><div style="white-space:pre-wrap;line-height:1.55">'+esc(entry.result)+'</div>'+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item"><b>AI сейчас недоступен</b><div>'+esc(e.message||e)+'</div><div style="margin-top:8px"><button class="btn small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Открыть локальный анализ</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{$('aiRunBtn').disabled=false}};
+ $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult');$('aiRunBtn').disabled=true;box.innerHTML='<div class="empty">Gemini анализирует выбранные данные…</div>';try{const data=await callAI({scope:c}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item"><b>Результат Gemini</b><div style="white-space:pre-wrap;line-height:1.55">'+esc(entry.result)+'</div>'+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Gemini сейчас не ответил</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{$('aiRunBtn').disabled=false}};
 }
 function validateDaySteps(){
   const steps=state.day.steps;
@@ -3545,9 +3578,13 @@ async function refreshAIHealth(force=false){
   el.textContent='AI: проверка…';
   aiHealthPromise=(async()=>{
     try{
-      const data=await callAI({ping:true});
+      // free check (no Gemini request): the function is up and the key is set
+      const token=await getAISessionToken();
+      const res=await fetch(AI_FUNCTION_URL,{method:'GET',headers:{'apikey':SUPABASE_CONFIG.publishableKey,'Authorization':'Bearer '+token},cache:'no-store'});
+      const data=await res.json().catch(()=>({}));
       aiHealthAt=Date.now();
-      el.textContent='AI в сети · '+(data?.model||AI_MODEL);
+      if(!res.ok)throw new Error(normalizeAIError(data,res.status));
+      el.textContent=data?.configured?'AI подключён · выбирает доступную модель сам':'AI: ключ Gemini не задан';
     }catch(e){
       aiHealthAt=Date.now();
       const msg=String(e?.message||e||'');
@@ -3711,6 +3748,12 @@ function closeDay(){
 }
 
 /* ===== V59: разбор недели ===== */
+function localWeekText(){
+  const w=weekStats(),cur=state.profile.currency||'сомони',fm=v=>Math.round(v).toLocaleString('ru-RU')+' '+cur;
+  const strong=w.closed>=5?`СИЛЬНАЯ СТОРОНА — закрыто ${w.closed} из 7 дней: ритм держится.`:w.inc>0?`СИЛЬНАЯ СТОРОНА — за неделю пришло ${fm(w.inc)}.`:'СИЛЬНАЯ СТОРОНА — ты ведёшь учёт, это основа контроля.';
+  const weak=w.closed<4?`СЛАБОЕ МЕСТО — закрыто только ${w.closed} из 7 дней: без итогов дня план теряется.`:w.out>w.inc&&w.inc>0?`СЛАБОЕ МЕСТО — расход ${fm(w.out)} больше дохода ${fm(w.inc)}.`:'СЛАБОЕ МЕСТО — мало записей о тратах: картина денег неполная.';
+  const step=w.closed<5?'ШАГ НА НЕДЕЛЮ — закрывать день каждый вечер в 21:30, 7 из 7.':'ШАГ НА НЕДЕЛЮ — записывать каждый расход в тот же час, без исключений.';
+  return strong+'\n'+weak+'\n'+step}
 function weekKey(d=new Date()){const x=new Date(d);x.setHours(12,0,0,0);const wd=(x.getDay()+6)%7;x.setDate(x.getDate()-wd);return keyDay(x)}
 function nextWeekReviewAt(){
   const [hh,mm]=WEEK_REVIEW_TIME.split(':').map(Number),d=new Date();d.setHours(hh,mm,0,0);d.setDate(d.getDate()+((7-d.getDay())%7));
@@ -3750,8 +3793,8 @@ async function runWeekReview(){
     state.ai.weekly[weekKey()]={at:new Date().toISOString(),text};
     const keys=Object.keys(state.ai.weekly).sort();for(const k of keys.slice(0,Math.max(0,keys.length-12)))delete state.ai.weekly[k];
     saveState();scheduleNativeTasks();if(box)box.dataset.sig='';renderWeek();toast('Разбор недели готов');
-  }catch(e){if(box){box.dataset.sig='err';box.textContent=String(e?.message||e)}toast('AI сейчас недоступен',String(e?.message||e))}
-  finally{btn.disabled=false;renderWeek()}
+  }catch(e){const msg=String(e?.message||e);if(box){box.dataset.sig='err';box.textContent=localWeekText()+'\n\n⏳ '+msg}toast('AI не ответил — показал разбор без AI',msg.slice(0,90))}
+  finally{btn.disabled=false;if(box?.dataset.sig!=='err')renderWeek()}
 }
 
 /* ===== V59: план выплаты долга ===== */
@@ -3884,9 +3927,6 @@ function openHabitEditor(id=''){
 }
 
 /* ===== V60: «Подробнее» ===== */
-function setMore(btn,open){const el=$(btn.dataset.more);if(!el)return;el.hidden=!open;btn.setAttribute('aria-expanded',String(open));const lbl=btn.querySelector('span');if(lbl){lbl.dataset.label=lbl.dataset.label||lbl.textContent;lbl.textContent=open?'Скрыть':lbl.dataset.label}try{localStorage.setItem('JL_MORE_'+btn.dataset.more,open?'1':'0')}catch(e){}
-  if(open){if(btn.dataset.more==='moneyMore')renderMoney();else renderGoal()}}
-function bindMore(){$$('[data-more]').forEach(b=>{let open=false;try{open=localStorage.getItem('JL_MORE_'+b.dataset.more)==='1'}catch(e){}setMore(b,open);b.onclick=()=>setMore(b,b.getAttribute('aria-expanded')!=='true')})}
 // every tap on a button makes its icon "answer"
 document.addEventListener('click',e=>{const b=e.target.closest?.('button,[role="button"],.v-row');if(!b||!b.querySelector('.ui-icon'))return;b.classList.remove('jl-tap');void b.offsetWidth;b.classList.add('jl-tap');setTimeout(()=>b.classList.remove('jl-tap'),500)},true);
 
@@ -4062,7 +4102,7 @@ async function openMoveDevice(){
 
 /* ===== V63: банки — свои, с эмодзи; категории расходов из банков ===== */
 const BANK_STICKERS=[['🍔','Еда'],['🛒','Продукты'],['🍽️','Кафе'],['☕','Кофе'],['🎉','Развлечения','Досуг'],['🎮','Игры'],['🎬','Кино'],['🚕','Транспорт'],['⛽','Бензин'],['🏠','Дом'],['💡','Коммуналка','Свет, газ'],['📱','Связь'],['👕','Одежда'],['💊','Здоровье'],['🎓','Учёба'],['📚','Книги'],['🎁','Подарки'],['👨‍👩‍👦','Семья'],['🕌','Садака'],['⚽','Спорт'],['💈','Красота'],['🐾','Питомцы'],['🧾','Платежи'],['💰','Копилка']];
-const BANK_EMOJIS=BANK_STICKERS.map(x=>x[0]);
+
 function bankIcon(b){return b?.emoji||EXPENSE_ICONS[b?.name]||'🏦'}
 function catIcon(name){const b=(state.budgets||[]).find(x=>String(x.name).toLowerCase()===String(name||'').toLowerCase());return b?bankIcon(b):EXPENSE_ICONS[name]||''}
 function expenseCats(){const base=EXPENSE_QUICK.filter(x=>x.value!=='Другое'),other=EXPENSE_QUICK.find(x=>x.value==='Другое');const banks=(state.budgets||[]).filter(b=>!base.some(x=>x.value.toLowerCase()===String(b.name).toLowerCase())).map(b=>({value:b.name,icon:bankIcon(b),label:b.name}));return [...banks,...base.map(x=>{const b=(state.budgets||[]).find(y=>String(y.name).toLowerCase()===x.value.toLowerCase());return b?{...x,icon:bankIcon(b)}:x}),other]}
@@ -4590,7 +4630,7 @@ function bind(){
   ['rDone','rBlock','rTomorrow'].forEach(id=>$(id).addEventListener('input',()=>{const r=dayReport();r.done=$('rDone').value;r.block=$('rBlock').value;r.tomorrow=$('rTomorrow').value;r.savedAt=r.savedAt||new Date().toISOString();queueAutosave();$('reportSaved').textContent='Черновик сохранён'}));
   $('saveReportBtn').onclick=closeDay;
   $('mcRangeBtn')&&($('mcRangeBtn').onclick=()=>{mcRangeMode=!mcRangeMode;$('mcRangeBtn').classList.toggle('active',mcRangeMode);if(mcRangeMode)toast('Выбери первый день периода','потом последний');});
-  $$('[data-mc-quick]').forEach(b=>b.onclick=()=>{const d=new Date(),q=b.dataset.mcQuick;let from,to;if(q==='week'){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));from=keyDay(x);to=keyDay(d)}else if(q==='month'){from=keyDay(new Date(d.getFullYear(),d.getMonth(),1));to=keyDay(d)}else{from=keyDay(new Date(d.getFullYear(),d.getMonth()-1,1));to=keyDay(new Date(d.getFullYear(),d.getMonth(),0))}const f=new Date(from+'T12:00:00');mcYear=f.getFullYear();mcMonth=f.getMonth();mcRangeMode=false;mcSetRange(from,to)});$('setEvery2h')?.addEventListener('change',e=>{state.settings.every2h=e.target.checked;saveState();scheduleNative2h();renderFreePlan();toast(e.target.checked?'Напоминания каждые 2 часа включены':'Напоминания каждые 2 часа выключены')});$('addHabitBtn').onclick=()=>openHabitEditor();$('setBackupRow').onclick=openBackups;$('setMoveRow').onclick=openMoveDevice;bindMore();$('wkRun').onclick=runWeekReview;
+  $$('[data-mc-quick]').forEach(b=>b.onclick=()=>{const d=new Date(),q=b.dataset.mcQuick;let from,to;if(q==='week'){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));from=keyDay(x);to=keyDay(d)}else if(q==='month'){from=keyDay(new Date(d.getFullYear(),d.getMonth(),1));to=keyDay(d)}else{from=keyDay(new Date(d.getFullYear(),d.getMonth()-1,1));to=keyDay(new Date(d.getFullYear(),d.getMonth(),0))}const f=new Date(from+'T12:00:00');mcYear=f.getFullYear();mcMonth=f.getMonth();mcRangeMode=false;mcSetRange(from,to)});$('setEvery2h')?.addEventListener('change',e=>{state.settings.every2h=e.target.checked;saveState();scheduleNative2h();renderFreePlan();toast(e.target.checked?'Напоминания каждые 2 часа включены':'Напоминания каждые 2 часа выключены')});$('addHabitBtn').onclick=()=>openHabitEditor();$('setBackupRow').onclick=openBackups;$('setMoveRow').onclick=openMoveDevice;$('wkRun').onclick=runWeekReview;
   $('setBiometric')?.addEventListener('change',e=>{try{const ok=window.AndroidBridge.setBiometric(e.target.checked);if(e.target.checked&&!ok){e.target.checked=false;toast('Отпечаток недоступен','Добавь отпечаток в настройках телефона.')}else toast(e.target.checked?'Вход по отпечатку включён':'Вход по отпечатку выключен',e.target.checked?'При следующем открытии приложение спросит отпечаток.':'')}catch(err){e.target.checked=false}});
   $('historyBtn').onclick=openReportHistory;$('lifeAnalysisBtn').onclick=openLifeAnalysis;$('aiAnalysisBtn').onclick=openGeminiAnalysis;
   $('dayMode').onchange=()=>{const d=dailyState();d.mode=$('dayMode').value;state.dayMode=d.mode;saveState();renderToday()};

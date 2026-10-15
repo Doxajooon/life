@@ -538,18 +538,23 @@ await test("Привычки: отметка, серия и объединени
   await A.ctx.close(); await B.ctx.close();
 });
 
-await test("Экраны «Деньги» и «Цель»: главное сверху, остальное в «Подробнее»", async () => {
+await test("Экраны «Деньги» и «Цель»: всё видно сразу, без «Скрыть»; каждый график рисуется", async () => {
   const { ctx, page } = await device(makeCloud());
   const r = await page.evaluate(() => {
-    showView("viewMoney"); const mb = document.querySelector('[data-more="moneyMore"]');
-    const hiddenBefore = document.getElementById("moneyMore").hidden; mb.click();
-    const shown = !document.getElementById("moneyMore").hidden && document.getElementById("mvChart").innerHTML.length > 0;
+    const now = new Date().toISOString();
+    state.profits.push({ id: "p1", amount: 5000, sourceGroup: "Зарплата", at: now }); state.expenses.push({ id: "e1", amount: 300, category: "Еда", at: now }); saveState(); renderAll();
+    showView("viewMoney");
+    const money = { collapsers: document.querySelectorAll("[data-more], .jl-more-btn").length, chart: document.getElementById("mvChart").innerHTML.length > 0, donut: !/Нет данных|Нет расходов/.test(document.getElementById("expenseDonutCenter").textContent), sources: document.querySelectorAll("#profitSourceList .source-row").length, zeroRows: [...document.querySelectorAll("#profitSourceList .source-val")].filter(x => /^0 /.test(x.textContent)).length, debtChart: !!document.getElementById("debtChart") };
     showView("viewGoal");
     const goalText = document.getElementById("viewGoal").innerText;
     const title = state.goal.title, count = goalText.split(title).length - 1;
-    return { hiddenBefore, shown, label: mb.textContent.trim(), noAnalysis: !document.getElementById("financeAnalysis"), count, mainInList: !!document.querySelector('#goalList [data-goal-open="' + state.goals.find(g => g.main)?.id + '"]') };
+    state.goal.finance.targetAmount = 0; saveState(); renderAll(); showView("viewGoal");
+    const empty = !document.getElementById("goalMoneyEmpty").hidden && document.getElementById("goalMoneyBody").hidden;
+    state.goal.finance.targetAmount = 20000; saveState(); renderAll(); showView("viewGoal");
+    const filled = document.getElementById("goalMoneyEmpty").hidden && !document.getElementById("goalMoneyBody").hidden;
+    return { money, count, empty, filled, noAnalysis: !document.getElementById("financeAnalysis"), mainInList: !!document.querySelector('#goalList [data-goal-open="' + state.goals.find(g => g.main)?.id + '"]') };
   });
-  assert.deepEqual(r, { hiddenBefore: true, shown: true, label: "Скрыть", noAnalysis: true, count: 1, mainInList: false });
+  assert.deepEqual(r, { money: { collapsers: 0, chart: true, donut: true, sources: 1, zeroRows: 0, debtChart: true }, count: 1, empty: true, filled: true, noAnalysis: true, mainInList: false });
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
