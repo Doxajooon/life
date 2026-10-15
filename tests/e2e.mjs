@@ -21,7 +21,7 @@ async function test(name, fn) {
 }
 
 // ---------- static server for the app ----------
-const types = { ".html": "text/html", ".js": "text/javascript", ".svg": "image/svg+xml", ".png": "image/png", ".webmanifest": "application/manifest+json" };
+const types = { ".woff2": "font/woff2", ".wav": "audio/wav", ".html": "text/html", ".js": "text/javascript", ".svg": "image/svg+xml", ".png": "image/png", ".webmanifest": "application/manifest+json" };
 const server = http.createServer((req, res) => {
   let p = path.join(ROOT, decodeURIComponent(req.url.split("?")[0]));
   if (p.endsWith("/")) p += "index.html";
@@ -798,6 +798,24 @@ await test("Новый банк из стикеров без списка под
   assert.ok(saved && saved.icon === "car" && saved.color === "green" && saved.targetAmount === 50000);
   const h = await page.evaluate(() => { showView("viewToday"); renderToday(); return { now: document.getElementById("currentAction").textContent, quote: document.getElementById("motivationText").textContent, details: document.getElementById("currentDetails").children.length }; });
   assert.match(h.now, /Работа/); assert.ok(!/Сегодня:/.test(h.quote), "quote must not carry the task line"); assert.equal(h.details, 0);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Шрифт выбирается в настройках и сохраняется; звук Jamal Glass загружается", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(async () => {
+    const def = document.documentElement.dataset.font;
+    showView("viewSettings");
+    const sel = document.getElementById("setFont"); sel.value = "nunito"; sel.dispatchEvent(new Event("change"));
+    const after = document.documentElement.dataset.font, saved = state.settings.font;
+    const loaded = await document.fonts.load('16px "Nunito"', "Привет").then(f => f.length > 0);
+    const res = await fetch("sounds/jamal-glass.wav"); const buf = await res.arrayBuffer();
+    return { def, after, saved, loaded, wav: res.ok && buf.byteLength > 100000 };
+  });
+  assert.deepEqual(r, { def: "manrope", after: "nunito", saved: "nunito", loaded: true, wav: true });
+  await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.font), "nunito");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

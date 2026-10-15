@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "66.0.0");
-assert.match(gradle, /versionCode 660\b/); assert.match(gradle, /versionName '66\.0'/);
-assert.match(csproj, /<Version>66\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V66'), "app version must be V66 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v66-0"), "service worker cache must be V66");
+assert.equal(pkg.version, "67.0.0");
+assert.match(gradle, /versionCode 670\b/); assert.match(gradle, /versionName '67\.0'/);
+assert.match(csproj, /<Version>67\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V67'), "app version must be V67 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v67-0"), "service worker cache must be V67");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -78,4 +78,7 @@ assert.ok(html.includes("if(synced)await wipeLocalData()"), "logout must clear p
 assert.ok(html.includes("function renderRhythm") && html.includes("function renderDayStrip") && html.includes("function renderHabitWeek"), "living rhythm, day strip and habit week chart");
 assert.ok(existsSync(new URL("../fonts/inter-cyrillic.woff2", import.meta.url)) && html.includes('url("fonts/inter-cyrillic.woff2")') && sw.includes("inter-cyrillic.woff2"), "Inter font must ship with the app (offline)");
 assert.ok(!html.includes("data-more=") && !html.includes('class="jl-more"'), "Money and Goal show everything — no hidden «Подробнее» blocks");
-console.log("JAMAL_LIFE_V66_STATIC_QA_OK");
+assert.ok(existsSync(new URL("../sounds/jamal-glass.wav", import.meta.url)) && html.includes("sounds/jamal-glass.wav") && sw.includes("jamal-glass.wav") && notif.includes('"jamal_life_glass"'), "the Jamal Glass tone ships to web and Android (new channel so phones pick it up)");
+for (const f of ["manrope", "nunito", "inter"]) assert.ok(existsSync(new URL(`../fonts/${f}-cyrillic.woff2`, import.meta.url)) && sw.includes(`${f}-cyrillic.woff2`), "font missing: " + f);
+assert.ok(html.includes('id="setFont"') && html.includes("function applyFont"), "font choice in settings");
+console.log("JAMAL_LIFE_V67_STATIC_QA_OK");

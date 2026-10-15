@@ -1359,16 +1359,12 @@ body{line-height:1.45}
 @keyframes jlGlowUp{0%{box-shadow:0 0 0 0 rgba(34,197,94,0)}25%{box-shadow:0 0 0 4px rgba(34,197,94,.45),0 0 26px rgba(34,197,94,.45);border-color:var(--green)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
 @keyframes jlGlowDown{0%{box-shadow:0 0 0 0 rgba(245,158,11,0)}25%{box-shadow:0 0 0 4px rgba(245,158,11,.45),0 0 26px rgba(245,158,11,.4);border-color:var(--orange)}100%{box-shadow:0 0 0 0 rgba(245,158,11,0)}}
 /* living charts: bars grow, lines draw, donut turns in */
-.vc-bar{transform-box:fill-box;transform-origin:50% 100%;animation:jlBarUp .8s cubic-bezier(.2,.8,.2,1) backwards}
-.vc-line,.lc-actual{stroke-dasharray:4000;stroke-dashoffset:0;animation:jlDraw2 1.4s .15s cubic-bezier(.65,0,.35,1) backwards}
 .lc-plan{animation:jlFade .8s .5s ease backwards}
-.donut{animation:jlDonut 1s cubic-bezier(.34,1.56,.64,1) backwards}
 .tm-day i{transform-origin:50% 100%;animation:jlBarUp .7s cubic-bezier(.2,.8,.2,1) backwards}
 .debt-bar{transform-origin:50% 100%;animation:jlBarUp .8s cubic-bezier(.2,.8,.2,1) backwards}
-@keyframes jlBarUp{0%{transform:scaleY(0)}100%{transform:scaleY(1)}}
-@keyframes jlDraw2{0%{stroke-dashoffset:4000}100%{stroke-dashoffset:0}}
+
+
 @keyframes jlFade{0%{opacity:0}100%{opacity:1}}
-@keyframes jlDonut{0%{transform:rotate(-120deg) scale(.6);opacity:0}100%{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.jl-emo,.vc-bar,.vc-line,.lc-actual,.lc-plan,.donut,.tm-day i,.debt-bar,.jl-bank.glow-up,.jl-bank.glow-down,.v-task.soon .jl-task-bar{animation:none!important}}
 
 /* ===== V61.1: phone, tablet and PC ===== */
@@ -1676,7 +1672,16 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
    headings a step bigger, running text a step smaller ===== */
 @font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:url("fonts/inter-cyrillic.woff2") format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
 @font-face{font-family:"Inter";font-style:normal;font-weight:100 900;font-display:swap;src:url("fonts/inter-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-html,body,button,input,select,textarea,.note-title,.note-time,.note-body,.lc-axis,.v-chart .vc-axis{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif!important}
+@font-face{font-family:"Manrope";font-style:normal;font-weight:200 1000;font-display:swap;src:url("fonts/manrope-cyrillic.woff2") format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Manrope";font-style:normal;font-weight:200 1000;font-display:swap;src:url("fonts/manrope-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url("fonts/nunito-cyrillic.woff2") format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Nunito";font-style:normal;font-weight:200 1000;font-display:swap;src:url("fonts/nunito-latin.woff2") format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--jl-font:"Manrope","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+html[data-font="inter"]{--jl-font:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+html[data-font="nunito"]{--jl-font:"Nunito","Inter",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+html,body,button,input,select,textarea,.note-title,.note-time,.note-body,.lc-axis,.v-chart .vc-axis,.jl-quote blockquote{font-family:var(--jl-font)!important}
+html:not([data-font="inter"]) body{letter-spacing:0}
+html[data-font="manrope"] body{font-weight:500}html[data-font="manrope"] .v-sub,html[data-font="manrope"] small{font-weight:500}
 body{font-size:.94rem;letter-spacing:-.003em;font-feature-settings:"cv11","ss01";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .v-h1{font-size:1.75rem!important;font-weight:700;letter-spacing:-.025em}
 #viewGoal .v-head .v-h1,#viewMoney .v-head .v-h1,.v-topline .v-h1{font-size:1.5rem!important}
@@ -1690,7 +1695,7 @@ b,strong{font-weight:600}
 /* Today hero: the stage is a calm headline, not a banner */
 .jl-now-title{font-size:1.15rem!important;font-weight:700!important;line-height:1.35!important;margin-top:6px}
 .jl-now-meta,.jl-now-foot{font-size:.82rem!important}
-.jl-quote blockquote{font-family:"Inter",system-ui,sans-serif!important;font-style:normal!important;font-size:.98rem!important;font-weight:450;line-height:1.65!important}
+.jl-quote blockquote{font-style:normal!important;font-size:.98rem!important;font-weight:450;line-height:1.65!important}
 .jl-quote figcaption{font-size:.78rem!important;font-weight:500!important}
 /* AI failure card */
 .jl-ai-fail b{display:block;margin-bottom:6px}
@@ -1709,6 +1714,28 @@ b,strong{font-weight:600}
 .jl-goal-money-card .goal-finance-kpis .kpi,.jl-goal-money .distance-kpi{min-width:0}
 .jl-goal-money .distance-kpi .value{font-size:1rem!important;overflow-wrap:anywhere}
 .jl-goal-money .distance-kpi .label{font-size:.7rem!important}
+
+/* ===== V67 living charts and lists ===== */
+.lc-actual,.vc-line{stroke-dasharray:1;stroke-dashoffset:0;animation:jlDraw 1.3s .15s cubic-bezier(.4,0,.2,1) backwards}
+@keyframes jlDraw{from{stroke-dashoffset:1}}
+.vc-bar{transform-box:fill-box;transform-origin:50% 100%;animation:jlBarUp .7s cubic-bezier(.2,.8,.2,1) backwards}
+.vc-bar:nth-of-type(2n){animation-delay:.05s}.vc-bar:nth-of-type(3n){animation-delay:.1s}.vc-bar:nth-of-type(5n){animation-delay:.15s}
+@keyframes jlBarUp{from{transform:scaleY(0)}}
+.donut{animation:jlDonutIn .9s cubic-bezier(.2,.8,.2,1) backwards}
+@keyframes jlDonutIn{from{transform:rotate(-90deg) scale(.7);opacity:0}}
+.donut-center{animation:jlDonutIn .9s cubic-bezier(.2,.8,.2,1) reverse backwards}
+.source-fill,.budget-fill,.jl-track .auto-fill,.dp-track i{transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.legend-row,.source-row,.jl-deep-cat{animation:jlRowIn .45s cubic-bezier(.2,.8,.2,1) backwards}
+.legend-row:nth-child(2),.source-row:nth-child(2){animation-delay:.05s}.legend-row:nth-child(3),.source-row:nth-child(3){animation-delay:.1s}.legend-row:nth-child(4){animation-delay:.15s}.legend-row:nth-child(n+5){animation-delay:.2s}
+/* cards further down the page appear as they scroll in (no script, runs on the compositor) */
+@supports (animation-timeline:view()){
+  .view.active>.card:nth-child(n+4) .v-title,.view.active .money-pane>.card:nth-child(n+3) .v-title{animation:jlTitleIn linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
+  @keyframes jlTitleIn{from{opacity:.2;transform:translateX(-10px)}}
+}
+/* every tappable thing answers the finger */
+.jl-chip,.jl-pill,.btn,.v-add,.jl-icon-btn,.ring-item,.v-row,.v-goal-item,.jl-stickers button,.ge-icons button,.ge-colors button{-webkit-tap-highlight-color:transparent}
+.btn:active,.jl-pill:active,.v-add:active,.jl-icon-btn:active,.v-row:active,.v-goal-item:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){.lc-actual,.vc-line,.vc-bar,.donut,.donut-center,.legend-row,.source-row,.jl-deep-cat{animation:none!important}.view.active .v-title{animation:none!important}}
 </style>
 
 
@@ -1787,7 +1814,7 @@ b,strong{font-weight:600}
   <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="authGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0"/><stop offset=".6" stop-color="#f97316" stop-opacity=".5"/><stop offset="1" stop-color="#9a3412" stop-opacity=".15"/></linearGradient><linearGradient id="authRidge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3a5f"/><stop offset="1" stop-color="#0b1426"/></linearGradient></defs><rect x="0" y="36" width="400" height="150" fill="url(#authGlow)"/><path d="M0 320V150l38-30 26 18 48-62 40 48 30-26 46 54 36-34 52 44 44-28 40 26v130z" fill="#3b3f62" opacity=".8"/><path d="M0 320V190l56-34 40 28 52-46 54 52 44-30 60 42 38-22 56 30v110z" fill="url(#authRidge)"/><path d="M0 320v-70l74-30 62 24 68-34 70 30 64-22 62 22v80z" fill="#070e1c"/></svg></div>
   <div class="auth-box">
     <div class="auth-crown"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg></div>
-    <h1 class="auth-title">Jamal Life <span>V66</span></h1>
+    <h1 class="auth-title">Jamal Life <span>V67</span></h1>
     <div class="auth-intro">Контролируй жизнь<br>Достигай цели<br>Будь лучше каждый день</div>
     <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="Email"></div></div>
     <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Пароль"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
@@ -1798,7 +1825,7 @@ b,strong{font-weight:600}
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V66</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V67</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -2083,6 +2110,7 @@ b,strong{font-weight:600}
     <button class="v-row" type="button" id="setLangRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-globe"></use></svg></span><span class="v-row-main"><b>Язык</b><small>Язык интерфейса</small></span><span class="v-row-val">Русский</span></button>
     <button class="v-row" type="button" id="setModeRow"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-layout"></use></svg></span><span class="v-row-main"><b>Режим</b><small>Мобильный или ПК</small></span><span class="v-row-val"><span id="setModeVal">—</span><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <div class="v-row"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-text"></use></svg></span><span class="v-row-main"><b>Размер текста</b><small>Масштаб нового интерфейса</small></span><select id="setFontScale" aria-label="Размер текста"><option value="1">Мелкий</option><option value="1.1">Обычный</option><option value="1.2">Крупный</option></select></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-text"></use></svg></span><span class="v-row-main"><b>Шрифт</b><small>Какой приятнее глазам</small></span><select id="setFont" aria-label="Шрифт"><option value="manrope">Manrope — мягкий</option><option value="nunito">Nunito — округлый</option><option value="inter">Inter — строгий</option></select></div>
   </div>
   <div class="v-group-title">Уведомления</div>
   <div class="v-group">
@@ -2099,7 +2127,7 @@ b,strong{font-weight:600}
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">66.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">67.0</span></div>
   </div>
 </section>
 
@@ -2160,7 +2188,7 @@ const DEFAULT={
   version:58,
   profile:{name:'',currency:'сомони',createdAt:''},
   wallet:{openingBalance:0},
-  settings:{theme:'dark',preMinutes:10,notifications:true,wakeTime:'06:30',every2h:true,fontScale:1.1,lang:'ru',notifyTasks:true,notifyFinance:true,notifyGoals:true,sound:true},
+  settings:{theme:'dark',preMinutes:10,notifications:true,wakeTime:'06:30',every2h:true,fontScale:1.1,font:'manrope',lang:'ru',notifyTasks:true,notifyFinance:true,notifyGoals:true,sound:true},
   ai:{endpoint:'https://riqmwueobjazfnhvvumy.supabase.co/functions/v1/life-control-ai',model:'gemini-3.6-flash',enabled:true,webSearch:false,lastAnalysisAt:'',history:[],consent:{goal:true,money:true,reports:true,notes:false}},
   income:4500,
   runtimeErrors:[],
@@ -2688,17 +2716,22 @@ function initLayoutMode(){
   let t=0;const re=()=>{clearTimeout(t);t=setTimeout(()=>{if(layoutChoice()==='auto')applyLayoutMode('auto',false)},120)};
   window.addEventListener('resize',re);window.addEventListener('orientationchange',re);
 }
-function setTheme(){try{if(localStorage.getItem('LIFE_CONTROL_DESIGN_V56')!=='1'){state.settings=state.settings||{};state.settings.theme='dark';localStorage.setItem('LIFE_CONTROL_DESIGN_V56','1')}}catch(e){}const fontScale=clamp(Number(state.settings?.fontScale)||1.1,1,1.22);document.documentElement.style.setProperty('--font-scale',String(fontScale));document.documentElement.style.fontSize=(16*fontScale).toFixed(2)+'px';const darkSwitch=$('setDarkTheme');if(darkSwitch)darkSwitch.checked=state.settings.theme==='dark';const dark=state.settings.theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#081120':'#f3f6fb');try{if(window.AndroidBridge&&AndroidBridge.setTheme)AndroidBridge.setTheme(!!dark)}catch(e){}}
+function applyFont(){const f=['manrope','nunito','inter'].includes(state.settings?.font)?state.settings.font:'manrope';if(document.documentElement.dataset.font!==f)document.documentElement.dataset.font=f}
+function setTheme(){applyFont();try{if(localStorage.getItem('LIFE_CONTROL_DESIGN_V56')!=='1'){state.settings=state.settings||{};state.settings.theme='dark';localStorage.setItem('LIFE_CONTROL_DESIGN_V56','1')}}catch(e){}const fontScale=clamp(Number(state.settings?.fontScale)||1.1,1,1.22);document.documentElement.style.setProperty('--font-scale',String(fontScale));document.documentElement.style.fontSize=(16*fontScale).toFixed(2)+'px';const darkSwitch=$('setDarkTheme');if(darkSwitch)darkSwitch.checked=state.settings.theme==='dark';const dark=state.settings.theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#081120':'#f3f6fb');try{if(window.AndroidBridge&&AndroidBridge.setTheme)AndroidBridge.setTheme(!!dark)}catch(e){}}
 function toast(title,body=''){clearTimeout(toastTimer);$('toast').innerHTML=`<strong>${esc(title)}</strong>${body?`<div>${esc(body)}</div>`:''}`;$('toast').classList.add('show');toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3600)}
 function logNotice(title,body,kind='tasks',read=false){state.notificationsLog.unshift({id:uid(),title,body,kind,read:!!read,at:new Date().toISOString()});state.notificationsLog=state.notificationsLog.slice(0,80);saveState();updateBell();if(currentView==='viewNotifications')renderNotifications()}
 let notificationAudioCtx=null;function audioCtx(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;notificationAudioCtx=notificationAudioCtx||new AC();if(notificationAudioCtx.state==='suspended')notificationAudioCtx.resume().catch(()=>{});return notificationAudioCtx}
-let _lastChimeAt=0;
+let _lastChimeAt=0,_glassBuf=null,_glassLoading=null;
+function loadGlass(){const ctx=audioCtx();if(!ctx||_glassBuf||_glassLoading)return _glassLoading;_glassLoading=fetch('sounds/jamal-glass.wav').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,no)=>ctx.decodeAudioData(b,ok,no))).then(buf=>{_glassBuf=buf}).catch(()=>{}).finally(()=>{_glassLoading=null});return _glassLoading}
 /* Jamal chime: a soft ascending major arpeggio (E5 · G#5 · B5 · E6) with bell partials and a short echo. */
 function playNotificationSound(force=false){
   if(!force&&state.settings?.sound===false)return;
   const now=Date.now();if(now-_lastChimeAt<1200)return;_lastChimeAt=now;
   try{
     const ctx=audioCtx();if(!ctx)return;
+    // «Jamal Glass» — the same soft glassy tone as on Android (sounds/jamal-glass.wav)
+    if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
+    loadGlass();
     const t0=ctx.currentTime+.03,out=ctx.createGain(),echo=ctx.createDelay(),fb=ctx.createGain();
     out.gain.value=.5;echo.delayTime.value=.13;fb.gain.value=.2;
     out.connect(ctx.destination);out.connect(echo);echo.connect(fb);fb.connect(ctx.destination);
@@ -2714,7 +2747,7 @@ function playNotificationSound(force=false){
   }catch(e){}
 }
 // Browsers only allow sound after the first tap/click: unlock the audio context then.
-['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{try{audioCtx()}catch(e){}},{once:true,passive:true,capture:true}));
+['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{try{audioCtx();loadGlass()}catch(e){}},{once:true,passive:true,capture:true}));
 function hasNativeAlarms(){try{return typeof window.AndroidBridge?.scheduleDaily==='function'}catch(e){return false}}
 function showWebNotification(title,body,taskId){
   try{
@@ -3149,7 +3182,7 @@ function svgLineChart(pointsActual, pointsPlan, target, labels, yFormatter, tool
   if(target>0){const yy=y(target);svg+=`<line class="lc-target" x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}"/><text class="lc-axis" x="${W-R}" y="${yy-5}" text-anchor="end">Цель ${esc(yFormatter(target))}</text>`}
   labels.forEach((lab,i)=>{if(labels.length<=7||i===0||i===labels.length-1||i%2===0)svg+=`<text class="lc-axis" x="${x(i)}" y="${H-10}" text-anchor="middle">${esc(lab)}</text>`});
   const aPaths=segmentPaths(pointsActual).split('|').filter(Boolean),pPaths=segmentPaths(pointsPlan).split('|').filter(Boolean);
-  pPaths.forEach(d=>svg+=`<path class="lc-plan" d="${d}"/>`);aPaths.forEach(d=>svg+=`<path class="lc-actual" d="${d}"/>`);
+  pPaths.forEach(d=>svg+=`<path class="lc-plan" d="${d}"/>`);aPaths.forEach(d=>svg+=`<path class="lc-actual" pathLength="1" d="${d}"/>`);
   pointsActual.forEach((v,i)=>{if(v!==null&&v!==undefined&&Number.isFinite(Number(v)))svg+=`<circle class="lc-dot actual" cx="${x(i)}" cy="${y(v)}" r="3.6"><title>${esc(labels[i]||'')} · ${esc(tooltipFormatter(v))}</title></circle>`});
   pointsPlan.forEach((v,i)=>{if(Number.isFinite(Number(v)))svg+=`<circle class="lc-dot plan" cx="${x(i)}" cy="${y(v)}" r="2.8"><title>${esc(labels[i]||'')} · план ${esc(tooltipFormatter(v))}</title></circle>`});
   svg+='</svg>';return svg;
@@ -3615,7 +3648,7 @@ function runSelfTest(){
   return ok;
 }
 
-function refreshCloudUI(){const a=cloudAuth(),st=$('cloudState'),u=$('cloudUserState'),net=$('cloudNetworkState'),sync=$('cloudSyncState');if(!st)return;if(a?.user?.email){st.textContent='Подключено';u.textContent=a.user.email;if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'В сети';if(sync&&sync.textContent==='Проверяется…')sync.textContent='Автоматически'}else{st.textContent='Локально';u.textContent='Нет аккаунта';if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'Локально';if(sync)sync.textContent='Не выполняется'}}
+function refreshCloudUI(){const a=cloudAuth(),st=$('cloudState'),u=$('cloudUserState'),net=$('cloudNetworkState'),sync=$('cloudSyncState');if(!st)return;if(a?.user?.email){st.textContent='Подключено';u.textContent=a.user.email;if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'В сети';if(sync&&sync.textContent==='Проверяется…')sync.textContent='Автоматически'}else{st.textContent='Войди';u.textContent='и данные будут на всех устройствах';if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'данные только на этом устройстве';if(sync)sync.textContent='Нет входа'}}
 function openSettings(){
   const steps=state.day.steps;const stepDraft=Array.isArray(state.drafts?.settingsSteps)?state.drafts.settingsSteps:steps;
   const stepFields=steps.map((st,i)=>{const src=stepDraft[i]||st;return `<div class="card" style="padding:12px"><div class="row"><strong><svg class="ui-icon" style="width:14px;height:14px;vertical-align:-2px;color:var(--blue)"><use href="#i-arrow-right"></use></svg> Этап ${i+1}</strong><span class="small muted">в расписании</span></div><div class="grid g2" style="margin-top:9px"><div class="field"><label>Название</label><input id="dsTitle${i}" value="${esc(src.title)}"></div><div class="field"><label>Время начала / окончания</label><div class="grid g2"><input id="dsTime${i}" type="time" value="${esc(src.time)}"><input id="dsEnd${i}" type="time" value="${esc(src.end)}"></div></div></div><div class="field" style="margin-top:9px"><label>Описание</label><input id="dsText${i}" value="${esc(src.text)}"></div><div class="field" style="margin-top:9px"><label>Важные занятия, по одному в строке</label><textarea id="dsDetails${i}" placeholder="Например: проверить заявки\nпроверить размеры">${esc((src.details||[]).join('\n'))}</textarea></div></div>`}).join('');
@@ -4433,7 +4466,7 @@ function barLineChartSVG(b){
   svg+=`<text class="vc-axis" x="${W-R+6}" y="${yb(bmax)+3}">${esc(ax(bmax))}</text>`+(bmax!==bmin?`<text class="vc-axis" x="${W-R+6}" y="${yb(bmin)+3}">${esc(ax(bmin))}</text>`:'');
   const step=Math.ceil(n/10);
   b.forEach((x,i)=>{const c=cx(i);if(x.income>0)svg+=`<rect class="vc-bar vc-in" x="${(c-bw-1).toFixed(1)}" y="${y(x.income).toFixed(1)}" width="${bw}" height="${(T+ih-y(x.income)).toFixed(1)}" rx="2"><title>${esc(x.label)} · доход ${esc(fmtMoney(x.income))}</title></rect>`;if(x.expense>0)svg+=`<rect class="vc-bar vc-out" x="${(c+1).toFixed(1)}" y="${y(x.expense).toFixed(1)}" width="${bw}" height="${(T+ih-y(x.expense)).toFixed(1)}" rx="2"><title>${esc(x.label)} · расход ${esc(fmtMoney(x.expense))}</title></rect>`;if(i%step===0||i===n-1)svg+=`<text class="vc-axis" x="${c}" y="${H-10}" text-anchor="middle">${esc(x.label)}</text>`});
-  svg+=`<path class="vc-line" d="${b.map((x,i)=>`${i?'L':'M'}${cx(i).toFixed(1)} ${yb(x.balance).toFixed(1)}`).join(' ')}"/>`;
+  svg+=`<path class="vc-line" pathLength="1" d="${b.map((x,i)=>`${i?'L':'M'}${cx(i).toFixed(1)} ${yb(x.balance).toFixed(1)}`).join(' ')}"/>`;
   b.forEach((x,i)=>{if(n<=31)svg+=`<circle class="vc-dot" cx="${cx(i).toFixed(1)}" cy="${yb(x.balance).toFixed(1)}" r="2.8"><title>${esc(x.label)} · баланс ${esc(fmtMoney(x.balance))}</title></circle>`});
   return svg+'</svg>';
 }
@@ -4523,6 +4556,7 @@ function renderSettingsView(){
   setText('setProfileSub',[state.profile.name,a?.user?.email].filter(Boolean).join(' · ')||'Имя не указано');
   const set=(id,v)=>{const el=$(id);if(el)el.checked=!!v};
   set('setDarkTheme',state.settings.theme==='dark');set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setEvery2h',state.settings.every2h!==false);
+  const sf=$('setFont');if(sf)sf.value=state.settings.font||'manrope';
   const fs=$('setFontScale');if(fs){const v=Number(state.settings.fontScale)||1.1;fs.value=v<1.05?'1':v>1.15?'1.2':'1.1'}
   setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный');renderBiometricRow();refreshCloudUI();
 }
@@ -4612,7 +4646,7 @@ function bindV57(){
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
   $('setDarkTheme').onchange=e=>{state.settings.theme=e.target.checked?'dark':'light';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');
-  $('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
+  $('setFont')&&($('setFont').onchange=e=>{state.settings.font=['manrope','nunito','inter'].includes(e.target.value)?e.target.value:'manrope';saveState();applyFont();toast('Шрифт изменён',e.target.selectedOptions[0]?.textContent||'')});$('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
   [['setNotifyAll','notifications'],['setNotifyTasks','notifyTasks'],['setNotifyFinance','notifyFinance'],['setNotifyGoals','notifyGoals'],['setNotifySound','sound']].forEach(([id,key])=>$(id).onchange=e=>{state.settings[key]=e.target.checked;saveState();if(key==='notifications'||key==='notifyTasks')scheduleNative()});
   $('setNotifyPermission').onclick=requestNotifications;$('setAdvancedRow').onclick=openSettings;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;

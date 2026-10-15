@@ -19,11 +19,11 @@ import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-/** Reminders with the Jamal Glow sound (res/raw/jamal_glow.wav) on a high-importance channel. */
+/** Reminders with the Jamal Glass sound (res/raw/jamal_glow.wav, made by tools/make-chime.py) on a high-importance channel. */
 public final class NotificationUtil {
     // A channel's sound can't be changed after creation, so the chime gets its own channel id.
-    private static final String CHANNEL = "jamal_life_glow";
-    private static final String[] OLD_CHANNELS = {"jamal_life_reminders", "life_control_v2", "life_control"};
+    private static final String CHANNEL = "jamal_life_glass";
+    private static final String[] OLD_CHANNELS = {"jamal_life_glow", "jamal_life_reminders", "life_control_v2", "life_control"};
     private static final long[] VIBRATION = {0, 180, 120, 180};
     private NotificationUtil() {}
 
