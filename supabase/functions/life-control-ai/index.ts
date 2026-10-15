@@ -63,6 +63,22 @@ function deepContext(s: any, facts: any): any {
   return { ...c, habits, banks, app_numbers: f ? JSON.parse(f.endsWith("}") ? f : "{}") : {} };
 }
 
+// LIFE mode: the ticked sections + habits, banks, open tasks and the app's own exact numbers.
+// deno-lint-ignore no-explicit-any
+function lifeContext(s: any, sc: any, facts: any): any {
+  const c = context(s, sc);
+  if (sc.money) c.banks = (Array.isArray(s?.budgets) ? s.budgets : []).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthly: Number(b?.planned) || 0 }));
+  if (sc.reports) {
+    c.habits = (Array.isArray(s?.habits) ? s.habits : []).slice(0, 12).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind }));
+    const tasks = Array.isArray(s?.tasks) ? s.tasks : [];
+    c.tasks = { total: tasks.length, done: tasks.filter((t: any) => t?.done).length, open: tasks.filter((t: any) => !t?.done).slice(0, 10).map((t: any) => clip(t?.title, 120)) };
+  }
+  let f = "";
+  try { f = JSON.stringify(facts ?? {}).slice(0, 12000); } catch { f = ""; }
+  c.app_numbers = f && f.endsWith("}") ? JSON.parse(f) : {};
+  return c;
+}
+
 // Only the sections the user ticked are sent to the model, trimmed to sane sizes.
 // deno-lint-ignore no-explicit-any
 function context(s: any, c: any): any {
@@ -184,14 +200,14 @@ Deno.serve(async (req) => {
     const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return json({ error: "Не удалось прочитать данные Jamal Life из Supabase." }, 500);
-    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : context(row?.state || {}, sc);
+    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
     const p = mode === "deep"
       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "week"
       ? weekRules() + "\n\nРЕЖИМ: WEEK. Подведи итог последних 7 дней ровно тремя блоками, каждый с новой строки и начинается с названия заглавными буквами:\nСИЛЬНАЯ СТОРОНА — 1–2 предложения: что реально получилось, с цифрой или фактом из данных.\nСЛАБОЕ МЕСТО — 1–2 предложения: что чаще всего мешало (смотри block в днях, траты, незакрытые дни и задачи).\nШАГ НА НЕДЕЛЮ — ровно одно конкретное действие на следующие 7 дней, которое можно проверить (время, сумма или количество).\nНичего кроме этих трёх блоков. Если данных почти нет, честно скажи это в СЛАБОМ МЕСТЕ и дай шаг: закрывать день каждый вечер.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "goal"
       ? promptRules() + "\n\nРЕЖИМ: GOAL. Проанализируй именно главную цель пользователя. Ответь в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — 2–3 подтверждённых факта.\n2) ЧТО УЖЕ ДОСТИГНУТО — только закрытые этапы и реальные результаты из данных.\n3) ЧТО УЖЕ ЕСТЬ — капитал в цели, свободная касса, доходы/расходы и другие подтверждённые ресурсы.\n4) ГЛАВНАЯ ПРОБЛЕМА — один главный ограничитель.\n5) ГЛАВНЫЙ ФОКУС — один приоритет на ближайшие 7 дней.\n6) ПЛАН ДЕЙСТВИЙ — 3–5 строк в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n7) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — ровно одно действие.\n\nНе выдумывай отсутствующие данные. Если цель не имеет суммы или срока, прямо укажи это и дай ближайшее измеримое действие без выдуманной цифры.\n\nДанные:\n" + JSON.stringify(ctx)
-      : promptRules() + "\n\nРЕЖИМ: LIFE. Проанализируй систему пользователя в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — максимум 3 факта.\n2) ГЛАВНАЯ ПРОБЛЕМА — одна проблема, которая сейчас сильнее всего ограничивает движение.\n3) ФИНАНСОВАЯ СИТУАЦИЯ — только подтверждённые цифры и арифметика.\n4) ГЛАВНЫЙ ФОКУС НА 7 ДНЕЙ — один приоритет.\n5) ПЛАН ДЕЙСТВИЙ — 3–5 конкретных действий в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n6) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — одно действие, без альтернатив.\n7) КОНТРОЛЬНАЯ ТОЧКА — что проверить через 7 дней и по какому числу/факту понять результат.\n\nНе выдумывай отсутствующие данные. Если для конкретного действия не хватает данных, прямо укажи, чего не хватает, вместо выдумывания.\n\nДанные:\n" + JSON.stringify(ctx);
+      : promptRules() + "\n\nРЕЖИМ: LIFE. Сделай самый полезный честный разбор жизни пользователя. Ответь ровно восемью блоками, каждый с новой строки, название ЗАГЛАВНЫМИ буквами и тире:\nГДЕ Я СЕЙЧАС — 3 главных факта с цифрами (деньги, долг, цель, дисциплина).\nПЛЮСЫ — 2–4 реальные сильные стороны, каждая с цифрой из данных.\nМИНУСЫ — 2–4 слабых места и утечки: где теряются деньги (категории, мелкие траты, перерасход банков), что проседает в дисциплине (незакрытые дни, привычки, задачи). С цифрами.\nКУДА Я ИДУ — прогноз при текущем темпе, с арифметикой: когда будет достигнута цель, когда закроется долг (используй app_numbers.debtFreeLine, если есть), что будет через 3 месяца, если ничего не менять, и что изменится, если исправить главный минус.\nГЛАВНЫЙ РИСК — одна вещь, которая сильнее всего угрожает цели.\nПЛАН НА 7 ДНЕЙ — 3–5 строк: P1/P2/P3 | действие | срок | измеримый результат.\nШАГ НА СЕГОДНЯ — ровно одно действие на сегодня.\nКАК ЛУЧШЕ ИСПОЛЬЗОВАТЬ ПРИЛОЖЕНИЕ — 1–2 конкретных совета, если из данных видно, что чего-то не хватает (не записываются расходы, нет банков, нет привычек, дни не закрываются). Если всего хватает — напиши это одной строкой.\nБез markdown, без звёздочек и решёток. app_numbers — точные расчёты приложения, используй их. Не выдумывай данные; если чего-то нет, так и скажи.\n\nДанные:\n" + JSON.stringify(ctx);
     const r = mode === "week" ? await gemini(p, false, weekRules()) : mode === "deep" ? await gemini(p, false, deepRules()) : await gemini(p, sc.webSearch);
     if ("error" in r) return json({ error: r.error }, r.status);
     return json({ ok: true, model: r.model || MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });

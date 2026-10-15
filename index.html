@@ -44,8 +44,8 @@ button,input,textarea,select{-webkit-user-select:text;user-select:text}
 ::selection{background:color-mix(in srgb,var(--blue) 28%,transparent);color:var(--text)}
 
 .goal-finance-kpis .kpi{background:var(--panel)}
-.stage-pct{font-size:0.7188rem;color:var(--blue-dark);font-weight:700;margin-top:4px}
-.timeline-row.done .stage-pct{color:var(--muted)}
+
+
 html{background:var(--bg);color-scheme:light}
 html[data-theme="dark"]{color-scheme:dark}
 body{margin:0;background:var(--bg);color:var(--text);line-height:1.45}
@@ -92,21 +92,21 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .motivation{border-left:4px solid var(--orange);background:var(--soft);padding:15px;border-radius:12px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
 .auto-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--orange));transition:width .8s linear}
 .detail-list{display:grid;gap:6px;margin-top:10px}
-.detail-item{display:flex;gap:8px;align-items:flex-start;font-size:0.7812rem}
-.detail-item b{color:var(--blue-dark)}
+
+
 
 
 
 
 
 .timeline{display:grid;gap:7px}
-.timeline-row{display:grid;grid-template-columns:64px 1fr 34px;gap:10px;align-items:center;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:var(--panel);transition:transform .18s ease,background .22s ease,border-color .22s ease,box-shadow .22s ease}
-.timeline-row:hover{transform:translateY(-1px)}
-.timeline-row.current{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 10%,transparent)}
-.timeline-row.done{background:color-mix(in srgb,var(--blue-soft) 70%,var(--panel));border-color:color-mix(in srgb,var(--blue) 26%,var(--line))}
-.time-range{font-size:0.7188rem;color:var(--muted);font-weight:700}
-.t-title{font-size:0.7812rem;font-weight:700;display:flex;align-items:center;gap:7px}
-.t-note{font-size:0.7188rem;color:var(--muted);margin-top:2px}
+
+
+
+
+
+
+
 .check{appearance:none;width:30px;height:30px;margin:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:grid;place-items:center;position:relative;cursor:pointer;transition:transform .18s ease,background .22s ease,border-color .22s ease,box-shadow .22s ease,color .22s ease}
 .check::after{content:"✓";font-size:1.0625rem;line-height:1;font-weight:700;color:transparent;transform:scale(.65) rotate(-8deg);transition:transform .2s ease,color .2s ease}
 .check:hover{transform:scale(1.05);border-color:var(--blue);box-shadow:0 6px 16px color-mix(in srgb,var(--blue) 14%,transparent)}
@@ -117,11 +117,11 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 .check:disabled:not(:checked){background:var(--soft)}
 .check:disabled:not(:checked)::after{color:transparent}
 @keyframes lcCheckPop{0%{transform:scale(.55) rotate(-10deg);opacity:0}60%{transform:scale(1.16) rotate(2deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
-.check.auto-complete-anim::after{animation:lcCheckPop .42s cubic-bezier(.2,.9,.25,1.15) both}
-.stage-icon{width:30px;height:30px;border-radius:10px;border:1px solid var(--line);background:var(--soft);display:grid;place-items:center;color:var(--muted);transition:transform .2s ease,background .22s ease,color .22s ease,border-color .22s ease;flex:0 0 auto}
-.stage-icon .ui-icon{width:15px;height:15px}
-.timeline-row.current .stage-icon{color:var(--blue);border-color:color-mix(in srgb,var(--blue) 40%,var(--line));background:var(--blue-soft);animation:lcStagePulse 1.9s ease-in-out infinite}
-.timeline-row.done .stage-icon{color:#2f9b54;border-color:#9bd2ac;background:#eaf8ee}
+
+
+
+
+
 @keyframes lcStagePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 0%,transparent)}50%{transform:scale(1.06);box-shadow:0 0 0 5px color-mix(in srgb,var(--blue) 10%,transparent)}}
 @media (prefers-reduced-motion:reduce){.timeline-row,.check,.stage-icon,.check::after{transition:none!important;animation:none!important}}
 .goal-title{line-height:1.12;font-weight:700;letter-spacing:-.03em}
@@ -574,7 +574,7 @@ h1{font-size:2.125rem;font-weight:700}
 .btn.primary{background:linear-gradient(135deg,var(--blue),#1677d4);border-color:var(--blue);box-shadow:0 8px 22px color-mix(in srgb,var(--blue) 18%,transparent)}
 .btn.orange{background:var(--orange-soft)}
 .timeline-row,.future-item,.milestone,.money-item,.note{border-radius:14px;background:var(--panel);border-color:var(--line);padding:12px}
-.timeline-row.current{background:var(--blue-soft)}
+
 
 .goal-title{font-size:1.75rem}
 .bar,.pulse-bar{background:color-mix(in srgb,var(--line) 80%,var(--bg))}
@@ -1257,12 +1257,12 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 .jl-habit-ideas{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .jl-habit-ideas .jl-pill{min-height:40px;font-size:0.8438rem;padding:0 14px}
 .jl-flame-mini{display:inline-flex;align-items:center;gap:2px;color:var(--orange-dark);font-weight:700}
-.jl-more-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;margin:2px 0 12px;border-radius:16px;border:1px dashed var(--line);background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:0.875rem;cursor:pointer}
-.jl-more-btn .ui-icon{width:18px;height:18px;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-.jl-more-btn[aria-expanded="true"] .ui-icon{transform:rotate(180deg)}
-.jl-more-btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.jl-more:not([hidden])>*{animation:jlRise .45s cubic-bezier(.2,.8,.2,1) backwards}
-.jl-more:not([hidden])>*:nth-child(2){animation-delay:.05s}.jl-more:not([hidden])>*:nth-child(3){animation-delay:.1s}.jl-more:not([hidden])>*:nth-child(4){animation-delay:.15s}.jl-more:not([hidden])>*:nth-child(5){animation-delay:.2s}
+
+
+
+
+
+
 .jl-debt-block{margin:0 0 12px}.jl-section-head{padding:2px 4px 0}.jl-debt-block .jl-debtplan{margin-top:10px}
 .jl-backup{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}.jl-backup b{display:block;font-size:0.9062rem}.jl-backup small{display:block;font-size:0.75rem;color:var(--muted);margin-top:2px}
 .jl-move-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.jl-move-grid>div{padding:10px;border-radius:14px;background:var(--soft);border:1px solid var(--line);text-align:center}.jl-move-grid b{display:block;font-size:1.2rem}.jl-move-grid span{display:block;font-size:.75rem;color:var(--muted);margin-top:2px}
@@ -1292,7 +1292,7 @@ button:active .ui-icon{transform:scale(.82)}
 @keyframes jlIconPop{0%{transform:scale(1)}35%{transform:scale(.78) rotate(-8deg)}70%{transform:scale(1.14) rotate(4deg)}100%{transform:scale(1)}}
 .v-add .ui-icon,.jl-fab .ui-icon{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
 .v-add:hover .ui-icon,.jl-fab:hover .ui-icon{transform:rotate(90deg)}
-@media (prefers-reduced-motion:reduce){.jl-tap .ui-icon,.jl-more:not([hidden])>*,.jl-habit-check.pop{animation:none}button:active .ui-icon{transform:none}.jl-more-btn .ui-icon{transition:none}}
+@media (prefers-reduced-motion:reduce){.jl-tap .ui-icon,.jl-more:not([hidden])>*,.jl-habit-check.pop{animation:none}button:active .ui-icon{transform:none}}
 
 /* ===== V61: ритм отступов, живые эмодзи, банки, свободное время, сроки, живые графики ===== */
 body{line-height:1.45}
@@ -1307,7 +1307,7 @@ body{line-height:1.45}
 .v-title:hover .jl-emo,.v-title:active .jl-emo,.jl-tap .jl-emo{animation:jlEmoWiggle .6s ease}
 @keyframes jlEmoIn{0%{transform:scale(.2) rotate(-25deg);opacity:0}100%{transform:none;opacity:1}}
 @keyframes jlEmoWiggle{0%,100%{transform:none}25%{transform:rotate(-14deg) scale(1.15)}60%{transform:rotate(10deg) scale(1.08)}}
-.jl-chips{display:flex;flex-wrap:wrap;gap:8px}
+
 .jl-chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--text);font:inherit;font-size:0.8438rem;font-weight:700;cursor:pointer;transition:background .2s ease,border-color .2s ease,transform .2s ease}
 
 .jl-chip:active{transform:scale(.95)}
@@ -1410,9 +1410,9 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-bank-name:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
 .jl-bank-empty{display:grid;justify-items:center;text-align:center;gap:6px;padding:14px 8px}
 .jl-bank-empty .jl-emo{font-size:2.4rem;margin:0}.jl-bank-empty small{color:var(--muted);max-width:30ch}
-.jl-emoji-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
-.jl-emoji-grid button{min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--soft);font-size:1.4rem;cursor:pointer;transition:transform .2s ease,border-color .2s ease}
-.jl-emoji-grid button.active{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 18%,var(--soft));transform:scale(1.08)}
+
+
+
 .dp-slider input{height:36px;cursor:pointer}
 .dp-slider input::-webkit-slider-thumb{width:28px;height:28px}
 .dp-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
@@ -1736,6 +1736,83 @@ b,strong{font-weight:600}
 .jl-chip,.jl-pill,.btn,.v-add,.jl-icon-btn,.ring-item,.v-row,.v-goal-item,.jl-stickers button,.ge-icons button,.ge-colors button{-webkit-tap-highlight-color:transparent}
 .btn:active,.jl-pill:active,.v-add:active,.jl-icon-btn:active,.v-row:active,.v-goal-item:active{transform:scale(.97)}
 @media (prefers-reduced-motion:reduce){.lc-actual,.vc-line,.vc-bar,.donut,.donut-center,.legend-row,.source-row,.jl-deep-cat{animation:none!important}.view.active .v-title{animation:none!important}}
+
+/* ===== V68 ===== */
+/* debt cells open the history */
+.jl-debt-cells{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.jl-debt-cell{all:unset;box-sizing:border-box;position:relative;display:block;cursor:pointer;padding:12px 30px 12px 12px;border-radius:14px;border:1px solid var(--line);background:var(--soft);transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s ease,background .2s ease}
+.jl-debt-cell:hover{border-color:color-mix(in srgb,var(--blue) 45%,var(--line))}
+.jl-debt-cell:active{transform:scale(.96)}
+.jl-debt-cell:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.jl-debt-go{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--muted);transition:transform .2s ease}
+.jl-debt-go .ui-icon{width:16px;height:16px}
+.jl-debt-cell:hover .jl-debt-go{transform:translate(3px,-50%)}
+.debt-bar-wrap{cursor:pointer}
+.jl-dh-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.jl-dh-top>div{padding:10px;border-radius:14px;border:1px solid var(--line);background:var(--soft);cursor:pointer;transition:border-color .2s ease,background .2s ease}
+.jl-dh-top>div.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--soft))}
+.jl-dh-top small{display:block;color:var(--muted);font-size:.75rem}.jl-dh-top b{display:block;margin-top:5px;font-size:.92rem;font-variant-numeric:tabular-nums}
+.jl-dh-sec{margin-top:18px}.jl-dh-sec h3{margin:0 0 8px;font-size:.95rem}
+.jl-dh-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:10px 2px;border-top:1px solid var(--line);animation:jlRowIn .4s calc(var(--i)*30ms) cubic-bezier(.2,.8,.2,1) backwards}
+.jl-dh-row span{font-size:.84rem;color:var(--muted);min-width:0}
+.jl-dh-row b{font-variant-numeric:tabular-nums}
+.jl-dh-row em{grid-column:1/-1;font-style:normal;font-size:.76rem;color:var(--muted)}
+.jl-dh-row em.down{color:var(--green)}.jl-dh-row em.up{color:var(--red)}
+.jl-dh-row.pay{grid-template-columns:minmax(0,1fr) auto}
+.jl-dh-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+/* living money forms */
+.jl-receipt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--soft);animation:jlStickerIn .45s cubic-bezier(.34,1.56,.64,1) backwards}
+.jl-receipt.in{border-color:color-mix(in srgb,var(--green) 40%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--green) 14%,var(--soft)),var(--soft))}
+.jl-receipt.out{border-color:color-mix(in srgb,var(--red) 35%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--red) 12%,var(--soft)),var(--soft))}
+.jl-receipt.tr{border-color:color-mix(in srgb,var(--blue) 40%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 14%,var(--soft)),var(--soft))}
+.jl-receipt-ico{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:1.7rem;background:var(--panel)}
+.jl-receipt-ico.pop{animation:jlDoneBurst .5s cubic-bezier(.34,1.56,.64,1)}
+.jl-receipt-main{min-width:0}.jl-receipt-main b{display:block;font-size:1.2rem;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-receipt{margin-bottom:4px}
+.jl-dh-actions .btn{white-space:nowrap;font-size:.88rem;padding-left:10px;padding-right:10px}
+.jl-receipt.in .jl-receipt-main b{color:var(--green)}.jl-receipt.out .jl-receipt-main b{color:var(--red)}
+.jl-receipt-main small{display:block;margin-top:4px;color:var(--muted);font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jl-receipt-date{padding:6px 10px;border-radius:999px;background:var(--panel);font-size:.78rem;font-weight:600;white-space:nowrap}
+.jl-date-chips,.jl-sum-chips{margin-top:8px}
+.jl-src-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:4px}
+.jl-src-tiles button{display:grid;justify-items:center;gap:6px;padding:12px 4px;border-radius:16px;border:1.5px solid var(--line);background:var(--soft);color:var(--text);cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s ease,background .2s ease}
+.jl-src-tiles button i{font-style:normal;font-size:1.6rem;line-height:1}
+.jl-src-tiles button span{font-size:.74rem;font-weight:600;text-align:center;line-height:1.2}
+.jl-src-tiles button.active{border-color:var(--green);background:color-mix(in srgb,var(--green) 14%,var(--soft))}
+.jl-src-tiles button.active i{animation:jlEmoWiggle .6s ease}
+.jl-src-tiles button:active{transform:scale(.93)}
+.jl-hidden-select{position:absolute!important;opacity:0;pointer-events:none;width:1px!important;height:1px!important;min-height:0!important}
+/* the three money buttons breathe */
+.jl-quick3 .jl-pill .ui-icon{transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.jl-quick3 #qIncome .ui-icon{animation:jlPlusSpin 4s ease-in-out infinite}
+.jl-quick3 #qExpense .ui-icon{animation:jlMinusPulse 4s .6s ease-in-out infinite}
+.jl-quick3 #qTransfer .ui-icon{animation:jlSwap 4s 1.2s ease-in-out infinite}
+.jl-quick3 .jl-pill:active .ui-icon{transform:scale(1.4)}
+@keyframes jlPlusSpin{0%,80%,100%{transform:rotate(0)}88%{transform:rotate(90deg) scale(1.2)}}
+@keyframes jlMinusPulse{0%,80%,100%{transform:scaleX(1)}88%{transform:scaleX(1.5)}}
+@keyframes jlSwap{0%,80%,100%{transform:translateX(0)}86%{transform:translateX(3px)}92%{transform:translateX(-3px)}}
+/* milestones: automatic progress */
+.jl-ms-auto{color:var(--muted)}
+.jl-ms-bar{display:block;height:4px;border-radius:4px;background:var(--line);margin-top:7px;overflow:hidden}
+.jl-ms-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--green),var(--gold));transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.jl-step-body{min-width:0}
+/* Today: calm, tidy top */
+.jl-now{padding:14px 16px!important}
+.jl-now-title{font-size:1rem!important;font-weight:700!important;margin-top:4px!important;line-height:1.35!important}
+.jl-now-meta{font-size:.78rem!important;margin-top:3px!important}
+.jl-now-foot{font-size:.76rem!important}
+.jl-quote{margin-top:12px!important;padding:12px 14px 12px 40px!important;border-radius:16px!important;cursor:pointer}
+.jl-quote::before{font-size:2.2rem!important;left:12px!important;top:4px!important}
+.jl-quote blockquote{font-size:.88rem!important;line-height:1.55!important;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.jl-quote.open blockquote{-webkit-line-clamp:unset;display:block}
+.jl-quote figcaption{margin-top:6px!important;font-size:.72rem!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-quote.open figcaption{white-space:normal}
+@media (prefers-reduced-motion:reduce){.jl-quick3 .ui-icon,.jl-receipt,.jl-receipt-ico,.jl-dh-row,.jl-src-tiles button i{animation:none!important}}
+
+.jl-ai-result>b{display:block;margin-bottom:10px}
+.jl-ai-sec{padding:12px 14px;border-radius:14px;background:var(--soft);border:1px solid var(--line);margin-top:10px;animation:jlRowIn .45s calc(var(--i)*60ms) cubic-bezier(.2,.8,.2,1) backwards}
+.jl-ai-sec b{display:flex;align-items:center;gap:8px;font-size:.92rem;margin-bottom:6px}
+.jl-ai-sec div{white-space:pre-wrap;line-height:1.6;font-size:.88rem}
 </style>
 
 
@@ -1814,7 +1891,7 @@ b,strong{font-weight:600}
   <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="authGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0"/><stop offset=".6" stop-color="#f97316" stop-opacity=".5"/><stop offset="1" stop-color="#9a3412" stop-opacity=".15"/></linearGradient><linearGradient id="authRidge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3a5f"/><stop offset="1" stop-color="#0b1426"/></linearGradient></defs><rect x="0" y="36" width="400" height="150" fill="url(#authGlow)"/><path d="M0 320V150l38-30 26 18 48-62 40 48 30-26 46 54 36-34 52 44 44-28 40 26v130z" fill="#3b3f62" opacity=".8"/><path d="M0 320V190l56-34 40 28 52-46 54 52 44-30 60 42 38-22 56 30v110z" fill="url(#authRidge)"/><path d="M0 320v-70l74-30 62 24 68-34 70 30 64-22 62 22v80z" fill="#070e1c"/></svg></div>
   <div class="auth-box">
     <div class="auth-crown"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg></div>
-    <h1 class="auth-title">Jamal Life <span>V67</span></h1>
+    <h1 class="auth-title">Jamal Life <span>V68</span></h1>
     <div class="auth-intro">Контролируй жизнь<br>Достигай цели<br>Будь лучше каждый день</div>
     <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="Email"></div></div>
     <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Пароль"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
@@ -1825,7 +1902,7 @@ b,strong{font-weight:600}
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V67</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V68</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -1957,7 +2034,7 @@ b,strong{font-weight:600}
     <div class="jl-goalhero-actions"><button class="jl-pill gold" type="button" id="addGoalSavingBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg>Пополнить</button><button class="jl-pill ghost" type="button" id="editGoalFinanceBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg>Сумма и срок</button></div>
   </div>
 
-  <div class="card"><div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🏁</span>Этапы цели</h2><div class="v-sub">Отмечай этап, когда он закрыт</div></div><span class="jl-count" id="goalCount">0 / 0</span></div>
+  <div class="card"><div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🏁</span>Этапы цели</h2><div class="v-sub">Закрываются сами по цифрам · можно отметить вручную</div></div><span class="jl-count" id="goalCount">0 / 0</span></div>
     <div class="bar" style="margin-top:12px"><i id="goalBar"></i></div><span class="v-sr" id="goalPct">0%</span>
     <div class="milestones" id="milestones"></div></div>
 
@@ -2127,7 +2204,7 @@ b,strong{font-weight:600}
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">67.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">68.0</span></div>
   </div>
 </section>
 
@@ -2341,7 +2418,7 @@ function mergeFirstContact(local,remote){
 }
 function applyCloudState(next,updatedAt){
   const before=stateFingerprint();
-  state=normalize(next);state[CLOUD_BASE_KEY]=updatedAt||'';
+  state=normalize(next);state[CLOUD_BASE_KEY]=updatedAt||'';rememberBaseStamp(state[CLOUD_BASE_KEY]);
   const changed=stateFingerprint()!==before;
   _persistFingerprint='';_cloudBaseFingerprint=stateFingerprint();
   saveState();
@@ -2361,7 +2438,7 @@ async function cloudPushNow(user,baseStamp){
     rows=await supaFetch('/rest/v1/life_state?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({user_id:user.id,...body})});
   }
   const row=Array.isArray(rows)?rows[0]:rows;
-  state[CLOUD_BASE_KEY]=row?.updated_at||'';
+  state[CLOUD_BASE_KEY]=row?.updated_at||'';rememberBaseStamp(state[CLOUD_BASE_KEY]);
   _cloudBaseFingerprint=sentFingerprint;storeCloudBase(sentState);
   if(stateFingerprint()===sentFingerprint)clearCloudDirty();else{markCloudDirty();queueCloudSync()}
   return row;
@@ -2369,6 +2446,7 @@ async function cloudPushNow(user,baseStamp){
 async function cloudSync(){
   const user=await cloudUser();if(!user)return {ok:false,logged:false};
   const owner=deviceOwner();if(owner&&owner!==user.id)resetForNewOwner();setDeviceOwner(user.id);
+  if(!state[CLOUD_BASE_KEY]){const st=baseStamp();if(st)state[CLOUD_BASE_KEY]=st}
   const q='/rest/v1/life_state?user_id=eq.'+encodeURIComponent(user.id)+'&limit=1&select=';
   for(let attempt=0;attempt<3;attempt++){
     const meta=(await supaFetch(q+'updated_at'))?.[0]||null;
@@ -2428,14 +2506,18 @@ async function openPasswordRecovery(){
   openModal('<div class="close-row"><div><div class="eyebrow">Jamal Life</div><h2>Новый пароль</h2><div class="sub">Ссылка восстановления приняла сессию. Задай новый пароль для аккаунта.</div></div></div><div class="stack" style="margin-top:12px"><div class="field"><label>Новый пароль</label><input id="recoveryPassword1" type="password" autocomplete="new-password" placeholder="Минимум 6 символов"></div><div class="field"><label>Повтори пароль</label><input id="recoveryPassword2" type="password" autocomplete="new-password" placeholder="Повтори пароль"></div><button class="btn primary" id="recoverySaveBtn">Сохранить новый пароль</button></div>');
   $('recoverySaveBtn').onclick=async()=>{const a=$('recoveryPassword1').value,b=$('recoveryPassword2').value;if(a.length<6){toast('Пароль слишком короткий','Минимум 6 символов.');return}if(a!==b){toast('Пароли не совпадают');return}try{await cloudUpdatePassword(a);const u=await cloudUser();const auth=cloudAuth();if(auth) setCloudAuth({...auth,user:u||auth.user});closeModal();toast('Пароль изменён','Теперь можно войти в Jamal Life с новым паролем.')}catch(e){toast('Не удалось сменить пароль',e.message)}};
 }
-const OWNER_KEY='JL_DEVICE_OWNER_V64';var _wipingDevice=false;
+const OWNER_KEY='JL_DEVICE_OWNER_V64',BASE_STAMP_KEY='JL_CLOUD_BASE_STAMP_V68';var _wipingDevice=false;
+/* The device's last agreed cloud version. Kept apart from the state: a change made while the very first upload
+   is in flight must still be merged (not overwritten by the cloud copy) after a quick restart. */
+function rememberBaseStamp(v){try{if(v)localStorage.setItem(BASE_STAMP_KEY,v);else localStorage.removeItem(BASE_STAMP_KEY)}catch(e){}}
+function baseStamp(){try{return localStorage.getItem(BASE_STAMP_KEY)||''}catch(e){return ''}}
 function deviceOwner(){try{return localStorage.getItem(OWNER_KEY)||''}catch(e){return ''}}
 function setDeviceOwner(id){try{if(id)localStorage.setItem(OWNER_KEY,id)}catch(e){}}
 /* Another account signed in on this device: its data must never be mixed with the previous owner's records. */
-function resetForNewOwner(){state=normalize(clone(DEFAULT));state[CLOUD_BASE_KEY]='';_cloudBaseState=null;_cloudBaseFingerprint='';_persistFingerprint='';clearCloudDirty();saveState()}
+function resetForNewOwner(){rememberBaseStamp('');state=normalize(clone(DEFAULT));state[CLOUD_BASE_KEY]='';_cloudBaseState=null;_cloudBaseFingerprint='';_persistFingerprint='';clearCloudDirty();saveState()}
 async function wipeLocalData(){
   _wipingDevice=true;
-  try{[KEY,BACKUP_KEY,BACKUP2_KEY,CLOUD_DIRTY_KEY,OWNER_KEY,'JL_PENDING_ACTIONS_V1'].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  try{[KEY,BACKUP_KEY,BACKUP2_KEY,CLOUD_DIRTY_KEY,OWNER_KEY,BASE_STAMP_KEY,'JL_PENDING_ACTIONS_V1'].forEach(k=>localStorage.removeItem(k))}catch(e){}
   try{const db=await openLifeDB();if(db)await new Promise(res=>{try{const tx=db.transaction(['state','backups'],'readwrite');tx.objectStore('state').clear();tx.objectStore('backups').clear();tx.oncomplete=res;tx.onerror=res;tx.onabort=res}catch(e){res()}})}catch(e){}
   try{window.AndroidBridge?.updateWidget?.('{}')}catch(e){}
 }
@@ -2941,7 +3023,7 @@ function renderLifePulse(){applyAutoDayMode();const p=getLifePulse();for(const [
 function profitsBefore(dt){const t=dt?.getTime?.()||Date.now();return (state.profits||[]).reduce((a,x)=>{const z=Date.parse(x.at||'');return a+(Number.isFinite(z)&&z<=t?Math.max(0,Number(x.amount)||0):0)},0)}
 function expensesBefore(dt){const t=dt?.getTime?.()||Date.now();return (state.expenses||[]).reduce((a,x)=>{const z=Date.parse(x.at||'');return a+(Number.isFinite(z)&&z<=t?Math.max(0,Number(x.amount)||0):0)},0)}
 function goalDistanceMetrics(){const f=goalFinanceMetrics(),now=new Date();let daysLeft=null,requiredMonth=null,actualRate=null,variance=null;const date=f.targetDate?new Date(f.targetDate+'T23:59:59'):null;if(date&&!Number.isNaN(date.getTime())){daysLeft=Math.max(0,Math.ceil((date-now)/DAY_MS));const months=Math.max(1,daysLeft/30.4375);requiredMonth=f.remaining/months}const contributions=Array.isArray(f.contributions)?f.contributions:[];if(f.startedAt){const start=new Date(f.startedAt),elapsed=Math.max(1,(Date.now()-start.getTime())/DAY_MS);const startCapital=Math.max(0,Number(state.wallet?.openingBalance)||0)+Math.max(0,Number(state.goal?.finance?.manualSavedAmount)||0)+profitsBefore(start)-expensesBefore(start);const currentAvailable=Math.max(0,goalFinanceMetrics().available);const delta=Math.max(0,currentAvailable-Math.max(0,startCapital));actualRate=delta/elapsed;if(daysLeft!==null&&daysLeft>0){const reqDay=f.remaining/daysLeft;variance=reqDay>0?((actualRate-reqDay)/reqDay*100):100}}return {daysLeft,requiredMonth,actualRate,variance,remaining:f.remaining,complete:f.completed,targetDate:f.targetDate}}
-function renderGoalDistance(){const g=goalDistanceMetrics();setText('goalDistanceDays',g.daysLeft===null?'—':g.complete?'Цель закрыта':g.daysLeft+' дн.');setText('goalDistanceMoney',fmtMoney(g.remaining));setText('goalRequiredMonth',g.requiredMonth===null?'—':fmtMoney(g.requiredMonth));setText('goalActualRate',g.actualRate===null?'—':fmtMoney(g.actualRate));setText('goalDistanceState',g.targetDate?`Срок: ${new Date(g.targetDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}`:'Срок не задан');const box=$('goalTempoAlert');if(!box)return;if(g.complete){box.className='tempo-alert ok';box.textContent='Капитал собран. Следующий ориентир — сохранить результат.'}else if(g.variance===null){box.className='tempo-alert';box.textContent=g.targetDate?'Недостаточно истории накоплений для оценки темпа. Добавь пополнения — сравнение появится автоматически.':'Задай срок и фиксируй накопления, чтобы видеть требуемый темп.'}else if(g.variance<0){box.className='tempo-alert warn';box.textContent=`Темп ниже необходимого на ${Math.round(Math.abs(g.variance))}%. Нужно в среднем ${fmtMoney(g.requiredMonth)} в месяц.`}else{box.className='tempo-alert ok';box.textContent=`Темп выше необходимого примерно на ${Math.round(g.variance)}%. Текущего ритма достаточно.`}}
+function renderGoalDistance(){const g=goalDistanceMetrics();setText('goalDistanceDays',g.daysLeft===null?'—':g.complete?'Цель закрыта':g.daysLeft+' дн.');setText('goalRequiredMonth',g.requiredMonth===null?'—':fmtMoney(g.requiredMonth));setText('goalActualRate',g.actualRate===null?'—':fmtMoney(g.actualRate));setText('goalDistanceState',g.targetDate?`Срок: ${new Date(g.targetDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}`:'Срок не задан');const box=$('goalTempoAlert');if(!box)return;if(g.complete){box.className='tempo-alert ok';box.textContent='Капитал собран. Следующий ориентир — сохранить результат.'}else if(g.variance===null){box.className='tempo-alert';box.textContent=g.targetDate?'Недостаточно истории накоплений для оценки темпа. Добавь пополнения — сравнение появится автоматически.':'Задай срок и фиксируй накопления, чтобы видеть требуемый темп.'}else if(g.variance<0){box.className='tempo-alert warn';box.textContent=`Темп ниже необходимого на ${Math.round(Math.abs(g.variance))}%. Нужно в среднем ${fmtMoney(g.requiredMonth)} в месяц.`}else{box.className='tempo-alert ok';box.textContent=`Темп выше необходимого примерно на ${Math.round(g.variance)}%. Текущего ритма достаточно.`}}
 function analyzeLife(){
   const now=Date.now(),D=DAY_MS,t=x=>Date.parse(x?.at||'')||0,amt=x=>Math.max(0,Number(x?.amount)||0);
   const exp=(state.expenses||[]).filter(x=>!x.transfer&&!x.debtPayment),inc=state.profits||[];
@@ -3008,6 +3090,16 @@ function openLifeAnalysis(){
       box.innerHTML=deepTextHtml(text);btn.querySelector('span').textContent='🤖 Обновить разбор AI';
     }catch(e){box.textContent=String(e?.message||e);btn.querySelector('span').textContent='🤖 Попробовать ещё раз'}finally{btn.disabled=false}
   };
+}
+function lifeFacts(){const a=analyzeLife();return {...a,big:a.big.map(x=>({category:x.category,amount:x.amount,at:x.at})),habStats:a.habStats.map(h=>({title:h.h.title,due:h.due,done:h.done})),banksOver:a.banksOver.map(x=>({name:x.b.name,pct:x.li.pct,left:x.li.remaining})),cats:a.cats.slice(0,10),debtFreeLine:typeof debtFreeLine==='function'?String(debtFreeLine()||''):''}}
+/* AI answers come as blocks with CAPS headings — show each as its own card with an icon */
+function aiTextHtml(text){
+  const t=String(text||'').replace(/\*\*|__/g,'').replace(/^#+\s*/gm,'').trim();
+  const head=/^(?:\d+[).]\s*)?([А-ЯЁ][А-ЯЁ0-9 ,\/«»-]{3,60}?)\s*(?:—|:|–|-)\s*/;
+  const icon=h=>/ПЛЮС|СИЛЬН/.test(h)?'✅':/МИНУС|СЛАБ|ТЕРЯ/.test(h)?'⚠️':/КУДА|ПРОГНОЗ|ТРАЕКТ/.test(h)?'🧭':/РИСК|ПРОБЛЕМ/.test(h)?'🚩':/ПЛАН/.test(h)?'📋':/ШАГ|ДЕЙСТВИ/.test(h)?'👉':/СЕЙЧАС|СОСТОЯН/.test(h)?'📍':/ПРИЛОЖ/.test(h)?'📱':/ФИНАН|ДЕН/.test(h)?'💰':/КОНТРОЛ/.test(h)?'🎯':'•';
+  const parts=[];let cur=null;
+  for(const line of t.split('\n')){const m=line.match(head);if(m&&m[1].trim().length>=4&&m[1]===m[1].toUpperCase()){cur={h:m[1].trim(),body:[line.slice(m[0].length)]};parts.push(cur)}else if(cur)cur.body.push(line);else parts.push({h:'',body:[line]})}
+  return parts.filter(p=>p.h||p.body.join('').trim()).map((p,i)=>`<div class="jl-ai-sec" style="--i:${i}">${p.h?`<b><span aria-hidden="true">${icon(p.h)}</span>${esc(p.h.charAt(0)+p.h.slice(1).toLowerCase())}</b>`:''}<div>${esc(p.body.join('\n').trim())}</div></div>`).join('');
 }
 function deepTextHtml(text){
   const t=String(text||'').replace(/\*\*|__|^#+\s*/gm,'').trim();
@@ -3271,7 +3363,7 @@ function renderGoalAI(){
   const g=state.goal||{},plan=g.aiPlan,key=goalAIKey(),stateEl=$('goalAiState'),summary=$('goalAiSummary'),list=$('goalAiPlan');
   if(!stateEl||!summary||!list)return;
   if(!String(g.title||'').trim()){stateEl.textContent='Сначала задай цель.';summary.textContent='';list.innerHTML='';return}
-  if(!plan){stateEl.textContent='AI-план ещё не сформирован. После сохранения цели он запускается автоматически.';summary.textContent='AI покажет: что уже достигнуто, что уже есть и что конкретно делать дальше.';list.innerHTML='';return}
+  if(!plan){stateEl.textContent='AI-план ещё не сформирован — он построится сам, когда ты в сети.';summary.textContent='AI покажет: что уже достигнуто, что уже есть и что конкретно делать дальше.';list.innerHTML='';return}
   if(plan.goalKey!==key){stateEl.textContent='Цель изменена — нужен новый AI-план.';summary.textContent='Сохрани новую формулировку цели и обнови AI.';list.innerHTML='';return}
   stateEl.textContent=plan.at?'Обновлено '+fmtDateTime(new Date(plan.at)):'AI-план готов';summary.textContent=plan.summary||'';
   list.innerHTML=(Array.isArray(plan.actions)?plan.actions:[]).map((x,i)=>'<div class="goal-ai-item"><div><span class="goal-ai-badge">'+esc(x.priority||('P'+(i+1)))+'</span> '+esc(x.action||'Действие')+'</div><div>'+esc(x.deadline||'Срок не указан')+' · '+esc(x.result||'Измеримый результат не указан')+'</div></div>').join('')||'<div class="empty">AI не вернул структурированный план. Нажми «Обновить AI».</div>';
@@ -3296,7 +3388,34 @@ async function requestGoalAI(force=false){
   }catch(e){if(stateEl)stateEl.textContent='AI сейчас недоступен';if(summary)summary.textContent=String(e?.message||e||'Неизвестная ошибка AI.')}
   finally{goalAiBusy=false}
 }
-function renderGoal(){
+/* A milestone closes itself when the numbers say so. Rules by its words:
+   «рост долга» → no debt growth for 30 days and at least one payment · «долг» → half of the starting debt repaid ·
+   «резерв / капитал / доход» → goal capital collected · otherwise → its share of the goal's money (i+1)/n.
+   Never re-opens a milestone the user closed; the user can still tick and untick by hand. */
+function milestoneAuto(m,i,n){
+  const t=String(m.title||'').toLowerCase(),base=Number(state.debtBaseline)||0,now=debtTotal(),paid=Math.max(0,base-now),f=goalFinanceMetrics?.()||{},fin=Number(f.target)>0?Math.min(1,(Number(f.available)||0)/Number(f.target)):0;
+  if(/рост.*долг|долг.*рост/.test(t)){const h=(state.debtHistory||[]).filter(x=>Date.parse(x.at||x.day)>=Date.now()-30*DAY_MS),grew=h.some((x,j)=>j&&Number(x.total)>Number(h[j-1].total)),pays=(state.expenses||[]).some(e=>e.debtPayment);return {p:pays&&!grew?1:pays?.6:h.length?.3:0,hint:pays?(grew?'долг рос за 30 дней':'долг не растёт, платежи идут'):'нужен первый платёж по долгу'}}
+  if(/долг/.test(t)&&base>0){const p=Math.min(1,paid/(base*.5));return {p,hint:`выплачено ${Math.round(paid/base*100)}% из нужных 50%`}}
+  if(/резерв|капитал|подушк|накоп|доход/.test(t)&&Number(f.target)>0)return {p:fin,hint:`собрано ${Math.round(fin*100)}% суммы цели`};
+  if(Number(f.target)>0){const need=(i+1)/n;return {p:Math.min(1,fin/need),hint:`по деньгам цели: ${Math.round(fin*100)}% из ${Math.round(need*100)}%`}}
+  return {p:0,hint:''};
+}
+function autoMilestones(){
+  const ms=state.goal?.milestones;if(!Array.isArray(ms)||!ms.length)return false;let changed=false;
+  ms.forEach((m,i)=>{if(m.done)return;const a=milestoneAuto(m,i,ms.length);if(a.p>=1){m.done=true;m.auto=true;m.doneAt=new Date().toISOString();changed=true;toast('Этап закрыт сам','🏁 '+m.title);celebrate()}});
+  if(changed)saveState();return changed;
+}
+let _goalAiAutoAt=0;
+function maybeAutoGoalAI(){
+  if(goalAiBusy||state.ai?.enabled===false||!cloudAuth()?.access_token||!appReadyForSync)return;
+  if('onLine' in navigator&&navigator.onLine===false)return;
+  const plan=state.goal?.aiPlan,stale=!plan||plan.goalKey!==goalAIKey()||Date.now()-Date.parse(plan.at||0)>7*DAY_MS;
+  let last=0;try{last=Number(localStorage.getItem('JL_GOALAI_AUTO'))||0}catch(e){}
+  if(!stale||Date.now()-Math.max(last,_goalAiAutoAt)<6*3600e3)return;
+  _goalAiAutoAt=Date.now();try{localStorage.setItem('JL_GOALAI_AUTO',String(_goalAiAutoAt))}catch(e){}
+  requestGoalAI(true);
+}
+function renderGoal(){autoMilestones();
   syncGoalFinanceCompletion();
   const total=state.goal.milestones.length,done=state.goal.milestones.filter(m=>m.done).length,p=total?Math.round(done/total*100):0;
   setText('goalTitle',state.goal.title);setText('goalWhy',state.goal.why);setText('goalPct',p+'%');setWidth('goalBar',p+'%');setText('goalNext',state.goal.next);setText('goalCount',`${done} / ${total}`);
@@ -3312,12 +3431,12 @@ function renderGoal(){
   $('goalSavingList').innerHTML=contrib.length?contrib.map(e=>`<div class="saving-item"><div class="saving-main"><div class="saving-title">${Number(e.amount)<0?'Вывод из цели':'Пополнение цели'}</div><div class="saving-meta">${esc(e.note||'Без комментария')} · ${esc(fmtDateTime(new Date(e.at)))}</div></div><div class="saving-amount">${Number(e.amount)<0?'−':'+'}${esc(fmtMoney(Math.abs(Number(e.amount)||0)))}</div><button class="delete-x" data-del-saving="${esc(e.id)}" aria-label="Удалить накопление">×</button></div>`).join(''):'<div class="empty">Пополнений пока нет. Можно вести сумму вручную или добавлять накопления кнопкой выше.</div>';
   $$('[data-del-saving]').forEach(b=>b.onclick=()=>{const id=b.dataset.delSaving;state.goal.finance.contributions=state.goal.finance.contributions.filter(x=>x.id!==id);syncGoalFinanceCompletion();saveState();renderAll();toast('Пополнение удалено')});
   renderGoalChart();renderGoalAI();renderGoalDeadline();renderGoalHero();
-  {const ms=state.goal.milestones,doneN=ms.filter(m=>m.done).length,cur=ms.findIndex(m=>!m.done);const box=$('milestones');if(box){box.style.setProperty('--f',ms.length>1?String(Math.min(1,doneN/(ms.length-1))):'0');box.innerHTML=ms.map((m,i)=>`<div class="jl-step ${m.done?'done':i===cur?'current':'todo'}"><span class="jl-step-dot">${m.done?'✓':i+1}</span><div class="jl-step-body"><b>${esc(m.title)}</b><small>${m.done?'✅ Этап закрыт':i===cur?'🔥 Сейчас в работе':'⏳ Впереди'}</small></div><input class="check" type="checkbox" data-ms="${esc(m.id)}" aria-label="Этап ${i+1}: ${esc(m.title)}" ${m.done?'checked':''}></div>`).join('')||'<div class="v-empty">Этапов нет — добавь их в «Изменить цель».</div>'}}
+  {const ms=state.goal.milestones,doneN=ms.filter(m=>m.done).length,cur=ms.findIndex(m=>!m.done);const box=$('milestones');if(box){box.style.setProperty('--f',ms.length>1?String(Math.min(1,doneN/(ms.length-1))):'0');box.innerHTML=ms.map((m,i)=>`<div class="jl-step ${m.done?'done':i===cur?'current':'todo'}"><span class="jl-step-dot">${m.done?'✓':i+1}</span><div class="jl-step-body"><b>${esc(m.title)}</b><small>${m.done?(m.auto?'✅ Закрыт автоматически':'✅ Этап закрыт'):(i===cur?'🔥 Сейчас в работе':'⏳ Впереди')}${!m.done?(()=>{const a=milestoneAuto(m,i,ms.length);return a.hint?` · <span class="jl-ms-auto">${esc(a.hint)}</span>`:''})():''}</small>${!m.done?(()=>{const a=milestoneAuto(m,i,ms.length);return a.p>0?`<span class="jl-ms-bar"><i style="width:${Math.round(a.p*100)}%"></i></span>`:''})():''}</div><input class="check" type="checkbox" data-ms="${esc(m.id)}" aria-label="Этап ${i+1}: ${esc(m.title)}" ${m.done?'checked':''}></div>`).join('')||'<div class="v-empty">Этапов нет — добавь их в «Изменить цель».</div>'}}
   $$('[data-ms]').forEach(c=>c.onchange=()=>{const m=state.goal.milestones.find(x=>x.id===c.dataset.ms);if(!m)return;m.done=c.checked;if(c.checked&&state.goal.milestones.every(x=>x.done))setTimeout(celebrate,200);else if(c.checked)haptic(16);const next=state.goal.milestones.find(x=>!x.done);state.goal.next=next?next.title:'Цель достигнута — выбери следующий финансовый ориентир.';saveState();renderAll();toast(c.checked?'Этап закрыт':'Этап открыт',m.title)});
   $('achievements').innerHTML=state.achievements.length?state.achievements.slice().sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).map(a=>`<div class="note"><div class="note-title">Результат</div><div class="note-body">${esc(a.text)}</div><div class="note-time">${esc(fmtDateTime(new Date(a.at)))}</div></div>`).join(''):'<div class="empty">Здесь остаются реальные завершённые результаты.</div>';
 }
 
-function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){chart.innerHTML='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);chart.innerHTML=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
+function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){chart.innerHTML='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);chart.innerHTML=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap" role="button" tabindex="0" data-debt-open="all" title="Открыть историю долга"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
 function normalizeProfitSource(v){
   const raw=String(v||'').trim();
   const s=raw.toLowerCase();
@@ -3386,7 +3505,9 @@ function openBudget(id=''){
 
 function renderMoney(){
   const debt=debtTotal(),debtBase=Math.max(0,Number(state.debtBaseline)||debt),debtPaid=Math.max(0,debtBase-debt),incomePlan=Math.max(0,Number(state.income)||0),payShare=incomePlan?Math.round((Number(state.debts.monthlyPayment||0)/incomePlan)*100):0;
-  const ds=$('debtSummary');if(ds)ds.innerHTML=`<div class="kpi-row"><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-card"></use></svg></span>Банк</div><div class="value">${esc(fmtMoney(state.debts.bank))}</div><div class="debt-kpi-note">отдельно</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-briefcase"></use></svg></span>Фирмы</div><div class="value">${esc(fmtMoney(state.debts.firms))}</div><div class="debt-kpi-note">отдельно</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Всего</div><div class="value">${esc(fmtMoney(debt))}</div><div class="debt-kpi-note">всех обязательств</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Платёж / месяц</div><div class="value">${esc(fmtMoney(state.debts.monthlyPayment||0))}</div><div class="debt-kpi-note">${payShare?`≈ ${payShare}% от плана дохода`:''}</div></div><div class="kpi"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-check"></use></svg></span>Зафиксировано погашено</div><div class="value blue">${esc(fmtMoney(debtPaid))}</div><div class="debt-kpi-note">от стартовой суммы</div></div></div>`;
+  const ds=$('debtSummary');if(ds){const cell=(key,ico,label,val,note,cls='')=>`<button type="button" class="kpi jl-debt-cell" data-debt-open="${key}"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#${ico}"></use></svg></span>${label}</div><div class="value ${cls}">${esc(val)}</div><div class="debt-kpi-note">${note}</div><span class="jl-debt-go" aria-hidden="true">${svgIcon('i-chevron-right')}</span></button>`;
+    ds.innerHTML=`<div class="kpi-row jl-debt-cells">${cell('bank','i-card','Банк',fmtMoney(state.debts.bank),'платежи и история')}${cell('firms','i-briefcase','Фирмы',fmtMoney(state.debts.firms),'платежи и история')}${cell('all','i-money','Всего',fmtMoney(debt),'всех обязательств')}${cell('pay','i-calendar','Платёж / месяц',fmtMoney(state.debts.monthlyPayment||0),payShare?`≈ ${payShare}% от плана дохода`:'изменить')}${cell('paid','i-check','Погашено',fmtMoney(debtPaid),'от стартовой суммы','blue')}</div>`;
+    $$('[data-debt-open]').forEach(b=>b.onclick=()=>b.dataset.debtOpen==='pay'?openDebtEdit():openDebtHistory(b.dataset.debtOpen))}
   renderDebtChart();renderDebtPlan();renderBudgets();renderMoneyCharts();renderMoneyV57();
 }
 
@@ -3480,6 +3601,29 @@ const EXPENSE_QUICK=[
 const EXPENSE_ICONS=Object.fromEntries(EXPENSE_QUICK.map(x=>[x.value,x.icon]));
 function moneyDateIso(dateKey,baseIso=''){const key=String(dateKey||keyDay()),t=baseIso?new Date(baseIso):new Date();const hh=String(t.getHours()).padStart(2,'0'),mm=String(t.getMinutes()).padStart(2,'0'),ss=String(t.getSeconds()).padStart(2,'0');return new Date(key+'T'+hh+':'+mm+':'+ss).toISOString()}
 function openMoneyEdit(kind,id){const item=(kind==='profit'?state.profits:state.expenses).find(x=>x.id===id);if(item)openMoneyForm(kind,'',item)}
+/* Live preview on top of the income / expense / transfer forms: the amount counts, the icon pops,
+   date chips «Сегодня / Вчера / Позавчера», quick sums. Purely visual — the form fields stay the source of truth. */
+function liveMoneyForm(kind){
+  const stack=document.querySelector('.modal .stack');if(!stack||stack.querySelector('.jl-receipt'))return;
+  const isP=kind==='profit',isT=kind==='transfer',amountId=isT?'trAmount':'moneyAmount',dateId=isT?'trDate':'moneyDate';
+  const pv=document.createElement('div');pv.className='jl-receipt '+(isP?'in':isT?'tr':'out');
+  pv.innerHTML=`<span class="jl-receipt-ico" id="rcIco">${isP?'💼':isT?'🔁':'🧾'}</span><div class="jl-receipt-main"><b id="rcSum">${isP?'+':isT?'':'−'}0 ${esc(state.profile.currency||'сомони')}</b><small id="rcWhat">—</small></div><span class="jl-receipt-date" id="rcDate">—</span>`;
+  stack.prepend(pv);
+  const dIn=$(dateId),aIn=$(amountId);
+  if(dIn&&!dIn.parentElement.querySelector('.jl-date-chips')){const c=document.createElement('div');c.className='jl-chips jl-date-chips';const k=n=>{const d=new Date();d.setDate(d.getDate()-n);return keyDay(d)};c.innerHTML=[[0,'Сегодня'],[1,'Вчера'],[2,'Позавчера']].map(([n,t])=>`<button type="button" class="jl-chip" data-day-pick="${k(n)}">${t}</button>`).join('');dIn.after(c);c.querySelectorAll('[data-day-pick]').forEach(b=>b.onclick=()=>{dIn.value=b.dataset.dayPick;dIn.dispatchEvent(new Event('input',{bubbles:true}));dIn.dispatchEvent(new Event('change',{bubbles:true}));haptic(6)})}
+  if(aIn&&!aIn.parentElement.querySelector('.jl-sum-chips')){const c=document.createElement('div');c.className='jl-chips jl-sum-chips';c.innerHTML=[50,100,500,1000].map(v=>`<button type="button" class="jl-chip" data-sum-add="${v}">+${v.toLocaleString('ru-RU')}</button>`).join('');aIn.after(c);c.querySelectorAll('[data-sum-add]').forEach(b=>b.onclick=()=>{aIn.value=String((Number(aIn.value)||0)+Number(b.dataset.sumAdd));aIn.dispatchEvent(new Event('input',{bubbles:true}));haptic(6)})}
+  const type=$('moneyType');
+  if(isP&&type&&!stack.querySelector('.jl-src-tiles')){const t=document.createElement('div');t.className='jl-src-tiles';t.innerHTML=PROFIT_SOURCES.map(x=>`<button type="button" data-src-pick="${esc(x)}" class="${type.value===x?'active':''}"><i>${PROFIT_ICONS[x]||'💠'}</i><span>${esc(x)}</span></button>`).join('');type.after(t);type.classList.add('jl-hidden-select');t.querySelectorAll('[data-src-pick]').forEach(b=>b.onclick=()=>{type.value=b.dataset.srcPick;t.querySelectorAll('button').forEach(y=>y.classList.toggle('active',y===b));type.dispatchEvent(new Event('change',{bubbles:true}));haptic(6)})}
+  let shown=0,raf=0;
+  const upd=()=>{const v=Math.max(0,Number(aIn?.value)||0),cur=state.profile.currency||'сомони';cancelAnimationFrame(raf);const from=shown,t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/280),val=from+(v-from)*(1-Math.pow(1-p,3));setText('rcSum',`${isP?'+':isT?'':'−'}${Math.round(val).toLocaleString('ru-RU')} ${cur}`);if(p<1)raf=requestAnimationFrame(step);else shown=v};raf=requestAnimationFrame(step);
+    const d=dIn?.value?new Date(dIn.value+'T12:00:00'):new Date(),diff=Math.round((new Date(keyDay()+'T12:00:00')-d)/DAY_MS);setText('rcDate',diff===0?'сегодня':diff===1?'вчера':diff===2?'позавчера':d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}));
+    document.querySelectorAll('[data-day-pick]').forEach(b=>b.classList.toggle('active',b.dataset.dayPick===dIn?.value));
+    let what='—',ico=isP?'💼':isT?'🔁':'🧾';
+    if(isT){const dir=$('trDir')?.value;what=dir==='to-debt'?'Кошелёк → Долг':dir==='from-goal'?'Цель → Кошелёк':'Кошелёк → Цель';ico=dir==='to-debt'?'📉':dir==='from-goal'?'👛':'🎯'}
+    else if(type){const v2=type.value;what=v2==='Другое'?($('moneyCustomCategory')?.value||'Другое'):v2;ico=isP?(PROFIT_ICONS[v2]||'💠'):(catIcon(v2)||(expenseCats().find(x=>x.value===v2)?.icon)||'🧾');if(!isP&&$('moneyDebtPay')?.checked){what='Платёж по долгу';ico='📉'}}
+    setText('rcWhat',what);const ic=$('rcIco');if(ic&&ic.textContent!==ico){ic.textContent=ico;ic.classList.remove('pop');void ic.offsetWidth;ic.classList.add('pop')}};
+  stack.addEventListener('input',upd);stack.addEventListener('change',upd);stack.addEventListener('click',e=>{if(e.target.closest('[data-expense-quick]'))setTimeout(upd,0)});upd();
+}
 function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
   const isProfit=kind==='profit',dk=isProfit?'moneyProfit':'moneyExpense',draft=editItem?{amount:editItem.amount,type:isProfit?(editItem.sourceGroup||editItem.source):editItem.category,note:editItem.note||'',customCategory:editItem.customCategory||'',debtPay:!!editItem.debtPayment,debtType:editItem.debtPayment||'bank',dateKey:keyDay(validDate(editItem.at))}:state.drafts?.[dk]||{};const editing=!!editItem;
   const sourceValue=normalizeProfitSource(draft.type||draft.source||(isProfit?presetCategory:'Зарплата'));
@@ -3491,6 +3635,7 @@ function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
     : `<select id="moneyType">${CATS.map(x=>`<option value="${esc(x.value)}" ${x.value===category?'selected':''}>${esc(x.icon)} ${esc(x.label)}</option>`).join('')}</select><div class="expense-quick-grid">${CATS.map(x=>`<button type="button" class="expense-quick ${x.value===category?'active':''}" data-expense-quick="${esc(x.value)}"><span class="ico">${x.icon}</span><span>${esc(x.label)}</span></button>`).join('')}</div><div class="field" id="customExpenseWrap" style="display:${category==='Другое'?'block':'none'}"><label>Название расхода</label><input id="moneyCustomCategory" maxlength="80" placeholder="Например: кино, подарок, кофе" value="${esc(customDraft)}"></div><div class="expense-personal-hint">Выбирай готовую категорию. Для любого другого расхода нажми «Другое» и задай точное название — оно попадёт в историю и диаграмму расходов.</div>`;
   openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Деньги</div><h2>${editing?(isProfit?'Изменить прибыль':'Изменить расход'):(isProfit?'Добавить прибыль':'Добавить расход')}</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Дата операции</label><input id="moneyDate" type="date" value="${esc(forcedDate||draft.dateKey||moneyViewDate||keyDay())}"></div><div class="field"><label>Сумма</label><input id="moneyAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" value="${esc(draft.amount||'')}"></div><div class="field"><label>${isProfit?'Источник дохода':'Категория расхода'}</label>${typeField}</div>${!isProfit?`<label class="debt-payment-toggle"><input type="checkbox" id="moneyDebtPay"> Это платёж по долгу</label><div class="field" id="moneyDebtWrap" style="display:none"><label>Какой долг уменьшить</label><select id="moneyDebtType"><option value="bank">Банк</option><option value="firms">Фирмы</option></select></div>`:''}<div class="field"><label>Комментарий</label><input id="moneyNote" placeholder="Необязательно" value="${esc(draft.note||'')}"></div><div class="sub">${isProfit?'Доступны три источника: зарплата, фриланс и спортивная аналитика.':'Расход сразу уменьшает общую кассу и автоматически попадает в анализ.'} Поля сохраняются автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn ${isProfit?'primary':'orange'}" id="saveMoneyBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> ${isProfit?'Сохранить прибыль':'Сохранить расход'}</button></div></div>`);
   $('closeModalBtn').onclick=closeModal;
+  liveMoneyForm(kind==='profit'?'profit':'expense');
   const syncCustomVisibility=()=>{if($('customExpenseWrap'))$('customExpenseWrap').style.display=$('moneyType').value==='Другое'?'block':'none'};
   const autosave=()=>editing?null:saveDraft(dk,{amount:$('moneyAmount').value,type:$('moneyType').value,note:$('moneyNote').value,customCategory:$('moneyCustomCategory')?.value||'',debtPay:$('moneyDebtPay')?.checked||false,debtType:$('moneyDebtType')?.value||'bank',dateKey:$('moneyDate').value});
   ['moneyDate','moneyAmount','moneyType','moneyNote','moneyCustomCategory','moneyDebtPay','moneyDebtType'].forEach(id=>$(id)?.addEventListener(id==='moneyDebtPay'||id==='moneyDebtType'||id==='moneyType'?'change':'input',()=>{if(id==='moneyDebtPay')$('moneyDebtWrap').style.display=$('moneyDebtPay').checked?'block':'none';syncCustomVisibility();autosave()}));
@@ -3520,6 +3665,26 @@ function openGoalEdit(){
 }
 function openAchievement(){
   const d=state.drafts?.achievement||{};openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-spark"></use></svg></span>Результат</div><h2>Зафиксировать</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Что конкретно достиг</label><textarea id="achInput" placeholder="Например: закрыл этап, накопил сумму, закончил часть работы...">${esc(d.text||'')}</textarea></div><div class="sub">Текст сохраняется автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveAchBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить результат</button></div></div>`);$('closeModalBtn').onclick=closeModal;$('achInput').addEventListener('input',()=>saveDraft('achievement',{text:$('achInput').value}));$('saveAchBtn').onclick=()=>{const t=$('achInput').value.trim();if(!t){toast('Добавь факт');return}state.achievements.push({id:uid(),text:t,at:new Date().toISOString()});clearDraft('achievement');saveState();closeModal();renderGoal();toast('Результат сохранён')};focusSoon('achInput',50)
+}
+document.addEventListener('click',e=>{const b=e.target.closest?.('#debtChart [data-debt-open]');if(b)openDebtHistory('all')});
+document.addEventListener('click',e=>{const q=e.target.closest?.('.jl-quote');if(q)q.classList.toggle('open')});
+function openDebtHistory(focus='all'){
+  ensureDebtHistory();
+  const who=focus==='bank'||focus==='firms'?focus:'',name={bank:'Банк',firms:'Фирмы'};
+  const pays=(state.expenses||[]).filter(e=>e.debtPayment&&(!who||e.debtPayment===who)).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+  const paidSum=pays.reduce((a,e)=>a+(Number(e.amount)||0),0);
+  const hist=state.debtHistory.slice().reverse().slice(0,30);
+  const histRows=hist.map((x,i)=>{const prev=hist[i+1],d=prev?(Number(x.total)||0)-(Number(prev.total)||0):0;return `<div class="jl-dh-row" style="--i:${i}"><span>${esc(new Date(x.day+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}))}</span><b>${esc(fmtMoney(x.total))}</b><em class="${d<0?'down':d>0?'up':''}">${d<0?'−'+esc(fmtMoney(-d)):d>0?'+'+esc(fmtMoney(d)):'без изменений'}</em></div>`}).join('');
+  const payRows=pays.slice(0,40).map((e,i)=>`<div class="jl-dh-row pay" style="--i:${i}"><span>${esc(new Date(e.at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'}))} · ${esc(name[e.debtPayment]||'Долг')}${e.note?' · '+esc(e.note):''}</span><b class="green-txt">−${esc(fmtMoney(e.amount))}</b></div>`).join('');
+  openModal(`<div class="close-row"><div><div class="eyebrow">Долг</div><h2>${who?esc(name[who]):'История долга'}</h2><div class="sub">${who?'Платежи и как менялся этот долг':'Все платежи и как менялся долг'}</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
+  <div class="jl-dh-top"><div class="${focus==='bank'?'on':''}" data-dh="bank"><small>Банк</small><b>${esc(fmtMoney(state.debts.bank))}</b></div><div class="${focus==='firms'?'on':''}" data-dh="firms"><small>Фирмы</small><b>${esc(fmtMoney(state.debts.firms))}</b></div><div class="${!who?'on':''}" data-dh="all"><small>Всего</small><b>${esc(fmtMoney(debtTotal()))}</b></div></div>
+  <section class="jl-dh-sec"><h3>💸 Платежи${pays.length?` · ${pays.length} на ${esc(fmtMoney(paidSum))}`:''}</h3>${payRows||'<div class="v-empty">Платежей по долгу ещё нет. Внеси первый — кнопкой ниже.</div>'}</section>
+  <section class="jl-dh-sec"><h3>📉 Как менялся долг</h3>${histRows||'<div class="v-empty">История появится после первого изменения.</div>'}</section>
+  <div class="jl-dh-actions"><button class="btn primary" type="button" id="dhPay">${svgIcon('i-transfer')} Внести платёж</button><button class="btn" type="button" id="dhEdit">${svgIcon('i-pencil')} Изменить суммы</button></div>`);
+  $('closeModalBtn').onclick=closeModal;
+  $$('[data-dh]').forEach(b=>b.onclick=()=>openDebtHistory(b.dataset.dh));
+  $('dhPay').onclick=()=>{closeModal();openTransferForm({dir:'to-debt',debt:who||'bank'})};
+  $('dhEdit').onclick=()=>{closeModal();openDebtEdit()};
 }
 function openDebtEdit(){
   const d=state.drafts?.debt||{};openModal(`<div class="close-row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Обязательства</div><h2>Долги</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="grid g2"><div class="field"><label>Банк</label><input id="db" type="number" min="0" value="${esc(d.bank??state.debts.bank)}"></div><div class="field"><label>Фирмы</label><input id="df" type="number" min="0" value="${esc(d.firms??state.debts.firms)}"></div></div><div class="field"><label>Обязательный платёж / месяц</label><input id="dp" type="number" min="0" value="${esc(d.payment??state.debts.monthlyPayment)}"></div><div class="sub">Изменения долгов сохраняются автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveDebtBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;const autosave=()=>{state.debts.bank=Math.max(0,Number($('db').value)||0);state.debts.firms=Math.max(0,Number($('df').value)||0);state.debts.monthlyPayment=Math.max(0,Number($('dp').value)||0);saveDraft('debt',{bank:$('db').value,firms:$('df').value,payment:$('dp').value});renderMoney();renderTodayLight()};['db','df','dp'].forEach(id=>$(id).addEventListener('input',autosave));$('saveDebtBtn').onclick=()=>{autosave();clearDraft('debt');closeModal();renderMoney();toast('Долги обновлены')}
@@ -3574,7 +3739,7 @@ function openGeminiAnalysis(){
   openModal('<div class="close-row"><div><div class="eyebrow">Jamal Life AI</div><h2>Анализ моей жизни</h2><div class="sub">AI получает только выбранные данные из твоего аккаунта. Запрос запускается только вручную.</div></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="card" style="margin-top:12px;padding:13px;background:var(--soft)"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Что использовать</div><div class="stack" style="margin-top:8px"><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span><input id="aiGoal" type="checkbox" '+(consent.goal?'checked':'')+'> Цель и её прогресс</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span><input id="aiMoney" type="checkbox" '+(consent.money?'checked':'')+'> Деньги, доходы, расходы и долги</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span><input id="aiReports" type="checkbox" '+(consent.reports?'checked':'')+'> Итоги и этапы дня</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-note"></use></svg></span><input id="aiNotes" type="checkbox" '+(consent.notes?'checked':'')+'> Заметки (последние 15)</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg></span><input id="aiWeb" type="checkbox" '+(state.ai?.webSearch?'checked':'')+'> Проверять актуальные внешние факты через Google</label></div><div class="sub" style="margin-top:8px">Основные данные сервер читает из твоей строки life_state в Supabase. Полный JSON состояния из браузера не отправляется.</div></div><div style="margin-top:10px"><button class="btn primary" id="aiRunBtn" style="width:100%"><svg class="ui-icon"><use href="#i-spark"></use></svg> Запустить AI-анализ</button></div><div class="ai-result" id="aiResult" style="margin-top:12px"></div>');
   $('closeModalBtn').onclick=closeModal;
   $('aiWeb').onchange=()=>{state.ai.webSearch=$('aiWeb').checked;saveState()};
- $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult');$('aiRunBtn').disabled=true;box.innerHTML='<div class="empty">Gemini анализирует выбранные данные…</div>';try{const data=await callAI({scope:c}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item"><b>Результат Gemini</b><div style="white-space:pre-wrap;line-height:1.55">'+esc(entry.result)+'</div>'+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Gemini сейчас не ответил</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{$('aiRunBtn').disabled=false}};
+ $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult');$('aiRunBtn').disabled=true;box.innerHTML='<div class="empty">AI читает твои данные: деньги, долг, цель, дни, привычки и задачи…</div>';try{if(cloudAuth()){try{await cloudSync()}catch(e){}}const data=await callAI({scope:c,facts:lifeFacts()}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item jl-ai-result"><b>Разбор твоей жизни · '+esc(data.model||'Gemini')+'</b>'+aiTextHtml(entry.result)+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Gemini сейчас не ответил</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{$('aiRunBtn').disabled=false}};
 }
 function validateDaySteps(){
   const steps=state.day.steps;
@@ -3726,6 +3891,7 @@ function showView(id){
   document.querySelectorAll('.bottom button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===navId));
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===navId));
   document.body.dataset.view=id;
+  if(id==='viewGoal')setTimeout(maybeAutoGoalAI,1500);
   if(opts.push!==false&&prev!==id){try{history.pushState({lcView:id},'');navDepth++}catch(e){}}
   onViewShown(id);
   requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'}));
@@ -4419,7 +4585,8 @@ function openTransferForm(opts={}){
   const goalOpts=goals.map(g=>`<option value="${esc(g.id)}" ${g.id===opts.goalId?'selected':''}>${esc((g.main?'★ ':'')+(g.main?state.goal.title:g.title))}</option>`).join('');
   openModal(`<div class="close-row"><div><div class="eyebrow">Деньги</div><h2>Перевод</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Направление</label><select id="trDir"><option value="to-goal">Кошелёк → Цель</option><option value="from-goal">Цель → Кошелёк</option><option value="to-debt">Кошелёк → Долг</option></select></div><div class="field" id="trGoalWrap"><label>Цель</label><select id="trGoal">${goalOpts}</select></div><div class="field" id="trDebtWrap" style="display:none"><label>Какой долг</label><select id="trDebt"><option value="bank">Банк · ${esc(fmtMoney(state.debts.bank))}</option><option value="firms">Фирмы · ${esc(fmtMoney(state.debts.firms))}</option></select></div><div class="grid g2"><div class="field"><label>Сумма</label><input id="trAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0"></div><div class="field"><label>Дата</label><input id="trDate" type="date" value="${esc(dk)}"></div></div><div class="field"><label>Комментарий</label><input id="trNote" maxlength="120" placeholder="Необязательно"></div><div class="sub" id="trHint">В кошельке: ${esc(fmtMoney(wm.cash))}</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="trSave">${svgIcon('i-transfer')} Перевести</button></div></div>`);
   $('closeModalBtn').onclick=closeModal;
-  if(opts.dir)$('trDir').value=opts.dir;
+  liveMoneyForm('transfer');
+  if(opts.dir)$('trDir').value=opts.dir;if(opts.debt&&$('trDebt'))$('trDebt').value=opts.debt;
   const hint=()=>{const dir=$('trDir').value,g=goalById($('trGoal').value);$('trGoalWrap').style.display=dir==='to-debt'?'none':'block';$('trDebtWrap').style.display=dir==='to-debt'?'block':'none';const cash=walletMetrics().cash;if(dir==='to-goal'&&g){const p=goalProgress(g);setText('trHint',`В кошельке: ${fmtMoney(cash)} · в цели: ${fmtMoney(goalSavedOf(g))}${p.target?' · до суммы цели: '+fmtMoney(Math.max(0,p.target-goalSavedOf(g))):''}`)}else if(dir==='from-goal'&&g)setText('trHint',`В цели отложено: ${fmtMoney(goalSavedOf(g))}`);else setText('trHint',`В кошельке: ${fmtMoney(cash)} · долг: ${fmtMoney(debtTotal())}`)};
   ['trDir','trGoal','trDebt'].forEach(id=>$(id).addEventListener('change',hint));hint();
   $('trSave').onclick=()=>{

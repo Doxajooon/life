@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "67.0.0");
-assert.match(gradle, /versionCode 670\b/); assert.match(gradle, /versionName '67\.0'/);
-assert.match(csproj, /<Version>67\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V67'), "app version must be V67 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v67-0"), "service worker cache must be V67");
+assert.equal(pkg.version, "68.0.0");
+assert.match(gradle, /versionCode 680\b/); assert.match(gradle, /versionName '68\.0'/);
+assert.match(csproj, /<Version>68\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V68'), "app version must be V68 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v68-0"), "service worker cache must be V68");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -81,4 +81,7 @@ assert.ok(!html.includes("data-more=") && !html.includes('class="jl-more"'), "Mo
 assert.ok(existsSync(new URL("../sounds/jamal-glass.wav", import.meta.url)) && html.includes("sounds/jamal-glass.wav") && sw.includes("jamal-glass.wav") && notif.includes('"jamal_life_glass"'), "the Jamal Glass tone ships to web and Android (new channel so phones pick it up)");
 for (const f of ["manrope", "nunito", "inter"]) assert.ok(existsSync(new URL(`../fonts/${f}-cyrillic.woff2`, import.meta.url)) && sw.includes(`${f}-cyrillic.woff2`), "font missing: " + f);
 assert.ok(html.includes('id="setFont"') && html.includes("function applyFont"), "font choice in settings");
-console.log("JAMAL_LIFE_V67_STATIC_QA_OK");
+assert.ok(html.includes("rememberBaseStamp(state[CLOUD_BASE_KEY])") && html.includes("const st=baseStamp()"), "the cloud base stamp survives a quick restart (an edit made during the first upload is merged, not lost)");
+assert.ok(html.includes("function openDebtHistory") && html.includes("function liveMoneyForm") && html.includes("function autoMilestones") && html.includes("function maybeAutoGoalAI") && html.includes("function aiTextHtml"), "V68 features");
+assert.ok(fn.includes("function lifeContext") && fn.includes("ПЛЮСЫ") && fn.includes("КУДА Я ИДУ"), "life analysis: pluses, minuses and direction");
+console.log("JAMAL_LIFE_V68_STATIC_QA_OK");

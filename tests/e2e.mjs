@@ -815,7 +815,49 @@ await test("Шрифт выбирается в настройках и сохр�
   });
   assert.deepEqual(r, { def: "manrope", after: "nunito", saved: "nunito", loaded: true, wav: true });
   await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
-  assert.equal(await page.evaluate(() => document.documentElement.dataset.font), "nunito");
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.font + "|" + state.settings.font), "nunito|nunito");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Долг: ячейки открывают историю; формы денег живые; этапы цели закрываются сами", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    state.debts = { bank: 100000, firms: 100000, monthlyPayment: 4000 }; state.debtBaseline = 200000;
+    state.expenses.push({ id: "dp1", amount: 4000, category: "Долг", debtPayment: "bank", at: new Date().toISOString() });
+    saveState(); renderAll(); showView("viewMoney");
+    document.querySelector('[data-debt-open="bank"]').click();
+    const hist = { title: document.querySelector(".modal h2")?.textContent, pays: document.querySelectorAll(".jl-dh-row.pay").length };
+    closeModal();
+    openMoneyForm("profit");
+    const a = document.getElementById("moneyAmount"); a.value = "1500"; a.dispatchEvent(new Event("input", { bubbles: true }));
+    document.querySelector('[data-src-pick="Фриланс"]').click();
+    document.querySelector('[data-day-pick]:nth-child(2)').click();
+    const rc = { sumNode: !!document.getElementById("rcSum"), ico: document.getElementById("rcIco").textContent, what: document.getElementById("rcWhat").textContent, date: document.getElementById("rcDate").textContent, type: document.getElementById("moneyType").value };
+    closeModal();
+    state.goal.milestones = [{ id: "m1", title: "Закрыть основную часть долгов", done: false }, { id: "m2", title: "Создать резерв", done: false }];
+    state.debts = { bank: 50000, firms: 40000, monthlyPayment: 4000 }; saveState(); renderAll(); showView("viewGoal");
+    return { hist, rc, ms: state.goal.milestones.map(m => [m.done, !!m.auto]) };
+  });
+  assert.equal(r.hist.title, "Банк"); assert.equal(r.hist.pays, 1);
+  assert.ok(r.rc.sumNode); assert.equal(r.rc.type, "Фриланс"); assert.equal(r.rc.what, "Фриланс"); assert.equal(r.rc.date, "вчера");
+  assert.deepEqual(r.ms, [[true, true], [false, false]]);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("AI-разбор жизни: шлёт цифры приложения и показывает блоки плюсов и минусов", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await page.evaluate(() => openGeminiAnalysis());
+  const opened = await page.evaluate(() => !!document.getElementById("aiRunBtn"));
+  if (opened) {
+    await page.click("#aiRunBtn");
+    await page.waitForFunction(() => document.querySelector("#aiResult .analysis-item"), null, { timeout: 8000 });
+    const body = cloud.aiBodies.at(-1);
+    assert.ok(body.facts && typeof body.facts === "object" && "cats" in body.facts, "life analysis must send the app's own numbers");
+    assert.equal(await page.evaluate(() => window.__xss), undefined);
+  }
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
