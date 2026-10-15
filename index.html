@@ -622,7 +622,7 @@ h1{font-size:1.75rem}
 .bottom button b{width:34px}}
 :root,html[data-theme="dark"]{--bg:#081120;--panel:#0f1b2e;--soft:#0b1627;--text:#eaf1fb;--muted:#8a9bb5;--line:#1d2c44;--blue:#3b82f6;--blue-dark:#7fb2ff;--blue-soft:#11264a;--green:#22c55e;--green-soft:#0f2e22;--red:#ef4444;--red-soft:#351822;--orange:#f59e0b;--orange-dark:#fbbf56;--orange-soft:#33260f;--purple:#a78bfa;--cyan:#22d3ee;--shadow:0 10px 30px rgba(0,0,0,.28);--radius:16px;--r:16px
 }
-html[data-theme="light"]{--bg:#f3f6fb;--panel:#ffffff;--soft:#eef3f9;--text:#122033;--muted:#62748c;--line:#dbe4ef;--blue:#2563eb;--blue-dark:#1d4ed8;--blue-soft:#e6efff;--green:#16a34a;--green-soft:#e5f7ec;--red:#dc2626;--red-soft:#fdecec;--orange:#d97706;--orange-dark:#b45309;--orange-soft:#fff3df;--purple:#7c3aed;--cyan:#0891b2;--shadow:0 8px 24px rgba(18,32,51,.08)
+html[data-theme="light"]{--bg:#f3f6fb;--panel:#ffffff;--soft:#eef3f9;--text:#122033;--muted:#4f5f75;--line:#dbe4ef;--blue:#2563eb;--blue-dark:#1d4ed8;--blue-soft:#e6efff;--green:#16a34a;--green-soft:#e5f7ec;--red:#dc2626;--red-soft:#fdecec;--orange:#d97706;--orange-dark:#b45309;--orange-soft:#fff3df;--purple:#7c3aed;--cyan:#0891b2;--shadow:0 8px 24px rgba(18,32,51,.08)
 }
 body{background:radial-gradient(1200px 600px at 50% -200px,color-mix(in srgb,var(--blue) 14%,transparent),transparent 70%),var(--bg);background-attachment:fixed}
 .card{border-radius:var(--r);border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)}
@@ -1624,7 +1624,7 @@ html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
 .jl-chips{display:flex;flex-wrap:wrap;gap:8px}
 .jl-chip{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--text);font-weight:700;font-size:.85rem;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s ease,border-color .2s ease}
 .jl-chip:active{transform:scale(.94)}
-.jl-chip.active{background:color-mix(in srgb,var(--gc,var(--blue)) 22%,var(--soft));border-color:var(--gc,var(--blue))}
+.jl-chip.active{background:color-mix(in srgb,var(--gc,var(--blue)) 22%,var(--soft));border-color:var(--gc,var(--blue));color:var(--text)}
 .jl-hint{font-size:.82rem;color:var(--muted);line-height:1.55;padding:12px 14px;border-radius:14px;background:var(--soft);border:1px dashed var(--line)}
 /* bank stickers */
 .jl-bank-preview{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 14%,var(--soft)),var(--soft));border:1px solid color-mix(in srgb,var(--gold) 30%,var(--line))}
@@ -1813,6 +1813,7 @@ b,strong{font-weight:600}
 .jl-ai-result>b{display:block;margin-bottom:10px}
 .jl-ai-sec{padding:12px 14px;border-radius:14px;background:var(--soft);border:1px solid var(--line);margin-top:10px;animation:jlRowIn .45s calc(var(--i)*60ms) cubic-bezier(.2,.8,.2,1) backwards}
 .jl-ai-sec b{display:flex;align-items:center;gap:8px;font-size:.92rem;margin-bottom:6px}
+.jl-ai-sec,.jl-ai-sec div{color:var(--text)}
 .jl-ai-sec div{white-space:pre-wrap;line-height:1.6;font-size:.88rem}
 </style>
 

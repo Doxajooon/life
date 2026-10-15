@@ -930,6 +930,45 @@ await test("Клавиатура: столбики долга и цитата о
   await ctx.close();
 });
 
+await test("Светлая тема: новые компоненты читаются (контраст ≥ 4.5:1)", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const AXE = fs.readFileSync(path.join(ROOT, "node_modules/axe-core/axe.min.js"), "utf8");
+  const SHOTS = process.env.SHOTS; if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
+  await page.addScriptTag({ content: AXE });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.evaluate(() => {
+    const now = new Date().toISOString();
+    state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 }; ensureDebtHistory();
+    state.expenses.push({ id: "dp", amount: 4000, category: "Долг", debtPayment: true, at: now });
+    state.goal.target = 50000; state.goal.milestones.forEach((m, i) => { m.done = i === 0; });
+    state.ai.history.unshift({ id: "ah", at: now, scope: {}, result: "ПЛЮСЫ — доход 9 000\nМИНУСЫ — кафе 1 200\nШАГ НА СЕГОДНЯ — записать траты", sources: [] });
+    saveState(); renderAll();
+  });
+  const bad = [];
+  const check = async (name, sel) => {
+    await page.waitForSelector(sel, { timeout: 4000 }); await page.waitForTimeout(250);
+    const v = await page.evaluate(sel => axe.run(sel, { runOnly: ["color-contrast"] }).then(r => r.violations.flatMap(v => v.nodes.map(n => n.target.join(" ") + " " + (n.any[0]?.data?.contrastRatio ?? "")))), sel);
+    const th = await page.evaluate(() => document.documentElement.dataset.theme);
+    bad.push(...v.map(x => th + " " + name + ": " + x));
+    if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `${name}-${await page.evaluate(() => document.documentElement.dataset.theme)}.png`) });
+  };
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate(t => { state.settings.theme = t; setTheme(); closeModal(); }, theme);
+    await page.evaluate(() => openMoneyForm("expense")); await check("receipt-expense", ".jl-receipt");
+    await page.evaluate(() => { closeModal(); openMoneyForm("profit"); }); await check("receipt-profit", ".modal .stack, #modal");
+    await check("src-tiles", ".jl-src-tiles");
+    await page.evaluate(() => { closeModal(); openDebtHistory("bank"); }); await check("debt-history", "#modal");
+    await page.evaluate(() => { closeModal(); openBudget(); }); await check("stickers", ".jl-stickers");
+    await page.evaluate(() => { closeModal(); showView("viewGoal"); renderGoal(); }); await check("goal-milestones", "#milestones");
+    await page.evaluate(() => { const d = document.createElement("div"); d.id = "aiProbe"; d.className = "analysis-item jl-ai-result"; d.innerHTML = aiTextHtml(state.ai.history[0].result); document.getElementById("milestones").after(d); d.scrollIntoView(); });
+    await check("ai-cards", "#aiProbe"); await page.evaluate(() => document.getElementById("aiProbe").remove());
+  }
+  if (bad.length) console.log(bad.join("\n"));
+  assert.deepEqual(bad, [], bad.join("\n"));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
