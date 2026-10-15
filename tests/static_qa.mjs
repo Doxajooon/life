@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "64.0.0");
-assert.match(gradle, /versionCode 640\b/); assert.match(gradle, /versionName '64\.0'/);
-assert.match(csproj, /<Version>64\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V64'), "app version must be V64 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v64-0"), "service worker cache must be V64");
+assert.equal(pkg.version, "65.0.0");
+assert.match(gradle, /versionCode 650\b/); assert.match(gradle, /versionName '65\.0'/);
+assert.match(csproj, /<Version>65\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V65'), "app version must be V65 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v65-0"), "service worker cache must be V65");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -76,4 +76,4 @@ assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 assert.ok(html.includes("function resetForNewOwner") && html.includes("OWNER_KEY") && /owner&&owner!==user\.id\)resetForNewOwner\(\)/.test(html), "another account must never get the previous owner's records");
 assert.ok(html.includes("if(synced)await wipeLocalData()"), "logout must clear personal data from the device once it is safe in the cloud");
 assert.ok(html.includes("function renderRhythm") && html.includes("function renderDayStrip") && html.includes("function renderHabitWeek"), "living rhythm, day strip and habit week chart");
-console.log("JAMAL_LIFE_V64_STATIC_QA_OK");
+console.log("JAMAL_LIFE_V65_STATIC_QA_OK");

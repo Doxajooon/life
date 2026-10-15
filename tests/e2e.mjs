@@ -775,6 +775,28 @@ await test("Сегодня: ритм дня этапами, задачи и пр
   await ctx.close();
 });
 
+await test("Новый банк из стикеров без списка подсказок; новая цель с подсказками; верх «Сегодня» без лишней строки", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-15T11:00:00+05:00") });
+  await page.evaluate(() => { showView("viewMoney"); openBudget(); });
+  const f = await page.evaluate(() => ({ datalist: !!document.querySelector(".modal datalist, #budgetName[list]"), focused: document.activeElement?.id || "", n: document.querySelectorAll("[data-emo]").length }));
+  assert.equal(f.datalist, false, "datalist flashes a text list on phones"); assert.notEqual(f.focused, "budgetName", "keyboard must not pop up on open"); assert.ok(f.n >= 20);
+  await page.click('[data-emo="☕"]'); await page.click('[data-bank-sum="500"]');
+  assert.equal(await page.inputValue("#budgetName"), "Кофе");
+  await page.click("#saveBudgetBtn");
+  assert.deepEqual(await page.evaluate(() => state.budgets.map(b => [b.emoji, b.name, b.planned])), [["☕", "Кофе", 500]]);
+  await page.evaluate(() => openGoalEditor());
+  await page.click('[data-ge-idea="1"]'); await page.click('[data-ge-sum="50000"]'); await page.click('[data-ge-months="12"]'); await page.click('[data-ge-color="green"]');
+  const g = await page.evaluate(() => ({ title: document.getElementById("gePvTitle").textContent, monthly: document.getElementById("geMonthly").textContent, date: document.getElementById("geDate").value }));
+  assert.equal(g.title, "Машина"); assert.match(g.monthly, /в месяц/); assert.equal(g.date, "2027-10-15");
+  await page.click("#geSave");
+  const saved = await page.evaluate(() => state.goals.find(x => x.title === "Машина"));
+  assert.ok(saved && saved.icon === "car" && saved.color === "green" && saved.targetAmount === 50000);
+  const h = await page.evaluate(() => { showView("viewToday"); renderToday(); return { now: document.getElementById("currentAction").textContent, quote: document.getElementById("motivationText").textContent, details: document.getElementById("currentDetails").children.length }; });
+  assert.match(h.now, /Работа/); assert.ok(!/Сегодня:/.test(h.quote), "quote must not carry the task line"); assert.equal(h.details, 0);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

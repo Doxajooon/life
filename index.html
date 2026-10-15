@@ -1582,6 +1582,95 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 @keyframes jlDotBlink{0%,100%{opacity:1}50%{opacity:.45}}
 @media (max-width:420px){.jl-dots i{width:10px;height:10px}.jl-dots{gap:3px}.jl-habit{gap:8px}.jl-miniring{width:40px;height:40px}}
 @media (prefers-reduced-motion:reduce){.jl-rstep::after,.jl-rstep-dot,.jl-rstep-bar i::after,.jl-seg em,.jl-task-emo,.jl-habit-emo,.jl-fl,.jl-dots i,.jl-miniring{animation:none!important;transition:none!important}}
+
+/* ===== V65: air between lines, sticker bank form, goal form, calm hero ===== */
+body{line-height:1.55}
+.v-sub,.sub{line-height:1.5}
+.v-title+.v-sub,h2+.v-sub,h2+.sub,.v-title+.sub{margin-top:6px}
+.v-task-meta,.jl-habit-name small,.v-row-main small,.v-tx small,.jl-rstep-meta,.jl-bank-top small,.v-goal-body p,.v-goal-body small{margin-top:5px;line-height:1.45}
+.v-task-title,.jl-habit-name b,.v-row-main b,.v-tx b{line-height:1.35}
+.v-kpi span{line-height:1.3}.v-kpi b{margin-top:6px!important;line-height:1.3!important}
+.ring-label{margin-top:6px}.ring-state{margin-top:3px;line-height:1.3}
+.v-task,.jl-habit{padding-top:.85rem!important;padding-bottom:.85rem!important}
+.jl-now-meta{margin-top:6px}.jl-now-foot{margin-top:8px;line-height:1.45}
+.card>.row+*{margin-top:14px}
+.jl-focus-item b{display:block;margin-top:5px;line-height:1.35}.jl-focus-item small{margin-top:6px!important;line-height:1.5!important}
+.jl-week-stats span{display:block;margin-top:6px}
+.jl-hero-date span{display:block;margin-top:7px}
+.kpi .value{margin-top:7px!important;line-height:1.3}.kpi .label{line-height:1.35}
+.dp-cell b{margin-top:7px!important;line-height:1.3}.dp-cell small{margin-top:6px!important;line-height:1.45}.dp-sum{margin-top:6px!important}
+.jl-money-today b+small,.jl-money-today small{margin-top:7px!important;line-height:1.5}
+.jl-goalhero-next b{margin-top:8px!important}
+.jl-free-item b+small,.jl-free-item small,.jl-free-head small{display:block;margin-top:6px!important;line-height:1.45}
+.v-tx small,.v-tx-meta,.v-tx-date{display:block;margin-top:5px}
+.v-kpi4 .v-kpi b small,.v-kpi b small{margin-left:3px}
+.v-title~.v-sub,.row>div>.v-sub{margin-top:6px}
+.field{gap:8px}
+.stack{gap:16px}
+/* hero */
+.jl-now-title{font-size:1.45rem;letter-spacing:-.01em}
+.jl-now-details:empty{display:none}
+.jl-quote{position:relative;margin:18px 0 0;padding:18px 18px 16px 52px;border:0!important;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 12%,transparent),transparent 70%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 22%,transparent)}
+.jl-quote::before{content:"\201C";position:absolute;left:14px;top:2px;font:700 3.4rem/1 Georgia,"Noto Serif","Times New Roman",serif;color:var(--gold);opacity:.85}
+.jl-quote blockquote{font-family:"Noto Serif",Georgia,"Times New Roman",serif;font-style:italic;font-size:1.06rem!important;line-height:1.6!important;letter-spacing:.005em;color:#f4efe3!important}
+.jl-quote figcaption{margin-top:12px;font-size:.8rem;line-height:1.5;color:var(--gold)!important;opacity:.85;font-weight:600}
+.jl-quote figcaption::before{content:"— "}
+html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
+/* shared form layout */
+.jl-form{display:grid;gap:22px;margin-top:16px}
+.jl-fsec{display:grid;gap:12px}
+.jl-fsec-h{display:flex;align-items:center;gap:10px;font-size:.85rem;font-weight:800;color:var(--text);letter-spacing:.01em}
+.jl-fsec-h>span:first-child{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.75rem;background:color-mix(in srgb,var(--gc,var(--blue)) 22%,var(--soft));color:var(--gc,var(--blue));flex:0 0 auto}
+.jl-fsec-h em{font-style:normal;font-weight:600;color:var(--muted);font-size:.78rem}
+.jl-fsec input,.jl-fsec textarea{min-height:54px;font-size:1.02rem!important;padding:14px 16px!important;border-radius:14px!important;transition:border-color .2s ease,box-shadow .2s ease}
+.jl-fsec input:focus,.jl-fsec textarea:focus{border-color:var(--gc,var(--blue));box-shadow:0 0 0 4px color-mix(in srgb,var(--gc,var(--blue)) 18%,transparent);outline:none}
+.jl-fsec textarea{min-height:96px;line-height:1.5;resize:vertical}
+.jl-chips{display:flex;flex-wrap:wrap;gap:8px}
+.jl-chip{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--text);font-weight:700;font-size:.85rem;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s ease,border-color .2s ease}
+.jl-chip:active{transform:scale(.94)}
+.jl-chip.active{background:color-mix(in srgb,var(--gc,var(--blue)) 22%,var(--soft));border-color:var(--gc,var(--blue))}
+.jl-hint{font-size:.82rem;color:var(--muted);line-height:1.55;padding:12px 14px;border-radius:14px;background:var(--soft);border:1px dashed var(--line)}
+/* bank stickers */
+.jl-bank-preview{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 14%,var(--soft)),var(--soft));border:1px solid color-mix(in srgb,var(--gold) 30%,var(--line))}
+.jl-bank-preview-emo{width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-size:2rem;background:var(--panel);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.jl-bank-preview-emo.bump{animation:jlDoneBurst .55s cubic-bezier(.34,1.56,.64,1)}
+.jl-bank-preview b{display:block;font-size:1.1rem;line-height:1.3}
+.jl-bank-preview small{display:block;margin-top:4px;color:var(--muted);font-size:.85rem}
+.jl-stickers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.jl-stickers button{display:grid;justify-items:center;gap:6px;padding:12px 1px 10px;min-width:0;border-radius:16px;border:1.5px solid var(--line);background:var(--soft);color:var(--text);cursor:pointer;animation:jlStickerIn .45s calc(var(--i)*18ms) cubic-bezier(.34,1.56,.64,1) backwards;transition:transform .25s cubic-bezier(.34,1.56,.64,1),border-color .2s ease,background .2s ease,box-shadow .2s ease}
+.jl-stickers button i{font-style:normal;font-size:1.75rem;line-height:1;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.jl-stickers button small{font-size:.7rem;font-weight:700;letter-spacing:-.02em;color:var(--muted);line-height:1.2;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jl-stickers button:active{transform:scale(.92)}
+.jl-stickers button.active{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 16%,var(--soft));box-shadow:0 6px 18px color-mix(in srgb,var(--gold) 22%,transparent)}
+.jl-stickers button.active i{transform:scale(1.18);animation:jlEmoWiggle .6s ease}
+.jl-stickers button.active small{color:var(--text)}
+@keyframes jlStickerIn{from{opacity:0;transform:scale(.6) translateY(8px)}}
+@media (min-width:560px){.jl-stickers{grid-template-columns:repeat(6,minmax(0,1fr))}}
+/* goal form */
+.ge-preview{display:grid;justify-items:center;gap:12px;text-align:center;margin:4px 0 16px}
+.ge-preview .v-cover.round{transition:box-shadow .4s ease,background .4s ease}
+.ge-preview .v-cover-ico{animation:jlFloatY 3s ease-in-out infinite}
+.ge-pv-text{display:grid;gap:6px;justify-items:center}
+.ge-pv-text b{font-size:1.3rem;line-height:1.3;max-width:28ch;overflow-wrap:anywhere}
+.ge-pv-text span{font-size:.88rem;color:var(--muted);line-height:1.45}
+.ge-pv-text em{font-style:normal;font-weight:800;font-size:.85rem;padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--gc,var(--blue)) 20%,transparent);color:color-mix(in srgb,var(--gc,var(--blue)) 70%,#fff)}
+.ge-pv-text em[hidden]{display:none}
+.ge-cur{font-weight:600;color:var(--muted)}
+.ge-date-note{font-size:.82rem;color:var(--muted);line-height:1.45}
+.ge-date-note:empty{display:none}
+#viewGoalEdit .v-form{padding:20px 18px}
+#viewGoalEdit .jl-chip.active,#viewGoalEdit .jl-fsec-h>span:first-child{--gc:inherit}
+.ge-icons{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px!important;overflow:visible!important}
+.ge-icons button{width:auto!important;height:auto!important;aspect-ratio:1;flex:none!important;border-radius:16px!important;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .2s ease,border-color .2s ease}
+.ge-icons button:active{transform:scale(.9)}
+.ge-icons button.active{transform:scale(1.06);box-shadow:0 6px 16px color-mix(in srgb,var(--gc,var(--blue)) 40%,transparent)}
+.ge-colors{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px!important}
+.ge-colors button{width:auto!important;height:auto!important;aspect-ratio:1;display:grid;place-items:center;color:#fff;transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.ge-colors button .ui-icon{width:16px;height:16px;opacity:0;transform:scale(.4);transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+.ge-colors button.active{transform:scale(1.12)}
+.ge-colors button.active .ui-icon{opacity:1;transform:scale(1)}
+@media (max-width:380px){.ge-colors{grid-template-columns:repeat(4,minmax(0,1fr))}.ge-icons{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){.jl-stickers button,.jl-stickers button i,.ge-preview .v-cover-ico,.jl-bank-preview-emo{animation:none!important}}
 </style>
 
 
@@ -1660,7 +1749,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
   <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="authGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0"/><stop offset=".6" stop-color="#f97316" stop-opacity=".5"/><stop offset="1" stop-color="#9a3412" stop-opacity=".15"/></linearGradient><linearGradient id="authRidge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3a5f"/><stop offset="1" stop-color="#0b1426"/></linearGradient></defs><rect x="0" y="36" width="400" height="150" fill="url(#authGlow)"/><path d="M0 320V150l38-30 26 18 48-62 40 48 30-26 46 54 36-34 52 44 44-28 40 26v130z" fill="#3b3f62" opacity=".8"/><path d="M0 320V190l56-34 40 28 52-46 54 52 44-30 60 42 38-22 56 30v110z" fill="url(#authRidge)"/><path d="M0 320v-70l74-30 62 24 68-34 70 30 64-22 62 22v80z" fill="#070e1c"/></svg></div>
   <div class="auth-box">
     <div class="auth-crown"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg></div>
-    <h1 class="auth-title">Jamal Life <span>V64</span></h1>
+    <h1 class="auth-title">Jamal Life <span>V65</span></h1>
     <div class="auth-intro">Контролируй жизнь<br>Достигай цели<br>Будь лучше каждый день</div>
     <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="Email"></div></div>
     <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Пароль"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
@@ -1671,7 +1760,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V64</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V65</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -1850,13 +1939,17 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 
 <section id="viewGoalEdit" class="view">
   <div class="v-topline"><button class="v-back" type="button" data-back aria-label="Назад"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button><h1 class="v-h1" id="geHeading">Новая цель</h1><button class="v-icon-btn primary" type="button" id="geSaveTop" aria-label="Сохранить цель"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg></button></div>
-  <div class="v-cover round" id="geCover"></div>
-  <div class="card v-form">
-    <div class="field"><label for="geName">Название цели</label><input id="geName" maxlength="120" placeholder="Например: Переезд в Польшу"></div>
-    <div class="field"><label for="geAmount">Целевая сумма (<span id="geCurrency">сомони</span>)</label><input id="geAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div><div class="field"><label for="geDate">Срок достижения</label><input id="geDate" type="date"></div>
-    <div class="field"><label for="geDesc">Описание (необязательно)</label><textarea id="geDesc" maxlength="900" placeholder="Зачем эта цель и как ты поймёшь, что дошёл"></textarea></div>
-    <div class="field"><label>Иконка</label><div class="v-icon-picker" id="geIcons"></div></div>
-    <div class="field"><label>Цвет</label><div class="v-color-picker" id="geColors"></div></div>
+  <div class="ge-preview" id="gePreview">
+    <div class="v-cover round" id="geCover"></div>
+    <div class="ge-pv-text"><b id="gePvTitle">Новая цель</b><span id="gePvMeta">Сумма и срок — ниже</span><em id="geMonthly" hidden></em></div>
+  </div>
+  <div class="card v-form jl-form">
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>1</span>Что хочешь достичь</div><input id="geName" maxlength="120" autocomplete="off" enterkeyhint="next" placeholder="Например: Своя квартира"><div class="jl-chips" id="geIdeas"></div></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>2</span>Сколько нужно · <span class="ge-cur" id="geCurrency">сомони</span></div><input id="geAmount" type="number" min="0" step="0.01" inputmode="decimal" enterkeyhint="next" placeholder="0"><div class="jl-chips" id="geAmountChips"></div></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>3</span>К какому сроку</div><div class="jl-chips" id="geDateChips"></div><input id="geDate" type="date"><small class="ge-date-note" id="geDateNote"></small></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>4</span>Зачем тебе это <em>необязательно</em></div><textarea id="geDesc" maxlength="900" rows="3" placeholder="Как изменится жизнь, когда дойдёшь"></textarea></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>5</span>Иконка</div><div class="v-icon-picker ge-icons" id="geIcons"></div></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>6</span>Цвет</div><div class="v-color-picker ge-colors" id="geColors"></div></section>
     <div class="v-note-main" id="geInfo">—</div>
   </div>
   <button class="btn primary v-wide" type="button" id="geSave"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg> Сохранить</button>
@@ -1975,7 +2068,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">64.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">65.0</span></div>
   </div>
 </section>
 
@@ -2542,7 +2635,7 @@ const MOTIVATIONS=[
   {author:'Пророк Мухаммад ﷺ',text:'«Облегчайте и не затрудняйте; радуйте и не отталкивайте».',source:'Сахих аль-Бухари 69; 6124'},
   {author:'Пророк Мухаммад ﷺ',text:'«Кому Аллах желает добра, тому даёт понимание религии».',source:'Сахих аль-Бухари 71'}
  ];
-function motivation(){const k=keyDay();const idx=Math.floor(Date.UTC(...keyDay().split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS)%MOTIVATIONS.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);if(state.dailyMotivations[k]?.idx===idx)return state.dailyMotivations[k];const m=MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length];const result={idx,text:`${m.text}\n\nСегодня: ${action}.`,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
+function motivation(){const k=keyDay();const idx=Math.floor(Date.UTC(...keyDay().split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS)%MOTIVATIONS.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);if(state.dailyMotivations[k]?.idx===idx)return state.dailyMotivations[k];const m=MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length];const result={idx,text:m.text,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
 function applyLayoutMode(mode,persist=true){
   // The layout belongs to this device only (phone, tablet and PC can differ) — never synced.
   const choice=mode==='desktop'||mode==='mobile'?mode:'auto';
@@ -2762,7 +2855,7 @@ function renderStagePercents(info=getStageInfo()){
     el.textContent=done?'100% завершено':(info.kind==='active'&&info.i===i?`${pct}% времени прошло`:now>=en?'100% завершено':'0% времени прошло');
   });
 }
-function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=details[0]||info.s.title;meta=`Этап ${info.i+1} · ${info.s.title} · ${info.s.time}–${info.s.end}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`Этап ${info.i+1} из ${state.day.steps.length} · ${Math.round(info.pct)}% времени прошло · осталось ${fmtDuration(remain)}`);const html=details.slice(1).map(x=>`<div class="detail-item"><b>•</b><span>${esc(x)}</span></div>`).join('');const cur=$('currentDetails');if(cur&&cur.innerHTML!==html)cur.innerHTML=html}else if(info.kind==='between'){action=`Подготовься: ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const html='<div class="detail-item"><b>•</b><span>Отдых. Завтра продолжим с одного шага.</span></div>';const cur=$('currentDetails');if(cur&&cur.innerHTML!==html)cur.innerHTML=html}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info)}
+function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${state.day.steps.length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info)}
 function daySum(arr,key=keyDay()){return arr.filter(x=>x.dateKey===key).reduce((a,x)=>a+Number(x.amount||0),0)}
 function monthSum(arr,d=new Date()){const y=d.getFullYear(),m=d.getMonth();return arr.filter(x=>{const z=new Date(x.at);return z.getFullYear()===y&&z.getMonth()===m}).reduce((a,x)=>a+Number(x.amount||0),0)}
 
@@ -2923,7 +3016,7 @@ function openDayProgress(){
 function renderToday(){
   autoCompleteExpiredStages();renderTodayLight();renderControlDashboard();const d=new Date(),info=getStageInfo(),rep=dayReport(),dd=dailyState();
   $('todayTitle').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});$('todayDate').textContent=d.toLocaleDateString('ru-RU',{weekday:'long'})+' · '+d.getFullYear();
-  const mo=motivation();$('motivationText').textContent=mo.text;$('motivationSource').textContent=`${mo.author} — ${mo.source}`;
+  const mo=motivation();$('motivationText').textContent=String(mo.text||'').split(/\n+\s*Сегодня:/)[0].trim();$('motivationSource').textContent=`${mo.author} — ${mo.source}`;
   renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
   autoCompleteExpiredStages();renderRhythm(info);
   setText('todayBalance',fmtMoney(daySum(state.profits)-daySum(state.expenses)));const fs=financialSnapshot();setText('todayCashState',`Касса: ${fmtMoney(fs.cash)} · На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`);
@@ -3200,19 +3293,27 @@ function renderBudgets(){const list=$('budgetList');if(!list)return;const rows=A
   $$('[data-del-budget]').forEach(b=>b.onclick=()=>{const x=state.budgets.find(y=>y.id===b.dataset.delBudget);if(!x||!confirm('Удалить банк «'+x.name+'»?'))return;state.budgets=state.budgets.filter(y=>y.id!==x.id);saveState();renderMoney();renderTodayLimit();toast('Банк удалён')})}
 function openBudget(id=''){
   const b=id?(state.budgets||[]).find(x=>x.id===id):null;let emoji=b?bankIcon(b):'🍔';
-  openModal(`<div class="close-row"><div><div class="eyebrow">Банки</div><h2>${b?'Изменить банк':'Новый банк'}</h2><div class="sub">Сам решаешь: на что и сколько в месяц.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
-  <div class="stack" style="margin-top:12px"><div class="field"><label>Эмодзи</label><div class="jl-emoji-grid" id="bankEmojis">${BANK_EMOJIS.map(e=>`<button type="button" class="${e===emoji?'active':''}" data-emo="${e}" aria-label="${e}">${e}</button>`).join('')}</div></div>
-  <div class="field"><label for="budgetName">Название</label><input id="budgetName" maxlength="40" list="budgetCats" placeholder="Например: Еда" value="${esc(b?.name||'')}"><datalist id="budgetCats">${EXPENSE_QUICK.map(x=>`<option value="${esc(x.value)}">`).join('')}</datalist></div>
-  <div class="field"><label for="budgetPlanned">Сколько кладёшь в банк на месяц</label><input id="budgetPlanned" type="number" min="1" inputmode="decimal" placeholder="0" value="${esc(b?.planned||'')}"></div>
-  <div class="sub">Каждый расход с таким же названием берётся из этого банка. На 80% придёт предупреждение.</div>
-  <button class="btn primary jl-close-btn" id="saveBudgetBtn" type="button">${svgIcon('i-check')} ${b?'Сохранить':'Создать банк'}</button>${b?`<button class="btn red" type="button" id="delBudgetBtn">${svgIcon('i-trash')} Удалить банк</button>`:''}</div>`);
+  const stickerName=e=>(BANK_STICKERS.find(x=>x[0]===e)||[])[1]||'';
+  let autoName=!b;
+  openModal(`<div class="close-row"><div><div class="eyebrow">Банки</div><h2>${b?'Изменить банк':'Новый банк'}</h2><div class="sub">Выбери стикер — название подставится само.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
+  <div class="jl-form">
+    <div class="jl-bank-preview" id="bankPreview"><span class="jl-bank-preview-emo" id="bpEmo">${emoji}</span><div><b id="bpName">${esc(b?.name||stickerName(emoji))}</b><small id="bpSum">${b?fmtMoney(b.planned)+' в месяц':'сумма на месяц'}</small></div></div>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>1</span>Стикер</div><div class="jl-stickers" id="bankEmojis">${BANK_STICKERS.map(([e,n,l],i)=>`<button type="button" class="${e===emoji?'active':''}" data-emo="${e}" data-emo-name="${esc(n)}" style="--i:${i}" aria-label="${esc(n)}" aria-pressed="${e===emoji}"><i>${e}</i><small>${esc(l||n)}</small></button>`).join('')}</div></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>2</span>Название</div><input id="budgetName" maxlength="40" autocomplete="off" autocapitalize="sentences" enterkeyhint="next" placeholder="Например: Еда" value="${esc(b?.name||stickerName(emoji))}"></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>3</span>Сколько кладёшь в банк на месяц</div><input id="budgetPlanned" type="number" min="1" inputmode="decimal" enterkeyhint="done" placeholder="0" value="${esc(b?.planned||'')}"><div class="jl-chips" id="bankSums">${[200,500,1000,2000,3000].map(v=>`<button type="button" class="jl-chip" data-bank-sum="${v}">${v.toLocaleString('ru-RU')}</button>`).join('')}</div></section>
+    <div class="jl-hint">Каждый расход с таким же названием берётся из этого банка. На 80% придёт предупреждение.</div>
+    <button class="btn primary jl-close-btn" id="saveBudgetBtn" type="button">${svgIcon('i-check')} ${b?'Сохранить':'Создать банк'}</button>${b?`<button class="btn red" type="button" id="delBudgetBtn">${svgIcon('i-trash')} Удалить банк</button>`:''}</div>`);
   $('closeModalBtn').onclick=closeModal;
-  $$('[data-emo]').forEach(x=>x.onclick=()=>{emoji=x.dataset.emo;$$('[data-emo]').forEach(y=>y.classList.toggle('active',y===x));haptic(6)});
-  $('saveBudgetBtn').onclick=()=>{const name=$('budgetName').value.trim(),planned=Math.max(0,Number($('budgetPlanned').value)||0);if(!name||planned<=0){toast('Укажи название и сумму');return}
+  const preview=()=>{setText('bpEmo',emoji);setText('bpName',$('budgetName').value.trim()||stickerName(emoji)||'Новый банк');const v=Number($('budgetPlanned').value)||0;setText('bpSum',v>0?fmtMoney(v)+' в месяц':'сумма на месяц');const pe=$('bpEmo');pe.classList.remove('bump');void pe.offsetWidth;pe.classList.add('bump')};
+  $$('[data-emo]').forEach(x=>x.onclick=()=>{emoji=x.dataset.emo;$$('[data-emo]').forEach(y=>{const on=y===x;y.classList.toggle('active',on);y.setAttribute('aria-pressed',on)});
+    const inp=$('budgetName');if(autoName||!inp.value.trim())inp.value=x.dataset.emoName;haptic(6);preview()});
+  $('budgetName').oninput=()=>{autoName=false;preview()};
+  $('budgetPlanned').oninput=()=>{$$('[data-bank-sum]').forEach(c=>c.classList.toggle('active',c.dataset.bankSum===$('budgetPlanned').value));preview()};
+  $$('[data-bank-sum]').forEach(c=>c.onclick=()=>{$('budgetPlanned').value=c.dataset.bankSum;$$('[data-bank-sum]').forEach(y=>y.classList.toggle('active',y===c));haptic(6);preview()});
+  $('saveBudgetBtn').onclick=()=>{const name=$('budgetName').value.trim(),planned=Math.max(0,Number($('budgetPlanned').value)||0);if(!name||planned<=0){toast(name?'Укажи сумму на месяц':'Выбери стикер или впиши название');return}
     const same=(state.budgets||[]).find(x=>x!==b&&x.name.toLowerCase()===name.toLowerCase());if(same){toast('Такой банк уже есть',name);return}
     if(b)Object.assign(b,{name,planned,emoji});else state.budgets.push({id:uid(),name,planned,emoji,tops:[]});saveState();closeModal();renderMoney();renderTodayLimit();toast(b?'Банк сохранён':'Банк создан',`${emoji} ${name}: ${fmtMoney(planned)} в месяц`)};
   if(b)$('delBudgetBtn').onclick=()=>{if(!confirm('Удалить банк «'+b.name+'»? Расходы останутся.'))return;state.budgets=state.budgets.filter(x=>x.id!==b.id);saveState();closeModal();renderMoney();renderTodayLimit();toast('Банк удалён')};
-  focusSoon('budgetName',60);
 }
 
 
@@ -3960,7 +4061,8 @@ async function openMoveDevice(){
 }
 
 /* ===== V63: банки — свои, с эмодзи; категории расходов из банков ===== */
-const BANK_EMOJIS=['🍔','🛒','🍽️','☕','🎉','🎮','🎬','✈️','🚕','⛽','🏠','💡','📱','👕','💊','🎓','📚','🎁','👨‍👩‍👦','🕌','⚽','🎨','💈','🐾','🧾','💰'];
+const BANK_STICKERS=[['🍔','Еда'],['🛒','Продукты'],['🍽️','Кафе'],['☕','Кофе'],['🎉','Развлечения','Досуг'],['🎮','Игры'],['🎬','Кино'],['🚕','Транспорт'],['⛽','Бензин'],['🏠','Дом'],['💡','Коммуналка','Свет, газ'],['📱','Связь'],['👕','Одежда'],['💊','Здоровье'],['🎓','Учёба'],['📚','Книги'],['🎁','Подарки'],['👨‍👩‍👦','Семья'],['🕌','Садака'],['⚽','Спорт'],['💈','Красота'],['🐾','Питомцы'],['🧾','Платежи'],['💰','Копилка']];
+const BANK_EMOJIS=BANK_STICKERS.map(x=>x[0]);
 function bankIcon(b){return b?.emoji||EXPENSE_ICONS[b?.name]||'🏦'}
 function catIcon(name){const b=(state.budgets||[]).find(x=>String(x.name).toLowerCase()===String(name||'').toLowerCase());return b?bankIcon(b):EXPENSE_ICONS[name]||''}
 function expenseCats(){const base=EXPENSE_QUICK.filter(x=>x.value!=='Другое'),other=EXPENSE_QUICK.find(x=>x.value==='Другое');const banks=(state.budgets||[]).filter(b=>!base.some(x=>x.value.toLowerCase()===String(b.name).toLowerCase())).map(b=>({value:b.name,icon:bankIcon(b),label:b.name}));return [...banks,...base.map(x=>{const b=(state.budgets||[]).find(y=>String(y.name).toLowerCase()===x.value.toLowerCase());return b?{...x,icon:bankIcon(b)}:x}),other]}
@@ -4141,7 +4243,19 @@ function renderGoals(){
   $$('[data-goal-open]').forEach(b=>b.onclick=()=>openGoalEditor(b.dataset.goalOpen));
 }
 let geState={id:'',icon:'target',color:'blue'};
-function renderGoalEditorCover(){const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=coverHTML({icon:geState.icon},'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
+function renderGoalEditorCover(){renderGoalPreview();const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=coverHTML({icon:geState.icon},'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
+const GOAL_IDEAS=[['🏠','Своя квартира','home2'],['🚗','Машина','car'],['🛡️','Финансовая подушка','bank'],['💳','Закрыть долги','briefcase'],['🎓','Учёба','graduation'],['💍','Свадьба','heart'],['✈️','Путешествие','plane'],['💻','Ноутбук','laptop']];
+function renderGoalPreview(){
+  const name=$('geName')?.value.trim(),amount=Number($('geAmount')?.value)||0,date=$('geDate')?.value||'',cur=state.profile.currency||'сомони';
+  setText('gePvTitle',name||'Новая цель');
+  let meta=amount>0?fmtMoney(amount):'Сумма не задана';let note='',monthly='';
+  if(date){const d=new Date(date+'T12:00:00'),days=Math.round((d-new Date())/DAY_MS);meta+=' · до '+d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+    if(days<=0)note='⚠️ Эта дата уже прошла — выбери срок впереди';else{const mo=Math.max(1,Math.round(days/30.4));note=`⏳ Осталось ${days} ${plural(days,'день','дня','дней')} · около ${mo} ${plural(mo,'месяц','месяца','месяцев')}`;if(amount>0)monthly=`Откладывай ≈ ${fmtMoney(Math.ceil(amount/mo))} в месяц`}}
+  setText('gePvMeta',meta);setText('geDateNote',note);const m=$('geMonthly');if(m){m.hidden=!monthly;m.textContent=monthly}
+  $$('[data-ge-sum]').forEach(b=>b.classList.toggle('active',Number(b.dataset.geSum)===amount));
+  $$('[data-ge-months]').forEach(b=>{const d=new Date();d.setMonth(d.getMonth()+Number(b.dataset.geMonths));b.classList.toggle('active',keyDay(d)===date)});
+  const pv=$('gePreview');if(pv)pv.style.setProperty('--gc',GOAL_COLORS[geState.color]||GOAL_COLORS.blue);
+}
 function openGoalEditor(id=''){
   const g=id?goalById(id):null,isMain=!!g?.main,f=state.goal.finance||{};
   geState={id:g?g.id:'',icon:g?.icon||'target',color:g?.color||'blue'};
@@ -4151,14 +4265,21 @@ function openGoalEditor(id=''){
   $('geDate').value=g?(isMain?(f.targetDate||''):(g.targetDate||'')):'';
   $('geDesc').value=g?(isMain?(state.goal.why||''):(g.description||'')):'';
   $('geIcons').innerHTML=GOAL_ICONS.map(k=>`<button type="button" data-ge-icon="${k}" aria-label="Иконка ${k}">${svgIcon(ICON_IDS[k])}</button>`).join('');
-  $('geColors').innerHTML=Object.entries(GOAL_COLORS).map(([k,v])=>`<button type="button" data-ge-color="${k}" style="--sw:${v}" aria-label="Цвет ${k}"></button>`).join('');
-  $$('[data-ge-icon]').forEach(b=>b.onclick=()=>{geState.icon=b.dataset.geIcon;renderGoalEditorCover()});
-  $$('[data-ge-color]').forEach(b=>b.onclick=()=>{geState.color=b.dataset.geColor;renderGoalEditorCover()});
+  $('geColors').innerHTML=Object.entries(GOAL_COLORS).map(([k,v])=>`<button type="button" data-ge-color="${k}" style="--sw:${v}" aria-label="Цвет ${k}">${svgIcon('i-check')}</button>`).join('');
+  $$('[data-ge-icon]').forEach(b=>b.onclick=()=>{geState.icon=b.dataset.geIcon;haptic(6);renderGoalEditorCover()});
+  $$('[data-ge-color]').forEach(b=>b.onclick=()=>{geState.color=b.dataset.geColor;haptic(6);renderGoalEditorCover()});
+  $('geIdeas').innerHTML=g?'':GOAL_IDEAS.map(([e,t,ic],i)=>`<button type="button" class="jl-chip" data-ge-idea="${i}">${e} ${esc(t)}</button>`).join('');
+  $$('[data-ge-idea]').forEach(b=>b.onclick=()=>{const [,t,ic]=GOAL_IDEAS[Number(b.dataset.geIdea)];$('geName').value=t;geState.icon=ic;$$('[data-ge-idea]').forEach(y=>y.classList.toggle('active',y===b));haptic(6);renderGoalEditorCover()});
+  $('geAmountChips').innerHTML=[5000,10000,20000,50000,100000].map(v=>`<button type="button" class="jl-chip" data-ge-sum="${v}">${v.toLocaleString('ru-RU')}</button>`).join('');
+  $$('[data-ge-sum]').forEach(b=>b.onclick=()=>{$('geAmount').value=b.dataset.geSum;haptic(6);renderGoalEditorCover()});
+  $('geDateChips').innerHTML=[[3,'3 месяца'],[6,'Полгода'],[12,'1 год'],[24,'2 года'],[60,'5 лет']].map(([m,t])=>`<button type="button" class="jl-chip" data-ge-months="${m}">${t}</button>`).join('');
+  $$('[data-ge-months]').forEach(b=>b.onclick=()=>{const d=new Date();d.setMonth(d.getMonth()+Number(b.dataset.geMonths));$('geDate').value=keyDay(d);haptic(6);renderGoalEditorCover()});
+  ['geName','geAmount','geDate'].forEach(k=>$(k).oninput=()=>renderGoalEditorCover());$('geDate').onchange=()=>renderGoalEditorCover();
   renderGoalEditorCover();
   const p=g?goalProgress(g):null;
   $('geInfo').innerHTML=!g?'Новая цель копится переводами из кошелька: «Деньги → Перевод».':isMain?`Главная цель: её видят AI-план, «Пульс жизни» и экран «Сегодня». Собрано ${esc(fmtMoney(p.collected))} (${p.pct}%). Этапы и AI-стратегия — в разделе «Главная цель подробно».`:`В цели отложено ${esc(fmtMoney(p.saved))} (${p.pct}%). При удалении цели эти деньги вернутся в кошелёк.`;
   $('geMakeMain').hidden=!g||isMain;$('geDelete').hidden=!g||isMain;$('geTopUp').hidden=!g;
-  showView('viewGoalEdit');(g||focusSoon('geName',60));
+  showView('viewGoalEdit');
 }
 function saveGoalEditor(){
   const title=$('geName').value.trim(),amount=Math.max(0,Number($('geAmount').value)||0),date=$('geDate').value||'',desc=$('geDesc').value.trim();
