@@ -52,6 +52,19 @@ public class JamalWidget extends AppWidgetProvider {
         } catch (Exception ignored) {}
     }
 
+    /** Part of the planned day already behind (first stage start → last stage end), 0–100, or -1. */
+    static int dayProgress(Context ctx) {
+        try {
+            JSONArray steps = new JSONObject(ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString("data", "{}")).optJSONArray("steps");
+            if (steps == null || steps.length() == 0) return -1;
+            int st = toMin(steps.getJSONObject(0).optString("t")), en = toMin(steps.getJSONObject(steps.length() - 1).optString("e"));
+            if (st < 0 || en <= st) return -1;
+            Calendar c = Calendar.getInstance();
+            int now = c.get(Calendar.HOUR_OF_DAY) * 60 + c.get(Calendar.MINUTE);
+            return Math.max(0, Math.min(100, Math.round((now - st) * 100f / (en - st))));
+        } catch (Exception e) { return -1; }
+    }
+
     private static int toMin(String hhmm) {
         try { String[] p = hhmm.split(":"); return Integer.parseInt(p[0].trim()) * 60 + Integer.parseInt(p[1].trim()); }
         catch (Exception e) { return -1; }

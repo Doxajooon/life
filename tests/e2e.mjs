@@ -576,6 +576,51 @@ await test("Виджет Android и резервные копии", async () => 
   await ctx.close();
 });
 
+// ================= V61 =================
+await test("Новый телефон: после входа приходит полный пакет данных", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud);
+  await A.page.evaluate(() => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.profile.name = "Джамал"; state.income = 9000; state.debts = { bank: 90000, firms: 100000, monthlyPayment: 4500, whatIf: 6000 };
+    state.profits.push({ id: "p1", amount: 8000, sourceGroup: "Зарплата", at: now });
+    state.expenses.push({ id: "e1", amount: 300, category: "Еда", at: now });
+    state.tasks.push({ id: "t1", title: "Звонок", time: "23:00", date: k, remind: 10, createdAt: now });
+    state.notes.push({ id: "n1", title: "Идея", body: "текст", at: now, category: "work" });
+    state.habits = [{ id: "h1", title: "Спорт", kind: "weekly", target: 3 }]; state.habitLog = { h1: { [k]: 1 } };
+    state.budgets = [{ id: "b1", name: "Поездки", planned: 1000, tops: [{ id: "x", month: monthKey(), amount: 300 }] }];
+    state.reports[k] = { done: "сделал", block: "", tomorrow: "шаг", closedAt: now, steps: {} };
+    state.goals.push({ id: "g9", title: "Машина", icon: "car", color: "blue", target: 50000, createdAt: now });
+    state.achievements.push({ id: "a1", text: "Закрыл кредитку", at: now });
+    state.day.steps[1].title = "Семья и спорт"; state.settings.every2h = false; state.settings.preMinutes = 15;
+    state.ai.weekly = { [weekKey()]: { at: now, text: "СИЛЬНАЯ СТОРОНА — x" } };
+    ensureDebtHistory(); saveState();
+  });
+  await sync(A.page);
+  const want = await A.page.evaluate(() => JSON.stringify(Object.fromEntries(Object.entries(normalize(clone(state))).filter(([k]) => !SYNC_META_KEYS.includes(k) && !["runtimeErrors", "notificationsLog", "lastReadAt", "drafts"].includes(k)))));
+  await A.ctx.close();
+  // a brand-new phone: empty storage, the user logs in
+  const B = await device(cloud);
+  await sync(B.page);
+  const got = await B.page.evaluate(() => JSON.stringify(Object.fromEntries(Object.entries(normalize(clone(state))).filter(([k]) => !SYNC_META_KEYS.includes(k) && !["runtimeErrors", "notificationsLog", "lastReadAt", "drafts"].includes(k)))));
+  const a = JSON.parse(want), b = JSON.parse(got), diff = Object.keys(a).filter(k => JSON.stringify(a[k]) !== JSON.stringify(b[k]));
+  assert.deepEqual(diff, [], "not transferred: " + diff.map(k => k + " A=" + JSON.stringify(a[k]).slice(0, 300) + " B=" + JSON.stringify(b[k]).slice(0, 300)).join("\n"));
+  assert.deepEqual(B.page.errors, []);
+  await B.ctx.close();
+});
+
+await test("Планшет и компьютер: свой вид на каждом устройстве, без лишнего меню", async () => {
+  const cloud = makeCloud();
+  const r = [];
+  for (const [w, h] of [[390, 844], [820, 1180], [1180, 820], [1440, 900]]) {
+    const { ctx, page } = await device(cloud, { viewport: { width: w, height: h } });
+    r.push(await page.evaluate(() => ({ layout: document.body.dataset.layout, wide: document.documentElement.scrollWidth > document.documentElement.clientWidth, synced: "viewMode" in state.settings })));
+    await ctx.close();
+  }
+  assert.deepEqual(r.map(x => x.layout), ["mobile", "mobile", "desktop", "desktop"]);
+  assert.ok(r.every(x => !x.wide && !x.synced), JSON.stringify(r));
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

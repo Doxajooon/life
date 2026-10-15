@@ -43,6 +43,20 @@ function weekContext(s: any, today: string): any {
     tasks: { total: tasks.length, done: tasks.filter((t: any) => t?.done).length, open: tasks.filter((t: any) => !t?.done).slice(0, 10).map((t: any) => clip(t?.title, 120)) } };
 }
 
+// DEEP mode: honest money leaks + weak/strong side, from the whole state and the app's own numbers.
+function deepRules() {
+  return ["Ты — Jamal Life AI, честный личный аналитик денег и дисциплины.","Опирайся только на переданные данные и цифры. Не придумывай суммы и события.","Говори прямо, по-человечески, коротко, с конкретными цифрами из данных. Без воды, без markdown (#, **, списков со звёздочками).","Спортивную аналитику не выдавай за гарантированный доход и не советуй ставки для закрытия долгов."].join("\n");
+}
+// deno-lint-ignore no-explicit-any
+function deepContext(s: any, facts: any): any {
+  const c = context(s, { goal: true, money: true, reports: true, notes: false });
+  const habits = (Array.isArray(s?.habits) ? s.habits : []).slice(0, 12).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind }));
+  const banks = (Array.isArray(s?.budgets) ? s.budgets : []).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthly: Number(b?.planned) || 0 }));
+  let f = "";
+  try { f = JSON.stringify(facts ?? {}).slice(0, 12000); } catch { f = ""; }
+  return { ...c, habits, banks, app_numbers: f ? JSON.parse(f.endsWith("}") ? f : "{}") : {} };
+}
+
 // Only the sections the user ticked are sent to the model, trimmed to sane sizes.
 // deno-lint-ignore no-explicit-any
 function context(s: any, c: any): any {
@@ -136,16 +150,18 @@ Deno.serve(async (req) => {
         : json({ error: "GEMINI_API_KEY не настроен в Supabase Secrets." }, 503);
     }
     if (!(await allowRequest(a.sb, a.user.id))) return json({ error: "Слишком много запросов AI за час. Попробуй позже." }, 429);
-    const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : "life";
+    const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return json({ error: "Не удалось прочитать данные Jamal Life из Supabase." }, 500);
-    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : context(row?.state || {}, sc);
-    const p = mode === "week"
+    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : context(row?.state || {}, sc);
+    const p = mode === "deep"
+      ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
+      : mode === "week"
       ? weekRules() + "\n\nРЕЖИМ: WEEK. Подведи итог последних 7 дней ровно тремя блоками, каждый с новой строки и начинается с названия заглавными буквами:\nСИЛЬНАЯ СТОРОНА — 1–2 предложения: что реально получилось, с цифрой или фактом из данных.\nСЛАБОЕ МЕСТО — 1–2 предложения: что чаще всего мешало (смотри block в днях, траты, незакрытые дни и задачи).\nШАГ НА НЕДЕЛЮ — ровно одно конкретное действие на следующие 7 дней, которое можно проверить (время, сумма или количество).\nНичего кроме этих трёх блоков. Если данных почти нет, честно скажи это в СЛАБОМ МЕСТЕ и дай шаг: закрывать день каждый вечер.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "goal"
       ? promptRules() + "\n\nРЕЖИМ: GOAL. Проанализируй именно главную цель пользователя. Ответь в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — 2–3 подтверждённых факта.\n2) ЧТО УЖЕ ДОСТИГНУТО — только закрытые этапы и реальные результаты из данных.\n3) ЧТО УЖЕ ЕСТЬ — капитал в цели, свободная касса, доходы/расходы и другие подтверждённые ресурсы.\n4) ГЛАВНАЯ ПРОБЛЕМА — один главный ограничитель.\n5) ГЛАВНЫЙ ФОКУС — один приоритет на ближайшие 7 дней.\n6) ПЛАН ДЕЙСТВИЙ — 3–5 строк в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n7) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — ровно одно действие.\n\nНе выдумывай отсутствующие данные. Если цель не имеет суммы или срока, прямо укажи это и дай ближайшее измеримое действие без выдуманной цифры.\n\nДанные:\n" + JSON.stringify(ctx)
       : promptRules() + "\n\nРЕЖИМ: LIFE. Проанализируй систему пользователя в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — максимум 3 факта.\n2) ГЛАВНАЯ ПРОБЛЕМА — одна проблема, которая сейчас сильнее всего ограничивает движение.\n3) ФИНАНСОВАЯ СИТУАЦИЯ — только подтверждённые цифры и арифметика.\n4) ГЛАВНЫЙ ФОКУС НА 7 ДНЕЙ — один приоритет.\n5) ПЛАН ДЕЙСТВИЙ — 3–5 конкретных действий в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n6) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — одно действие, без альтернатив.\n7) КОНТРОЛЬНАЯ ТОЧКА — что проверить через 7 дней и по какому числу/факту понять результат.\n\nНе выдумывай отсутствующие данные. Если для конкретного действия не хватает данных, прямо укажи, чего не хватает, вместо выдумывания.\n\nДанные:\n" + JSON.stringify(ctx);
-    const r = mode === "week" ? await gemini(p, false, weekRules()) : await gemini(p, sc.webSearch);
+    const r = mode === "week" ? await gemini(p, false, weekRules()) : mode === "deep" ? await gemini(p, false, deepRules()) : await gemini(p, sc.webSearch);
     if ("error" in r) return json({ error: r.error }, r.status);
     return json({ ok: true, model: MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
   } catch (e) {

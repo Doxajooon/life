@@ -1,7 +1,7 @@
 // Jamal Life service worker: offline shell only.
 // It never touches requests to other origins (Supabase, Gemini): those must always hit the network,
 // otherwise a cached "session OK" answer hides an expired login and blocks sync.
-const CACHE = 'jamal-life-v61-0';
+const CACHE = 'jamal-life-v62-0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => e.waitUntil(

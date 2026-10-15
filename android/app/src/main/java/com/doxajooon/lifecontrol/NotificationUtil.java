@@ -14,6 +14,8 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
+import android.view.View;
+import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -51,6 +53,30 @@ public final class NotificationUtil {
     static void show(Context ctx, String title, String body, int id) { show(ctx, title, body, id, null, 0); }
     static void show(Context ctx, String title, String body, int id, String taskId) { show(ctx, title, body, id, taskId, 0); }
 
+    private static final String[] MOTIVATION = {
+            "💪 Начни прямо сейчас — первые 5 минут решают всё",
+            "🔥 Маленький шаг сегодня — большая победа через месяц",
+            "🎯 Сделай главное, пока голова свежая",
+            "⚡ Не жди настроения — действие рождает настроение",
+            "👑 Ты управляешь днём, а не день тобой",
+            "🌱 Постоянство важнее силы — просто сделай",
+            "🏆 Каждое выполненное дело приближает к цели"
+    };
+
+    private static RemoteViews content(Context ctx, String title, String text, boolean big) {
+        RemoteViews v = new RemoteViews(ctx.getPackageName(), R.layout.notif_reminder);
+        v.setTextViewText(R.id.n_title, title);
+        v.setTextViewText(R.id.n_body, text);
+        v.setTextViewText(R.id.n_motiv, MOTIVATION[(int) ((System.currentTimeMillis() / 60000) % MOTIVATION.length)]);
+        int day = JamalWidget.dayProgress(ctx);
+        if (big && day >= 0) {
+            v.setProgressBar(R.id.n_day, 100, day, false);
+            v.setTextViewText(R.id.n_day_txt, "день " + day + "%");
+        } else v.setViewVisibility(R.id.n_day_row, View.GONE);
+        if (!big) v.setViewVisibility(R.id.n_motiv_row, View.GONE);
+        return v;
+    }
+
     private static Bitmap largeIcon;
     private static Bitmap appIcon(Context ctx) {
         if (largeIcon != null) return largeIcon;
@@ -82,7 +108,9 @@ public final class NotificationUtil {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(title == null ? "Jamal Life" : title)
                 .setContentText(text)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(content(ctx, title == null ? "Jamal Life" : title, text, false))
+                .setCustomBigContentView(content(ctx, title == null ? "Jamal Life" : title, text, true))
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
