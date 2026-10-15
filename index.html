@@ -3094,12 +3094,21 @@ function openLifeAnalysis(){
 function lifeFacts(){const a=analyzeLife();return {...a,big:a.big.map(x=>({category:x.category,amount:x.amount,at:x.at})),habStats:a.habStats.map(h=>({title:h.h.title,due:h.due,done:h.done})),banksOver:a.banksOver.map(x=>({name:x.b.name,pct:x.li.pct,left:x.li.remaining})),cats:a.cats.slice(0,10),debtFreeLine:typeof debtFreeLine==='function'?String(debtFreeLine()||''):''}}
 /* AI answers come as blocks with CAPS headings — show each as its own card with an icon */
 function aiTextHtml(text){
-  const t=String(text||'').replace(/\*\*|__/g,'').replace(/^#+\s*/gm,'').trim();
-  const head=/^(?:\d+[).]\s*)?([А-ЯЁ][А-ЯЁ0-9 ,\/«»-]{3,60}?)\s*(?:—|:|–|-)\s*/;
+  // Headings come as «ПЛЮСЫ — ...» (the prompt), but models also write «## Плюсы», «**Плюсы:**», «1. ПЛЮСЫ» on its own line, and «* »/«- » lists.
+  const caps=/^(?:\d+[).]\s*)?([А-ЯЁ][А-ЯЁ0-9 ,\/«»-]{3,60}?)\s*(?:—|:|–|-|$)\s*/;
+  const md=/^#{1,6}\s+(?:\d+[).]\s*)?(.{2,80}?)\s*:?\s*$/,bold=/^(?:\d+[).]\s*)?(?:\*\*|__)([^*_]{2,80}?)[:.]?(?:\*\*|__)\s*(?:[—:–-]\s*)?(.*)$/;
+  const clean=x=>x.replace(/\*\*|__/g,'').replace(/^\s*[*•-]\s+/,'• ');
   const icon=h=>/ПЛЮС|СИЛЬН/.test(h)?'✅':/МИНУС|СЛАБ|ТЕРЯ/.test(h)?'⚠️':/КУДА|ПРОГНОЗ|ТРАЕКТ/.test(h)?'🧭':/РИСК|ПРОБЛЕМ/.test(h)?'🚩':/ПЛАН/.test(h)?'📋':/ШАГ|ДЕЙСТВИ/.test(h)?'👉':/СЕЙЧАС|СОСТОЯН/.test(h)?'📍':/ПРИЛОЖ/.test(h)?'📱':/ФИНАН|ДЕН/.test(h)?'💰':/КОНТРОЛ/.test(h)?'🎯':'•';
   const parts=[];let cur=null;
-  for(const line of t.split('\n')){const m=line.match(head);if(m&&m[1].trim().length>=4&&m[1]===m[1].toUpperCase()){cur={h:m[1].trim(),body:[line.slice(m[0].length)]};parts.push(cur)}else if(cur)cur.body.push(line);else parts.push({h:'',body:[line]})}
-  return parts.filter(p=>p.h||p.body.join('').trim()).map((p,i)=>`<div class="jl-ai-sec" style="--i:${i}">${p.h?`<b><span aria-hidden="true">${icon(p.h)}</span>${esc(p.h.charAt(0)+p.h.slice(1).toLowerCase())}</b>`:''}<div>${esc(p.body.join('\n').trim())}</div></div>`).join('');
+  for(const raw of String(text||'').replace(/\r/g,'').trim().split('\n')){
+    const line=raw.trim();let h='',rest='',m;
+    if((m=line.match(md)))h=m[1].replace(/\*\*|__/g,'');
+    else if((m=line.match(bold)))[h,rest]=[m[1],m[2]];
+    else if((m=line.match(caps))&&m[1].trim().length>=4&&m[1]===m[1].toUpperCase())[h,rest]=[m[1],line.slice(m[0].length)];
+    h=h.trim().replace(/[:.]$/,'');
+    if(h){cur={h,body:[clean(rest)]};parts.push(cur)}else if(cur)cur.body.push(clean(line));else parts.push({h:'',body:[clean(line)]});
+  }
+  return parts.filter(p=>p.h||p.body.join('').trim()).map((p,i)=>`<div class="jl-ai-sec" style="--i:${i}">${p.h?`<b><span aria-hidden="true">${icon(p.h.toUpperCase())}</span>${esc(p.h.charAt(0).toUpperCase()+p.h.slice(1).toLowerCase())}</b>`:''}<div>${esc(p.body.join('\n').trim())}</div></div>`).join('');
 }
 function deepTextHtml(text){
   const t=String(text||'').replace(/\*\*|__|^#+\s*/gm,'').trim();

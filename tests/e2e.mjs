@@ -60,6 +60,7 @@ function makeCloud() {
     if (url.pathname.startsWith("/functions/")) {
       if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
       const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
+      if (cloud.aiFail) return send(429, { error: "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей." });
       if (b.mode === "week") return send(200, { ok: true, model: "mock", output_text: "СИЛЬНАЯ СТОРОНА — закрыл 5 дней.\nСЛАБОЕ МЕСТО — **телефон** <img src=x onerror=window.__xss=1>\nШАГ НА НЕДЕЛЮ — после 21:00 телефон на зарядку.", sources: [] });
       return send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] });
     }
@@ -599,6 +600,7 @@ await test("Новый телефон: после входа приходит п
     state.achievements.push({ id: "a1", text: "Закрыл кредитку", at: now });
     state.day.steps[1].title = "Семья и спорт"; state.settings.every2h = false; state.settings.preMinutes = 15;
     state.ai.weekly = { [weekKey()]: { at: now, text: "СИЛЬНАЯ СТОРОНА — x" } };
+    autoCompleteExpiredStages(); // the rhythm closes past stages by time of day; do it here so the result does not depend on the hour
     ensureDebtHistory(); saveState();
   });
   await sync(A.page);
@@ -857,6 +859,42 @@ await test("AI-разбор жизни: шлёт цифры приложения
     const body = cloud.aiBodies.at(-1);
     assert.ok(body.facts && typeof body.facts === "object" && "cats" in body.facts, "life analysis must send the app's own numbers");
     assert.equal(await page.evaluate(() => window.__xss), undefined);
+  }
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("AI: разбор понимает markdown и нумерацию; при лимите 429 — понятная причина и разбор без AI", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  const parsed = await page.evaluate(() => {
+    const heads = t => { const d = document.createElement("div"); d.innerHTML = aiTextHtml(t); return [...d.querySelectorAll(".jl-ai-sec")].map(x => [x.querySelector("b")?.textContent || "", x.querySelector("div")?.textContent || ""]); };
+    return {
+      caps: heads("ПЛЮСЫ — доход 9 000\nМИНУСЫ — кафе 1 200"),
+      md: heads("## Плюсы\n* доход 9 000\n### Минусы:\n- кафе 1 200"),
+      bold: heads("**Плюсы:** доход 9 000\n**МИНУСЫ** — кафе 1 200"),
+      num: heads("1. ПЛЮСЫ\nдоход 9 000\n2) МИНУСЫ:\nкафе 1 200"),
+    };
+  });
+  for (const [k, v] of Object.entries(parsed)) {
+    assert.equal(v.length, 2, k + " " + JSON.stringify(v));
+    assert.match(v[0][0], /Плюсы$/, k); assert.match(v[1][0], /Минусы$/, k);
+    assert.match(v[0][1], /доход 9 000/, k); assert.match(v[1][1], /кафе 1 200/, k);
+    assert.ok(!/[*#]/.test(JSON.stringify(v)), k + " keeps markdown: " + JSON.stringify(v));
+  }
+  cloud.aiFail = true;
+  await page.evaluate(() => openGeminiAnalysis());
+  await page.click("#aiRunBtn");
+  await page.waitForSelector("#aiResult .jl-ai-fail", { timeout: 8000 });
+  assert.match(await page.textContent("#aiResult"), /лимит Gemini/);
+  await page.click("#localFallbackBtn");
+  await page.waitForTimeout(400);
+  assert.ok(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open") && document.getElementById("modal").textContent.length > 50), "local analysis did not open");
+  await page.evaluate(() => { closeModal(); showView("viewToday"); renderWeek(); });
+  if (await page.evaluate(() => !!document.getElementById("wkRun"))) {
+    await page.evaluate(() => runWeekReview());
+    const wk = await page.textContent("#wkText");
+    assert.match(wk, /лимит Gemini/); assert.ok(wk.length > 60, "week card must keep the review without AI: " + wk);
   }
   assert.deepEqual(page.errors, []);
   await ctx.close();
