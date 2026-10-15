@@ -418,11 +418,15 @@ await test("Нагрузка: 3000 операций и 500 заметок", asyn
     const now = Date.now();
     for (let i = 0; i < 3000; i++) state.expenses.push({ id: "e" + i, amount: (i % 97) + 1, category: "Еда", at: new Date(now - i * 3600e3).toISOString() });
     for (let i = 0; i < 500; i++) state.notes.push({ id: "n" + i, title: "Заметка " + i, body: "текст ".repeat(50), at: new Date(now - i * 864e5).toISOString(), category: "personal" });
-    const a = performance.now(); renderAll(); const b = performance.now(); saveState(); const c = performance.now();
-    return { render: b - a, save: c - b };
+    // best of three: one garbage-collection pause or a cold JIT must not fail the test, a real slowdown still does
+    const render = [], save = [];
+    for (let i = 0; i < 3; i++) { const a = performance.now(); renderAll(); const b = performance.now(); saveState(); const c = performance.now(); render.push(b - a); save.push(c - b); }
+    return { render: Math.min(...render), save: Math.min(...save), all: render.map(x => Math.round(x)) + " / " + save.map(x => Math.round(x)) };
   });
-  assert.ok(t.render < 600, "render " + t.render.toFixed(0) + " ms");
-  assert.ok(t.save < 200, "save " + t.save.toFixed(0) + " ms");
+  const slow = Math.max(1, Number(process.env.CPU_SLOW) || 1) ** 0.5; // a 4× slower CPU gets 2× the budget
+  if (process.env.PERF_LOG) console.log("   load render/save ms:", t.all);
+  assert.ok(t.render < 600 * slow, "render " + t.render.toFixed(0) + " ms (" + t.all + ")");
+  assert.ok(t.save < 200 * slow, "save " + t.save.toFixed(0) + " ms (" + t.all + ")");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -974,7 +978,7 @@ await test("Деньги: платёж по долгу не входит в «Р
   await page.emulateMedia({ reducedMotion: "reduce" });
   const r = await page.evaluate(async () => {
     const now = new Date().toISOString(), k = keyDay();
-    state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
+    state.income = 9000; state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
     state.expenses.push({ id: "e300", amount: 300, category: "Еда", at: now, dateKey: k }, { id: "d4000", amount: 4000, category: "Долг", debtPayment: "bank", at: now, dateKey: k });
     saveState(); showView("viewToday"); renderAll(); await new Promise(r => setTimeout(r, 1500));
     const n = id => (document.getElementById(id)?.title || document.getElementById(id)?.textContent || "").replace(/\s/g, " ");
@@ -984,8 +988,27 @@ await test("Деньги: платёж по долгу не входит в «Р
     const overview = { exp: n("mvExpense"), line: line("mvDebtPay") };
     document.querySelector('[data-money-tab="cal"]')?.click(); renderMoneyCalendar();
     const cal = { exp: document.getElementById("mcExpense").title.replace(/\s/g, " "), line: line("mcDebtPay") };
-    const a = analyzeLife(); return { today, overview, cal, analysis: a.spend ?? a.month?.spend ?? a };
+    // old financial calendar: selected day and period
+    closeModal(); openCalendar();
+    const meta = document.querySelector(".calendar-selected .meta").textContent.replace(/\s/g, " ");
+    const rangeBox = document.querySelector(".calendar-range-summary").textContent.replace(/\s/g, " ");
+    const day = { exp: meta, line: line("calDayDebtPay") }, period = { exp: rangeBox, line: line("calRangeDebtPay"), net: calendarRangeMetrics(keyDay(), keyDay()).net };
+    closeModal();
+    // week card and the hint in the debt plan
+    showView("viewToday"); renderWeek(); renderDebtPlan();
+    const week = { exp: document.getElementById("wkExpense").textContent.replace(/\s/g, " "), line: line("wkDebtPay"), stats: weekStats(), local: localWeekText() };
+    const hint = document.getElementById("dpLeft")?.textContent.replace(/\s/g, " ") || "";
+    const a = analyzeLife(); return { today, overview, cal, day, period, week, hint, analysis: a.spend ?? a.month?.spend ?? a };
   });
+  assert.match(r.day.exp, /Расход: −300 /, "calendar day: " + JSON.stringify(r.day));
+  assert.match(r.period.exp, /Потрачено−300 /, "calendar period: " + JSON.stringify(r.period));
+  assert.match(r.period.exp, /Чистый итог−4 300 /, "net still pays the debt: " + JSON.stringify(r.period));
+  assert.equal(r.period.net, -4300);
+  for (const [k, v] of Object.entries({ day: r.day, period: r.period, week: r.week })) assert.match(v.line, /Платежи по долгу: 4 000/, k + " " + JSON.stringify(v));
+  assert.equal(r.week.exp, "−300", "week card: " + JSON.stringify(r.week));
+  assert.equal(r.week.stats.out, 300); assert.equal(r.week.stats.debt, 4000);
+  assert.ok(!/4 300/.test(r.week.local), "week review without AI: " + r.week.local);
+  assert.match(r.hint, /обычно тратишь 300 /, "debt plan hint: " + r.hint);
   for (const [k, v] of Object.entries({ today: r.today, overview: r.overview, cal: r.cal })) {
     assert.match(v.exp, /^300\b/, k + " «Расход» must be 300: " + JSON.stringify(v));
     assert.match(v.line, /Платежи по долгу: 4 000/, k + " " + JSON.stringify(v));

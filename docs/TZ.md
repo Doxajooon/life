@@ -38,7 +38,7 @@ Jamal Life — личное приложение одного человека �
   - Auth по e-mail/паролю.
   - Таблица `public.life_state` (одна строка на пользователя: `user_id`, `state` jsonb, `schema_version` = 58, `updated_at`, `device_id`), RLS: только `user_id = auth.uid()` на select/insert/update/delete.
   - Таблица `public.ai_usage` (счётчик AI-запросов, лимит 10 в час), RLS на свои строки.
-  - Edge Function `life-control-ai` (`supabase/functions/life-control-ai/index.ts`, `verify_jwt: true`, import map `deno.jsonc`), текущая развёрнутая версия **v15**.
+  - Edge Function `life-control-ai` (`supabase/functions/life-control-ai/index.ts`, `verify_jwt: true`, import map `deno.jsonc`), текущая развёрнутая версия **v16** (платежи по долгу передаются отдельно: `debtPaid`).
 - **CI** (`.github/workflows/release.yml`): на push в `main` — тесты → Android APK + Windows EXE → релиз. Тег берётся из `package.json`.
   APK подписывается ключом из секретов `ANDROID_KEY_ALIAS`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEYSTORE_BASE64`;
   **пока секретов нет — подписывается временным ключом** (обновление поверх старой версии не ставится).

@@ -89,6 +89,8 @@ assert.ok(/<figure class="jl-quote" role="button" tabindex="0" aria-expanded="fa
 assert.ok(!/id="debtChart" role="img"/.test(html), "interactive bars must not sit inside role=img");
 assert.ok(/const md=\/\^#\{1,6\}/.test(html) && html.includes("bold=/^"), "AI parser must understand markdown and bold headings");
 assert.ok(html.includes("const spendOnly=") && html.includes("monthSum(spendOnly(state.expenses))") && ["tmDebtPay", "mvDebtPay", "mcDebtPay"].every(id => html.includes(`id="${id}"`)), "debt payments are shown apart from «Расход»");
+assert.ok(html.includes("(debt?debtPaysOnly:spendOnly)(state.expenses)") && html.includes("net:income-expense-debt") && html.includes("const out=spendOnly(state.expenses).filter(x=>inRange(x)") && html.includes("monthSum(spendOnly(state.expenses)));setText('dpLeft'") && ["calDayDebtPay", "calRangeDebtPay", "wkDebtPay"].every(id => html.includes(id)), "day, period, week and the debt-plan hint keep debt payments out of «Расход»");
+assert.ok(fn.includes("debtPaid: dp.reduce") && fn.includes("debtPaid:dp30") && fn.includes("!x?.debtPayment"), "AI context: debt payments are not spending");
 assert.ok(html.includes("if(m.done||m.autoOff)return") && html.includes("data-ms-auto") && html.includes("if(m.autoOff!==true)delete m.autoOff"), "auto-closing goal stages can be switched off");
 // no CSS for classes the app never uses
 { const css = html.slice(html.indexOf("<style"), html.indexOf("</style>")), rest = html.replace(css, "");

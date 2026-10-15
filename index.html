@@ -2018,6 +2018,7 @@ b,strong{font-weight:600}
   <div class="card jl-week" id="weekCard">
     <div class="jl-week-head"><span class="jl-emo" aria-hidden="true">✨</span><b>Разбор недели от AI</b><small id="wkWhen">по воскресеньям</small></div>
     <div class="jl-week-stats"><div><b id="wkDays">0 / 7</b><span>дней закрыто</span></div><div><b id="wkIncome">0</b><span>доход</span></div><div><b id="wkExpense">0</b><span>расход</span></div></div>
+    <div class="jl-debtpay" id="wkDebtPay" hidden></div>
     <div class="jl-week-text" id="wkText" aria-live="polite"></div>
     <button class="jl-pill gold jl-week-btn" type="button" id="wkRun"><svg class="ui-icon" aria-hidden="true"><use href="#i-spark"></use></svg><span id="wkRunLabel">Получить разбор недели</span></button>
   </div>
@@ -3130,24 +3131,26 @@ function dayIncome(dateOrKey){
   const key=typeof dateOrKey==='string'?dateOrKey:keyDay(dateOrKey);
   return (state.profits||[]).filter(x=>{const d=validDate(x.at);return d&&keyDay(d)===key}).reduce((sum,x)=>sum+Math.max(0,Number(x.amount)||0),0)
 }
-function dayExpenses(dateOrKey){
+function dayExpenses(dateOrKey,debt=false){
+  // «Расход» of a day; debt=true gives the day's debt payments instead (they are never spending)
   const key=typeof dateOrKey==='string'?dateOrKey:keyDay(dateOrKey);
-  return (state.expenses||[]).filter(x=>{const d=validDate(x.at);return d&&keyDay(d)===key}).reduce((sum,x)=>sum+Math.max(0,Number(x.amount)||0),0)
+  return (debt?debtPaysOnly:spendOnly)(state.expenses).filter(x=>{const d=validDate(x.at);return d&&keyDay(d)===key}).reduce((sum,x)=>sum+Math.max(0,Number(x.amount)||0),0)
 }
 function calendarMonthKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function calendarRangeMetrics(start,end){
-  if(!start)return {days:0,income:0,expense:0,expenseOps:0,net:0};
-  const a=new Date(start+'T12:00:00'),b=new Date((end||start)+'T12:00:00');if(Number.isNaN(a.getTime())||Number.isNaN(b.getTime()))return {days:0,income:0,expense:0,expenseOps:0,net:0};
-  const lo=a<=b?a:b,hi=a<=b?b:a,days=Math.max(1,Math.floor((hi-lo)/DAY_MS)+1);let income=0,expense=0,expenseOps=0;
-  for(let i=0;i<days;i++){const d=new Date(lo);d.setDate(lo.getDate()+i);const k=keyDay(d);income+=dayIncome(k);expense+=dayExpenses(k);expenseOps+=(state.expenses||[]).filter(x=>{const z=validDate(x.at);return z&&keyDay(z)===k}).length}
-  return {days,income,expense,expenseOps,net:income-expense};
+  if(!start)return {days:0,income:0,expense:0,debt:0,expenseOps:0,net:0};
+  const a=new Date(start+'T12:00:00'),b=new Date((end||start)+'T12:00:00');if(Number.isNaN(a.getTime())||Number.isNaN(b.getTime()))return {days:0,income:0,expense:0,debt:0,expenseOps:0,net:0};
+  const lo=a<=b?a:b,hi=a<=b?b:a,days=Math.max(1,Math.floor((hi-lo)/DAY_MS)+1);let income=0,expense=0,debt=0,expenseOps=0;const spend=spendOnly(state.expenses);
+  for(let i=0;i<days;i++){const d=new Date(lo);d.setDate(lo.getDate()+i);const k=keyDay(d);income+=dayIncome(k);expense+=dayExpenses(k);debt+=dayExpenses(k,true);expenseOps+=spend.filter(x=>{const z=validDate(x.at);return z&&keyDay(z)===k}).length}
+  // the net result still pays the debt: income − spending − debt payments
+  return {days,income,expense,debt,expenseOps,net:income-expense-debt};
 }
 function renderCalendar(year,month,selectedKey){
   const first=new Date(year,month,1),last=new Date(year,month+1,0),days=last.getDate(),monthTitle=first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}),leading=(first.getDay()+6)%7;
   const earned=[];for(let day=1;day<=days;day++){const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key);if(income>0)earned.push({day,key,income})}
   const total=earned.reduce((s,x)=>s+x.income,0),earnedDays=earned.length,best=earned.reduce((m,x)=>x.income>m?x.income:m,0);
   let selected=selectedKey||keyDay(new Date());if(!selected.startsWith(calendarMonthKey(first)))selected=keyDay(first);
-  const selectedDate=new Date(selected+'T12:00:00'),selectedIn=dayIncome(selected),selectedOut=dayExpenses(selected);
+  const selectedDate=new Date(selected+'T12:00:00'),selectedIn=dayIncome(selected),selectedOut=dayExpenses(selected),selectedDebt=dayExpenses(selected,true);
   const selectedProfits=(state.profits||[]).filter(x=>{const d=validDate(x.at);return d&&keyDay(d)===selected}).sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
   const selectedSources={};selectedProfits.forEach(x=>{const k=normalizeProfitSource(x.sourceGroup||x.source);selectedSources[k]=(selectedSources[k]||0)+Math.max(0,Number(x.amount)||0)});
   const sourceRows=Object.entries(selectedSources).sort((a,b)=>b[1]-a[1]).map(([k,v])=>'<div class="calendar-source"><span>'+esc(PROFIT_ICONS[k]||'💠')+' '+esc(k)+'</span><strong class="blue">+'+esc(fmtMoney(v))+'</strong></div>').join('');
@@ -3156,9 +3159,9 @@ function renderCalendar(year,month,selectedKey){
   for(let i=0;i<leading;i++)cells+='<div class="calendar-day empty" aria-hidden="true"></div>';
   for(let day=1;day<=days;day++){const d=new Date(year,month,day),key=keyDay(d),income=dayIncome(key),today=key===keyDay(new Date()),sel=key===selected,inRange=rangeActive&&rangeLo&&rangeHi&&key>=rangeLo&&key<=rangeHi,start=key===rangeLo&&rangeActive,end=key===rangeHi&&rangeActive;cells+='<button class="calendar-day '+(income>0?'earned ':'')+(today?'today ':'')+(sel?'selected ':'')+(inRange?'in-range ':'')+(start?'range-start ':'')+(end?'range-end':'')+'" type="button" data-cal-day="'+key+'" aria-label="'+esc(d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}))+'"><span class="calendar-num">'+day+'</span>'+(income>0?'<span class="calendar-earned">'+esc(fmtMoney(income))+'</span>':'<span class="calendar-day-noearn">—</span>')+'</button>'}
   const rangeLabel=!rangeActive?'Задай период ниже':(!calendarRangeEnd?'Теперь выбери последнюю дату':range.days+' дн. · '+rangeLo+' → '+rangeHi);
-  const rangeSummary=rangeActive&&calendarRangeEnd?'<div class="calendar-range-summary"><div class="calendar-kpi"><div class="label">Дней</div><div class="value">'+range.days+'</div></div><div class="calendar-kpi"><div class="label">Прибыль</div><div class="value blue">+'+esc(fmtMoney(range.income))+'</div></div><div class="calendar-kpi"><div class="label">Потрачено</div><div class="value red-txt">−'+esc(fmtMoney(range.expense))+'</div></div><div class="calendar-kpi"><div class="label">Чистый итог</div><div class="value '+(range.net>=0?'orange-txt':'red-txt')+'">'+(range.net>=0?'+':'−')+esc(fmtMoney(Math.abs(range.net)))+'</div></div></div>':'';
+  const rangeSummary=rangeActive&&calendarRangeEnd?'<div class="calendar-range-summary"><div class="calendar-kpi"><div class="label">Дней</div><div class="value">'+range.days+'</div></div><div class="calendar-kpi"><div class="label">Прибыль</div><div class="value blue">+'+esc(fmtMoney(range.income))+'</div></div><div class="calendar-kpi"><div class="label">Потрачено</div><div class="value red-txt">−'+esc(fmtMoney(range.expense))+'</div></div><div class="calendar-kpi"><div class="label">Чистый итог</div><div class="value '+(range.net>=0?'orange-txt':'red-txt')+'">'+(range.net>=0?'+':'−')+esc(fmtMoney(Math.abs(range.net)))+'</div></div></div>'+(range.debt>0?'<div class="jl-debtpay" id="calRangeDebtPay"><span aria-hidden="true">🏦</span> Платежи по долгу: <b>'+esc(fmtMoney(range.debt))+'</b></div>':''):'';
   const y=new Date().getFullYear(),defaultStart=calendarRangeStart||y+'-01-01',defaultEnd=calendarRangeEnd||keyDay(new Date());
-  const modal='<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Финансовый календарь</div><h2>Доходы и расходы по периоду</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="calendar-modal" style="margin-top:12px"><div class="calendar-range-bar" style="margin-top:0;display:grid;grid-template-columns:1fr 1fr auto;align-items:end"><div class="field"><label>От</label><input id="calStartDate" type="date" value="'+esc(defaultStart)+'"></div><div class="field"><label>До</label><input id="calEndDate" type="date" value="'+esc(defaultEnd)+'"></div><button class="btn small primary" id="calApplyRange" type="button"><svg class="ui-icon"><use href="#i-check"></use></svg> Рассчитать</button></div><div class="calendar-range-actions" style="margin-top:8px"><button class="btn small" id="calYearBtn" type="button">С 1 января</button><button class="btn small" id="calTodayBtn" type="button">До сегодня</button><button class="btn small ghost" id="calRangeClear" type="button">Очистить</button></div><div class="calendar-head" style="margin-top:12px"><div class="calendar-month">'+esc(monthTitle)+'</div><div class="calendar-nav"><button class="iconbtn" id="calPrev" type="button" aria-label="Предыдущий месяц">‹</button><button class="iconbtn" id="calNext" type="button" aria-label="Следующий месяц">›</button></div></div><div class="calendar-summary"><div class="calendar-kpi"><div class="label">Дней с доходом</div><div class="value">'+earnedDays+'</div></div><div class="calendar-kpi"><div class="label">Заработано за месяц</div><div class="value blue">'+esc(fmtMoney(total))+'</div></div><div class="calendar-kpi"><div class="label">Лучший день</div><div class="value orange">'+esc(fmtMoney(best))+'</div></div></div><div class="calendar-grid">'+cells+'</div><div class="calendar-range-bar"><span><strong>Период:</strong> '+esc(rangeLabel)+'</span></div>'+rangeSummary+'<div class="calendar-selected"><h3>'+esc(selectedDate.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</h3><div class="meta">Доход: <strong class="blue">+'+esc(fmtMoney(selectedIn))+'</strong> · Расход: <strong class="red-txt">−'+esc(fmtMoney(selectedOut))+'</strong></div><div class="stack" style="margin-top:8px">'+(sourceRows||'<div class="empty">В этот день доходов не зафиксировано.</div>')+'</div></div><div class="calendar-foot">Можно указать любой период, например <strong>01.01.2026 → 19.09.2026</strong>. Система считает только реально записанные операции.</div></div>';
+  const modal='<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-calendar"></use></svg></span>Финансовый календарь</div><h2>Доходы и расходы по периоду</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="calendar-modal" style="margin-top:12px"><div class="calendar-range-bar" style="margin-top:0;display:grid;grid-template-columns:1fr 1fr auto;align-items:end"><div class="field"><label>От</label><input id="calStartDate" type="date" value="'+esc(defaultStart)+'"></div><div class="field"><label>До</label><input id="calEndDate" type="date" value="'+esc(defaultEnd)+'"></div><button class="btn small primary" id="calApplyRange" type="button"><svg class="ui-icon"><use href="#i-check"></use></svg> Рассчитать</button></div><div class="calendar-range-actions" style="margin-top:8px"><button class="btn small" id="calYearBtn" type="button">С 1 января</button><button class="btn small" id="calTodayBtn" type="button">До сегодня</button><button class="btn small ghost" id="calRangeClear" type="button">Очистить</button></div><div class="calendar-head" style="margin-top:12px"><div class="calendar-month">'+esc(monthTitle)+'</div><div class="calendar-nav"><button class="iconbtn" id="calPrev" type="button" aria-label="Предыдущий месяц">‹</button><button class="iconbtn" id="calNext" type="button" aria-label="Следующий месяц">›</button></div></div><div class="calendar-summary"><div class="calendar-kpi"><div class="label">Дней с доходом</div><div class="value">'+earnedDays+'</div></div><div class="calendar-kpi"><div class="label">Заработано за месяц</div><div class="value blue">'+esc(fmtMoney(total))+'</div></div><div class="calendar-kpi"><div class="label">Лучший день</div><div class="value orange">'+esc(fmtMoney(best))+'</div></div></div><div class="calendar-grid">'+cells+'</div><div class="calendar-range-bar"><span><strong>Период:</strong> '+esc(rangeLabel)+'</span></div>'+rangeSummary+'<div class="calendar-selected"><h3>'+esc(selectedDate.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))+'</h3><div class="meta">Доход: <strong class="blue">+'+esc(fmtMoney(selectedIn))+'</strong> · Расход: <strong class="red-txt">−'+esc(fmtMoney(selectedOut))+'</strong></div>'+(selectedDebt>0?'<div class="jl-debtpay" id="calDayDebtPay"><span aria-hidden="true">🏦</span> Платежи по долгу: <b>'+esc(fmtMoney(selectedDebt))+'</b></div>':'')+'<div class="stack" style="margin-top:8px">'+(sourceRows||'<div class="empty">В этот день доходов не зафиксировано.</div>')+'</div></div><div class="calendar-foot">Можно указать любой период, например <strong>01.01.2026 → 19.09.2026</strong>. Система считает только реально записанные операции.</div></div>';
   openModal(modal);$('closeModalBtn').onclick=closeModal;
   const apply=()=>{const a=$('calStartDate').value,b=$('calEndDate').value;if(!a){toast('Укажи начальную дату');return}if(b&&b<a){calendarRangeStart=b;calendarRangeEnd=a}else{calendarRangeStart=a;calendarRangeEnd=b||a}renderCalendar(year,month,selected);toast('Период пересчитан',calendarRangeStart+' — '+calendarRangeEnd)};
   $('calApplyRange').onclick=apply;$('calYearBtn').onclick=()=>{calendarRangeStart=new Date().getFullYear()+'-01-01';calendarRangeEnd=keyDay(new Date());renderCalendar(year,month,selected)};$('calTodayBtn').onclick=()=>{calendarRangeEnd=keyDay(new Date());if(!calendarRangeStart)calendarRangeStart=calendarRangeEnd;renderCalendar(year,month,selected)};$('calRangeClear').onclick=()=>{calendarRangeStart='';calendarRangeEnd='';renderCalendar(year,month,selected)};
@@ -3351,7 +3354,7 @@ function renderExpenseDonut(){
   const box=$('expenseDonut'),legend=$('expenseLegend');if(!box||!legend)return;
   const nowLocal=new Date();const month=dateKeyFromDate(nowLocal).slice(0,7);
   const map=new Map();
-  for(const e of state.expenses||[]){const d=new Date(e.at);if(Number.isNaN(d.getTime())||dateKeyFromDate(d).slice(0,7)!==month)continue;const k=(e.category||'Без категории').trim()||'Без категории';map.set(k,(map.get(k)||0)+(Number(e.amount)||0))}
+  for(const e of spendOnly(state.expenses)){const d=new Date(e.at);if(Number.isNaN(d.getTime())||dateKeyFromDate(d).slice(0,7)!==month)continue;const k=(e.category||'Без категории').trim()||'Без категории';map.set(k,(map.get(k)||0)+(Number(e.amount)||0))}
   const rows=[...map.entries()].sort((a,b)=>b[1]-a[1]);const total=rows.reduce((a,[,v])=>a+v,0);
   if(total<=0){box.style.background='var(--line)';$('expenseDonutCenter').innerHTML='<div>Нет<br>расходов</div>';legend.innerHTML='';setText('expenseChartNote','В этом месяце расходы ещё не записаны.');return}
   let angle=0;const stops=[];
@@ -3987,9 +3990,10 @@ function weekStats(){
   const from=new Date();from.setHours(0,0,0,0);from.setDate(from.getDate()-6);const f=from.getTime();
   const inRange=x=>{const t=Date.parse(x?.at||'');return t>=f};
   const inc=(state.profits||[]).filter(inRange).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0);
-  const out=(state.expenses||[]).filter(x=>inRange(x)&&!x.transfer).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0);
+  const out=spendOnly(state.expenses).filter(x=>inRange(x)&&!x.transfer).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0);
+  const debt=debtPaysOnly(state.expenses).filter(inRange).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0);
   let closed=0;const d=new Date();for(let i=0;i<7;i++){const k=keyDay(d);if(dayClosed(state.reports?.[k],k))closed++;d.setDate(d.getDate()-1)}
-  return {inc,out,closed};
+  return {inc,out,debt,closed};
 }
 function weekTextHtml(text){
   const t=String(text||'').replace(/\*\*|__|^#+\s*/gm,'').trim();
@@ -3999,7 +4003,7 @@ function weekTextHtml(text){
 }
 function renderWeek(){
   const card=$('weekCard');if(!card)return;const st=weekStats(),cur=state.ai?.weekly?.[weekKey()],sunday=new Date().getDay()===0;
-  setText('wkDays',st.closed+' / 7');setText('wkIncome',(st.inc?'+':'')+fmtNum(st.inc));setText('wkExpense',(st.out?'−':'')+fmtNum(st.out));
+  setText('wkDays',st.closed+' / 7');setText('wkIncome',(st.inc?'+':'')+fmtNum(st.inc));setText('wkExpense',(st.out?'−':'')+fmtNum(st.out));debtPayLine('wkDebtPay',st.debt);
   card.classList.toggle('sunday',sunday&&!cur);
   setText('wkWhen',cur?'готов · '+new Date(cur.at).toLocaleDateString('ru-RU',{weekday:'long'}):sunday?'сегодня воскресенье':'по воскресеньям');
   const box=$('wkText'),html=cur?weekTextHtml(cur.text):'';if(box&&box.dataset.sig!==String(cur?.at||'')){box.innerHTML=html;box.dataset.sig=String(cur?.at||'')}
@@ -4042,7 +4046,7 @@ function renderDebtPlan(){
   <div class="dp-left" id="dpLeft"></div>`;
   const upd=v=>{const m1=payoffMonths(debt,v),gain=m0-m1;setText('dpAltPay',fmtNum(v));setText('dpAltDate',monthsLater(m1));setText('dpAltGain',gain>0?'на '+monthsText(gain)+' раньше':'так же, как сейчас')};
   upd(alt);
-  const left=()=>{const inc=Math.max(0,Number(state.income)||0),p=Math.max(0,Number(state.debts.monthlyPayment)||0),avg=Math.round(monthSum(state.expenses||[]));setText('dpLeft',inc?`После платежа останется ${fmtMoney(inc-p)} на жизнь${avg?` · обычно тратишь ${fmtMoney(avg)} в месяц`:''}`:'Укажи, сколько планируешь заработать — посчитаю, сколько останется после платежа')};left();
+  const left=()=>{const inc=Math.max(0,Number(state.income)||0),p=Math.max(0,Number(state.debts.monthlyPayment)||0),avg=Math.round(monthSum(spendOnly(state.expenses)));setText('dpLeft',inc?`После платежа останется ${fmtMoney(inc-p)} на жизнь${avg?` · обычно тратишь ${fmtMoney(avg)} в месяц`:''}`:'Укажи, сколько планируешь заработать — посчитаю, сколько останется после платежа')};left();
   let tmr=0;const commit=(fn)=>{clearTimeout(tmr);tmr=setTimeout(()=>{fn();saveState();el.dataset.sig='';renderDebtPlan();setText('dashDebtMeta',debtFreeLine());haptic(10)},120)};
   // typing only updates the hint; the plan is recalculated when the field is left (no lost focus)
   $('dpIncome').oninput=e=>{state.income=Math.max(0,Number(e.target.value)||0);left();queueAutosave()};
