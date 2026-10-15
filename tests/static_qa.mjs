@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "62.1.0");
-assert.match(gradle, /versionCode 621\b/); assert.match(gradle, /versionName '62\.1'/);
-assert.match(csproj, /<Version>62\.1\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V62'), "app version must be V62 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v62-1"), "service worker cache must be V62");
+assert.equal(pkg.version, "63.0.0");
+assert.match(gradle, /versionCode 630\b/); assert.match(gradle, /versionName '63\.0'/);
+assert.match(csproj, /<Version>63\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V63'), "app version must be V63 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v63-0"), "service worker cache must be V63");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -73,4 +73,4 @@ assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 // Gemini Interactions API: thinking_level must sit inside generation_config (top-level → HTTP 400)
 { assert.ok(/generation_config:\s*\{[^}]*thinking_level/.test(fn) && !/\n\s*thinking_level:/.test(fn), "thinking_level must be inside generation_config");
   for (const m of ["week", "deep", "goal"]) assert.ok(fn.includes(`body?.mode === "${m}"`), "AI mode missing: " + m); }
-console.log("JAMAL_LIFE_V62_STATIC_QA_OK");
+console.log("JAMAL_LIFE_V63_STATIC_QA_OK");

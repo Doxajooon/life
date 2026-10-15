@@ -1,7 +1,7 @@
 {
   "name": "jamal-life",
   "private": true,
-  "version": "62.1.0",
+  "version": "63.0.0",
   "type": "module",
   "scripts": {
     "sync": "node tools/sync-platforms.mjs",

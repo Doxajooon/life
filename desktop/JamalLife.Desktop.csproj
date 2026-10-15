@@ -9,7 +9,7 @@
     <AssemblyName>JamalLife</AssemblyName>
     <RootNamespace>JamalLife.Desktop</RootNamespace>
     <Product>Jamal Life</Product>
-    <Version>62.1.0</Version>
+    <Version>63.0.0</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>

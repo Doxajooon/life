@@ -665,6 +665,58 @@ await test("Офлайн: записи сохраняются без интер�
   await ctx.close();
 });
 
+// ================= V63 =================
+await test("Деньги: смахнул влево — удалил, «Вернуть» возвращает", async () => {
+  const { ctx, page } = await device(makeCloud(), { viewport: { width: 390, height: 844 } });
+  await page.evaluate(() => { state.expenses.push({ id: "sw1", amount: 120, category: "Еда", at: new Date().toISOString() }); saveState(); renderAll(); showView("viewMoney"); });
+  const row = page.locator('.jl-swipe[data-i="sw1"] .v-tx');
+  await row.scrollIntoViewIfNeeded(); const box = await row.boundingBox();
+  await page.mouse.move(box.x + box.width - 20, box.y + box.height / 2); await page.mouse.down();
+  for (let i = 1; i <= 10; i++) await page.mouse.move(box.x + box.width - 20 - i * 20, box.y + box.height / 2);
+  await page.mouse.up(); await page.waitForTimeout(350);
+  assert.ok(await page.evaluate(() => document.querySelector('.jl-swipe[data-i="sw1"]').classList.contains("open")), "row did not open");
+  await page.click('.jl-swipe[data-i="sw1"] [data-sw-del]'); await page.waitForTimeout(400);
+  assert.equal(await page.evaluate(() => state.expenses.some(x => x.id === "sw1")), false, "not deleted");
+  await page.click("#jlSnackUndo");
+  assert.equal(await page.evaluate(() => state.expenses.some(x => x.id === "sw1")), true, "undo failed");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Банки: свой банк с эмодзи становится категорией расхода; календарь считает период", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(async () => {
+    showView("viewMoney"); openBudget();
+    document.querySelector('[data-emo="☕"]').click(); document.getElementById("budgetName").value = "Кофе"; document.getElementById("budgetPlanned").value = "300"; document.getElementById("saveBudgetBtn").click();
+    const b = state.budgets.find(x => x.name === "Кофе");
+    openMoneyForm("expense"); const opt = [...document.querySelectorAll("#moneyType option")].find(o => o.value === "Кофе")?.textContent; closeModal();
+    const d = new Date(), k1 = keyDay(d); d.setDate(d.getDate() - 1); const k0 = keyDay(d);
+    state.expenses.push({ id: "c1", amount: 40, category: "Кофе", categoryIcon: "☕", at: new Date().toISOString() }, { id: "c2", amount: 60, category: "Кофе", categoryIcon: "☕", at: new Date(Date.now() - 864e5).toISOString() });
+    saveState(); renderMoney();
+    moneyTab = "cal"; mcSetRange(k0, k1);
+    return { emoji: b?.emoji, opt, noIdeas: !document.body.innerText.includes("Поездки · "), range: document.getElementById("mcRangeBox").innerText, left: limitInfo(b).remaining };
+  });
+  assert.equal(r.emoji, "☕"); assert.match(r.opt || "", /☕ Кофе/); assert.ok(r.noIdeas);
+  assert.match(r.range, /Расход\s*100/); assert.equal(r.left, 200);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Цель: кольцо, отставание и живые этапы", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    const main = state.goals.find(g => g.main); main.createdAt = new Date(Date.now() - 50 * 864e5).toISOString();
+    const t = new Date(Date.now() + 50 * 864e5); state.goal.finance.targetAmount = 10000; state.goal.finance.targetDate = keyDay(t);
+    state.goal.finance.contributions = [{ id: "c", amount: 1000, at: new Date().toISOString() }];
+    state.goal.milestones[0].done = true; saveState(); renderAll(); showView("viewGoal");
+    return { lag: document.getElementById("goalLag").textContent, hidden: document.getElementById("goalLag").hidden, steps: [...document.querySelectorAll(".jl-step")].map(x => x.className.replace("jl-step ", "")), ring: document.getElementById("goalRing").style.strokeDashoffset, chartOnMain: !document.getElementById("goalChart").closest(".jl-more") };
+  });
+  assert.equal(r.hidden, false); assert.match(r.lag, /Отстаёшь на/);
+  assert.deepEqual(r.steps.slice(0, 2), ["done", "current"]); assert.ok(Number(r.ring) > 0); assert.ok(r.chartOnMain);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
