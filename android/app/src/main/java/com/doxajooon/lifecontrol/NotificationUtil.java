@@ -8,22 +8,25 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-/** Reminders with the Jamal Life chime (res/raw/jamal_chime.wav) on a high-importance channel. */
+/** Reminders with the Jamal Glow sound (res/raw/jamal_glow.wav) on a high-importance channel. */
 public final class NotificationUtil {
     // A channel's sound can't be changed after creation, so the chime gets its own channel id.
-    private static final String CHANNEL = "jamal_life_reminders";
-    private static final String[] OLD_CHANNELS = {"life_control_v2", "life_control"};
+    private static final String CHANNEL = "jamal_life_glow";
+    private static final String[] OLD_CHANNELS = {"jamal_life_reminders", "life_control_v2", "life_control"};
     private static final long[] VIBRATION = {0, 180, 120, 180};
     private NotificationUtil() {}
 
     static Uri chimeUri(Context ctx) {
-        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + ctx.getPackageName() + "/" + R.raw.jamal_chime);
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + ctx.getPackageName() + "/" + R.raw.jamal_glow);
     }
 
     static void ensureChannel(Context ctx) {
@@ -45,10 +48,27 @@ public final class NotificationUtil {
         nm.createNotificationChannel(ch);
     }
 
-    static void show(Context ctx, String title, String body, int id) { show(ctx, title, body, id, null); }
+    static void show(Context ctx, String title, String body, int id) { show(ctx, title, body, id, null, 0); }
+    static void show(Context ctx, String title, String body, int id, String taskId) { show(ctx, title, body, id, taskId, 0); }
 
-    /** taskId != null adds the buttons «Готово» and «Через 15 мин». */
-    static void show(Context ctx, String title, String body, int id, String taskId) {
+    private static Bitmap largeIcon;
+    private static Bitmap appIcon(Context ctx) {
+        if (largeIcon != null) return largeIcon;
+        try {
+            Drawable d = ctx.getPackageManager().getApplicationIcon(ctx.getPackageName());
+            int px = (int) (64 * ctx.getResources().getDisplayMetrics().density);
+            Bitmap b = Bitmap.createBitmap(px, px, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(b); d.setBounds(0, 0, px, px); d.draw(c);
+            largeIcon = b;
+        } catch (Exception ignored) {}
+        return largeIcon;
+    }
+
+    /**
+     * taskId != null adds the buttons «Готово» and «Через 15 мин».
+     * dueAt > now shows a live countdown to the task time on the lock screen.
+     */
+    static void show(Context ctx, String title, String body, int id, String taskId, long dueAt) {
         ensureChannel(ctx);
         if (Build.VERSION.SDK_INT >= 33 && ctx.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
         Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -56,7 +76,10 @@ public final class NotificationUtil {
         String text = body == null ? "" : body;
         NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, CHANNEL)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setColor(0xFF3FD0C9)
+                .setColor(0xFFE3B04B)
+                .setLargeIcon(appIcon(ctx))
+                .setSubText(taskId != null ? "Задача" : "Ритм дня")
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(title == null ? "Jamal Life" : title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
@@ -66,18 +89,22 @@ public final class NotificationUtil {
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setSound(chimeUri(ctx))
                 .setVibrate(VIBRATION);
+        if (dueAt > System.currentTimeMillis()) {
+            b.setWhen(dueAt).setShowWhen(true).setUsesChronometer(true);
+            if (Build.VERSION.SDK_INT >= 24) b.setChronometerCountDown(true);
+        }
         int nid = id == 0 ? (int) (System.currentTimeMillis() & 0x7fffffff) : id;
         if (taskId != null && !taskId.isEmpty()) {
-            b.addAction(0, "Готово", action(ctx, ActionReceiver.DONE, taskId, nid, title, text));
-            b.addAction(0, "Через 15 мин", action(ctx, ActionReceiver.SNOOZE, taskId, nid, title, text));
+            b.addAction(0, "Готово", action(ctx, ActionReceiver.DONE, taskId, nid, title, text, dueAt));
+            b.addAction(0, "Через 15 мин", action(ctx, ActionReceiver.SNOOZE, taskId, nid, title, text, dueAt));
         }
         NotificationManagerCompat.from(ctx).notify(nid, b.build());
     }
 
-    private static PendingIntent action(Context ctx, String act, String taskId, int nid, String title, String body) {
+    private static PendingIntent action(Context ctx, String act, String taskId, int nid, String title, String body, long due) {
         Intent i = new Intent(ctx, ActionReceiver.class).setAction(act)
                 .setData(Uri.parse("jamal://task/" + Uri.encode(taskId) + "/" + act))
-                .putExtra("task", taskId).putExtra("nid", nid).putExtra("title", title).putExtra("body", body);
+                .putExtra("task", taskId).putExtra("nid", nid).putExtra("title", title).putExtra("body", body).putExtra("due", due);
         return PendingIntent.getBroadcast(ctx, (act + taskId).hashCode() & 0x7fffffff, i,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }

@@ -17,16 +17,16 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "60.0.0");
-assert.match(gradle, /versionCode 600\b/); assert.match(gradle, /versionName '60\.0'/);
-assert.match(csproj, /<Version>60\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V60'), "app version must be V60 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v60-0"), "service worker cache must be V60");
+assert.equal(pkg.version, "61.0.0");
+assert.match(gradle, /versionCode 610\b/); assert.match(gradle, /versionName '61\.0'/);
+assert.match(csproj, /<Version>61\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V61'), "app version must be V61 (state schema 58)");
+assert.ok(sw.includes("jamal-life-v61-0"), "service worker cache must be V61");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
 assert.ok(!/Life Control/.test(html), "old name left in the app");
-for (const f of ["icon.svg", "icon-192.png", "icon-512.png", "desktop/app.ico", "android/app/src/main/res/raw/jamal_chime.wav"]) assert.ok(existsSync(new URL(f, root)), "missing " + f);
+for (const f of ["icon.svg", "icon-192.png", "icon-512.png", "desktop/app.ico", "android/app/src/main/res/raw/jamal_glow.wav"]) assert.ok(existsSync(new URL(f, root)), "missing " + f);
 assert.ok(read("android/app/src/main/res/values/strings.xml").includes("Jamal Life"));
 
 // single source of truth: no checked-in copies of the web app
@@ -56,7 +56,7 @@ assert.ok(js.includes("window.__jlTick="), "desktop host tick missing");
 assert.ok(js.includes("REMINDER_GRACE_MIN"), "missed reminders must catch up");
 assert.ok(activity.includes("scheduleOnce") && activity.includes("ACTION_VIEW"), "Android task alarms / external links");
 assert.ok(!/return false;\s*\n\s*\n\s*try \{\s*\n\s*startActivity/.test(activity) && !activity.includes('"http".equalsIgnoreCase(scheme)) return false'), "external sites must not open inside the WebView");
-assert.ok(notif.includes("R.raw.jamal_chime") && notif.includes("IMPORTANCE_HIGH"), "Android chime channel");
+assert.ok(notif.includes("R.raw.jamal_glow") && notif.includes("IMPORTANCE_HIGH"), "Android chime channel");
 assert.ok(desktop.includes("NotifyIcon") && desktop.includes("__jlTick") && desktop.includes("WebMessageReceived"), "Windows tray + notifications");
 
 // secrets never ship to the browser
@@ -70,4 +70,4 @@ const tiny = [...html.matchAll(/font-size:\s*(\d*\.?\d+)(px|rem)\b/g)].map(m => 
 assert.deepEqual(tiny, [], "text smaller than 11px: " + tiny.join(", "));
 assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 
-console.log("JAMAL_LIFE_V60_STATIC_QA_OK");
+console.log("JAMAL_LIFE_V61_STATIC_QA_OK");

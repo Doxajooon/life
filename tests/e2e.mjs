@@ -380,7 +380,7 @@ await test("Android: задачи ставятся будильниками, б�
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     state.tasks.push({ id: "fut", title: "Встреча", time: `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`, date: key, remind: 15 });
     scheduleNativeTasks();
-    const once = __calls.filter(c => c[0] === "scheduleOnce").map(c => c[1]);
+    const once = __calls.filter(c => c[0] === "scheduleOnce" || c[0] === "scheduleTask").map(c => c[1]);
     __calls.length = 0;
     notify("Задача: тест", "x", "tasks", { native: true });
     const dup = __calls.filter(c => c[0] === "notify").length;
@@ -445,7 +445,7 @@ await test("Напоминание: кнопки «Готово» и «Чере�
     const nt = __calls.find(c => c[0] === "notifyTask");
     applyReminderAction("snooze", "t2");
     const sn = Date.parse(state.tasks.find(t => t.id === "t2").snoozeAt) - Date.now();
-    return { t1, nt, sn, scheduled: __calls.filter(c => c[0] === "scheduleOnce").map(c => c[1]) };
+    return { t1, nt, sn, scheduled: __calls.filter(c => c[0] === "scheduleOnce" || c[0] === "scheduleTask").map(c => c[1]) };
   });
   assert.equal(r.t1, true, "«Готово» from the notification did not close the task");
   assert.deepEqual(r.nt?.slice(1), ["Задача: Английский", "Время: 23:58", "t2"]);
@@ -493,7 +493,7 @@ await test("План выплаты долга и лимиты на месяц",
   assert.match(r.plan, /через 4 года 7 мес\./, r.plan);
   assert.match(r.gain, /раньше/);
   assert.match(r.budget, /Осталось 150 сомони на \d+ (день|дня|дней) — около \d+ сомони в день/);
-  assert.ok(r.log.some(t => /Лимит «Еда»: 85%/.test(t)), JSON.stringify(r.log));
+  assert.ok(r.log.some(t => /Банк «Еда»: потрачено 85%/.test(t)), JSON.stringify(r.log));
   assert.match(r.today, /^Еда: осталось 150/);
   assert.deepEqual(page.errors, []);
   await ctx.close();

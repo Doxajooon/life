@@ -28,7 +28,7 @@ public class ActionReceiver extends BroadcastReceiver {
         } else if (SNOOZE.equals(i.getAction())) {
             String title = i.getStringExtra("title"), body = i.getStringExtra("body");
             AlarmScheduler.scheduleOnce(ctx, "tasksnz_" + task, System.currentTimeMillis() + SNOOZE_MS,
-                    title == null ? "Напоминание" : title, "Отложено на 15 минут" + (body == null || body.isEmpty() ? "" : " · " + body));
+                    title == null ? "Напоминание" : title, "Отложено на 15 минут" + (body == null || body.isEmpty() ? "" : " · " + body), i.getLongExtra("due", 0));
         }
     }
 }

@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.TRANSPARENT);
-        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        // No forced LAYER_TYPE_HARDWARE: on many phones it makes the WebView flicker while scrolling.
 
         // Same edge-to-edge behaviour on every Android version: the window draws under the system bars
         // and the root view pads the WebView by the bar / cutout / keyboard insets.
@@ -456,6 +456,20 @@ public class MainActivity extends AppCompatActivity {
             AlarmScheduler.scheduleOnce(ctx, id, atMillis, title, body);
         }
 
+        /** Task reminder with the task time: the notification shows a live countdown to it. */
+        @JavascriptInterface public void scheduleTask(String id, double atMillis, String title, String body, double dueMillis) {
+            AlarmScheduler.scheduleOnce(ctx, id, atMillis, title, body, dueMillis);
+        }
+
+        @JavascriptInterface public void notifyTaskAt(String title, String body, String taskId, double dueMillis) {
+            NotificationUtil.show(ctx, title, body, ("task_" + taskId).hashCode(), taskId, (long) dueMillis);
+        }
+
+        /** Short preview of the reminder sound (settings → «Проверить звук»). */
+        @JavascriptInterface public void previewSound() {
+            NotificationUtil.show(ctx, "Jamal Life", "Так звучат напоминания ✨", 4242, null, 0);
+        }
+
         @JavascriptInterface public void cancel(String id) {
             AlarmScheduler.cancel(ctx, id);
         }
@@ -489,6 +503,6 @@ public class MainActivity extends AppCompatActivity {
             String a = activity.launchAction; activity.launchAction = null; return a == null ? "" : a;
         }
 
-        @JavascriptInterface public int bridgeVersion() { return 4; }
+        @JavascriptInterface public int bridgeVersion() { return 5; }
     }
 }

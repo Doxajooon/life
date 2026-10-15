@@ -56,13 +56,15 @@ public final class AlarmScheduler {
         save(ctx, id, "daily", x.getStringExtra("time"), 0, title, body);
     }
 
-    static void scheduleOnce(Context ctx, String id, double atMillis, String title, String body) {
+    static void scheduleOnce(Context ctx, String id, double atMillis, String title, String body) { scheduleOnce(ctx, id, atMillis, title, body, 0); }
+
+    static void scheduleOnce(Context ctx, String id, double atMillis, String title, String body, double dueMillis) {
         long at = (long) atMillis;
         if (at <= System.currentTimeMillis()) { cancel(ctx, id); return; }
         Intent x = new Intent();
-        x.putExtra("id", id); x.putExtra("kind", "once"); x.putExtra("title", title); x.putExtra("body", body);
+        x.putExtra("id", id); x.putExtra("kind", "once"); x.putExtra("title", title); x.putExtra("body", body); x.putExtra("due", (long) dueMillis);
         setExact(ctx, at, pending(ctx, id, x));
-        save(ctx, id, "once", "", at, title, body);
+        save(ctx, id, "once", "", at, title, body, (long) dueMillis);
     }
 
     static void cancel(Context ctx, String id) {
@@ -75,10 +77,12 @@ public final class AlarmScheduler {
         cancel(ctx, "task_" + task); cancel(ctx, "taskpre_" + task); cancel(ctx, "tasksnz_" + task);
     }
 
-    private static void save(Context ctx, String id, String kind, String time, long at, String title, String body) {
+    private static void save(Context ctx, String id, String kind, String time, long at, String title, String body) { save(ctx, id, kind, time, at, title, body, 0); }
+
+    private static void save(Context ctx, String id, String kind, String time, long at, String title, String body, long due) {
         try {
             JSONObject o = new JSONObject();
-            o.put("kind", kind); o.put("time", time); o.put("at", at);
+            o.put("kind", kind); o.put("time", time); o.put("at", at); o.put("due", due);
             o.put("title", title == null ? "" : title); o.put("body", body == null ? "" : body);
             prefs(ctx).edit().putString(id, o.toString()).apply();
         } catch (Exception ignored) {}
@@ -105,7 +109,7 @@ public final class AlarmScheduler {
         for (String id : prefs(ctx).getAll().keySet()) {
             try {
                 JSONObject o = new JSONObject(prefs(ctx).getString(id, "{}"));
-                if ("once".equals(o.optString("kind"))) scheduleOnce(ctx, id, o.optLong("at"), o.optString("title"), o.optString("body"));
+                if ("once".equals(o.optString("kind"))) scheduleOnce(ctx, id, o.optLong("at"), o.optString("title"), o.optString("body"), o.optLong("due"));
                 else schedule(ctx, id, o.optString("time"), o.optString("title"), o.optString("body"));
             } catch (Exception ignored) {}
         }
