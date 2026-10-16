@@ -1,6 +1,6 @@
 # Jamal Life — техническое задание и передача проекта
 
-Версия документа: 16 октября 2026 · состояние кода: **71.0** (ветка `claude/design-v71`, в `main` — после проверки владельца) · владелец: Абдуджамол (doxajooon@gmail.com)
+Версия документа: 16 октября 2026 · состояние кода: **72.0** (ветка `claude/charming-cray-x1vzf8`, в `main` — после проверки владельца) · владелец: Абдуджамол (doxajooon@gmail.com)
 
 Этот файл — главное задание для разработчика (в том числе Claude Code), который продолжает проект.
 Раздел 1–4 — что уже есть и как оно устроено. Раздел 5 — правила работы. **Раздел 6 — что нужно сделать.**
@@ -24,13 +24,14 @@ Jamal Life — личное приложение одного человека �
 
 ## 2. Архитектура
 
-- **Одно веб-ядро** — `index.html` (~4 900 строк: вся разметка, CSS и JavaScript внутри, без фреймворков и сборщиков).
+- **Одно веб-ядро** — `index.html` (~5 400 строк: вся разметка, CSS и JavaScript внутри, без фреймворков и сборщиков).
   Рядом: `sw.js` (офлайн), `manifest.webmanifest`, иконки, `fonts/` (Manrope, Nunito, Inter — woff2), `sounds/jamal-dawn.wav` (делает `tools/make-dawn.py`).
 - **Android** (`android/`): Java, WebView + WebViewAssetLoader (`https://appassets.androidplatform.net/assets/`),
   мост `AndroidBridge` (версия 5): уведомления с кнопками «Готово / Через 15 мин» (`ActionReceiver`, `PendingActions`),
   будильники (`AlarmScheduler`, `AlarmReceiver`, `BootReceiver`), виджет (`JamalWidget`), отпечаток (BiometricPrompt),
   своё оформление уведомления (`NotificationUtil`, `res/layout/notif_reminder.xml`), значок-корона `res/drawable/ic_notification.xml`,
-  канал звука `jamal_life_dawn` со звуком `res/raw/jamal_dawn.wav` (у канала Android звук не меняется — новый звук = новый канал, старый удаляется в `OLD_CHANNELS`). minSdk 26.
+  канал звука `jamal_life_dawn` со звуком `res/raw/jamal_dawn.wav` (у канала Android звук не меняется — новый звук = новый канал, старый удаляется в `OLD_CHANNELS`).
+  С 72: будильник `stend_<этап>` за 10 мин до конца этапа показывает кнопки «Да / Перенести» (`AlarmReceiver.taskOf` → `stage:<id>`, `ActionReceiver` отдаёт оба действия веб-приложению через `PendingActions`). minSdk 26.
 - **Windows** (`desktop/`): .NET WPF + WebView2, трей, напоминания в фоне; папка `desktop/Web` — копия веб-файлов.
 - **Копирование веб-файлов**: `node tools/sync-platforms.mjs` копирует 13 файлов в `android/app/src/main/assets` и `desktop/Web`.
   Эти копии в git не хранятся; источник правды — корневые файлы. **После любой правки веб-файлов запускать sync.**
@@ -38,7 +39,8 @@ Jamal Life — личное приложение одного человека �
   - Auth по e-mail/паролю.
   - Таблица `public.life_state` (одна строка на пользователя: `user_id`, `state` jsonb, `schema_version` = 58, `updated_at`, `device_id`), RLS: только `user_id = auth.uid()` на select/insert/update/delete.
   - Таблица `public.ai_usage` (счётчик AI-запросов, лимит 10 в час), RLS на свои строки.
-  - Edge Function `life-control-ai` (`supabase/functions/life-control-ai/index.ts`, `verify_jwt: true`, import map `deno.jsonc`), текущая развёрнутая версия **v17** (платежи по долгу передаются отдельно: `debtPaid`; неделя считает их правильно).
+  - Таблица `public.life_state_history` (с 72, P7): `id`, `user_id`, `day`, `state` jsonb, `created_at`; уникально `user_id + day`; RLS select/insert/delete только свои строки. Приложение после синхронизации раз в сутки пишет снимок (`cloudDailySnapshot`) и удаляет свои копии старше 30 дней; восстановление — «Резервные копии» → «Облачные копии» (предпросмотр → подтверждение, `renderCloudCopies`).
+  - Edge Function `life-control-ai` (`supabase/functions/life-control-ai/index.ts`, `verify_jwt: true`, import map `deno.jsonc`), текущая развёрнутая версия **v18** (72: ответ не дольше ~19 с — тайм-аут на модель 12 с, модель с 503 на 3 минуты в конец очереди, ошибка «Google перегружен» по-русски; AI получает отчёт дня, привычки-отказы, победы и этап цели).
 - **CI** (`.github/workflows/release.yml`): на push в `main` — тесты → Android APK + Windows EXE → релиз. Тег берётся из `package.json`.
   APK подписывается ключом из секретов `ANDROID_KEY_ALIAS`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEYSTORE_BASE64`;
   Секреты добавлены 16.10.2026 (v70.0.913): APK подписан постоянным ключом владельца, обновления ставятся поверх. Шаг подписи сам убирает переносы строк из секретов и при ошибке называет неверный секрет.
@@ -56,12 +58,14 @@ Jamal Life — личное приложение одного человека �
 | --- | --- |
 | Старт, сохранение | `init`, `normalize`, `saveState`, `restoreFromIndexedDB`, `renderAll`, `showView` |
 | Синхронизация | `cloudSync`, `cloudPushNow`, `mergeStates`, `mergeFirstContact`, `applyCloudState`, `cloudLogout`, `wipeLocalData` |
-| Сегодня | `renderToday`, `renderAuto`, `renderRhythm`, `renderDayStrip`, `renderTasks`, `renderHabits`, `renderHabitWeek`, `renderFreePlan`, `closeDay`, `renderWeek`, `runWeekReview`, `localWeekText` |
-| Цель | `renderGoal`, `renderGoalHero`, `milestoneAuto`, `autoMilestones`, `renderGoalAI`, `requestGoalAI`, `maybeAutoGoalAI`, `openGoalEditor`, `renderGoalPreview` |
+| Сегодня | `renderToday`, `renderAuto`, `renderNowFocus`, `renderRhythm`, `renderDayStrip`, `renderTasks`, `renderHabits`, `renderHabitWeek`, `renderFreePlan`, `closeDay`, `renderWeek`, `runWeekReview`, `localWeekText` |
+| Ритм дня (72) | `stageFocus` (главное этапа: задача этапа › задача к цели › этап цели › свои слова этапа), `stageReminderTexts` (тексты начала и конца этапа), `goalFacts`, `goalLeftText`, `stageMainDone`, `moveStageMain`, `nextTwoHour`, `taskNotice`, `taskGoalLabel` |
+| Цель | `renderGoal`, `renderGoalHero`, `renderMilestones`, `milestoneCloseHint`, `currentMilestone`, `milestoneAuto` (= `milestoneAutoBase` + задачи этапа), `autoMilestones`, `renderGoalAI`, `requestGoalAI`, `maybeAutoGoalAI`, `openGoalEditor`, `renderGoalPreview` |
 | Деньги | `renderMoney`, `renderBudgets`, `openBudget`, `renderDebtPlan`, `openDebtHistory`, `openDebtEdit`, `openMoneyForm`, `openTransferForm`, `liveMoneyForm`, `renderProfitSources`, `deleteTx`, `bindSwipe`, `renderCalendarRange` |
 | AI (клиент) | `callAI`, `openGeminiAnalysis`, `lifeFacts`, `aiTextHtml`, `openLifeAnalysis`, `analyzeLife`, `refreshAIHealth`, `normalizeAIError` |
 | Уведомления | `runScheduler`, `notify`, `scheduleNativeTasks`, `playNotificationSound`, `loadGlass`, `pullNativeActions` |
-| Оформление | `setTheme`, `applyFont`, `applyLayoutMode` |
+| Оформление | `setTheme`, `applyFont`, `applyLayoutMode`, `painter(el).html=` и `textOf(el).v=` (пишут в DOM только изменившееся) |
+| Облачные копии (72) | `cloudDailySnapshot`, `snapshotOf`, `listCloudCopies`, `fetchCloudCopy`, `renderCloudCopies`, `restoreSnapshot` |
 
 ### AI (сервер, `supabase/functions/life-control-ai/index.ts`)
 - Режимы: `life` (плюсы, минусы, «куда я иду», риск, план, шаг, советы по приложению; `lifeContext` + `facts` от клиента), `goal`, `week`, `deep`, `ping`; `GET` — бесплатная проверка.
@@ -80,6 +84,7 @@ Jamal Life — личное приложение одного человека �
 | 68 | История долга из каждой ячейки; живые формы дохода/расхода/перевода; этапы цели закрываются сами; AI-стратегия обновляется сама; новый AI-разбор жизни; исправлена потеря правки при быстром перезапуске |
 | 69 | AI-разбор понимает markdown/нумерацию; клавиатура для графика долга и цитаты (axe 0); контраст светлой темы; платежи по долгу отдельно от «Расход»; переключатель автозакрытия этапов цели (`m.autoOff`); удалён мёртвый CSS (static_qa следит) |
 | 71 | Дизайн «Jamal Dawn»: светлее тёмная тема, живое небо на фоне (пауза в фоне), «дышащие» иконки, тонкие часы; «назад» и вкладки возвращают на то же место прокрутки (`viewScroll`); шкала общего пульса (% и градусы); напоминания каждые 2 часа — о цели (`goalFocusLine`), в работе — пауза; привычки «горят», тип «отказ» (`h.avoid`); «Итог дня» — полный отчёт (`renderDayLedger`); дашборд цели (собрано/осталось/пройдено), живые окна «Пополнить» и «Сумма и срок»; «Достигнуто» само собирает победы с благодарностью (`earnedAchievements`); плитки денег 2×2; природный звук «Jamal Dawn»; значок уведомления — корона |
+| 72 | Ритм дня ведёт: у каждого этапа «главное» из данных и связано с целью (`stageFocus`), напоминание в начале этапа «Сейчас: … Главное: … До цели: …» и за 10 мин до конца «Сделал главное?» с «Да / Перенести» (Android тоже), тексты меняются каждый день; «Свободное время» — первая строка о цели с «Сделал» (идёт в итог дня) и реальное время следующего напоминания; задачи «к цели» (🎯, засчитываются в этап, цель в уведомлении, просроченная иконка «тлеет»); этапы цели — дорожка (текущий крупно с % и «чтобы закрыть», закрытые золотые с датой, будущие под замком); ничего не обрезано «…»; тосты сверху, праздник 1,5 с; перерисовка только изменившегося, экраны ≤150 мс при CPU×4, анимации только transform/opacity; единый стиль иконок; облачные копии 30 дней; AI ≤19 с и «Google перегружен, пробую другую модель…» |
 | 70 | Полный аудит: тап по операции со смещением пальца, «назад» на Android закрывает окно, обход всех кнопок; одно правило «Расход» везде (+ старые переводы, записи без `dateKey`, «Нужно в месяц»), формат сумм; `normalize` переживает битые данные, старые записи без `id` получают одинаковый `id` на всех устройствах (раньше слияние теряло офлайн-записи); XSS через валюту и стикер банка; AI-неделя видела `debtPaid` 0; axe 0 на всех экранах и окнах; тест Edge Function |
 
 ## 4. Тесты и проверки
@@ -87,14 +92,14 @@ Jamal Life — личное приложение одного человека �
 ```bash
 npm install                    # один раз (Playwright 1.55)
 node tools/sync-platforms.mjs  # после любой правки веб-файлов
-node tests/static_qa.mjs       # должен закончиться строкой JAMAL_LIFE_V71_STATIC_QA_OK
-node tests/edge.mjs            # Edge Function на моках Deno/Supabase/Gemini — 14/14 passed (npm run test:edge, идёт в CI)
-node tests/e2e.mjs             # 62/62 passed; CHROME_PATH=... если Chromium установлен отдельно
+node tests/static_qa.mjs       # должен закончиться строкой JAMAL_LIFE_V72_STATIC_QA_OK
+node tests/edge.mjs            # Edge Function на моках Deno/Supabase/Gemini — 16/16 passed (npm run test:edge, идёт в CI)
+node tests/e2e.mjs             # 72/72 passed; CHROME_PATH=... если Chromium установлен отдельно
 SHOTS=папка node tests/e2e.mjs  # дополнительно сохранить снимки новых компонентов (светлая и тёмная тема)
-CPU_SLOW=4 node tests/e2e.mjs  # то же на «медленном телефоне» — тоже 62/62
+CPU_SLOW=4 node tests/e2e.mjs  # то же на «медленном телефоне» — тоже 72/72 (каждый экран ≤ 150 мс на 3000 операций)
 ONLY="часть названия" node tests/e2e.mjs   # один тест
 ```
-- `tests/e2e.mjs` поднимает фальшивый Supabase (вход, `life_state` с версиями, AI-ответы) — реальная база не трогается.
+- `tests/e2e.mjs` поднимает фальшивый Supabase (вход, `life_state` с версиями, `life_state_history`, AI-ответы с задержкой) — реальная база не трогается.
 - `tests/static_qa.mjs` проверяет версии во всех файлах, наличие шрифтов/звука, канал уведомлений, правила AI, отсутствие текста мельче 11 px, ключевые функции, отсутствие CSS для неиспользуемых классов.
 - e2e использует `axe-core` (devDependency) для проверок доступности и контраста.
 - e2e обходит все окна и экраны и нажимает каждую кнопку; axe — на всех экранах и окнах в обеих темах; 6 ширин (360–1440); XSS через все формы; битые данные в `normalize`; два устройства со старыми записями без `id`.
@@ -103,12 +108,12 @@ ONLY="часть названия" node tests/e2e.mjs   # один тест
 
 ## 5. Правила работы (обязательно)
 
-1. **Ничего не ломать.** Перед коммитом: sync → `static_qa` → `edge` (14/14) → `e2e` (62/62) → `CPU_SLOW=4 e2e` (62/62). Новая функция — новый тест в `tests/e2e.mjs` и проверка в `static_qa`.
-2. **Версия.** Каждый выпуск поднимает версию везде одинаково: `index.html` (`brand-ver">V71`, `>V71<` на экране входа, `71.0</span>` в «О приложении»), `sw.js` (`jamal-life-v71-0`), `package.json` и `package-lock.json` (`71.0.0`), `android/app/build.gradle` (`versionCode 710`, `versionName '71.0'`), `desktop/JamalLife.Desktop.csproj` (`71.0.0`), `tests/static_qa.mjs` (все эти ожидания). `schema_version` состояния остаётся **58**, пока не меняется формат данных.
+1. **Ничего не ломать.** Перед коммитом: sync → `static_qa` → `edge` (16/16) → `e2e` (72/72) → `CPU_SLOW=4 e2e` (72/72). Новая функция — новый тест в `tests/e2e.mjs` и проверка в `static_qa`.
+2. **Версия.** Каждый выпуск поднимает версию везде одинаково: `index.html` (`brand-ver">V72`, `>V72<` на экране входа, `72.0</span>` в «О приложении»), `sw.js` (`jamal-life-v72-0`), `package.json` и `package-lock.json` (`72.0.0`), `android/app/build.gradle` (`versionCode 720`, `versionName '72.0'`), `desktop/JamalLife.Desktop.csproj` (`72.0.0`), `tests/static_qa.mjs` (все эти ожидания). `schema_version` состояния остаётся **58**, пока не меняется формат данных.
 3. **Данные пользователя.** Никаких изменений формата состояния без миграции в `normalize()`. Никаких деструктивных SQL и миграций в Supabase **без явного согласия владельца**. Реальную строку `life_state` не редактировать.
 4. **Секреты.** Не коммитить ключи, пароли, keystore. Ключ Gemini — только в Supabase Secrets. Пароль владельца не спрашивать и не вводить.
 5. **Edge Function.** Правка `index.ts` → деплой той же функции (`life-control-ai`, `verify_jwt: true`, import map `deno.jsonc`) → проверить логи Supabase (`function_logs`, строки `gemini ok` / `gemini error`).
-6. **Дизайн.** Тёмная тема по умолчанию, светлая должна оставаться читаемой. Отступы между строками ≥ 4 px, текст ≥ 11 px, все анимации отключаются при `prefers-reduced-motion`. Без мерцания: не перерисовывать то, что не изменилось.
+6. **Дизайн.** Тёмная тема по умолчанию, светлая должна оставаться читаемой. Отступы между строками ≥ 4 px, текст ≥ 11 px, все анимации отключаются при `prefers-reduced-motion` и двигают только `transform`/`opacity` (static_qa проверяет). Без мерцания: не перерисовывать то, что не изменилось (`painter`, `textOf`, `dataset.sig`). Тосты — сверху, не над «+» и нижней панелью. Текст не обрезать «…».
 7. **Деплой.** Push в `main` = релиз (веб обновляется через GitHub Pages, APK/EXE — в Releases). Коммиты с понятным описанием. Ветку `main` не переписывать (`--force` запрещён).
 
 ## 6. Что нужно сделать
@@ -121,7 +126,7 @@ ONLY="часть названия" node tests/e2e.mjs   # один тест
 
 ### 6.2. Делает разработчик — по порядку приоритета
 
-> Статус на 71.0: дизайн «Jamal Dawn» и живые экраны (раздел 3, строка 71). Статус на 70.0: проведён полный аудит Q1–Q6 (раздел 3, строка 70). Статус на 69.0: P1–P5 и P8 сделаны (тесты в `tests/e2e.mjs`, проверки в `tests/static_qa.mjs`). P6 ждёт проверки владельцем на устройствах, P7 — согласия владельца на миграцию.
+> Статус на 72.0: D8–D16 сделаны (ритм дня с «главным» и напоминаниями начала/конца этапа, задачи к цели, дорожка этапов, облачные копии — P7 выполнен, таблица `life_state_history` создана 16.10.2026 с согласия владельца, AI v18). Статус на 71.0: дизайн «Jamal Dawn» и живые экраны (раздел 3, строка 71). Статус на 70.0: проведён полный аудит Q1–Q6 (раздел 3, строка 70). Статус на 69.0: P1–P5 и P8 сделаны (тесты в `tests/e2e.mjs`, проверки в `tests/static_qa.mjs`). P6 ждёт проверки владельцем на устройствах, P7 — согласия владельца на миграцию.
 
 **P1. Проверить AI на настоящем ключе и довести до рабочего состояния**
 - После того как владелец нажмёт «Запустить AI-анализ» — посмотреть логи функции (`gemini ok <модель>` или `gemini error <модель> <код>`).
@@ -151,7 +156,7 @@ ONLY="часть названия" node tests/e2e.mjs   # один тест
 - Windows EXE: запускается, сворачивается в трей, напоминание приходит при закрытом окне, шрифты и звук на месте.
 - Критерий: короткий отчёт владельца «работает / не работает» по каждому пункту; найденное — исправить.
 
-**P7. Облачные резервные копии (только с согласия владельца)**
+**P7. Облачные резервные копии — сделано в 72.0** (согласие владельца получено; таблица `life_state_history`, см. раздел 2)
 - Предложить владельцу таблицу `life_state_history` (снимок раз в сутки, 30 дней, RLS на свои строки) и восстановление из неё в «Резервные копии». Миграцию применять **только после явного «да»**.
 
 **P8. Чистота кода (без изменения поведения)**

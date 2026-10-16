@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "71.0.0");
-assert.match(gradle, /versionCode 710\b/); assert.match(gradle, /versionName '71\.0'/);
-assert.match(csproj, /<Version>71\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V71') && html.includes('<span>V71</span>') && html.includes('v-row-val">71.0</span>'), "app version must be V71 everywhere on screen (state schema 58)");
-assert.ok(sw.includes("jamal-life-v71-0"), "service worker cache must be V71");
+assert.equal(pkg.version, "72.0.0");
+assert.match(gradle, /versionCode 720\b/); assert.match(gradle, /versionName '72\.0'/);
+assert.match(csproj, /<Version>72\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V72') && html.includes('<span>V72</span>') && html.includes('v-row-val">72.0</span>'), "app version must be V72 everywhere on screen (state schema 58)");
+assert.ok(sw.includes("jamal-life-v72-0"), "service worker cache must be V72");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -116,4 +116,19 @@ assert.ok(html.includes("function renderPulseGauge(") && html.includes('id="pgAr
 assert.ok(existsSync(new URL("../tools/make-dawn.py", import.meta.url)) && !existsSync(new URL("../sounds/jamal-glass.wav", import.meta.url)), "Jamal Dawn is made by tools/make-dawn.py; the old tone is gone");
 assert.ok(notif.includes('"jamal_life_glass"') && notif.indexOf('"jamal_life_glass"') > notif.indexOf("OLD_CHANNELS"), "the old sound channel is deleted on Android (a channel's sound cannot change)");
 assert.ok(html.includes("avoid:h.avoid===true") && html.includes("function renderDayLedger(") && html.includes("function earnedAchievements(") && html.includes("function goalFocusLine("), "habits «отказ», day report, earned wins, goal-linked reminders");
-console.log("JAMAL_LIFE_V71_STATIC_QA_OK");
+// V72: the rhythm leads (one goal-linked action per stage, start/end reminders with «Да / Перенести»), goal tasks, the goal's road map,
+// nothing cut off, redraw only what changed, animations on transform/opacity only, one icon style, daily cloud copies, AI within ~19 s
+assert.ok(html.includes("function stageFocus(") && html.includes("function stageReminderTexts(") && html.includes("'stend_'+s.id") && html.includes("stage:'+s.id"), "stage focus and start/end-of-stage reminders");
+{ const ar = read("android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java"), act = read("android/app/src/main/java/com/doxajooon/lifecontrol/ActionReceiver.java");
+  assert.ok(ar.includes('"stend_"') && notif.includes('"Перенести"') && act.includes('task.startsWith("stage:")'), "Android: «Да / Перенести» on the stage reminder"); }
+assert.ok(html.includes("function nextTwoHour(") && html.includes("data-free-goal") && html.includes("dd.goalDone"), "free time starts with the goal step and the real next reminder");
+assert.ok(html.includes("function taskNotice(") && html.includes("goal:'main',ms:") && html.includes("tk=(state.tasks||[]).filter(x=>x.goal&&x.ms===m.id)"), "goal tasks count into the goal stage");
+assert.ok(html.includes("function renderMilestones(") && html.includes("function milestoneCloseHint(") && html.includes("Откроется после этапа"), "goal stages as a road map");
+assert.ok(html.includes("function painter(") && html.includes("function textOf("), "redraw only what changed");
+{ const css = html.slice(0, html.indexOf("</style>")), bad = [];
+  for (const m of css.matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]*\{[^{}]*\})*)\s*\}/g)) if ([...m[2].matchAll(/([a-z-]+)\s*:/g)].some(x => !["transform", "opacity"].includes(x[1]))) bad.push(m[1]);
+  assert.deepEqual(bad, [], "animations must move only transform/opacity: " + bad.join(", ")); }
+assert.ok(html.includes("@keyframes jlIconIn") && html.includes("#txFilters{flex-wrap:wrap"), "one icon style; transaction filters wrap");
+assert.ok(html.includes("life_state_history") && html.includes("CLOUD_KEEP_DAYS=30") && read("supabase/setup.sql").includes("create table if not exists public.life_state_history") && /life_state_history_select_own[\s\S]*auth\.uid\(\)/.test(read("supabase/setup.sql")), "daily cloud copies with RLS");
+assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes("перегружен") && html.includes("Google перегружен, пробую другую модель") && html.includes("function v72Facts("), "AI answers within ~19 s and sees the day report, «отказ» habits, wins and the goal stage");
+console.log("JAMAL_LIFE_V72_STATIC_QA_OK");

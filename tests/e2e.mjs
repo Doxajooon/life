@@ -72,6 +72,7 @@ function makeCloud() {
     if (url.pathname.startsWith("/functions/")) {
       if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
       const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
+      if (cloud.aiDelay) await new Promise(r => setTimeout(r, cloud.aiDelay));
       if (cloud.aiFail) return send(429, { error: "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей." });
       if (b.mode === "week") return send(200, { ok: true, model: "mock", output_text: "СИЛЬНАЯ СТОРОНА — закрыл 5 дней.\nСЛАБОЕ МЕСТО — **телефон** <img src=x onerror=window.__xss=1>\nШАГ НА НЕДЕЛЮ — после 21:00 телефон на зарядку.", sources: [] });
       return send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] });
@@ -1442,6 +1443,25 @@ await test("V72 D15: облачные копии — снимок раз в су
   const snap = await strip(cloud.history.find(r => r.id === id).state);
   assert.ok(snap.includes("Облако") && snap.includes("Дом"), "the copy holds that day's data");
   assert.equal(await strip(), snap, "restored data equal the copy");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D16: AI видит отчёт дня, привычки-отказы, победы и этап цели; при долгом ответе — «Google перегружен, пробую другую модель…»", async () => {
+  const cloud = makeCloud(); cloud.aiDelay = 8200;
+  const { ctx, page } = await device(cloud);
+  await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay(); state.profits.push({ id: "ai1", amount: 1200, sourceGroup: "Фриланс", at: now, dateKey: k }); state.expenses.push({ id: "ai2", amount: 200, category: "Еда", at: now, dateKey: k });
+    state.habits = [{ id: "hv", title: "Без соцсетей", kind: "daily", target: 7, avoid: true }]; state.habitLog = { hv: { [k]: 1 } };
+    state.goal.milestones[0].done = true; state.goal.milestones[0].doneAt = now; state.goal.milestones[1].autoOff = true; saveState(); renderAll(); openGeminiAnalysis(); });
+  await page.click("#aiRunBtn");
+  await page.waitForSelector("[data-ai-slow]", { timeout: 9000 });
+  assert.match(await page.textContent("[data-ai-slow]"), /Google перегружен, пробую другую модель/);
+  await page.waitForSelector(".jl-ai-result", { timeout: 15000 });
+  const f = cloud.aiBodies.at(-1).facts;
+  assert.equal(f.dayReport.income, 1200); assert.equal(f.dayReport.spent, 200); assert.ok(Array.isArray(f.dayReport.where) && f.dayReport.where[0].category === "Еда");
+  assert.deepEqual(f.avoidHabits.map(h => [h.title, h.heldToday]), [["Без соцсетей", true]]);
+  assert.ok(f.wins.some(w => /Этап 1 закрыт/.test(w.title)), "wins go to the AI");
+  assert.ok(f.goalStage && f.goalStage.n === 2 && typeof f.goalStage.toClose === "string", "the current goal stage goes to the AI");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
