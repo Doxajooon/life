@@ -1425,6 +1425,60 @@ await test("Безопасность: вредный текст, введённ�
   await ctx.close();
 });
 
+await test("Вид: axe 0 нарушений на всех экранах и в окнах (тёмная и светлая тема)", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const AXE = fs.readFileSync(path.join(ROOT, "node_modules/axe-core/axe.min.js"), "utf8");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addStyleTag({ content: "#toast{display:none!important}" });
+  await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay(); state.profile.name = "Джамал"; state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
+    state.profits.push({ id: "p1", amount: 8000, sourceGroup: "Зарплата", at: now, dateKey: k }); state.expenses.push({ id: "e1", amount: 300, category: "Еда", at: now, dateKey: k }, { id: "d1", amount: 4000, category: "Платёж по долгу", debtPayment: "bank", transfer: true, at: now, dateKey: k });
+    state.tasks.push({ id: "t1", title: "Позвонить", time: "23:00", date: k }); state.notes.push({ id: "n1", title: "Идея", body: "текст", at: now, category: "work" });
+    state.habits = [{ id: "h1", title: "Спорт", kind: "weekly", target: 3 }]; state.budgets = [{ id: "b1", name: "Поездки", planned: 1000, tops: [] }]; state.goal.finance.targetAmount = 50000; ensureDebtHistory(); saveState(); renderAll(); });
+  await page.addScriptTag({ content: AXE });
+  const places = [...["viewToday", "viewGoal", "viewGoalEdit", "viewMoney", "viewNotes", "viewNoteEdit", "viewSettings", "viewDisplay", "viewNotifications", "viewProfile"].map(v => [v, `closeModal(); showView("${v}")`]),
+    ...["tx", "cal"].map(t => ["viewMoney/" + t, `closeModal(); showView("viewMoney"); document.querySelector('[data-money-tab="${t}"]').click()`]),
+    ...WINDOWS.map(([n, o]) => [n, `closeModal(); showView("viewToday"); ${o}`])];
+  const bad = [];
+  for (const theme of ["dark", "light"]) {
+    await page.evaluate(t => { state.settings.theme = t; setTheme(); }, theme);
+    for (const [name, js] of places) {
+      await page.evaluate(js => { eval(js); window.scrollTo(0, 0); }, js); await page.waitForTimeout(80);
+      const v = await page.evaluate(() => axe.run(document, { runOnly: ["wcag2a", "wcag2aa"], resultTypes: ["violations"] }).then(r => r.violations.map(x => x.id + ": " + x.nodes.slice(0, 3).map(n => n.target.join(" ") + (n.any[0]?.data?.contrastRatio ? " " + n.any[0].data.contrastRatio : "")).join(", "))));
+      for (const x of v) bad.push(`${theme} ${name} — ${x}`);
+    }
+  }
+  assert.deepEqual(bad, [], bad.slice(0, 12).join("\n"));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Вид: 6 ширин × 2 темы — нет горизонтальной прокрутки и вылезания; «уменьшить движение» выключает анимации", async () => {
+  const bad = [];
+  for (const width of [360, 390, 412, 768, 1024, 1440]) {
+    const { ctx, page } = await device(makeCloud(), { viewport: { width, height: 844 } });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay(); state.profile.name = "Джамал Абдуджамолов"; state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
+      state.expenses.push({ id: "e1", amount: 123456, category: "Очень длинная категория расходов", at: now, dateKey: k }); state.tasks.push({ id: "t1", title: "Позвонить в банк и уточнить график платежей по кредиту на следующий месяц", time: "23:00", date: k });
+      state.notes.push({ id: "n1", title: "Очень длинный заголовок заметки, который не должен вылезать за край экрана", body: "текст", at: now, category: "work" }); state.budgets = [{ id: "b1", name: "Поездки и отдых за городом с семьёй", planned: 1000, tops: [] }]; ensureDebtHistory(); saveState(); renderAll(); });
+    for (const theme of ["dark", "light"]) {
+      await page.evaluate(t => { state.settings.theme = t; setTheme(); }, theme);
+      for (const [name, js] of [...["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"].map(v => [v, `closeModal(); showView("${v}")`]), ...WINDOWS.slice(0, 12).map(([n, o]) => [n, `closeModal(); ${o}`])]) {
+        await page.evaluate(js => eval(js), js); await page.waitForTimeout(60);
+        const r = await page.evaluate(() => { const W = document.documentElement.clientWidth, out = []; if (document.documentElement.scrollWidth > W + 1) out.push("scrolls sideways " + document.documentElement.scrollWidth);
+          const root = document.getElementById("modalBack").classList.contains("open") ? document.getElementById("modal") : document.querySelector(".view.active");
+          for (const el of root.querySelectorAll("*")) { const rc = el.getBoundingClientRect(); if (!rc.width || !el.getClientRects().length) continue; let p = el.parentElement, clipped = false; while (p && p !== document.body) { if (/(auto|scroll|hidden)/.test(getComputedStyle(p).overflowX)) { clipped = true; break; } p = p.parentElement; }
+            if (!clipped && (rc.right > W + 1 || rc.left < -1)) { out.push("sticks out: " + (el.id || String(el.className.baseVal ?? el.className).slice(0, 30))); break; } }
+          for (const el of document.querySelectorAll("body *")) { if (!el.getClientRects().length) continue; const cs = getComputedStyle(el); if (cs.animationName !== "none" && parseFloat(cs.animationDuration) > 0.02) { out.push("animates with reduced motion: " + (el.id || el.className)); break; } }
+          return out; });
+        for (const x of r) bad.push(`${width} ${theme} ${name}: ${x}`);
+      }
+    }
+    assert.deepEqual(page.errors, [], width + "");
+    await ctx.close();
+  }
+  assert.deepEqual(bad, [], bad.slice(0, 12).join("\n"));
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
