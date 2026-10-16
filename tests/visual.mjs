@@ -74,7 +74,7 @@ for (const width of (process.env.WIDTHS || "360,390,1366").split(",").map(Number
   const ctx = await browser.newContext({ viewport: { width, height: width > 1000 ? 800 : 844 }, serviceWorkers: "block", locale: "ru-RU", timezoneId: "Asia/Dushanbe", reducedMotion: "reduce" });
   await ctx.route(/supabase\.co/, r => { const u = new URL(r.request().url()); const send = b => r.fulfill({ status: 200, headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" }, contentType: "application/json", body: JSON.stringify(b) });
     if (r.request().method() === "OPTIONS") return send(null); if (u.pathname.startsWith("/functions/")) return send({ ok: true, model: "mock", output_text: "ПЛЮСЫ — ровный ритм.\nШАГ — один платёж.", sources: [] }); return send([]); });
-  await ctx.addInitScript(a => { localStorage.setItem("LIFE_CONTROL_SUPABASE_AUTH_V1", a); let s = 42; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647; }, JSON.stringify(session));
+  await ctx.addInitScript(a => { localStorage.setItem("LIFE_CONTROL_SUPABASE_AUTH_V1", a); if (!localStorage.getItem("LIFE_CONTROL_V52")) localStorage.setItem("LIFE_CONTROL_V52", JSON.stringify({ version: 58, settings: { onboarded: true } })); let s = 42; Math.random = () => (s = (s * 16807) % 2147483647) / 2147483647; }, JSON.stringify(session));
   const page = await ctx.newPage();
   page.on("pageerror", e => console.log("pageerror", e.message));
   await page.clock.setFixedTime(new Date("2026-10-16T11:00:00+05:00"));

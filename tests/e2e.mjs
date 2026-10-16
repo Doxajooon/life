@@ -84,10 +84,14 @@ function makeCloud() {
         const sel = url.searchParams.get("select") || "";
         const r = { updated_at: cloud.row.updated_at };
         if (sel.includes("state")) Object.assign(r, { state: cloud.row.state, schema_version: cloud.row.schema_version });
+        if (sel.includes("device_id")) r.device_id = cloud.row.device_id ?? null;
         return send(200, [r]);
       }
       const body = JSON.parse(req.postData() || "{}");
-      if (m === "POST") { cloud.row = { ...body, updated_at: cloud.nextStamp() }; return send(201, [cloud.row]); }
+      if (m === "POST") { cloud.row = { ...body, updated_at: cloud.nextStamp() };
+        // the row is written at once, the answer comes late (a slow phone that is closed before it arrives)
+        if (cloud.postDelay) { const row = cloud.row; await new Promise(r => setTimeout(r, cloud.postDelay)); return send(201, [row]).catch(() => {}); }
+        return send(201, [cloud.row]); }
       if (m === "PATCH") {
         const want = (url.searchParams.get("updated_at") || "").replace(/^eq\./, "");
         if (!cloud.row || cloud.row.updated_at !== want) return send(200, []);
@@ -100,13 +104,15 @@ function makeCloud() {
 }
 
 const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
-async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock, touch = false } = {}) {
+async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock, touch = false, onboarding = false } = {}) {
   const ctx = await browser.newContext({ viewport, serviceWorkers: sw, locale: "ru-RU", timezoneId: "Asia/Dushanbe", hasTouch: touch, isMobile: touch });
   await ctx.route(/supabase\.co/, r => cloud.handle(r));
   if (session !== null) {
     const s = session || cloud.session();
     await ctx.addInitScript(a => { if (!localStorage.getItem("LIFE_CONTROL_SUPABASE_AUTH_V1")) localStorage.setItem("LIFE_CONTROL_SUPABASE_AUTH_V1", a); }, JSON.stringify(s));
   }
+  // 73: the first-start setup opens for an empty account; tests that are not about it start as «already set up»
+  if (!onboarding) await ctx.addInitScript(() => { if (!localStorage.getItem("LIFE_CONTROL_V52")) localStorage.setItem("LIFE_CONTROL_V52", JSON.stringify({ version: 58, settings: { onboarded: true } })); });
   if (init) await ctx.addInitScript(init);
   const page = await ctx.newPage();
   if (process.env.CPU_SLOW) { const cdp = await ctx.newCDPSession(page); await cdp.send("Emulation.setCPUThrottlingRate", { rate: Number(process.env.CPU_SLOW) }); }
@@ -118,6 +124,10 @@ async function device(cloud, { viewport = { width: 390, height: 844 }, session, 
   await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true, null, { timeout: 10000 });
   return { ctx, page };
 }
+// 73: a new account starts with an empty goal — tests about goal stages set up a goal of their own (made-up values)
+const seedGoal = () => { state.goal.title = "Купить квартиру"; state.goal.why = "Своё жильё"; state.goal.next = "Накопить первый взнос";
+  state.goal.milestones = [{ id: "m1", title: "Накопить первый взнос", done: false }, { id: "m2", title: "Закрыть кредит за машину", done: false }, { id: "m3", title: "Выбрать район", done: false }, { id: "m4", title: "Оформить ипотеку", done: false }];
+  syncMainGoalMirror(); saveState(); renderAll(); };
 const sync = page => page.evaluate(async () => { while (cloudSyncInFlight) await cloudSyncInFlight.catch(() => {}); return cloudAutoSync(); });
 
 // ================= tests =================
@@ -565,6 +575,7 @@ await test("Привычки: отметка, серия и объединени
 
 await test("Экраны «Деньги» и «Цель»: всё видно сразу, без «Скрыть»; каждый график рисуется", async () => {
   const { ctx, page } = await device(makeCloud());
+  await page.evaluate(seedGoal);
   const r = await page.evaluate(() => {
     const now = new Date().toISOString();
     state.profits.push({ id: "p1", amount: 5000, sourceGroup: "Зарплата", at: now }); state.expenses.push({ id: "e1", amount: 300, category: "Еда", at: now }); saveState(); renderAll();
@@ -735,6 +746,7 @@ await test("Банки: свой банк с эмодзи становится �
 
 await test("Цель: кольцо, отставание и живые этапы", async () => {
   const { ctx, page } = await device(makeCloud());
+  await page.evaluate(seedGoal);
   const r = await page.evaluate(() => {
     const main = state.goals.find(g => g.main); main.createdAt = new Date(Date.now() - 50 * 864e5).toISOString();
     const t = new Date(Date.now() + 50 * 864e5); state.goal.finance.targetAmount = 10000; state.goal.finance.targetDate = keyDay(t);
@@ -848,6 +860,7 @@ await test("Шрифт выбирается в настройках и сохр�
 
 await test("Долг: ячейки открывают историю; формы денег живые; этапы цели закрываются сами", async () => {
   const { ctx, page } = await device(makeCloud());
+  await page.evaluate(seedGoal);
   const r = await page.evaluate(() => {
     state.debts = { bank: 100000, firms: 100000, monthlyPayment: 4000 }; state.debtBaseline = 200000;
     state.expenses.push({ id: "dp1", amount: 4000, category: "Долг", debtPayment: "bank", at: new Date().toISOString() });
@@ -865,7 +878,7 @@ await test("Долг: ячейки открывают историю; формы
     state.debts = { bank: 50000, firms: 40000, monthlyPayment: 4000 }; saveState(); renderAll(); showView("viewGoal");
     return { hist, rc, ms: state.goal.milestones.map(m => [m.done, !!m.auto]) };
   });
-  assert.equal(r.hist.title, "Банк"); assert.equal(r.hist.pays, 1);
+  assert.equal(r.hist.title, "Долг 1"); // a new account: neutral debt names assert.equal(r.hist.pays, 1);
   assert.ok(r.rc.sumNode); assert.equal(r.rc.type, "Фриланс"); assert.equal(r.rc.what, "Фриланс"); assert.equal(r.rc.date, "вчера");
   assert.deepEqual(r.ms, [[true, true], [false, false]]);
   assert.deepEqual(page.errors, []);
@@ -1179,6 +1192,7 @@ await test("Назад: экран возвращается на то же ме�
 
 await test("V71: пульс-шкала, отчёт дня, привычка-отказ, победы с благодарностью, напоминания о цели каждые 2 часа", async () => {
   const { ctx, page } = await device(makeCloud());
+  await page.evaluate(seedGoal);
   await page.emulateMedia({ reducedMotion: "reduce" });
   const r = await page.evaluate(() => {
     const k = keyDay(), now = new Date().toISOString();
@@ -1348,6 +1362,7 @@ await test("V72 D11: этапы цели — дорожка: текущий кр
 
 await test("V72 D12: ничего не скрыто и нет «мёртвых» иконок — нет руки-курсора без действия, кнопки-на-вид работают, текст не обрезан «…»", async () => {
   const { ctx, page } = await device(makeCloud());
+  await page.evaluate(seedGoal);
   const bad = await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay();
     state.goal.finance.targetAmount = 50000; state.goal.why = "Очень длинное объяснение, зачем нужна эта цель: своя квартира для семьи, спокойствие, стабильность и уверенность в завтрашнем дне";
     state.profits.push({ id: "p", amount: 8000, sourceGroup: "Зарплата", at: now, dateKey: k }); state.expenses.push({ id: "e", amount: 123456, category: "Очень длинная категория расходов для проверки", at: now, dateKey: k });
@@ -1450,6 +1465,7 @@ await test("V72 D15: облачные копии — снимок раз в су
 await test("V72 D16: AI видит отчёт дня, привычки-отказы, победы и этап цели; при долгом ответе — «Google перегружен, пробую другую модель…»", async () => {
   const cloud = makeCloud(); cloud.aiDelay = 8200;
   const { ctx, page } = await device(cloud);
+  await page.evaluate(seedGoal);
   await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay(); state.profits.push({ id: "ai1", amount: 1200, sourceGroup: "Фриланс", at: now, dateKey: k }); state.expenses.push({ id: "ai2", amount: 200, category: "Еда", at: now, dateKey: k });
     state.habits = [{ id: "hv", title: "Без соцсетей", kind: "daily", target: 7, avoid: true }]; state.habitLog = { hv: { [k]: 1 } };
     state.goal.milestones[0].done = true; state.goal.milestones[0].doneAt = now; state.goal.milestones[1].autoOff = true; saveState(); renderAll(); openGeminiAnalysis(); });
@@ -1471,7 +1487,7 @@ await test("V72: цитата дня — хадис Пророка ﷺ с ист
   const seen = [];
   for (let d = 0; d < 40; d++) {
     await page.clock.setSystemTime(new Date(Date.parse("2026-10-16T09:00:00+05:00") + d * 864e5));
-    seen.push(await page.evaluate(() => { const m = motivation(); return m.author + "|" + m.text + "|" + m.source; }));
+    seen.push(await page.evaluate(() => { state.settings.quoteSet = "hadith"; const m = motivation(); return m.author + "|" + m.text + "|" + m.source; }));
   }
   assert.ok(seen.every(x => x.startsWith("Пророк Мухаммад ﷺ|«") && x.split("|")[2].length > 3), "a hadith with its source every day");
   assert.equal(new Set(seen).size, 40, "40 days — 40 different hadiths");
@@ -1491,6 +1507,7 @@ const WINDOWS = [
   ["AI-анализ", "openGeminiAnalysis()"], ["Полный разбор", "openLifeAnalysis()"], ["Поиск", "openSearch()"], ["Достижение", "openAchievement()"], ["Резервная копия", "openBackupDialog()"],
   ["Копии", "openBackups()"], ["Профиль", "openProfileEdit()"], ["Отчёты", "openReportHistory()"], ["День", "openDayProgress()"], ["Касса", "openMetricDetail('cash')"],
   // the calendar opens on «1 January → today»; start from another period so its quick buttons have something to change
+  ["Настройка 1", "openOnboarding(1)"], ["Настройка 2", "openOnboarding(2)"], ["Настройка 3", "openOnboarding(3)"],
   ["Календарь, период", "openCalendar(); calendarRangeStart = '2026-03-01'; calendarRangeEnd = '2026-03-05'; renderCalendar(new Date().getFullYear(), new Date().getMonth(), keyDay())"],
 ];
 await test("Все окна: каждая кнопка работает, ошибок нет", async () => {
@@ -1523,7 +1540,7 @@ await test("Все окна: каждая кнопка работает, оши�
       const changed = await page.evaluate(i => { const s = window.__before, b = [...document.querySelectorAll("#modal button, #modal [role=button]")][i];
         return document.getElementById("modal").innerHTML !== s.html || document.getElementById("modalBack").classList.contains("open") !== s.open || currentView !== s.view || JSON.stringify(state) !== s.st || document.getElementById("toast").textContent !== s.toast || window.__dl > 0 || (b && (b.className !== s.cls || (b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded")) !== s.aria)) || document.activeElement?.closest?.("#modal input, #modal textarea, #modal select"); }, i);
       // not a bug: the period already is «1 January → today» (the same as tapping an already chosen chip)
-      const already = name === "Календарь" && /^(С 1 января|До сегодня)$/.test(before);
+      const already = (name === "Календарь" && /^(С 1 января|До сегодня)$/.test(before)) || (name === "Настройка 3" && before === "Работа 9–18"); // the template already chosen (it brings back its times after an edit)
       if (!changed && !already) dead.push(name + " → «" + before + "»");
     }
   }
@@ -1845,6 +1862,252 @@ await test("Окна: закрыл окно, пока идёт запрос (AI,
   await page.waitForTimeout(1200);
   assert.deepEqual(page.errors, []);
   await ctx.close();
+});
+
+
+// ================= 73: an app for everybody =================
+// A state of the same shape as the owner's cloud row (saved by 72: no quoteSet / debt names / onboarded), with made-up numbers.
+const OWNER_LIKE = () => {
+  const at = "2026-10-10T07:00:00.000Z";
+  return { version: 58, profile: { name: "Тест", currency: "сомони", createdAt: "2026-01-05T07:00:00.000Z" },
+    settings: { theme: "dark", preMinutes: 10, notifications: true, wakeTime: "06:30", every2h: true, fontScale: 1.1, font: "manrope", lang: "ru", notifyTasks: true, notifyFinance: true, notifyGoals: true, sound: true },
+    income: 6100, debts: { bank: 73000, firms: 41000, monthlyPayment: 3900 }, debtBaseline: 130000,
+    goal: { title: "Свой дом у моря", why: "Спокойная жизнь без аренды", next: "Отложить первый взнос", aiPlan: null, aiPlanAt: "", aiPlanGoalKey: "",
+      finance: { targetAmount: 90000, savedAmount: 0, manualSavedAmount: 0, targetDate: "2028-06-01", startedAt: "2026-01-05T07:00:00.000Z", completedAt: "", contributions: [{ id: "gc1", amount: 2500, at, note: "" }] },
+      milestones: [{ id: "m1", title: "Отложить первый взнос", done: true, doneAt: at }, { id: "m2", title: "Погасить кредит за технику", done: false }, { id: "m3", title: "Выбрать участок", done: false }, { id: "m4", title: "Начать стройку", done: false }] },
+    day: { steps: [{ id: "s1", title: "Смена в цеху", text: "Свой рабочий блок", time: "07:40", end: "16:20", details: ["Принять смену", "Сдать отчёт"] },
+      { id: "s2", title: "Спортзал и ужин", text: "После смены", time: "16:20", end: "21:10", details: ["Тренировка"] },
+      { id: "s3", title: "Итог дня", text: "Закрыть день", time: "21:10", end: "21:40", details: ["Записать факт дня"] }] },
+    profits: [{ id: "p1", amount: 3100, sourceGroup: "Спортивная аналитика", at, dateKey: "2026-10-10" }, { id: "p2", amount: 6100, sourceGroup: "Зарплата", at, dateKey: "2026-10-10" }],
+    expenses: [{ id: "e1", amount: 420, category: "Еда", at, dateKey: "2026-10-10" }, { id: "e2", amount: 3900, category: "Платёж по долгу", debtPayment: "bank", transfer: true, at, dateKey: "2026-10-10" }],
+    goals: [{ id: "goal-main", title: "Свой дом у моря", description: "Спокойная жизнь без аренды", icon: "home2", color: "green", targetAmount: 90000, targetDate: "2028-06-01", manualSaved: 0, contributions: [], createdAt: "2026-01-05T07:00:00.000Z", completedAt: "", main: true }],
+    tasks: [{ id: "t1", title: "Позвонить мастеру", time: "18:30", date: "2026-10-10", done: true, doneAt: at, createdAt: at }],
+    reports: { "2026-10-09": { done: "сделал главное", block: "", future: "", tomorrow: "шаг", savedAt: at, steps: { s1: true } } },
+    habits: [], habitLog: {}, budgets: [], notes: [], notesTrash: [], achievements: [], notificationsLog: [], dailyMotivations: {}, debtHistory: [{ day: "2026-10-10", total: 114000, at }], _lastSavedAt: at };
+};
+const ownerView = () => ({ income: state.income, debts: [state.debts.bank, state.debts.firms, state.debts.monthlyPayment], goal: [state.goal.title, state.goal.why, state.goal.next, state.goal.finance.targetAmount, state.goal.finance.targetDate],
+  ms: state.goal.milestones.map(m => m.title + (m.done ? "✓" : "")), steps: state.day.steps.map(x => [x.title, x.time, x.end, x.details.join("|")].join(" ")),
+  money: [state.profits.length, state.expenses.length, state.tasks.length], labels: [debtLabel("bank"), debtLabel("firms")], quotes: quoteSet(), onboarded: state.settings.onboarded });
+const OWNER_EXPECT = { income: 6100, debts: [73000, 41000, 3900], goal: ["Свой дом у моря", "Спокойная жизнь без аренды", "Отложить первый взнос", 90000, "2028-06-01"],
+  ms: ["Отложить первый взнос✓", "Погасить кредит за технику", "Выбрать участок", "Начать стройку"],
+  steps: ["Смена в цеху 07:40 16:20 Принять смену|Сдать отчёт", "Спортзал и ужин 16:20 21:10 Тренировка", "Итог дня 21:10 21:40 Записать факт дня"],
+  money: [2, 2, 1], labels: ["Банк", "Фирмы"], quotes: "hadith", onboarded: true };
+
+await test("73 «данные владельца»: сохранённые 72 доход, долги, цель с 4 этапами, распорядок и записи — на месте после загрузки, синхронизации и перезагрузки", async () => {
+  const cloud = makeCloud();
+  // the owner's phone: the state saved by 72 is on the device
+  const { ctx, page } = await device(cloud, { onboarding: true, init: `if (!sessionStorage.getItem("seeded")) { sessionStorage.setItem("seeded", "1"); localStorage.setItem("LIFE_CONTROL_V52", ${JSON.stringify(JSON.stringify(OWNER_LIKE()))}); }` });
+  await sync(page); await page.waitForTimeout(400);
+  assert.deepEqual(await page.evaluate(ownerView), OWNER_EXPECT, "after load and sync");
+  assert.equal(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), false, "no first-start setup for an account with data");
+  const ui = await page.evaluate(() => { showView("viewMoney"); const cells = [...document.querySelectorAll(".jl-debt-cell .label")].map(x => x.textContent.trim()); showView("viewGoal"); return { cells, goal: document.getElementById("goalTitle").textContent, quote: document.getElementById("motivationSource").textContent }; });
+  assert.ok(ui.cells[0] === "Банк" && ui.cells[1] === "Фирмы", "debt names stay «Банк / Фирмы»: " + ui.cells);
+  assert.equal(ui.goal, "Свой дом у моря"); assert.match(ui.quote, /Пророк Мухаммад ﷺ/);
+  // the cloud row holds the same values — nothing replaced by the defaults
+  const c = cloud.row.state;
+  assert.deepEqual([c.income, c.debts.bank, c.debts.firms, c.debts.monthlyPayment, c.goal.title, c.goal.milestones.length, c.day.steps[0].time, c.profits.length], [6100, 73000, 41000, 3900, "Свой дом у моря", 4, "07:40", 2]);
+  assert.deepEqual([c.settings.quoteSet, c.debts.labels, c.settings.onboarded], ["hadith", { bank: "Банк", firms: "Фирмы" }, true]);
+  await page.reload(); await page.waitForFunction(() => appReadyForSync === true); await sync(page);
+  assert.deepEqual(await page.evaluate(ownerView), OWNER_EXPECT, "after a reload");
+  // a second device of the owner: everything arrives from the cloud, the setup never shows
+  const B = await device(cloud, { onboarding: true });
+  await sync(B.page); await B.page.waitForTimeout(400);
+  assert.deepEqual(await B.page.evaluate(ownerView), OWNER_EXPECT, "on a second device");
+  assert.equal(await B.page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), false, "no setup on the second device");
+  assert.deepEqual(page.errors, []); assert.deepEqual(B.page.errors, []);
+  await ctx.close(); await B.ctx.close();
+});
+
+await test("73: строка владельца из облака на новом устройстве — первый контакт сохраняет все значения", async () => {
+  const cloud = makeCloud();
+  cloud.row = { user_id: UID, state: OWNER_LIKE(), schema_version: 58, updated_at: cloud.nextStamp() };
+  const { ctx, page } = await device(cloud, { onboarding: true });
+  await sync(page); await page.waitForTimeout(400);
+  assert.deepEqual(await page.evaluate(ownerView), OWNER_EXPECT);
+  assert.equal(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), false);
+  assert.equal(cloud.row.state.income, 6100); assert.equal(cloud.row.state.goal.milestones.length, 4);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("73: новый пустой аккаунт — чистый лист, цитаты «Мотивация», первая настройка из 3 шагов уходит в облако", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { onboarding: true });
+  await page.waitForSelector("#obNext", { timeout: 8000 });
+  const clean = await page.evaluate(() => ({ income: state.income, debts: [state.debts.bank, state.debts.firms, state.debts.monthlyPayment], goal: state.goal.title, ms: state.goal.milestones.length, labels: [debtLabel("bank"), debtLabel("firms")], q: quoteSet(), src: profitSources(), title: document.title, brand: document.querySelector(".brand-name").textContent.trim() }));
+  assert.deepEqual(clean, { income: 0, debts: [0, 0, 0], goal: "", ms: 0, labels: ["Долг 1", "Долг 2"], q: "general", src: ["Зарплата", "Фриланс", "Бизнес", "Другое"], title: "Life — цели, деньги, день", brand: "Life" });
+  // step 1 — name and currency
+  await page.fill("#obName", "Алия"); await page.selectOption("#obCur", "тенге"); await page.click("#obNext");
+  // step 2 — the goal with two stages
+  await page.fill("#obGoal", "Накопить на машину"); await page.fill("#obAmount", "30000"); await page.fill("#obDate", "2027-09-01"); await page.fill("#obMs1", "Отложить 10 000"); await page.fill("#obMs2", "Выбрать машину"); await page.click("#obNext");
+  // step 3 — a ready template, one time changed, one debt
+  await page.click('[data-ob-tpl="study"]'); await page.fill("#obS0", "08:30"); await page.click(".jl-ob-debt summary"); await page.fill("#obDebt1", "5000"); await page.fill("#obPay", "500"); await page.click("#obNext");
+  await page.waitForTimeout(300); await sync(page);
+  const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), on: state.settings.onboarded, name: state.profile.name, cur: currencyLabel(), goal: [state.goal.title, state.goal.finance.targetAmount, state.goal.finance.targetDate, state.goal.next], ms: state.goal.milestones.map(m => m.title), steps: state.day.steps.map(x => x.title + " " + x.time), debt: [state.debts.bank, state.debts.monthlyPayment] }));
+  assert.deepEqual(r, { open: false, on: true, name: "Алия", cur: "тенге", goal: ["Накопить на машину", 30000, "2027-09-01", "Отложить 10 000"], ms: ["Отложить 10 000", "Выбрать машину"], steps: ["Учёба 08:30", "Домашние задания и дела 15:00", "Итог дня 21:00"], debt: [5000, 500] });
+  const c = cloud.row.state;
+  assert.deepEqual([c.goal.title, c.goal.milestones.length, c.day.steps[0].time, c.settings.onboarded, c.settings.quoteSet], ["Накопить на машину", 2, "08:30", true, "general"], "the setup went to the cloud");
+  // never again — not after a reload, not on another device
+  await page.reload(); await page.waitForFunction(() => appReadyForSync === true); await sync(page); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), false);
+  const B = await device(cloud, { onboarding: true }); await sync(B.page); await B.page.waitForTimeout(300);
+  assert.equal(await B.page.evaluate(() => document.getElementById("modalBack").classList.contains("open") || state.goal.title), "Накопить на машину");
+  // the quote of the day: neutral thought, no religious text; «Выключить» hides it
+  const q = await page.evaluate(() => { showView("viewToday"); renderToday(); const m = motivation(); return { a: m.author, t: m.text, set: m.set }; });
+  assert.equal(q.a, "Мысль дня"); assert.ok(!/Аллах|Пророк|ﷺ/.test(q.t)); assert.equal(q.set, "general");
+  const off = await page.evaluate(() => { showView("viewSettings"); const sel = document.getElementById("setQuoteSet"); sel.value = "off"; sel.dispatchEvent(new Event("change")); showView("viewToday"); return document.querySelector(".jl-quote").hidden; });
+  assert.equal(off, true, "«Выключить» hides the quote");
+  assert.deepEqual(page.errors, []); assert.deepEqual(B.page.errors, []);
+  await ctx.close(); await B.ctx.close();
+});
+
+await test("73: настройку можно пропустить целиком; закрытое окно больше не появляется", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { onboarding: true });
+  await page.waitForSelector("#obSkip", { timeout: 8000 });
+  for (let i = 0; i < 3; i++) await page.click("#obSkip");
+  await page.waitForTimeout(200);
+  const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), on: state.settings.onboarded, goal: state.goal.title, steps: state.day.steps.length, hero: document.getElementById("tgTitle").textContent }));
+  assert.deepEqual(r, { open: false, on: true, goal: "", steps: 3, hero: "Задай свою цель" });
+  // a second empty account closes the window with «back» — it does not come back either
+  const C = await device(makeCloud(), { onboarding: true });
+  await C.page.waitForSelector("#obNext", { timeout: 8000 }); await C.page.evaluate(() => closeModal()); await C.page.waitForTimeout(100);
+  await sync(C.page); await C.page.waitForTimeout(200);
+  assert.deepEqual(await C.page.evaluate(() => [state.settings.onboarded, document.getElementById("modalBack").classList.contains("open")]), [true, false]);
+  assert.deepEqual(page.errors, []); assert.deepEqual(C.page.errors, []);
+  await ctx.close(); await C.ctx.close();
+});
+
+await test("73: цитаты дня — у пользователя с данными хадисы, у нового — мотивация (миграция quoteSet)", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    const withData = normalize({ version: 58, profits: [{ id: "x", amount: 1, at: "2026-01-01T00:00:00Z" }] }).settings.quoteSet;
+    const withTasks = normalize({ version: 58, tasks: [{ id: "t", title: "a", date: "2026-01-01" }] }).settings.quoteSet;
+    const withReport = normalize({ version: 58, reports: { "2026-01-01": { done: "сделал" } } }).settings.quoteSet;
+    const onlyClock = normalize({ version: 58, reports: { "2026-01-01": { steps: { s1: true } } } }).settings.quoteSet; // stage marks set by the clock are not user data
+    const empty = normalize({ version: 58 }).settings.quoteSet;
+    const chosen = normalize({ version: 58, settings: { quoteSet: "off" }, profits: [{ id: "x", amount: 1 }] }).settings.quoteSet;
+    return { withData, withTasks, withReport, onlyClock, empty, chosen, n: GENERAL_QUOTES.length, uniq: new Set(GENERAL_QUOTES).size };
+  });
+  assert.deepEqual(r, { withData: "hadith", withTasks: "hadith", withReport: "hadith", onlyClock: "general", empty: "general", chosen: "off", n: 60, uniq: 60 });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("73: пустой аккаунт со старыми демо-значениями 72 начинает с чистого листа; аккаунт с записями — не трогается", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    // the demo values of ≤72 are recognised by their hash only (they are no longer in the code)
+    const demo = { goal: { title: "x", why: "y", next: "z", milestones: [{ id: "m1", title: "a" }] } };
+    const kept = normalize({ version: 58, ...demo }).goal.title; // not the demo text → stays
+    const withRecords = normalize({ version: 58, income: 4500, debts: { bank: 1e5, firms: 1.2e5, monthlyPayment: 5200 }, expenses: [{ id: "e", amount: 5 }] });
+    const emptyDemo = normalize({ version: 58, income: 4500, debts: { bank: 1e5, firms: 1.2e5, monthlyPayment: 5200 } });
+    return { kept, withRecords: [withRecords.income, withRecords.debts.bank, withRecords.debts.firms], emptyDemo: [emptyDemo.income, emptyDemo.debts.bank, emptyDemo.debts.firms, emptyDemo.debts.monthlyPayment, emptyDemo.debtBaseline] };
+  });
+  assert.deepEqual(r, { kept: "x", withRecords: [4500, 100000, 120000], emptyDemo: [0, 0, 0, 0, null] });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("73: пустая цель и нулевой долг — спокойные пустые состояния без NaN/∞; имена долгов можно переименовать", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const bad = await page.evaluate(() => { const out = [];
+    for (const v of ["viewToday", "viewGoal", "viewMoney", "viewProfile"]) { showView(v); const t = document.querySelector(".view.active").innerText; for (const w of ["NaN", "Infinity", "∞", "undefined", "null"]) if (t.includes(w)) out.push(v + ": " + w); }
+    for (const o of ["openDebtEdit()", "openDebtHistory('all')", "openMetricDetail('debt')", "openMetricDetail('goal')", "openLifeAnalysis()", "openGoalFinanceEdit()"]) { closeModal(); eval(o); const t = document.getElementById("modal").innerText; for (const w of ["NaN", "Infinity", "∞", "undefined", "null"]) if (t.includes(w)) out.push(o + ": " + w); }
+    closeModal(); return out; });
+  assert.deepEqual(bad, []);
+  assert.equal(await page.evaluate(() => { showView("viewGoal"); return document.getElementById("goalTitle").textContent; }), "Задай свою цель");
+  await page.evaluate(() => openDebtEdit());
+  await page.fill("#dnb", "Кредит <b>"); await page.fill("#db", "1200"); await page.click("#saveDebtBtn");
+  const r = await page.evaluate(() => { showView("viewMoney"); return { label: state.debts.labels.bank, cell: document.querySelector('.jl-debt-cell[data-debt-open="bank"] .label').textContent.trim(), html: document.querySelector('.jl-debt-cell[data-debt-open="bank"] .label').innerHTML.includes("<b>") }; });
+  assert.deepEqual(r, { label: "Кредит b", cell: "Кредит b", html: false });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("73: merge() копирует значения по умолчанию — снятая отметка не «воскресает», DEFAULT не меняется", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    const before = JSON.stringify(DEFAULT);
+    const s = normalize({ version: 58, habits: [{ id: "h", title: "Спорт" }] }); // an old state without habitLog
+    s.habitLog.h = { "2026-10-16": 1 }; s.goal.milestones.push({ id: "z", title: "чужой" }); s.debts.bank = 7;
+    const fresh = normalize({ version: 58 });
+    return { same: JSON.stringify(DEFAULT) === before, log: fresh.habitLog, ms: fresh.goal.milestones.length, bank: fresh.debts.bank };
+  });
+  assert.deepEqual(r, { same: true, log: {}, ms: 0, bank: 0 });
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("73 RLS: два аккаунта не видят записи друг друга (life_state, life_state_history, ai_usage)", async () => {
+  // a fake Supabase that keeps rows per user and answers only with the caller's own rows (RLS: user_id = auth.uid())
+  const A_ID = "aaaaaaaa-0000-0000-0000-000000000001", B_ID = "bbbbbbbb-0000-0000-0000-000000000002";
+  const db = { life_state: [], life_state_history: [], ai_usage: [] }, forged = [];
+  let seq = 0;
+  const tok = id => `x.${b64({ sub: id, email: id.slice(0, 1) + "@test.tj", exp: Math.floor(Date.now() / 1000) + 3600 })}.s`;
+  const uidOf = h => { const m = /^Bearer x\.([^.]+)\.s$/.exec(h || ""); return m ? JSON.parse(Buffer.from(m[1], "base64url")).sub : null; };
+  const handle = async route => {
+    const req = route.request(), url = new URL(req.url()), m = req.method(), cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "*", "access-control-allow-methods": "*" };
+    const send = (st, b) => route.fulfill({ status: st, headers: cors, contentType: "application/json", body: JSON.stringify(b) });
+    if (m === "OPTIONS") return send(200, null);
+    const uid = uidOf(req.headers().authorization); if (!uid) return send(401, { message: "JWT" });
+    const t = url.pathname.replace("/rest/v1/", ""), q = url.searchParams, eq = k => (q.get(k) || "").replace(/^eq\./, "");
+    if (url.pathname.startsWith("/functions/")) { db.ai_usage.push({ user_id: uid, at: Date.now() }); return send(200, { ok: true, model: "mock", output_text: "ПЛЮСЫ — да.", sources: [] }); }
+    if (!(t in db)) return send(404, {});
+    if (q.get("user_id") && eq("user_id") !== uid) forged.push(m + " " + t);
+    const mine = db[t].filter(r => r.user_id === uid); // RLS
+    if (m === "GET") { let rows = mine; if (q.get("user_id")) rows = rows.filter(r => r.user_id === eq("user_id")); if (q.get("id")) rows = rows.filter(r => r.id === eq("id")); const sel = (q.get("select") || "").split(","); return send(200, rows.map(r => Object.fromEntries(sel.map(k => [k, r[k]])))); }
+    const body = JSON.parse(req.postData() || "{}");
+    if (m === "POST") { if (body.user_id !== uid) return send(403, { message: "new row violates row-level security policy" });
+      if (t === "life_state") { db[t] = db[t].filter(r => r.user_id !== uid); const row = { ...body, updated_at: new Date(Date.now() + ++seq).toISOString() }; db[t].push(row); return send(201, [row]); }
+      if (!db[t].some(r => r.user_id === uid && r.day === body.day)) db[t].push({ id: "h" + ++seq, ...body, created_at: new Date().toISOString() }); return send(201, null); }
+    if (m === "PATCH") { const row = mine.find(r => r.updated_at === eq("updated_at")); if (!row) return send(200, []); Object.assign(row, body, { updated_at: new Date(Date.now() + ++seq).toISOString() }); return send(200, [row]); }
+    if (m === "DELETE") return send(204, null);
+    return send(404, {});
+  };
+  const open = async id => { const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" }); await ctx.route(/supabase\.co/, handle);
+    await ctx.addInitScript(([a, s]) => { localStorage.setItem("LIFE_CONTROL_SUPABASE_AUTH_V1", a); if (!localStorage.getItem("LIFE_CONTROL_V52")) localStorage.setItem("LIFE_CONTROL_V52", s); }, [JSON.stringify({ access_token: tok(id), refresh_token: "r-" + id, token_type: "bearer", user: { id } }), JSON.stringify({ version: 58, settings: { onboarded: true } })]);
+    const page = await ctx.newPage(); page.errors = []; page.on("pageerror", e => page.errors.push(e.message)); await page.goto(APP); await page.waitForFunction(() => appReadyForSync === true); return { ctx, page }; };
+  const A = await open(A_ID), B = await open(B_ID);
+  await A.page.evaluate(() => { state.profits.push({ id: "secretA", amount: 777, sourceGroup: "Зарплата", at: new Date().toISOString(), dateKey: keyDay() }); state.goal.title = "Цель A"; saveState(); });
+  await B.page.evaluate(() => { state.notes.push({ id: "secretB", title: "Заметка B", body: "", at: new Date().toISOString(), category: "work" }); saveState(); });
+  for (const d of [A, B, A, B]) await sync(d.page);
+  await A.page.evaluate(() => { localStorage.removeItem("JL_CLOUD_SNAP_DAY_V72"); return cloudDailySnapshot(cloudAuth() && { id: jwtPayload(cloudAuth().access_token).sub }); });
+  await B.page.evaluate(() => { localStorage.removeItem("JL_CLOUD_SNAP_DAY_V72"); return cloudDailySnapshot(cloudAuth() && { id: jwtPayload(cloudAuth().access_token).sub }); });
+  await A.page.evaluate(() => callAI({ mode: "ping" }).catch(() => null)); await B.page.evaluate(() => callAI({ mode: "ping" }).catch(() => null)); await B.page.evaluate(() => callAI({ mode: "ping" }).catch(() => null));
+  const seenB = await B.page.evaluate(async () => ({ profits: state.profits.map(p => p.id), goal: state.goal.title, copies: (await listCloudCopies()).length,
+    other: await supaFetch("/rest/v1/life_state?user_id=eq.aaaaaaaa-0000-0000-0000-000000000001&select=state").catch(e => String(e)),
+    otherCopies: await supaFetch("/rest/v1/life_state_history?user_id=eq.aaaaaaaa-0000-0000-0000-000000000001&select=id,day").catch(e => String(e)),
+    write: await supaFetch("/rest/v1/life_state?on_conflict=user_id", { method: "POST", body: JSON.stringify({ user_id: "aaaaaaaa-0000-0000-0000-000000000001", state: {} }) }).then(() => "written", e => e.status) }));
+  const seenA = await A.page.evaluate(async () => ({ notes: state.notes.map(n => n.id), copies: (await listCloudCopies()).length }));
+  assert.deepEqual(seenB, { profits: [], goal: "", copies: 1, other: [], otherCopies: [], write: 403 }, "B sees nothing of A");
+  assert.deepEqual(seenA, { notes: [], copies: 1 }, "A sees nothing of B");
+  assert.equal(db.life_state.find(r => r.user_id === A_ID).state.profits[0].id, "secretA"); assert.equal(db.life_state.find(r => r.user_id === A_ID).state.goal.title, "Цель A");
+  assert.ok(db.life_state.find(r => r.user_id === B_ID).state.notes.some(n => n.id === "secretB") && !JSON.stringify(db.life_state.find(r => r.user_id === B_ID).state).includes("secretA"), "rows stay apart");
+  assert.deepEqual([db.ai_usage.filter(r => r.user_id === A_ID).length, db.ai_usage.filter(r => r.user_id === B_ID).length], [1, 2], "AI usage is counted per user");
+  assert.deepEqual(forged, ["GET life_state", "GET life_state_history"], "the app itself only asks for its own rows (the two forged reads above are the test's)");
+  assert.deepEqual(A.page.errors, []); assert.deepEqual(B.page.errors, []);
+  await A.ctx.close(); await B.ctx.close();
+});
+
+
+await test("73: правка во время самой первой выгрузки переживает перезапуск (облачная строка — своя же старая копия)", async () => {
+  const cloud = makeCloud(); cloud.postDelay = 4000;
+  const { ctx, page } = await device(cloud);
+  for (let i = 0; i < 50 && !cloud.row; i++) await page.waitForTimeout(100);
+  assert.ok(cloud.row, "the first upload reached the cloud");
+  await page.evaluate(() => { state.goal.title = "Своя цель"; state.daily[keyDay()] = { ...(state.daily[keyDay()] || {}), goalDone: { at: new Date().toISOString(), text: "шаг" } }; saveState(); });
+  await page.reload(); cloud.postDelay = 0; // closed before the answer of the first upload came
+  await page.waitForFunction(() => appReadyForSync === true); await sync(page);
+  const r = await page.evaluate(() => ({ title: state.goal.title, done: !!state.daily[keyDay()]?.goalDone, flag: localStorage.getItem("JL_FIRST_PUSH_V73") }));
+  assert.deepEqual(r, { title: "Своя цель", done: true, flag: null });
+  assert.equal(cloud.row.state.goal.title, "Своя цель", "the edit reached the cloud");
+  // someone else's row (another device) on first contact: the cloud still wins, as before
+  const other = makeCloud(); other.row = { user_id: UID, state: { version: 58, goal: { title: "Из облака", milestones: [] }, settings: { onboarded: true } }, device_id: "another-device", schema_version: 58, updated_at: other.nextStamp() };
+  const B = await device(other); await sync(B.page);
+  assert.equal(await B.page.evaluate(() => state.goal.title), "Из облака");
+  assert.deepEqual(page.errors, []); assert.deepEqual(B.page.errors, []);
+  await ctx.close(); await B.ctx.close();
 });
 
 await browser.close(); server.close();

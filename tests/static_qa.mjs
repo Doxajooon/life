@@ -17,17 +17,21 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "72.0.0");
-assert.match(gradle, /versionCode 720\b/); assert.match(gradle, /versionName '72\.0'/);
-assert.match(csproj, /<Version>72\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V72') && html.includes('<span>V72</span>') && html.includes('v-row-val">72.0</span>'), "app version must be V72 everywhere on screen (state schema 58)");
-assert.ok(sw.includes("jamal-life-v72-0"), "service worker cache must be V72");
+assert.equal(pkg.version, "73.0.0");
+assert.match(gradle, /versionCode 730\b/); assert.match(gradle, /versionName '73\.0'/);
+assert.match(csproj, /<Version>73\.0\.0<\/Version>/);
+// 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='73.0'") && html.includes('id="appVersion">73.0</span>'), "app version 73.0 from one constant (state schema 58)");
+assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
+assert.ok(sw.includes("'life-v73-0'"), "service worker cache must be life-v73-0");
 
 // branding
-assert.equal(manifest.name, "Jamal Life");
+assert.equal(manifest.name, "Life"); assert.equal(manifest.short_name, "Life");
 assert.ok(!/Life Control/.test(html), "old name left in the app");
 for (const f of ["icon.svg", "icon-192.png", "icon-512.png", "desktop/app.ico", "android/app/src/main/res/raw/jamal_dawn.wav"]) assert.ok(existsSync(new URL(f, root)), "missing " + f);
-assert.ok(read("android/app/src/main/res/values/strings.xml").includes("Jamal Life"));
+assert.ok(read("android/app/src/main/res/values/strings.xml").includes('<string name="app_name">Life</string>') && csproj.includes("<Product>Life</Product>") && csproj.includes("<AssemblyName>Life</AssemblyName>"), "the name «Life» on Android and Windows (Life.exe)");
+assert.ok((html.match(/\bAPP_NAME=/g) || []).length === 1 && html.includes("const APP_NAME='Life'"), "the visible name comes from one APP_NAME constant");
+assert.ok(read("android/app/build.gradle").includes("com.doxajooon.lifecontrol") && html.includes("const KEY='LIFE_CONTROL_V52'") && html.includes("LifeControlDB") && notif.includes('"jamal_life_dawn"'), "internal ids stay (package, storage keys, IndexedDB, notification channel) — the APK installs over 71/72 and nothing is lost");
 
 // single source of truth: no checked-in copies of the web app
 let tracked = [];
@@ -131,4 +135,23 @@ assert.ok(html.includes("function painter(") && html.includes("function textOf("
 assert.ok(html.includes("@keyframes jlIconIn") && html.includes("#txFilters{flex-wrap:wrap"), "one icon style; transaction filters wrap");
 assert.ok(html.includes("life_state_history") && html.includes("CLOUD_KEEP_DAYS=30") && read("supabase/setup.sql").includes("create table if not exists public.life_state_history") && /life_state_history_select_own[\s\S]*auth\.uid\(\)/.test(read("supabase/setup.sql")), "daily cloud copies with RLS");
 assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes("перегружен") && html.includes("Google перегружен, пробую другую модель") && html.includes("function v72Facts("), "AI answers within ~19 s and sees the day report, «отказ» habits, wins and the goal stage");
-console.log("JAMAL_LIFE_V72_STATIC_QA_OK");
+// 73: an app for everybody — nothing personal of the owner in the code, a clean start for a new person
+{ const files = execSync("git ls-files", { cwd: new URL(".", root) }).toString().split("\n").filter(f => f && !/\.(png|ico|wav|woff2|jar|keystore)$/.test(f));
+  const withMail = files.filter(f => { try { return read(f).includes("doxajooon" + "@gmail.com"); } catch { return false; } });
+  assert.deepEqual(withMail, [], "the owner's e-mail is in: " + withMail.join(", "));
+  const visible = ["index.html", "manifest.webmanifest", "sw.js", "supabase/functions/life-control-ai/index.ts", "android/app/src/main/res/values/strings.xml", "android/app/src/main/res/layout/widget_jamal.xml", "desktop/MainWindow.xaml", "desktop/MainWindow.xaml.cs", ".github/workflows/release.yml",
+    ...files.filter(f => /^android\/app\/src\/main\/java\/.*\.java$/.test(f))];
+  const named = visible.filter(f => read(f).includes("Jamal " + "Life"));
+  assert.deepEqual(named, [], "«Jamal Life» is still shown in: " + named.join(", "));
+  assert.ok(!html.includes("DEFAULT_AUTH_EMAIL") && /<input id="gateEmail"(?![^>]*value=)[^>]*>/.test(html) && html.includes("localStorage.getItem(AUTH_EMAIL_KEY)||''"), "the login e-mail is empty (only this device's last e-mail is filled in)");
+  const def = html.slice(html.indexOf("const DEFAULT={"), html.indexOf("\n};", html.indexOf("const DEFAULT={")));
+  for (const bad of ["100000", "120000", "5200", "4500", "финансово независим", "комнат", "семь", "раскро", "Английский"]) assert.ok(!def.includes(bad) && !(bad.length > 6 && html.includes(bad)), "personal default value left: " + bad);
+  assert.ok(/income:0,/.test(def) && /debts:\{bank:0,firms:0,monthlyPayment:0\}/.test(def) && /goal:\{title:'',why:'',next:''/.test(def) && /milestones:\[\]\}/.test(def), "neutral defaults: no income, no debts, an empty goal");
+  for (const f of ["hasUserData", "clearLegacyDemo", "applyV73", "debtLabel", "goalName", "quoteSet", "openOnboarding", "needsOnboarding", "profitSources"]) assert.ok(defs.includes(f), "73: missing " + f);
+  assert.ok(html.includes("s.settings.quoteSet=old?'hadith':'general'") && html.includes("old?'Банк':'Долг 1'") && html.includes("s.settings.onboarded=old"), "a user with data keeps the hadiths, «Банк / Фирмы» and never sees the first-start setup");
+  assert.ok(/const GENERAL_QUOTES=\[([\s\S]*?)\];/.test(html) && html.match(/const GENERAL_QUOTES=\[([\s\S]*?)\];/)[1].split("\n").filter(l => l.trim().startsWith("'")).length === 60, "60 neutral thoughts of the day");
+  assert.ok(!/Аллах|Пророк|намаз|ﷺ/.test(html.match(/const GENERAL_QUOTES=\[([\s\S]*?)\];/)[1]), "the neutral quotes carry no religious text");
+  assert.ok(html.includes("const o=clone(b);for(const k of Object.keys(a||{}))o[k]=merge(a[k],b[k])"), "merge() copies the defaults — an edit can never change DEFAULT itself");
+  assert.ok(fn.includes('const APP_NAME = "Life"') && !fn.includes("Душанбе"), "AI: neutral name");
+  assert.ok(html.includes("FIRST_PUSH_KEY='JL_FIRST_PUSH_V73'") && html.includes("row.device_id===getDeviceId()") && html.includes("const merged=own?mergeStates(remote,state,remote):mergeFirstContact(state,remote)"), "an edit made during the very first upload survives a restart"); }
+console.log("LIFE_V73_STATIC_QA_OK");

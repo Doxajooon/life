@@ -1,4 +1,4 @@
-<!-- Jamal Life notification icon: a solid crown (the brand mark), filled so it reads clearly in the status bar -->
+<!-- Life notification icon: a solid crown (the brand mark), filled so it reads clearly in the status bar -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
     <!-- crown body: three peaks and a slightly curved base -->

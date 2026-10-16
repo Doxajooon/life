@@ -1,4 +1,4 @@
-name: Jamal Life Release
+name: Life Release
 
 on:
   push:
@@ -79,16 +79,16 @@ jobs:
             echo "::warning::No ANDROID_KEYSTORE_* secrets: signing with a one-off key (updates over an older APK will need a reinstall)"
             PASS="android"; ALIAS="jamallife"
             keytool -genkeypair -keystore "$KEYSTORE" -storepass "$PASS" -keypass "$PASS" -alias "$ALIAS" \
-              -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Jamal Life, O=Jamal Life, L=Khujand, C=TJ"
+              -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Life, O=Life"
           fi
           "$APKSIGNER" sign --ks "$KEYSTORE" --ks-pass "pass:$PASS" --key-pass "pass:$PASS" --ks-key-alias "$ALIAS" \
-            --out ../JamalLife.apk "$ALIGNED"
-          "$APKSIGNER" verify ../JamalLife.apk
+            --out ../Life.apk "$ALIGNED"
+          "$APKSIGNER" verify ../Life.apk
           rm -f "$KEYSTORE"
       - uses: actions/upload-artifact@v4
         with:
           name: jamal-life-android
-          path: JamalLife.apk
+          path: Life.apk
 
   windows:
     needs: test
@@ -101,7 +101,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-      - name: Build single-file JamalLife.exe
+      - name: Build single-file Life.exe
         run: >
           dotnet publish desktop/JamalLife.Desktop.csproj -c Release -r win-x64 --self-contained true
           -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true
@@ -110,12 +110,12 @@ jobs:
         shell: pwsh
         run: |
           Get-ChildItem publish
-          if (-not (Test-Path publish/JamalLife.exe)) { throw "JamalLife.exe was not produced" }
-          Copy-Item publish/JamalLife.exe JamalLife.exe
+          if (-not (Test-Path publish/Life.exe)) { throw "Life.exe was not produced" }
+          Copy-Item publish/Life.exe Life.exe
       - uses: actions/upload-artifact@v4
         with:
           name: jamal-life-windows
-          path: JamalLife.exe
+          path: Life.exe
 
   release:
     needs: [android, windows]
@@ -137,13 +137,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.ver.outputs.v }}.${{ github.run_number }}
-          name: Jamal Life v${{ steps.ver.outputs.v }} (сборка ${{ github.run_number }})
+          name: Life v${{ steps.ver.outputs.v }} (сборка ${{ github.run_number }})
           make_latest: true
           body: |
             **Скачать**
-            - Android: `JamalLife.apk`
-            - Windows: `JamalLife.exe` (работает из трея, напоминания приходят при закрытом окне)
+            - Android: `Life.apk`
+            - Windows: `Life.exe` (работает из трея, напоминания приходят при закрытом окне)
             - Веб-версия: https://doxajooon.github.io/life/
           files: |
-            dist/JamalLife.apk
-            dist/JamalLife.exe
+            dist/Life.apk
+            dist/Life.exe

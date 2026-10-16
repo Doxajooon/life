@@ -71,7 +71,7 @@ public class JamalWidget extends AppWidgetProvider {
     }
 
     private static void render(Context ctx, AppWidgetManager mgr, int[] ids) {
-        String stage = "Открой Jamal Life", range = "", task = "Задач больше нет";
+        String stage = ctx.getString(R.string.widget_open), range = "", task = "Задач больше нет";
         int pct = 0;
         try {
             JSONObject d = new JSONObject(ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE).getString("data", "{}"));
