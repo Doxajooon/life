@@ -76,7 +76,7 @@ assert.ok(!html.includes("'Критично'"), "ring labels must not scold");
 assert.ok(html.includes("function resetForNewOwner") && html.includes("OWNER_KEY") && /owner&&owner!==user\.id\)resetForNewOwner\(\)/.test(html), "another account must never get the previous owner's records");
 assert.ok(html.includes("if(synced)await wipeLocalData()"), "logout must clear personal data from the device once it is safe in the cloud");
 assert.ok(html.includes("function renderRhythm") && html.includes("function renderDayStrip") && html.includes("function renderHabitWeek"), "living rhythm, day strip and habit week chart");
-assert.ok(existsSync(new URL("../fonts/inter-cyrillic.woff2", import.meta.url)) && html.includes('url("fonts/inter-cyrillic.woff2")') && sw.includes("inter-cyrillic.woff2"), "Inter font must ship with the app (offline)");
+assert.ok(existsSync(new URL("../fonts/inter-cyrillic.woff2", import.meta.url)) && /url\("?fonts\/inter-cyrillic\.woff2"?\)/.test(html) && sw.includes("inter-cyrillic.woff2"), "Inter font must ship with the app (offline)");
 assert.ok(!html.includes("data-more=") && !html.includes('class="jl-more"'), "Money and Goal show everything — no hidden «Подробнее» blocks");
 assert.ok(existsSync(new URL("../sounds/jamal-dawn.wav", import.meta.url)) && html.includes("sounds/jamal-dawn.wav") && sw.includes("jamal-dawn.wav") && notif.includes('"jamal_life_dawn"'), "the Jamal Glass tone ships to web and Android (new channel so phones pick it up)");
 for (const f of ["manrope", "nunito", "inter"]) assert.ok(existsSync(new URL(`../fonts/${f}-cyrillic.woff2`, import.meta.url)) && sw.includes(`${f}-cyrillic.woff2`), "font missing: " + f);

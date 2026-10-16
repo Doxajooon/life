@@ -36,11 +36,16 @@ const APP = `http://localhost:${server.address().port}/index.html`;
 // ---------- fake Supabase ----------
 const b64 = o => Buffer.from(JSON.stringify(o)).toString("base64url");
 function makeCloud() {
-  const cloud = { row: null, refresh: new Set(), seq: 0, hits: [], stamp: Date.parse("2026-10-14T05:00:00Z"), failRefresh: false };
-  cloud.token = (ttlSec = 3600) => `x.${b64({ sub: UID, email: "me@test.tj", exp: Math.floor(Date.now() / 1000) + ttlSec })}.s`;
-  cloud.session = (ttlSec = 3600) => { const r = "r" + (++cloud.seq); cloud.refresh.add(r); return { access_token: cloud.token(ttlSec), refresh_token: r, token_type: "bearer", user: { id: UID, email: "me@test.tj" } }; };
+  // several accounts: every table answers only with the rows of the signed-in user (like RLS user_id = auth.uid())
+  const cloud = { rows: {}, refresh: new Map(), seq: 0, hits: [], stamp: Date.parse("2026-10-14T05:00:00Z"), failRefresh: false, aiUsage: {},
+    users: { "me@test.tj": UID } };
+  Object.defineProperty(cloud, "row", { get: () => cloud.rows[UID] || null, set: v => { cloud.rows[UID] = v; } });
+  const emailOf = id => Object.keys(cloud.users).find(e => cloud.users[e] === id) || "me@test.tj";
+  cloud.token = (ttlSec = 3600, id = UID) => `x.${b64({ sub: id, email: emailOf(id), exp: Math.floor(Date.now() / 1000) + ttlSec })}.s`;
+  cloud.session = (ttlSec = 3600, id = UID) => { const r = "r" + (++cloud.seq); cloud.refresh.set(r, id); return { access_token: cloud.token(ttlSec, id), refresh_token: r, token_type: "bearer", user: { id, email: emailOf(id) } }; };
   cloud.nextStamp = () => new Date(cloud.stamp += 1000).toISOString().replace("Z", "+00:00");
-  const ok = (auth) => { const m = /^Bearer x\.([^.]+)\.s$/.exec(auth || ""); if (!m) return false; const p = JSON.parse(Buffer.from(m[1], "base64url")); return p.exp * 1000 > Date.now(); };
+  const who = (auth) => { const m = /^Bearer x\.([^.]+)\.s$/.exec(auth || ""); if (!m) return null; const p = JSON.parse(Buffer.from(m[1], "base64url")); return p.exp * 1000 > Date.now() ? p.sub : null; };
+  const ok = auth => !!who(auth);
   cloud.handle = async (route) => {
     const req = route.request(), url = new URL(req.url()), m = req.method(), cors = { "access-control-allow-origin": "*" };
     const send = (status, body) => route.fulfill({ status, headers: cors, contentType: "application/json", body: JSON.stringify(body) });
@@ -50,11 +55,11 @@ function makeCloud() {
       if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
       if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
       if (cloud.noHistory) return send(404, { code: "PGRST205", message: "relation not found" });
-      const H = cloud.history = cloud.history || [], q = url.searchParams, val = k => (q.get(k) || "").replace(/^(eq|lt)\./, "");
-      if (m === "POST") { const b = JSON.parse(req.postData() || "{}"); if (b.user_id !== UID) return send(403, { message: "RLS" });
+      const H = cloud.history = cloud.history || [], q = url.searchParams, val = k => (q.get(k) || "").replace(/^(eq|lt)\./, ""), me = who(req.headers().authorization);
+      if (m === "POST") { const b = JSON.parse(req.postData() || "{}"); if (b.user_id !== me) return send(403, { message: "RLS" });
         if (!H.some(r => r.user_id === b.user_id && r.day === b.day)) H.push({ id: "h" + (cloud.hseq = (cloud.hseq || 0) + 1), ...b, created_at: new Date().toISOString() }); return send(201, null); }
-      if (m === "DELETE") { const before = H.length; cloud.history = H.filter(r => !(r.user_id === val("user_id") && q.get("day")?.startsWith("lt.") && r.day < val("day"))); cloud.deleted = (cloud.deleted || 0) + before - cloud.history.length; return send(204, null); }
-      if (m === "GET") { let rows = H.filter(r => r.user_id === UID); if (q.get("id")) rows = rows.filter(r => r.id === val("id")); rows = [...rows].sort((a, b) => b.day.localeCompare(a.day));
+      if (m === "DELETE") { const before = H.length; cloud.history = H.filter(r => !(r.user_id === me && r.user_id === val("user_id") && q.get("day")?.startsWith("lt.") && r.day < val("day"))); cloud.deleted = (cloud.deleted || 0) + before - cloud.history.length; return send(204, null); }
+      if (m === "GET") { let rows = H.filter(r => r.user_id === me); if (q.get("id")) rows = rows.filter(r => r.id === val("id")); rows = [...rows].sort((a, b) => b.day.localeCompare(a.day));
         const sel = (q.get("select") || "").split(","); return send(200, rows.map(r => Object.fromEntries(sel.map(k => [k, r[k]])))); }
     }
     cloud.hits.push(m + " " + url.pathname + (url.search.includes("select=updated_at") ? "?meta" : ""));
@@ -63,14 +68,16 @@ function makeCloud() {
       const body = JSON.parse(req.postData() || "{}");
       if (url.searchParams.get("grant_type") === "refresh_token") {
         if (cloud.failRefresh || !cloud.refresh.has(body.refresh_token)) return send(400, { error: "invalid_grant" });
-        cloud.refresh.delete(body.refresh_token); return send(200, cloud.session());
+        const id = cloud.refresh.get(body.refresh_token); cloud.refresh.delete(body.refresh_token); return send(200, cloud.session(3600, id));
       }
-      return send(200, cloud.session());
+      const em = String(body.email || "me@test.tj").toLowerCase(); if (!cloud.users[em]) cloud.users[em] = "22222222-2222-2222-2222-" + String(Object.keys(cloud.users).length).padStart(12, "0");
+      return send(200, cloud.session(3600, cloud.users[em]));
     }
-    if (url.pathname === "/auth/v1/user" && m === "PUT") { cloud.newPassword = JSON.parse(req.postData() || "{}").password; return ok(req.headers().authorization) ? send(200, { id: UID, email: "me@test.tj" }) : send(401, { msg: "expired" }); }
-    if (url.pathname === "/auth/v1/user") return ok(req.headers().authorization) ? send(200, { id: UID, email: "me@test.tj" }) : send(401, { msg: "expired" });
+    if (url.pathname === "/auth/v1/user" && m === "PUT") { cloud.newPassword = JSON.parse(req.postData() || "{}").password; const id = who(req.headers().authorization); return id ? send(200, { id, email: emailOf(id) }) : send(401, { msg: "expired" }); }
+    if (url.pathname === "/auth/v1/user") { const id = who(req.headers().authorization); return id ? send(200, { id, email: emailOf(id) }) : send(401, { msg: "expired" }); }
     if (url.pathname.startsWith("/functions/")) {
       if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
+      const aiUser = who(req.headers().authorization); cloud.aiUsage[aiUser] = (cloud.aiUsage[aiUser] || 0) + 1;
       const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
       if (cloud.aiDelay) await new Promise(r => setTimeout(r, cloud.aiDelay));
       if (cloud.aiFail) return send(429, { error: "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей." });
@@ -78,20 +85,21 @@ function makeCloud() {
       return send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] });
     }
     if (url.pathname === "/rest/v1/life_state") {
-      if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
+      const me = who(req.headers().authorization); if (!me) return send(401, { message: "JWT expired" });
+      const row = cloud.rows[me] || null; // RLS: a user reads and writes only the own row, whatever the query asks for
       if (m === "GET") {
-        if (!cloud.row) return send(200, []);
+        if (!row) return send(200, []);
         const sel = url.searchParams.get("select") || "";
-        const r = { updated_at: cloud.row.updated_at };
-        if (sel.includes("state")) Object.assign(r, { state: cloud.row.state, schema_version: cloud.row.schema_version });
+        const r = { updated_at: row.updated_at };
+        if (sel.includes("state")) Object.assign(r, { state: row.state, schema_version: row.schema_version });
         return send(200, [r]);
       }
       const body = JSON.parse(req.postData() || "{}");
-      if (m === "POST") { cloud.row = { ...body, updated_at: cloud.nextStamp() }; return send(201, [cloud.row]); }
+      if (m === "POST") { if (body.user_id && body.user_id !== me) return send(403, { message: "RLS" }); cloud.rows[me] = { ...body, updated_at: cloud.nextStamp() }; return send(201, [cloud.rows[me]]); }
       if (m === "PATCH") {
         const want = (url.searchParams.get("updated_at") || "").replace(/^eq\./, "");
-        if (!cloud.row || cloud.row.updated_at !== want) return send(200, []);
-        cloud.row = { ...cloud.row, ...body, updated_at: cloud.nextStamp() }; return send(200, [cloud.row]);
+        if (!row || row.updated_at !== want) return send(200, []);
+        cloud.rows[me] = { ...row, ...body, updated_at: cloud.nextStamp() }; return send(200, [cloud.rows[me]]);
       }
     }
     return send(404, {});
@@ -99,9 +107,24 @@ function makeCloud() {
   return cloud;
 }
 
+// The state an existing user already has (the same shape as the owner's data, with made-up numbers and words).
+// Every device in the tests starts as such an existing user unless `fresh: true` asks for a brand-new, empty account.
+const OWNER_LIKE = {
+  version: 58, _lastSavedAt: "2026-10-01T05:00:00.000Z", income: 6100,
+  debts: { bank: 91000, firms: 33000, monthlyPayment: 4300 },
+  goal: { title: "Своё дело", why: "Работать на себя и обеспечить семью.", next: "Держать расходы под контролем.", aiPlan: null, aiPlanAt: "", aiPlanGoalKey: "",
+    finance: { targetAmount: 0, savedAmount: 0, manualSavedAmount: 0, targetDate: "", startedAt: "", completedAt: "", contributions: [] },
+    milestones: [{ id: "m1", title: "Остановить рост долга и держать деньги под контролем", done: false }, { id: "m2", title: "Закрыть основную часть долгов", done: false },
+      { id: "m3", title: "Накопить на ремонт и бытовую базу", done: false }, { id: "m4", title: "Создать устойчивый доход и финансовый резерв", done: false }] },
+  day: { steps: [
+    { id: "s1", title: "Работа", text: "Главный рабочий блок.", time: "08:30", end: "18:00", details: ["Закрыть текущие заявки без ошибок", "Сделать главное дело дня"] },
+    { id: "s2", title: "Дом, семья и отдых", text: "После работы — семья и спокойный отдых.", time: "18:00", end: "21:30", details: ["Поесть и переключиться", "Провести время с семьёй"] },
+    { id: "s3", title: "Итог дня", text: "Закрыть день: факты, вывод и одно действие на завтра.", time: "21:30", end: "22:00", details: ["Записать факт дня", "Один шаг на завтра"] }] },
+};
 const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
-async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock, touch = false } = {}) {
+async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock, touch = false, fresh = false } = {}) {
   const ctx = await browser.newContext({ viewport, serviceWorkers: sw, locale: "ru-RU", timezoneId: "Asia/Dushanbe", hasTouch: touch, isMobile: touch });
+  if (!fresh) await ctx.addInitScript(o => { if (!localStorage.getItem("LIFE_CONTROL_V52")) localStorage.setItem("LIFE_CONTROL_V52", o); }, JSON.stringify(OWNER_LIKE));
   await ctx.route(/supabase\.co/, r => cloud.handle(r));
   if (session !== null) {
     const s = session || cloud.session();
@@ -1480,6 +1503,101 @@ await test("V72: цитата дня — хадис Пророка ﷺ с ист
   assert.notEqual(c, "rgb(58, 47, 18)", "the quote on the dark hero must be light in the light theme too");
   assert.deepEqual(page.errors, []);
   await ctx.close();
+});
+
+// ---------- V73 «Приложение для всех» ----------
+// The owner's cloud state, the same shape as theirs (income, two debts with a payment, a goal with 4 stages, 3 stages of the day, money records), made-up numbers.
+const OWNER_CLOUD = () => { const now = new Date().toISOString(), k = "2026-10-15";
+  return { ...JSON.parse(JSON.stringify(OWNER_LIKE)), _lastSavedAt: now,
+    profits: [{ id: "op1", amount: 5300, sourceGroup: "Зарплата", at: "2026-10-15T07:00:00Z", dateKey: k }], expenses: [{ id: "oe1", amount: 270, category: "Еда", at: "2026-10-15T08:00:00Z", dateKey: k }],
+    tasks: [{ id: "ot1", title: "Оплатить интернет", time: "", date: k, done: true }], reports: { [k]: { done: "работал", block: "", tomorrow: "шаг", closedAt: "2026-10-15T17:00:00Z", steps: {} } },
+    goals: [{ id: "goal-main", title: "Своё дело", description: "Работать на себя и обеспечить семью.", icon: "briefcase", color: "green", main: true, createdAt: "2026-09-01T00:00:00Z" }] }; };
+const ownerView = page => page.evaluate(() => ({ income: state.income, debts: [state.debts.bank, state.debts.firms, state.debts.monthlyPayment], goal: [state.goal.title, state.goal.why, state.goal.next],
+  ms: state.goal.milestones.map(m => m.title), steps: state.day.steps.map(s => [s.title, s.time, s.end, s.text, s.details.length]), main: state.goals.find(g => g.main)?.title,
+  records: [state.profits.length, state.expenses.length, state.tasks.length], names: [debtName("bank"), debtName("firms")], quotes: quoteSet(), onboarding: document.getElementById("modalBack").classList.contains("open") }));
+
+await test("V73: данные владельца — после загрузки, синхронизации и перезагрузки всё на месте, ничего не заменено значениями по умолчанию", async () => {
+  const cloud = makeCloud();
+  cloud.row = { user_id: UID, state: OWNER_CLOUD(), schema_version: 58, updated_at: cloud.nextStamp() };
+  const want = { income: 6100, debts: [91000, 33000, 4300], goal: ["Своё дело", "Работать на себя и обеспечить семью.", "Держать расходы под контролем."],
+    ms: OWNER_LIKE.goal.milestones.map(m => m.title), steps: OWNER_LIKE.day.steps.map(s => [s.title, s.time, s.end, s.text, s.details.length]), main: "Своё дело",
+    records: [1, 1, 1], names: ["Банк", "Фирмы"], quotes: "hadith", onboarding: false };
+  // 1) a new phone of the owner: empty storage, the data come from the cloud
+  const B = await device(cloud, { fresh: true });
+  await sync(B.page); await B.page.waitForTimeout(300);
+  assert.deepEqual(await ownerView(B.page), want, "new phone");
+  await B.page.reload(); await B.page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true); await sync(B.page);
+  assert.deepEqual(await ownerView(B.page), want, "after a reload");
+  // 2) the owner's own phone that already holds the data locally
+  const A = await device(cloud, { init: o => localStorage.setItem("LIFE_CONTROL_V52", o) }); await A.page.evaluate(s => { state = normalize(JSON.parse(s)); saveState(); }, JSON.stringify(OWNER_CLOUD()));
+  await sync(A.page); await A.page.reload(); await A.page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true); await sync(A.page);
+  assert.deepEqual(await ownerView(A.page), want, "the owner's phone");
+  // the cloud row keeps every value too
+  const c = cloud.row.state;
+  assert.deepEqual([c.income, c.debts.bank, c.debts.firms, c.debts.monthlyPayment, c.goal.title, c.goal.milestones.length, c.day.steps[1].title], [6100, 91000, 33000, 4300, "Своё дело", 4, "Дом, семья и отдых"]);
+  assert.equal(c.settings.quoteSet, "hadith", "the old behaviour is written once, so it never flips later");
+  // what the owner sees: the debts as before, the hadith of the day, no setup window
+  const ui = await A.page.evaluate(() => { showView("viewMoney"); return { cells: document.getElementById("viewMoney").textContent, quote: document.getElementById("motivationSource").textContent }; });
+  assert.ok(ui.cells.includes("Банк") && ui.cells.includes("Фирмы"), "debt names stay"); assert.match(ui.quote, /Пророк/);
+  assert.deepEqual(A.page.errors, []); assert.deepEqual(B.page.errors, []);
+  await A.ctx.close(); await B.ctx.close();
+});
+
+await test("V73: новый пустой аккаунт — первая настройка в 3 шага, цель и распорядок уходят в облако; нейтральные цитаты и «Долг 1 / Долг 2»", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { fresh: true });
+  await sync(page); await page.waitForSelector("#obName", { timeout: 5000 });
+  const blank = await page.evaluate(() => ({ title: state.goal.title, ms: state.goal.milestones.length, debts: [state.debts.bank, state.debts.firms, state.income], quotes: quoteSet(), names: [debtName("bank"), debtName("firms")] }));
+  assert.deepEqual(blank, { title: "", ms: 0, debts: [0, 0, 0], quotes: "general", names: ["Долг 1", "Долг 2"] }, "nothing personal by default");
+  await page.fill("#obName", "Аня"); await page.click('[data-ob-cur="₽"]'); await page.click("#obNext");
+  await page.fill("#obGoal", "Ноутбук для учёбы"); await page.fill("#obSum", "60000"); await page.fill('[data-ob-ms="0"]', "Собрать 20 000"); await page.fill('[data-ob-ms="1"]', "Собрать 40 000"); await page.click("#obNext");
+  await page.click('[data-ob-tpl="study"]'); await page.fill("#obD1", "5000"); await page.click("#obNext");
+  await page.waitForTimeout(300); await sync(page);
+  const c = cloud.row.state;
+  assert.deepEqual([c.profile.name, c.profile.currency, c.goal.title, c.goal.finance.targetAmount, c.goal.milestones.map(m => m.title), c.day.steps.map(s => s.title + " " + s.time), c.debts.bank],
+    ["Аня", "₽", "Ноутбук для учёбы", 60000, ["Собрать 20 000", "Собрать 40 000"], ["Учёба 08:00", "Самостоятельные занятия и отдых 14:00", "Итог дня 21:30"], 5000], JSON.stringify([c.profile, c.goal.title, c.goal.milestones, c.day.steps.map(s => s.title + " " + s.time), c.debts]));
+  assert.equal(c.settings.onboarded, true); assert.equal(c.settings.quoteSet, "general");
+  const ui = await page.evaluate(() => { closeModal(); showView("viewToday"); renderToday(); return { quote: document.getElementById("motivationSource").textContent, open: document.getElementById("modalBack").classList.contains("open") }; });
+  assert.ok(!/Пророк/.test(ui.quote), "a new person gets neutral quotes: " + ui.quote);
+  // «Выключить» hides the quote
+  await page.evaluate(() => { state.settings.quoteSet = "off"; saveState(); renderToday(); });
+  assert.equal(await page.evaluate(() => document.querySelector("#todayHero .jl-quote").hidden), true);
+  // the setup never comes back, and another device of this account does not show it
+  await page.reload(); await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true); await sync(page); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => !!document.getElementById("obName")), false);
+  const B = await device(cloud, { fresh: true }); await sync(B.page); await B.page.waitForTimeout(300);
+  assert.equal(await B.page.evaluate(() => !!document.getElementById("obName")), false, "the second device of an account with data shows no setup");
+  // an empty account: nothing breaks — no NaN, ∞ or «undefined» anywhere
+  const C = await device(makeCloud(), { fresh: true }); await sync(C.page); await C.page.evaluate(() => closeModal());
+  const bad = await C.page.evaluate(() => { const out = []; for (const v of ["viewToday", "viewGoal", "viewMoney", "viewProfile"]) { showView(v); const t = document.getElementById(v).innerText; for (const w of ["NaN", "Infinity", "∞", "undefined", "null"]) if (t.includes(w)) out.push(v + ": " + w); } return out; });
+  assert.deepEqual(bad, []);
+  for (const d of [page, B.page, C.page]) assert.deepEqual(d.errors, []);
+  await ctx.close(); await B.ctx.close(); await C.ctx.close();
+});
+
+await test("V73: два разных аккаунта не видят записей друг друга (life_state, life_state_history, ai_usage)", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud); // the main test account
+  await A.page.evaluate(() => { state.expenses.push({ id: "secretA", amount: 77, category: "Тайное", at: new Date().toISOString() }); saveState(); });
+  await sync(A.page); await A.page.evaluate(() => _cloudSnapBusy);
+  await A.page.evaluate(() => callAI({ mode: "life", facts: {} }).catch(() => {}));
+  // a second person signs up on another phone
+  const other = "22222222-2222-2222-2222-000000000009"; cloud.users["anna@test.tj"] = other;
+  const B = await device(cloud, { fresh: true, session: cloud.session(3600, other) });
+  await sync(B.page); await B.page.evaluate(() => _cloudSnapBusy);
+  await B.page.evaluate(() => callAI({ mode: "life", facts: {} }).catch(() => {}));
+  const b = await B.page.evaluate(async () => ({ has: JSON.stringify(state).includes("secretA"), copies: await listCloudCopies() }));
+  assert.equal(b.has, false, "B got A's records");
+  assert.ok(b.copies.length === 1 && cloud.history.filter(r => r.user_id === other).length === 1, "B sees only its own cloud copy");
+  assert.ok(!JSON.stringify(cloud.rows[other].state).includes("secretA") && JSON.stringify(cloud.rows[UID].state).includes("secretA"), "rows stay apart");
+  assert.deepEqual([cloud.aiUsage[UID], cloud.aiUsage[other]], [1, 1], "each AI request is counted for its own user");
+  // the same phone: B signs in where A was — A's records disappear from the screen and never reach B's cloud row
+  await A.page.evaluate(s => { localStorage.setItem("LIFE_CONTROL_SUPABASE_AUTH_V1", s); }, JSON.stringify(cloud.session(3600, other)));
+  await A.page.reload(); await A.page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true); await sync(A.page);
+  assert.equal(await A.page.evaluate(() => JSON.stringify(state).includes("secretA")), false, "A's records stay hidden from B on a shared phone");
+  assert.ok(!JSON.stringify(cloud.rows[other].state).includes("secretA"));
+  assert.deepEqual(A.page.errors, []); assert.deepEqual(B.page.errors, []);
+  await A.ctx.close(); await B.ctx.close();
 });
 
 // Every window, every button: each one does something visible and nothing throws.
