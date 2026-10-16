@@ -45,6 +45,18 @@ function makeCloud() {
     const req = route.request(), url = new URL(req.url()), m = req.method(), cors = { "access-control-allow-origin": "*" };
     const send = (status, body) => route.fulfill({ status, headers: cors, contentType: "application/json", body: JSON.stringify(body) });
     if (cloud.down) return route.abort("internetdisconnected");
+    // V72: daily cloud copies (life_state_history): one row per user and day, own rows only
+    if (url.pathname === "/rest/v1/life_state_history") {
+      if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
+      if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
+      if (cloud.noHistory) return send(404, { code: "PGRST205", message: "relation not found" });
+      const H = cloud.history = cloud.history || [], q = url.searchParams, val = k => (q.get(k) || "").replace(/^(eq|lt)\./, "");
+      if (m === "POST") { const b = JSON.parse(req.postData() || "{}"); if (b.user_id !== UID) return send(403, { message: "RLS" });
+        if (!H.some(r => r.user_id === b.user_id && r.day === b.day)) H.push({ id: "h" + (cloud.hseq = (cloud.hseq || 0) + 1), ...b, created_at: new Date().toISOString() }); return send(201, null); }
+      if (m === "DELETE") { const before = H.length; cloud.history = H.filter(r => !(r.user_id === val("user_id") && q.get("day")?.startsWith("lt.") && r.day < val("day"))); cloud.deleted = (cloud.deleted || 0) + before - cloud.history.length; return send(204, null); }
+      if (m === "GET") { let rows = H.filter(r => r.user_id === UID); if (q.get("id")) rows = rows.filter(r => r.id === val("id")); rows = [...rows].sort((a, b) => b.day.localeCompare(a.day));
+        const sel = (q.get("select") || "").split(","); return send(200, rows.map(r => Object.fromEntries(sel.map(k => [k, r[k]])))); }
+    }
     cloud.hits.push(m + " " + url.pathname + (url.search.includes("select=updated_at") ? "?meta" : ""));
     if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
     if (url.pathname === "/auth/v1/token") {
@@ -1397,6 +1409,39 @@ await test("V72 D14: иконки целей, банков и источнико
     return out; });
   for (const k of ["goal", "bank", "src", "sticker"]) { assert.ok(r[k].grad, k + " icon has a gradient plaque"); assert.ok(/jlIconIn|jlStickerIn/.test(r[k].anim), k + " icon pops in: " + r[k].anim); }
   assert.deepEqual(r.filters, [], "filters cut at 360 px");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D15: облачные копии — снимок раз в сутки, старше 30 дней удаляются, восстановление возвращает те же данные", async () => {
+  const cloud = makeCloud();
+  cloud.history = [{ id: "old", user_id: UID, day: "2026-09-01", state: { notes: [] }, created_at: "2026-09-01T10:00:00Z" }, { id: "x", user_id: "someone-else", day: "2026-09-01", state: {}, created_at: "2026-09-01T10:00:00Z" }];
+  const { ctx, page } = await device(cloud, { clock: new Date("2026-10-16T23:40:00+05:00"), session: cloud.session(5 * 86400) }); /* a login valid across the fixed clock */
+  // the user's records (what the app works out by itself for the new day — motivation, empty report — is left aside)
+  const strip = (src) => page.evaluate(src => { const x = snapshotOf(normalize(clone(src || state))); return JSON.stringify(["profits", "expenses", "notes", "tasks", "goal", "goals", "habits", "budgets", "achievements", "debts"].map(k => x[k])); }, src);
+  await page.evaluate(async () => { const now = new Date().toISOString(), k = keyDay(); state.profits.push({ id: "cp", amount: 700, sourceGroup: "Фриланс", at: now, dateKey: k }); state.notes.push({ id: "cn", title: "Облако", body: "x", at: now, category: "work" }); state.goal.title = "Дом"; saveState(); });
+  await page.evaluate(async () => { await _cloudSnapBusy; localStorage.removeItem(CLOUD_SNAP_KEY); }); /* the start-up copy was taken before these records: start the day over */
+  cloud.history = cloud.history.filter(r => r.id === "old" || r.user_id !== UID);
+  await sync(page); await page.evaluate(() => _cloudSnapBusy); await sync(page); await page.evaluate(() => _cloudSnapBusy);
+  const mine = () => cloud.history.filter(r => r.user_id === UID);
+  assert.deepEqual(mine().map(r => r.day), ["2026-10-16"], "one copy a day; the copy older than 30 days is gone: " + JSON.stringify(mine().map(r => r.day)));
+  assert.ok(cloud.history.some(r => r.user_id === "someone-else"), "other users' rows are not touched");
+  // the next day: another copy
+  await page.clock.setSystemTime(new Date("2026-10-17T00:05:00+05:00")); /* past midnight; the login stays valid */
+  await page.evaluate(() => { state.goal.title = "Машина"; state.notes = state.notes.filter(n => n.id !== "cn"); saveState(); });
+  await sync(page); await page.evaluate(() => _cloudSnapBusy);
+  assert.deepEqual(mine().map(r => r.day).sort(), ["2026-10-16", "2026-10-17"]);
+  // restore the 16th from the cloud: list → preview → confirm
+  await page.evaluate(() => { window.confirm = () => true; openBackups(); });
+  await page.waitForSelector("[data-cloud-bk]");
+  const id = mine().find(r => r.day === "2026-10-16").id;
+  await page.click(`[data-cloud-bk="${id}"]`); await page.waitForFunction(id => document.querySelector(`[data-cloud-bk="${id}"]`)?.dataset.ready === "1", id);
+  const preview = await page.textContent(`[data-cloud-row="${id}"] [data-cloud-sum]`);
+  assert.match(preview, /операц.*цел.*замет/, "preview shows how many operations, goals, notes: " + preview);
+  await page.click(`[data-cloud-bk="${id}"]`); await page.waitForTimeout(300);
+  const snap = await strip(cloud.history.find(r => r.id === id).state);
+  assert.ok(snap.includes("Облако") && snap.includes("Дом"), "the copy holds that day's data");
+  assert.equal(await strip(), snap, "restored data equal the copy");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

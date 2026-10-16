@@ -2743,6 +2743,37 @@ async function cloudSync(){
   }
   throw new Error('Не удалось согласовать данные с облаком');
 }
+/* ===== V72: cloud copies — one snapshot a day in life_state_history (RLS: own rows), kept 30 days =====
+   A day is written once (the unique key user_id+day ignores repeats); copies older than 30 days are removed by the app. */
+const CLOUD_SNAP_KEY='JL_CLOUD_SNAP_DAY_V72',CLOUD_KEEP_DAYS=30,HISTORY='/rest/v1/life_state_history';
+let _cloudSnapBusy=null;
+function snapshotOf(st){const x=clone(st);for(const k of [...SYNC_META_KEYS,'runtimeErrors','notificationsLog','drafts'])delete x[k];return x}
+async function cloudDailySnapshot(user){
+  if(_cloudSnapBusy||!user?.id)return _cloudSnapBusy||false;const day=keyDay(),mark=user.id+'|'+day;
+  try{if(localStorage.getItem(CLOUD_SNAP_KEY)===mark)return false}catch(e){}
+  _cloudSnapBusy=(async()=>{
+    try{
+      const u=encodeURIComponent(user.id);
+      await supaFetch(HISTORY+'?on_conflict=user_id,day',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify({user_id:user.id,day,state:snapshotOf(state)})});
+      const old=new Date();old.setDate(old.getDate()-CLOUD_KEEP_DAYS);
+      await supaFetch(HISTORY+'?user_id=eq.'+u+'&day=lt.'+keyDay(old),{method:'DELETE',headers:{Prefer:'return=minimal'}});
+      try{localStorage.setItem(CLOUD_SNAP_KEY,mark)}catch(e){}return true;
+    }catch(e){return false}
+    finally{_cloudSnapBusy=null}
+  })();
+  return _cloudSnapBusy;
+}
+function snapshotSummary(st){const x=st||{};return {ops:(x.profits||[]).length+(x.expenses||[]).length,goals:(x.goals||[]).length||1,notes:(x.notes||[]).length,tasks:(x.tasks||[]).length}}
+async function listCloudCopies(){const u=await cloudUser();if(!u)return null;return await supaFetch(HISTORY+'?user_id=eq.'+encodeURIComponent(u.id)+'&select=id,day,created_at&order=day.desc&limit=40')||[]}
+async function fetchCloudCopy(id){const r=await supaFetch(HISTORY+'?id=eq.'+encodeURIComponent(id)+'&select=state,day&limit=1');return r?.[0]||null}
+// replaces the data with a snapshot; the current state is kept first as a local copy (like a local restore)
+async function restoreSnapshot(snapshot,label){
+  const restored=normalize(clone(snapshot));
+  const db=await openLifeDB();if(db){await new Promise(res=>{try{const tx=db.transaction('backups','readwrite');tx.objectStore('backups').put({id:'day-0000-before-restore-'+Date.now(),savedAt:new Date().toISOString(),payload:JSON.stringify(state)});tx.oncomplete=res;tx.onerror=res}catch(e){res()}})}
+  for(const k of SYNC_META_KEYS)if(k in state)restored[k]=state[k];
+  state=restored;saveState();renderAll();scheduleNative();closeModal();toast('Данные восстановлены',label||'Изменение уйдёт в облако и на другие устройства.');
+  if(cloudAuth())cloudAutoSync().catch(()=>{});
+}
 async function cloudPush(){const r=await cloudAutoSync();return r}
 async function cloudPullIntoLocal(){try{return await cloudAutoSync()}catch(e){return false}}
 async function cloudAutoSync(){
@@ -2752,7 +2783,7 @@ async function cloudAutoSync(){
   cloudSyncInFlight=(async()=>{
     try{
       const r=await cloudSync();
-      if(r?.ok){_lastSyncOkAt=Date.now();setSyncStatus('Синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));if(r.merged)toast('Данные объединены','Изменения с другого устройства добавлены без потерь.')}
+      if(r?.ok){_lastSyncOkAt=Date.now();if(r.user)cloudDailySnapshot(r.user).catch(()=>{});setSyncStatus('Синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));if(r.merged)toast('Данные объединены','Изменения с другого устройства добавлены без потерь.')}
       else if(!cloudAuth())setSyncStatus('Нужен вход');
       return !!r?.ok;
     }catch(e){
@@ -4583,9 +4614,25 @@ async function listDailyBackups(){
   return new Promise(resolve=>{try{const req=db.transaction('backups','readonly').objectStore('backups').getAll();req.onsuccess=()=>resolve((req.result||[]).filter(r=>String(r.id).startsWith('day-')).sort((a,b)=>String(b.id).localeCompare(String(a.id))));req.onerror=()=>resolve([])}catch(e){resolve([])}});
 }
 function backupSummary(payload){try{const x=JSON.parse(payload);return `${(x.profits||[]).length+(x.expenses||[]).length} операций · ${(x.tasks||[]).length} задач · ${(x.notes||[]).length} заметок`}catch(e){return 'повреждена'}}
+async function renderCloudCopies(){
+  const box=$('bkCloud');if(!box)return;let rows=null;
+  try{rows=await listCloudCopies()}catch(e){if($('bkCloud'))$('bkCloud').innerHTML=`<div class="empty">Облачные копии сейчас недоступны: ${esc(String(e?.message||e).slice(0,120))}</div>`;return}
+  if(!$('bkCloud'))return;
+  if(rows===null){$('bkCloud').innerHTML='<div class="empty">Войди в аккаунт — тогда здесь появятся облачные копии.</div>';return}
+  $('bkCloud').innerHTML=rows.length?rows.map(r=>`<div class="jl-backup" data-cloud-row="${esc(r.id)}"><div><b>${esc(new Date(String(r.day)+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'long'}))}</b><small data-cloud-sum>☁️ облако · нажми «Посмотреть»</small></div><button class="btn small" type="button" data-cloud-bk="${esc(r.id)}">${svgIcon('i-backup')} Посмотреть</button></div>`).join(''):'<div class="empty">Облачных копий пока нет — первая появится сегодня после синхронизации.</div>';
+  $$('[data-cloud-bk]').forEach(b=>b.onclick=async()=>{
+    const row=b.closest('[data-cloud-row]'),sum=row?.querySelector('[data-cloud-sum]');
+    if(b.dataset.ready!=='1'){b.disabled=true;try{const c=await fetchCloudCopy(b.dataset.cloudBk);if(!c?.state)throw new Error('копия пуста');const n=snapshotSummary(c.state);b._copy=c;
+        if(sum)sum.textContent=`${n.ops} ${plural(n.ops,'операция','операции','операций')} · ${n.goals} ${plural(n.goals,'цель','цели','целей')} · ${n.notes} ${plural(n.notes,'заметка','заметки','заметок')} · ${n.tasks} ${plural(n.tasks,'задача','задачи','задач')}`;
+        b.dataset.ready='1';b.innerHTML=svgIcon('i-backup')+' Вернуть'}catch(e){if(sum)sum.textContent='Не удалось открыть: '+String(e?.message||e).slice(0,80)}finally{b.disabled=false}return}
+    const c=b._copy;if(!c)return;
+    if(!confirm('Вернуть данные из облака на '+c.day+'? Всё, что добавлено после этого дня, будет заменено. Текущее состояние сначала сохранится отдельной копией.'))return;
+    try{await restoreSnapshot(c.state,'Из облачной копии на '+c.day)}catch(e){toast('Не удалось восстановить',String(e?.message||e))}
+  });
+}
 async function openBackups(){
-  openModal(`<div class="close-row"><div><div class="eyebrow">Безопасность данных</div><h2>Резервные копии</h2><div class="sub">Копия на этом устройстве сохраняется раз в день и хранится 14 дней. Облако тоже хранит всё — это вторая страховка.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="stack" id="bkList" style="margin-top:12px"><div class="empty">Загрузка…</div></div>`);
-  $('closeModalBtn').onclick=closeModal;
+  openModal(`<div class="close-row"><div><div class="eyebrow">Безопасность данных</div><h2>Резервные копии</h2><div class="sub">Копия на этом устройстве сохраняется раз в день и хранится 14 дней. Ещё одна копия уходит в облако раз в сутки и хранится 30 дней.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="stack" id="bkList" style="margin-top:12px"><div class="empty">Загрузка…</div></div><div class="jl-cloudbk"><div class="eyebrow" style="margin-top:16px">☁️ Облачные копии · 30 дней</div><div class="sub">Снимок уходит в облако раз в сутки. Можно вернуть любой день — даже с другого телефона.</div><div class="stack" id="bkCloud" style="margin-top:10px"><div class="empty">Загрузка…</div></div></div>`);
+  $('closeModalBtn').onclick=closeModal;renderCloudCopies();
   const rows=await listDailyBackups(),box=$('bkList');if(!box)return;
   box.innerHTML=rows.length?rows.map(r=>`<div class="jl-backup"><div><b>${esc(new Date(String(r.id).slice(4)+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'long'}))}</b><small>${esc(backupSummary(r.payload))}</small></div><button class="btn small" type="button" data-bk="${esc(r.id)}">${svgIcon('i-backup')} Вернуть</button></div>`).join(''):'<div class="empty">Копий пока нет — первая появится сегодня автоматически.</div>';
   $$('[data-bk]').forEach(b=>b.onclick=async()=>{
