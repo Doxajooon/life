@@ -814,7 +814,7 @@ await test("Новый банк из стикеров без списка под
   await ctx.close();
 });
 
-await test("Шрифт выбирается в настройках и сохраняется; звук Jamal Glass загружается", async () => {
+await test("Шрифт выбирается в настройках и сохраняется; звук Jamal Dawn загружается", async () => {
   const { ctx, page } = await device(makeCloud());
   const r = await page.evaluate(async () => {
     const def = document.documentElement.dataset.font;
@@ -822,7 +822,7 @@ await test("Шрифт выбирается в настройках и сохр�
     const sel = document.getElementById("setFont"); sel.value = "nunito"; sel.dispatchEvent(new Event("change"));
     const after = document.documentElement.dataset.font, saved = state.settings.font;
     const loaded = await document.fonts.load('16px "Nunito"', "Привет").then(f => f.length > 0);
-    const res = await fetch("sounds/jamal-glass.wav"); const buf = await res.arrayBuffer();
+    const res = await fetch("sounds/jamal-dawn.wav"); const buf = await res.arrayBuffer();
     return { def, after, saved, loaded, wav: res.ok && buf.byteLength > 100000 };
   });
   assert.deepEqual(r, { def: "manrope", after: "nunito", saved: "nunito", loaded: true, wav: true });
@@ -1159,6 +1159,47 @@ await test("Назад: экран возвращается на то же ме�
   assert.ok(Math.abs(await y() - money) <= 2, "Money keeps its place");
   await page.evaluate(() => showView("viewMoney")); await page.waitForTimeout(250);
   assert.equal(await y(), 0, "the same tab again scrolls to the top");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V71: пульс-шкала, отчёт дня, привычка-отказ, победы с благодарностью, напоминания о цели каждые 2 часа", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const r = await page.evaluate(() => {
+    const k = keyDay(), now = new Date().toISOString();
+    state.profits.push({ id: "v71p", amount: 1500, source: "Работа", sourceGroup: "Работа", at: now, dateKey: k });
+    state.expenses.push({ id: "v71e", amount: 300, category: "Еда", at: now, dateKey: k }, { id: "v71d", amount: 1000, category: "Долг", debtPayment: "bank", at: now, dateKey: k });
+    state.goal.finance.targetAmount = 40000; const td = new Date(); td.setMonth(td.getMonth() + 6); state.goal.finance.targetDate = keyDay(td);
+    state.goal.milestones.forEach((m, i) => { m.done = i === 0; m.autoOff = true; if (m.done) m.doneAt = now; });
+    state.day.steps = [{ id: "w", time: "08:00", end: "18:00", title: "Работа" }, { id: "f", time: "18:00", end: "23:00", title: "Дом, семья и отдых" }];
+    state.settings.every2h = true; state.settings.notifications = true;
+    saveState(); renderAll();
+    const L = dayLedger(), slots = twoHourSlots();
+    return { L, slots, gauge: document.getElementById("pgValue").dataset.v, ledger: document.getElementById("dayLedger").textContent,
+      wins: document.getElementById("achievements").textContent };
+  });
+  // the day report counts the same numbers as everywhere: spending without the debt payment, the net with it
+  assert.equal(r.L.inc, 1500); assert.equal(r.L.out, 300); assert.equal(r.L.debt, 1000); assert.equal(r.L.net, 200);
+  assert.ok(r.ledger.includes("Куда ушло") && r.ledger.includes("Еда"), "the report shows where the money went");
+  assert.match(String(r.gauge), /^\d+$/, "the pulse gauge has a value");
+  // free time after work: every 2 hours a reminder about the goal (not a generic tip); during work — a short pause
+  const free = r.slots.filter(s => s.min >= 18 * 60), work = r.slots.filter(s => s.min < 18 * 60);
+  assert.deepEqual(free.map(s => s.time), ["20:00", "22:00"]);
+  assert.ok(free.every(s => s.body.includes("🎯") && s.body.includes("до цели")), "free-time reminders talk about the goal: " + free.map(s => s.body).join(" | "));
+  assert.ok(work.length && work.every(s => s.title.includes("пауза")), "work reminders are short pauses");
+  // the closed stage is a win with a thank-you
+  assert.ok(r.wins.includes("Этап 1 закрыт") && /Спасибо|Браво|Горжусь|справился|упорство/.test(r.wins), "a closed stage shows up in «Достигнуто» with thanks");
+  // a «отказ» habit: made in the editor, ticked when held, survives a reload
+  await page.evaluate(() => openHabitEditor());
+  await page.fill("#hbTitle", "Без соцсетей до обеда"); await page.selectOption("#hbType", "avoid"); await page.click("#hbSave");
+  await page.waitForTimeout(200);
+  const h = await page.evaluate(() => state.habits.find(x => x.title === "Без соцсетей до обеда"));
+  assert.equal(h.avoid, true);
+  await page.click(`[data-habit-check="${h.id}"]`); await page.waitForTimeout(200);
+  assert.ok(await page.evaluate(id => document.querySelector(`[data-habit-row="${id}"]`).classList.contains("is-done"), h.id), "the held habit burns");
+  await page.reload(); await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true);
+  assert.equal(await page.evaluate(() => state.habits.find(x => x.title === "Без соцсетей до обеда")?.avoid), true, "the kind survives a reload");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
