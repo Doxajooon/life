@@ -67,7 +67,14 @@ jobs:
           KEYSTORE="$RUNNER_TEMP/jamal-life.keystore"
           if [ -n "${KEYSTORE_B64:-}" ] && [ -n "${KEYSTORE_PASSWORD:-}" ] && [ -n "${KEY_ALIAS:-}" ]; then
             echo "Signing with the persistent keystore from secrets"
-            echo "$KEYSTORE_B64" | base64 -d > "$KEYSTORE"; PASS="$KEYSTORE_PASSWORD"; ALIAS="$KEY_ALIAS"
+            # secrets pasted on Windows may carry line breaks or spaces: strip them before decoding
+            PASS="$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d '\r\n')"; ALIAS="$(printf '%s' "$KEY_ALIAS" | tr -d '\r\n ')"
+            if ! printf '%s' "$KEYSTORE_B64" | tr -d '\r\n\t ' | base64 -d > "$KEYSTORE" 2>/dev/null; then
+              echo "::error::ANDROID_KEYSTORE_BASE64 is not valid base64 — paste the secret again"; exit 1; fi
+            if ! keytool -list -keystore "$KEYSTORE" -storepass "$PASS" >/dev/null 2>&1; then
+              echo "::error::ANDROID_KEYSTORE_PASSWORD does not open the keystore (wrong password or damaged ANDROID_KEYSTORE_BASE64)"; exit 1; fi
+            if ! keytool -list -keystore "$KEYSTORE" -storepass "$PASS" -alias "$ALIAS" >/dev/null 2>&1; then
+              echo "::error::ANDROID_KEY_ALIAS '$ALIAS' is not in the keystore"; exit 1; fi
           else
             echo "::warning::No ANDROID_KEYSTORE_* secrets: signing with a one-off key (updates over an older APK will need a reinstall)"
             PASS="android"; ALIAS="jamallife"
