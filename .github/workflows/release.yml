@@ -27,6 +27,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Static checks
         run: npm test
+      - name: AI Edge Function (mocked Deno, Supabase and Gemini)
+        run: npm run test:edge
       - name: End-to-end tests (sync, reminders, UI)
         run: npm run test:e2e
 

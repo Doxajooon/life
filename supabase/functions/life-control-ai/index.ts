@@ -37,9 +37,9 @@ function weekRules() {
 // deno-lint-ignore no-explicit-any
 function weekContext(s: any, today: string): any {
   const since = Date.now() - 7 * 86400000, inWeek = (x: any) => Date.parse(x?.at || "") >= since, amt = (x: any) => Math.max(0, Number(x?.amount) || 0);
-  const p = (Array.isArray(s?.profits) ? s.profits : []).filter(inWeek), all = (Array.isArray(s?.expenses) ? s.expenses : []).filter((x: any) => inWeek(x) && !x?.transfer);
-  // a debt payment is not spending: it goes to money.debtPaid, never to spent or byCategory
-  const e = all.filter((x: any) => !x?.debtPayment), dp = all.filter((x: any) => x?.debtPayment);
+  const p = (Array.isArray(s?.profits) ? s.profits : []).filter(inWeek), all = (Array.isArray(s?.expenses) ? s.expenses : []).filter(inWeek);
+  // spending = no transfers, no debt payments; a debt payment (stored with transfer:true) goes to money.debtPaid
+  const e = all.filter((x: any) => !x?.transfer && !x?.debtPayment), dp = all.filter((x: any) => x?.debtPayment);
   const cat: Record<string, number> = {}; for (const x of e) { const k = clip(x?.category || "Другое", 60); cat[k] = (cat[k] || 0) + amt(x); }
   // Report keys are the user's local dates, so the app sends its own "today".
   const days: any[] = []; const d = new Date((/^\d{4}-\d{2}-\d{2}$/.test(today) ? today : new Date().toISOString().slice(0, 10)) + "T12:00:00Z");
