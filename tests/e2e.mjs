@@ -1270,7 +1270,6 @@ await test("Цифры: одни и те же операции дают один
   assert.match(r.calDaySum, /расход 300 .*долг 4 000/, "календарь, сумма дня " + ex);
   assert.equal(r.dayOld, 150, "старый календарь, день без dateKey " + ex);
   assert.equal(r.rangeOld.expense, 1350, "старый календарь, период " + ex); assert.equal(r.rangeOld.debt, 4000);
-  if (process.env.DBG) console.log(ex);
   assert.match(r.calRange, /Расход1 350/, "календарь, период " + ex);
   assert.equal(r.calDec2025, 50, "декабрь прошлого года " + ex);
   assert.match(r.donut, /650/, "круговая диаграмма месяца " + ex);
@@ -1362,6 +1361,68 @@ await test("Синхронизация: старые записи без id + о
   }
   assert.deepEqual(A.page.errors, []); assert.deepEqual(B.page.errors, []);
   await A.ctx.close(); await B.ctx.close();
+});
+
+await test("Резервная копия: создать → изменить → восстановить → данные те же, и облако их получает", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await page.evaluate(() => { window.__strip = s => { const x = normalize(JSON.parse(JSON.stringify(s))); for (const k of [...SYNC_META_KEYS, "runtimeErrors", "notificationsLog", "lastReadAt", "drafts", "_sent", "dailyMotivations", "dayMode", "daily", "_limitAlerts"]) delete x[k]; return JSON.stringify(x); }; }); // dayMode, daily, _limitAlerts are worked out by the app itself
+  const snap = await page.evaluate(async () => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.profits.push({ id: "bp", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k }); state.expenses.push({ id: "be", amount: 70, category: "Еда", at: now, dateKey: k });
+    state.notes.push({ id: "bn", title: "Мысль", body: "x", at: now, category: "work" }); state.goal.title = "Квартира"; state.budgets = [{ id: "bb", name: "Еда", planned: 500, tops: [] }];
+    saveState(); await cloudAutoSync();
+    openBackupDialog(); document.getElementById("bkCreate").click();
+    return __strip(state);
+  });
+  await page.evaluate(async () => {
+    state.expenses = state.expenses.filter(x => x.id !== "be"); state.notes.push({ id: "late", title: "после", body: "", at: new Date().toISOString(), category: "work" });
+    state.goal.title = "Машина"; state.budgets[0].planned = 900; saveState(); await cloudAutoSync();
+    window.confirm = () => true; openBackupDialog(); document.getElementById("bkRestore").click();
+  });
+  const restored = await page.evaluate(() => __strip(state));
+  assert.equal(restored, snap, "local data after restore differ from the backup");
+  await sync(page); await sync(page);
+  const after = await page.evaluate(() => ({ title: state.goal.title, be: state.expenses.some(x => x.id === "be"), planned: state.budgets[0]?.planned }));
+  const cl = cloud.row.state;
+  assert.deepEqual(after, { title: "Квартира", be: true, planned: 500 }, "the sync undid the restore on this device");
+  assert.deepEqual({ title: cl.goal.title, be: cl.expenses.some(x => x.id === "be"), planned: cl.budgets[0]?.planned }, { title: "Квартира", be: true, planned: 500 }, "the cloud did not get the restored data");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Безопасность: вредный текст, введённый через все формы, нигде не выполняется", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const X = '<img src=x onerror="window.__xss=(window.__xss||0)+1">"><script>window.__xss=7</script><svg onload="window.__xss=9">';
+  await page.evaluate(() => { window.confirm = () => true; window.prompt = () => null; window.alert = () => {}; const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "swE", amount: 300, category: "Еда", at: now, dateKey: k }); state.budgets = [{ id: "swB", name: "Поездки", planned: 1000, tops: [] }];
+    state.tasks.push({ id: "swT", title: "Позвонить", time: "23:00", date: k }); state.habits = [{ id: "swH", title: "Спорт", kind: "daily", target: 7 }]; saveState(); renderAll(); });
+  // every window: type the payload into every text field, then press its main button
+  for (const [name, open] of WINDOWS) {
+    await page.evaluate(([open, X]) => { closeModal(); showView("viewToday"); eval(open);
+      document.querySelectorAll("#modal input:not([type]), #modal input[type=text], #modal input[type=search], #modal textarea").forEach(el => { if (el.offsetParent === null) return; el.value = X; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+      document.querySelectorAll("#modal input[type=number]").forEach(el => { if (el.offsetParent !== null && !el.value) { el.value = "5"; el.dispatchEvent(new Event("input", { bubbles: true })); } });
+      const main = [...document.querySelectorAll("#modal .btn.primary")].find(b => b.offsetParent !== null && !/Удалить|Восстановить|Запустить|AI/i.test(b.textContent)); main?.click(); }, [open, X]);
+    await page.waitForTimeout(150);
+  }
+  // the notes editor, the goal form and the report of the day are screens, not windows
+  await page.evaluate(X => { closeModal(); openNoteEditor(""); const t = document.getElementById("noteTitle"), b = document.getElementById("noteBody"); if (t) { t.value = X; t.dispatchEvent(new Event("input", { bubbles: true })); } if (b) { b.value = X + "\n**" + X + "**"; b.dispatchEvent(new Event("input", { bubbles: true })); }
+    showView("viewToday"); for (const id of ["rDone", "rBlock", "rTomorrow"]) { const el = document.getElementById(id); if (el) { el.value = X; el.dispatchEvent(new Event("input", { bubbles: true })); } }
+    openGoalEditor(""); const g = document.getElementById("geName"); if (g) { g.value = X; g.dispatchEvent(new Event("input", { bubbles: true })); document.getElementById("geSave")?.click(); } }, X);
+  await page.waitForTimeout(300);
+  const stored = await page.evaluate(X => JSON.stringify(state).split(JSON.stringify(X).slice(1, -1)).length - 1, X);
+  assert.ok(stored >= 8, "the payload should have reached many fields, got " + stored);
+  // show everything: every screen, every window, the search
+  await page.evaluate(async X => { saveState(); renderAll();
+    for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewDisplay", "viewProfile", "viewNotifications"]) { showView(v); for (const tab of ["overview", "tx", "cal"]) document.querySelector(`#${v} [data-money-tab="${tab}"]`)?.click(); }
+    openSearch(); const q = document.querySelector("#modal input"); if (q) { q.value = "img"; q.dispatchEvent(new Event("input", { bubbles: true })); } await new Promise(r => setTimeout(r, 200)); }, X);
+  for (const [, open] of WINDOWS) await page.evaluate(open => { try { closeModal(); eval(open); } catch (e) {} }, open);
+  await page.waitForTimeout(500);
+  const r = await page.evaluate(() => ({ xss: window.__xss, injected: document.querySelectorAll("img[src='x'], [onerror], [onload], body script:not([src])").length - document.querySelectorAll("script[data-app]").length }));
+  assert.equal(r.xss, undefined, "script ran from user text: " + r.xss);
+  assert.ok(r.injected <= 1, "user text became HTML elements: " + r.injected); // the app's own inline <script> is the only one
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
 });
 
 await browser.close(); server.close();

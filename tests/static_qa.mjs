@@ -98,4 +98,6 @@ assert.ok(html.includes("if(m.done||m.autoOff)return") && html.includes("data-ms
   const classes = [...new Set([...css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{[^{}]*\}/g, "{}").matchAll(/\.([A-Za-z_][\w-]*)/g)].map(m => m[1]))].filter(c => !/^\d/.test(c));
   const unused = classes.filter(c => !new RegExp("(?<![\\w-])" + esc(c) + "(?![\\w-])").test(rest) && !new RegExp(esc(c.replace(/-[^-]+$/, "-")) + "(?:'|\"|`|\\$\\{)").test(rest));
   assert.deepEqual(unused, [], "CSS for classes nobody uses: " + unused.join(", ")); }
+// user text that ends up inside HTML without esc(): the currency and the bank sticker are cleaned at the source
+assert.ok(html.includes("function currencyLabel()") && !html.includes("state.profile.currency||'сомони'") && html.includes("function cleanEmoji(") && html.includes('<span class="ico">${esc(x.icon)}</span>'), "currency and bank stickers must never carry markup");
 console.log("JAMAL_LIFE_V69_STATIC_QA_OK");

@@ -2550,8 +2550,10 @@ function validDate(d){const x=d instanceof Date?d:new Date(d);return !Number.isN
 
 function fmtDateTime(d){const x=validDate(d);return x?x.toLocaleString('ru-RU',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'}
 // any money value: a broken or missing number shows as 0, never «NaN», «∞» or «не число»
+// the currency is typed by the user and printed next to every sum: plain text only
+function currencyLabel(){return String(state?.profile?.currency||'').replace(/[<>&"'`=\\]/g,'').trim().slice(0,12)||'сомони'}
 function moneyNum(n){const v=Number(n);return Number.isFinite(v)?v:0}
-function fmtMoney(n){const v=moneyNum(n);return v.toLocaleString('ru-RU',{maximumFractionDigits:Math.abs(v)>=1000?0:2})+' '+(state.profile.currency||'сомони')}
+function fmtMoney(n){const v=moneyNum(n);return v.toLocaleString('ru-RU',{maximumFractionDigits:Math.abs(v)>=1000?0:2})+' '+(currencyLabel())}
 function timeToMin(v){const [h,m]=String(v).split(':').map(Number);return (Number(h)||0)*60+(Number(m)||0)}
 function nowMin(){const d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60}
 function fmtDuration(mins){mins=Math.max(0,Math.round(mins));const h=Math.floor(mins/60),m=mins%60;return h?`${h} ч ${String(m).padStart(2,'0')} мин`:`${m} мин`}
@@ -3092,7 +3094,7 @@ function analyzeLife(){
 }
 function deepBar(label,pct,note=''){const p=pct===null?0:clamp(pct,0,100),c=p>=70?'var(--green)':p>=40?'var(--orange)':'var(--red)';return `<div class="jl-deep-bar"><div><span>${esc(label)}</span><b>${pct===null?'—':p+'%'}</b></div><div class="budget-track"><i class="budget-fill" style="width:${p}%;background:${c}"></i></div>${note?`<small>${esc(note)}</small>`:''}</div>`}
 function openLifeAnalysis(){
-  const a=analyzeLife(),cur=state.profile.currency||'сомони';
+  const a=analyzeLife(),cur=currencyLabel();
   const catRows=a.cats.slice(0,6).map(c=>`<div class="jl-deep-cat"><span class="jl-emo">${c.icon}</span><span>${esc(c.name)}</span><div class="budget-track"><i class="budget-fill" style="width:${c.share}%"></i></div><b>${esc(fmtNum(c.v))}</b></div>`).join('')||'<div class="empty">Расходов за 30 дней нет — добавляй их, и разбор станет точным.</div>';
   openModal(`<div class="close-row"><div><div class="eyebrow">Последние 30 дней</div><h2>📊 Полный разбор</h2><div class="sub">Где уходят деньги, что получается и над чем работать — на твоих цифрах.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
   <div class="jl-deep">
@@ -3646,7 +3648,7 @@ function liveMoneyForm(kind){
   const stack=document.querySelector('.modal .stack');if(!stack||stack.querySelector('.jl-receipt'))return;
   const isP=kind==='profit',isT=kind==='transfer',amountId=isT?'trAmount':'moneyAmount',dateId=isT?'trDate':'moneyDate';
   const pv=document.createElement('div');pv.className='jl-receipt '+(isP?'in':isT?'tr':'out');
-  pv.innerHTML=`<span class="jl-receipt-ico" id="rcIco">${isP?'💼':isT?'🔁':'🧾'}</span><div class="jl-receipt-main"><b id="rcSum">${isP?'+':isT?'':'−'}0 ${esc(state.profile.currency||'сомони')}</b><small id="rcWhat">—</small></div><span class="jl-receipt-date" id="rcDate">—</span>`;
+  pv.innerHTML=`<span class="jl-receipt-ico" id="rcIco">${isP?'💼':isT?'🔁':'🧾'}</span><div class="jl-receipt-main"><b id="rcSum">${isP?'+':isT?'':'−'}0 ${esc(currencyLabel())}</b><small id="rcWhat">—</small></div><span class="jl-receipt-date" id="rcDate">—</span>`;
   stack.prepend(pv);
   const dIn=$(dateId),aIn=$(amountId);
   if(dIn&&!dIn.parentElement.querySelector('.jl-date-chips')){const c=document.createElement('div');c.className='jl-chips jl-date-chips';const k=n=>{const d=new Date();d.setDate(d.getDate()-n);return keyDay(d)};c.innerHTML=[[0,'Сегодня'],[1,'Вчера'],[2,'Позавчера']].map(([n,t])=>`<button type="button" class="jl-chip" data-day-pick="${k(n)}">${t}</button>`).join('');dIn.after(c);c.querySelectorAll('[data-day-pick]').forEach(b=>b.onclick=()=>{dIn.value=b.dataset.dayPick;dIn.dispatchEvent(new Event('input',{bubbles:true}));dIn.dispatchEvent(new Event('change',{bubbles:true}));haptic(6)})}
@@ -3654,7 +3656,7 @@ function liveMoneyForm(kind){
   const type=$('moneyType');
   if(isP&&type&&!stack.querySelector('.jl-src-tiles')){const t=document.createElement('div');t.className='jl-src-tiles';t.innerHTML=PROFIT_SOURCES.map(x=>`<button type="button" data-src-pick="${esc(x)}" class="${type.value===x?'active':''}"><i>${PROFIT_ICONS[x]||'💠'}</i><span>${esc(x)}</span></button>`).join('');type.after(t);type.classList.add('jl-hidden-select');t.querySelectorAll('[data-src-pick]').forEach(b=>b.onclick=()=>{type.value=b.dataset.srcPick;t.querySelectorAll('button').forEach(y=>y.classList.toggle('active',y===b));type.dispatchEvent(new Event('change',{bubbles:true}));haptic(6)})}
   let shown=0,raf=0;
-  const upd=()=>{const v=Math.max(0,Number(aIn?.value)||0),cur=state.profile.currency||'сомони';cancelAnimationFrame(raf);const from=shown,t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/280),val=from+(v-from)*(1-Math.pow(1-p,3));setText('rcSum',`${isP?'+':isT?'':'−'}${Math.round(val).toLocaleString('ru-RU')} ${cur}`);if(p<1)raf=requestAnimationFrame(step);else shown=v};raf=requestAnimationFrame(step);
+  const upd=()=>{const v=Math.max(0,Number(aIn?.value)||0),cur=currencyLabel();cancelAnimationFrame(raf);const from=shown,t0=performance.now();const step=t=>{const p=Math.min(1,(t-t0)/280),val=from+(v-from)*(1-Math.pow(1-p,3));setText('rcSum',`${isP?'+':isT?'':'−'}${Math.round(val).toLocaleString('ru-RU')} ${cur}`);if(p<1)raf=requestAnimationFrame(step);else shown=v};raf=requestAnimationFrame(step);
     const d=dIn?.value?new Date(dIn.value+'T12:00:00'):new Date(),diff=Math.round((new Date(keyDay()+'T12:00:00')-d)/DAY_MS);setText('rcDate',diff===0?'сегодня':diff===1?'вчера':diff===2?'позавчера':d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'}));
     document.querySelectorAll('[data-day-pick]').forEach(b=>b.classList.toggle('active',b.dataset.dayPick===dIn?.value));
     let what='—',ico=isP?'💼':isT?'🔁':'🧾';
@@ -3671,7 +3673,7 @@ function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
   const customDraft=String(draft.customCategory||((category==='Другое'&&savedCategory!=='Другое')?savedCategory:''));
   const typeField=isProfit
     ? `<select id="moneyType">${PROFIT_SOURCES.map(s=>`<option value="${esc(s)}" ${s===sourceValue?'selected':''}>${esc(PROFIT_ICONS[s]||'💠')} ${esc(s)}</option>`).join('')}</select>`
-    : `<select id="moneyType">${CATS.map(x=>`<option value="${esc(x.value)}" ${x.value===category?'selected':''}>${esc(x.icon)} ${esc(x.label)}</option>`).join('')}</select><div class="expense-quick-grid">${CATS.map(x=>`<button type="button" class="expense-quick ${x.value===category?'active':''}" data-expense-quick="${esc(x.value)}"><span class="ico">${x.icon}</span><span>${esc(x.label)}</span></button>`).join('')}</div><div class="field" id="customExpenseWrap" style="display:${category==='Другое'?'block':'none'}"><label>Название расхода</label><input id="moneyCustomCategory" maxlength="80" placeholder="Например: кино, подарок, кофе" value="${esc(customDraft)}"></div><div class="expense-personal-hint">Выбирай готовую категорию. Для любого другого расхода нажми «Другое» и задай точное название — оно попадёт в историю и диаграмму расходов.</div>`;
+    : `<select id="moneyType">${CATS.map(x=>`<option value="${esc(x.value)}" ${x.value===category?'selected':''}>${esc(x.icon)} ${esc(x.label)}</option>`).join('')}</select><div class="expense-quick-grid">${CATS.map(x=>`<button type="button" class="expense-quick ${x.value===category?'active':''}" data-expense-quick="${esc(x.value)}"><span class="ico">${esc(x.icon)}</span><span>${esc(x.label)}</span></button>`).join('')}</div><div class="field" id="customExpenseWrap" style="display:${category==='Другое'?'block':'none'}"><label>Название расхода</label><input id="moneyCustomCategory" maxlength="80" placeholder="Например: кино, подарок, кофе" value="${esc(customDraft)}"></div><div class="expense-personal-hint">Выбирай готовую категорию. Для любого другого расхода нажми «Другое» и задай точное название — оно попадёт в историю и диаграмму расходов.</div>`;
   openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span>Деньги</div><h2>${editing?(isProfit?'Изменить прибыль':'Изменить расход'):(isProfit?'Добавить прибыль':'Добавить расход')}</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Дата операции</label><input id="moneyDate" type="date" value="${esc(forcedDate||draft.dateKey||moneyViewDate||keyDay())}"></div><div class="field"><label>Сумма</label><input id="moneyAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" value="${esc(draft.amount||'')}"></div><div class="field"><label>${isProfit?'Источник дохода':'Категория расхода'}</label>${typeField}</div>${!isProfit?`<label class="debt-payment-toggle"><input type="checkbox" id="moneyDebtPay"> Это платёж по долгу</label><div class="field" id="moneyDebtWrap" style="display:none"><label>Какой долг уменьшить</label><select id="moneyDebtType"><option value="bank">Банк</option><option value="firms">Фирмы</option></select></div>`:''}<div class="field"><label>Комментарий</label><input id="moneyNote" placeholder="Необязательно" value="${esc(draft.note||'')}"></div><div class="sub">${isProfit?'Доступны три источника: зарплата, фриланс и спортивная аналитика.':'Расход сразу уменьшает общую кассу и автоматически попадает в анализ.'} Поля сохраняются автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn ${isProfit?'primary':'orange'}" id="saveMoneyBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> ${isProfit?'Сохранить прибыль':'Сохранить расход'}</button></div></div>`);
   $('closeModalBtn').onclick=closeModal;
   liveMoneyForm(kind==='profit'?'profit':'expense');
@@ -3996,7 +3998,7 @@ function closeDay(){
 
 /* ===== V59: разбор недели ===== */
 function localWeekText(){
-  const w=weekStats(),cur=state.profile.currency||'сомони',fm=v=>Math.round(v).toLocaleString('ru-RU')+' '+cur;
+  const w=weekStats(),cur=currencyLabel(),fm=v=>Math.round(v).toLocaleString('ru-RU')+' '+cur;
   const strong=w.closed>=5?`СИЛЬНАЯ СТОРОНА — закрыто ${w.closed} из 7 дней: ритм держится.`:w.inc>0?`СИЛЬНАЯ СТОРОНА — за неделю пришло ${fm(w.inc)}.`:'СИЛЬНАЯ СТОРОНА — ты ведёшь учёт, это основа контроля.';
   const weak=w.closed<4?`СЛАБОЕ МЕСТО — закрыто только ${w.closed} из 7 дней: без итогов дня план теряется.`:w.out>w.inc&&w.inc>0?`СЛАБОЕ МЕСТО — расход ${fm(w.out)} больше дохода ${fm(w.inc)}.`:'СЛАБОЕ МЕСТО — мало записей о тратах: картина денег неполная.';
   const step=w.closed<5?'ШАГ НА НЕДЕЛЮ — закрывать день каждый вечер в 21:30, 7 из 7.':'ШАГ НА НЕДЕЛЮ — записывать каждый расход в тот же час, без исключений.';
@@ -4053,12 +4055,12 @@ function debtPlanStep(pay){return pay>=2000?100:50}
 function renderDebtPlan(){
   const el=$('debtPlan');if(!el)return;const debt=debtTotal(),pay=Math.max(0,Number(state.debts?.monthlyPayment)||0),pct=debtPulse(),base=Math.max(Number(state.debtBaseline)||0,debt);
   if(!(debt>0)){el.innerHTML=base>0?'<div class="dp-empty"><b>Долгов нет.</b> Ты свободен — теперь эти деньги работают на цель.</div>':'';el.dataset.sig='';return}
-  if(!(pay>0)){const sig='nopay|'+debt;if(el.dataset.sig!==sig){el.dataset.sig=sig;el.innerHTML=`<div class="dp-label">Долг осталось</div><div class="dp-sum">${esc(fmtNum(debt))}<small>${esc(state.profile.currency||'сомони')}</small></div><div class="dp-empty" style="margin-top:10px">Укажи, сколько платишь в месяц — посчитаю дату, когда будешь свободен.<br><button class="btn small" type="button" id="dpSetPay">${svgIcon('i-pencil')} Указать платёж</button></div>`;$('dpSetPay').onclick=()=>$('editDebtBtn2')?.click()}return}
+  if(!(pay>0)){const sig='nopay|'+debt;if(el.dataset.sig!==sig){el.dataset.sig=sig;el.innerHTML=`<div class="dp-label">Долг осталось</div><div class="dp-sum">${esc(fmtNum(debt))}<small>${esc(currencyLabel())}</small></div><div class="dp-empty" style="margin-top:10px">Укажи, сколько платишь в месяц — посчитаю дату, когда будешь свободен.<br><button class="btn small" type="button" id="dpSetPay">${svgIcon('i-pencil')} Указать платёж</button></div>`;$('dpSetPay').onclick=()=>$('editDebtBtn2')?.click()}return}
   const step=debtPlanStep(pay),min=Math.max(step,Math.ceil(pay/step)*step),max=Math.max(min+step*10,Math.ceil(pay*3/step)*step);
   let alt=Number(state.debts.whatIf)||0;if(!(alt>pay)||alt>max)alt=Math.min(max,Math.max(min+step,Math.ceil(pay*1.5/step)*step));
   const sig=[debt,pay,pct,alt,max].join('|');if(el.dataset.sig===sig)return;el.dataset.sig=sig;
   const m0=payoffMonths(debt,pay);
-  el.innerHTML=`<div class="dp-label">Долг осталось</div><div class="dp-sum"><span id="dpDebt">${esc(fmtNum(debt))}</span><small>${esc(state.profile.currency||'сомони')}</small></div>
+  el.innerHTML=`<div class="dp-label">Долг осталось</div><div class="dp-sum"><span id="dpDebt">${esc(fmtNum(debt))}</span><small>${esc(currencyLabel())}</small></div>
   <div class="dp-track"><i style="width:${pct}%"></i></div><div class="dp-foot"><span>Выплачено ${pct}%</span><span>Цель: свободен от долга</span></div>
   <div class="dp-grid"><div class="dp-cell"><span>Платишь ${esc(fmtNum(pay))} / мес</span><b>${esc(monthsLater(m0))}</b><small>через ${esc(monthsText(m0))}</small></div>
   <div class="dp-cell gold"><span>Если <span id="dpAltPay">${esc(fmtNum(alt))}</span> / мес</span><b id="dpAltDate">—</b><small id="dpAltGain">—</small></div></div>
@@ -4350,7 +4352,9 @@ async function openMoveDevice(){
 /* ===== V63: банки — свои, с эмодзи; категории расходов из банков ===== */
 const BANK_STICKERS=[['🍔','Еда'],['🛒','Продукты'],['🍽️','Кафе'],['☕','Кофе'],['🎉','Развлечения','Досуг'],['🎮','Игры'],['🎬','Кино'],['🚕','Транспорт'],['⛽','Бензин'],['🏠','Дом'],['💡','Коммуналка','Свет, газ'],['📱','Связь'],['👕','Одежда'],['💊','Здоровье'],['🎓','Учёба'],['📚','Книги'],['🎁','Подарки'],['👨‍👩‍👦','Семья'],['🕌','Садака'],['⚽','Спорт'],['💈','Красота'],['🐾','Питомцы'],['🧾','Платежи'],['💰','Копилка']];
 
-function bankIcon(b){return b?.emoji||EXPENSE_ICONS[b?.name]||'🏦'}
+// a bank sticker is user data: keep it short and never let it carry markup
+function cleanEmoji(e){return String(e||'').replace(/[<>&"'`=\\/]/g,'').slice(0,8)}
+function bankIcon(b){return cleanEmoji(b?.emoji)||EXPENSE_ICONS[b?.name]||'🏦'}
 function catIcon(name){const b=(state.budgets||[]).find(x=>String(x.name).toLowerCase()===String(name||'').toLowerCase());return b?bankIcon(b):EXPENSE_ICONS[name]||''}
 function expenseCats(){const base=EXPENSE_QUICK.filter(x=>x.value!=='Другое'),other=EXPENSE_QUICK.find(x=>x.value==='Другое');const banks=(state.budgets||[]).filter(b=>!base.some(x=>x.value.toLowerCase()===String(b.name).toLowerCase())).map(b=>({value:b.name,icon:bankIcon(b),label:b.name}));return [...banks,...base.map(x=>{const b=(state.budgets||[]).find(y=>String(y.name).toLowerCase()===x.value.toLowerCase());return b?{...x,icon:bankIcon(b)}:x}),other]}
 
@@ -4447,7 +4451,7 @@ function goalProgress(g){
 function daysLeftText(p){if(p.done)return 'Цель достигнута';if(p.daysLeft===null)return 'Срок не задан';if(p.daysLeft===0)return 'Срок сегодня';return 'Осталось '+p.daysLeft+' '+plural(p.daysLeft,'день','дня','дней')}
 function plural(n,a,b,c){n=Math.abs(Math.round(n));const m10=n%10,m100=n%100;if(m10===1&&m100!==11)return a;if(m10>=2&&m10<=4&&(m100<12||m100>14))return b;return c}
 function fmtShort(n){const v=moneyNum(n);return Math.abs(v)>=1e6?(v/1e6).toLocaleString('ru-RU',{maximumFractionDigits:1})+' млн':Math.abs(v)>=1e4?(v/1e3).toLocaleString('ru-RU',{maximumFractionDigits:1})+' тыс.':v.toLocaleString('ru-RU',{maximumFractionDigits:2})}
-function setMoneyKpi(id,v){const el=$(id);if(!el)return;const n=Number(v||0),txt=(n<0?'−':'')+Math.abs(n).toLocaleString('ru-RU'),cur=state.profile.currency||'сомони';let num=el.querySelector(':scope>.num');if(!num||el.querySelector(':scope>small')?.textContent!==cur){el.innerHTML='<span class="num">0</span><small>'+esc(cur)+'</small>';num=el.querySelector(':scope>.num')}if((num.dataset.shown??num.textContent)!==txt)countTo(num,txt)}
+function setMoneyKpi(id,v){const el=$(id);if(!el)return;const n=Number(v||0),txt=(n<0?'−':'')+Math.abs(n).toLocaleString('ru-RU'),cur=currencyLabel();let num=el.querySelector(':scope>.num');if(!num||el.querySelector(':scope>small')?.textContent!==cur){el.innerHTML='<span class="num">0</span><small>'+esc(cur)+'</small>';num=el.querySelector(':scope>.num')}if((num.dataset.shown??num.textContent)!==txt)countTo(num,txt)}
 function noticeAllowed(kind){const k={tasks:'notifyTasks',finance:'notifyFinance',goals:'notifyGoals'}[kind];return !k||state.settings?.[k]!==false}
 
 /* ---- Today ---- */
@@ -4535,7 +4539,7 @@ let geState={id:'',icon:'target',color:'blue'};
 function renderGoalEditorCover(){renderGoalPreview();const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=coverHTML({icon:geState.icon},'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
 const GOAL_IDEAS=[['🏠','Своя квартира','home2'],['🚗','Машина','car'],['🛡️','Финансовая подушка','bank'],['💳','Закрыть долги','briefcase'],['🎓','Учёба','graduation'],['💍','Свадьба','heart'],['✈️','Путешествие','plane'],['💻','Ноутбук','laptop']];
 function renderGoalPreview(){
-  const name=$('geName')?.value.trim(),amount=Number($('geAmount')?.value)||0,date=$('geDate')?.value||'',cur=state.profile.currency||'сомони';
+  const name=$('geName')?.value.trim(),amount=Number($('geAmount')?.value)||0,date=$('geDate')?.value||'',cur=currencyLabel();
   setText('gePvTitle',name||'Новая цель');
   let meta=amount>0?fmtMoney(amount):'Сумма не задана';let note='',monthly='';
   if(date){const d=new Date(date+'T12:00:00'),days=Math.round((d-new Date())/DAY_MS);meta+=' · до '+d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
@@ -4548,7 +4552,7 @@ function renderGoalPreview(){
 function openGoalEditor(id=''){
   const g=id?goalById(id):null,isMain=!!g?.main,f=state.goal.finance||{};
   geState={id:g?g.id:'',icon:g?.icon||'target',color:g?.color||'blue'};
-  setText('geHeading',g?'Цель':'Новая цель');setText('geCurrency',state.profile.currency||'сомони');
+  setText('geHeading',g?'Цель':'Новая цель');setText('geCurrency',currencyLabel());
   $('geName').value=g?(isMain?state.goal.title:g.title):'';
   $('geAmount').value=g?(isMain?(f.targetAmount||''):(g.targetAmount||'')):'';
   $('geDate').value=g?(isMain?(f.targetDate||''):(g.targetDate||'')):'';
@@ -4802,7 +4806,7 @@ function renderProfile(){
   const b=manualBackupInfo();setText('pfBackupSub',b?'Последняя копия: '+fmtDateTime(new Date(b.savedAt)):'Копии на этом устройстве ещё нет');
 }
 function openProfileEdit(){
-  openModal(`<div class="close-row"><div><div class="eyebrow">Профиль</div><h2>Редактировать</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Имя</label><input id="pfNameInput" maxlength="80" value="${esc(state.profile.name||'')}" placeholder="Как к тебе обращаться"></div><div class="field"><label>Валюта</label><input id="pfCurrencyInput" maxlength="20" value="${esc(state.profile.currency||'сомони')}"></div><div class="sub">Email меняется только в аккаунте Supabase: ${esc(cloudAuth()?.user?.email||'—')}</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="pfSave">${svgIcon('i-check')} Сохранить</button></div></div>`);
+  openModal(`<div class="close-row"><div><div class="eyebrow">Профиль</div><h2>Редактировать</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Имя</label><input id="pfNameInput" maxlength="80" value="${esc(state.profile.name||'')}" placeholder="Как к тебе обращаться"></div><div class="field"><label>Валюта</label><input id="pfCurrencyInput" maxlength="20" value="${esc(currencyLabel())}"></div><div class="sub">Email меняется только в аккаунте Supabase: ${esc(cloudAuth()?.user?.email||'—')}</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="pfSave">${svgIcon('i-check')} Сохранить</button></div></div>`);
   $('closeModalBtn').onclick=closeModal;
   $('pfSave').onclick=()=>{state.profile.name=$('pfNameInput').value.trim();state.profile.currency=$('pfCurrencyInput').value.trim()||'сомони';saveState();closeModal();renderAll();toast('Профиль сохранён')};
 }
