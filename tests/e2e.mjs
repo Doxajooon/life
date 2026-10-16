@@ -1466,7 +1466,7 @@ await test("V72 D16: AI видит отчёт дня, привычки-отка�
   await ctx.close();
 });
 
-await test("V72: цитата дня — хадис Пророка ﷺ с источником, каждый день новый (40 дней без повтора), читается в обеих темах", async () => {
+await test("V72: цитата дня — хадис Пророка ﷺ с источником, каждый день новый (год без повтора), читается в обеих темах", async () => {
   const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T09:00:00+05:00") });
   const seen = [];
   for (let d = 0; d < 40; d++) {
@@ -1475,6 +1475,7 @@ await test("V72: цитата дня — хадис Пророка ﷺ с ист
   }
   assert.ok(seen.every(x => x.startsWith("Пророк Мухаммад ﷺ|«") && x.split("|")[2].length > 3), "a hadith with its source every day");
   assert.equal(new Set(seen).size, 40, "40 days — 40 different hadiths");
+  assert.ok(await page.evaluate(() => MOTIVATIONS.length >= 365 && new Set(MOTIVATIONS.map(m => m.text)).size === MOTIVATIONS.length), "a year without a repeat: 365+ different hadiths");
   const c = await page.evaluate(() => { showView("viewToday"); renderToday(); state.settings.theme = "light"; setTheme(); const q = document.querySelector(".jl-quote blockquote"); return getComputedStyle(q).color; });
   assert.notEqual(c, "rgb(58, 47, 18)", "the quote on the dark hero must be light in the light theme too");
   assert.deepEqual(page.errors, []);
