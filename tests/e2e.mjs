@@ -1482,3 +1482,21 @@ await test("Вид: 6 ширин × 2 темы — нет горизонталь
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
+await test("Окна: закрыл окно, пока идёт запрос (AI, облако) — ошибок нет", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  // slow answers, so every request is still running when the window closes
+  await ctx.route(/supabase\.co\/functions/, async r => { await new Promise(res => setTimeout(res, 300)); return cloud.handle(r); });
+  await page.evaluate(() => { window.confirm = () => true; window.prompt = () => null; window.alert = () => {}; window.open = () => null; window.__snap = JSON.stringify(state); });
+  for (const [, open] of WINDOWS) {
+    const n = await page.evaluate(open => { closeModal(); eval(open); return document.querySelectorAll("#modal button").length; }, open);
+    for (let i = 0; i < n; i++) {
+      await page.evaluate(([open, i]) => { closeModal(); state = normalize(JSON.parse(window.__snap)); eval(open); const b = [...document.querySelectorAll("#modal button")][i];
+        if (b && b.offsetParent !== null && !/Удалить|Восстановить|Выйти|Сбросить|Очистить/i.test(b.textContent)) { b.click(); closeModal(); } }, [open, i]);
+    }
+  }
+  await page.waitForTimeout(1200);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
