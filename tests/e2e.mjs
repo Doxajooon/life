@@ -1299,6 +1299,71 @@ await test("Цифры: формат сумм — округление, мину
   await ctx.close();
 });
 
+await test("Данные: битые и старые данные — приложение не падает и ничего не теряет", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    const cases = {
+      nullState: null, string: "x", array: [],
+      nulls: { profits: null, expenses: null, tasks: null, notes: null, habits: null, budgets: null, goals: null, reports: null, debts: null, goal: null, settings: null, profile: null, ai: null, day: null, wallet: null, habitLog: null, achievements: null, debtHistory: null },
+      strings: { income: "9000", debts: { bank: "90000", firms: "abc", monthlyPayment: "4500" }, profits: [{ id: "a", amount: "100", at: "2026-10-01T00:00:00Z" }], expenses: [{ id: "b", amount: "x", at: "nonsense" }, { id: "c", amount: 20, at: "nonsense", dateKey: "2026-10-01" }] },
+      badItems: { expenses: [null, 5, "x", { id: "ok1", amount: 10, at: "2026-10-01T00:00:00Z" }], profits: [null, { id: "ok2", amount: 7, at: "2026-10-01T00:00:00Z" }], tasks: [null, { id: "t", title: "Задача", date: "2026-10-01" }], notes: [null, 7, { id: "n", title: "Заметка", body: null }],
+        habits: [null, { title: null }], budgets: [null, { id: "bb", name: "Еда", tops: "x" }], goals: [null], reports: { "2026-10-01": null, "x": 5 }, habitLog: { h: null }, achievements: [null, { id: "a1", text: "Есть" }], debtHistory: [null, { day: "2026-10-01", total: 5 }] },
+      goalBroken: { goal: { title: "Цель", milestones: [null, "x", { id: "m", title: "Этап" }], finance: { contributions: [null, { id: "c1", amount: "x", at: "2026-10-01T00:00:00Z" }, { id: "c2", amount: 300, at: "2026-10-01T00:00:00Z" }], targetAmount: "abc" } } },
+      unknown: { foo: 1, profits: [{ id: "u", amount: 50, at: "2026-10-01T00:00:00Z", extra: "keep" }] },
+      schema58: { version: 58, profits: [{ id: "o1", amount: 100, source: "Зарплата", at: "2026-09-01T00:00:00Z" }], expenses: [{ amount: 40, category: "Еда", at: "2026-09-02T00:00:00Z" }] },
+    };
+    const out = {};
+    for (const [k, v] of Object.entries(cases)) {
+      try {
+        const n = normalize(v == null || typeof v !== "object" ? v : JSON.parse(JSON.stringify(v)));
+        state = n; renderAll();
+        for (const id of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"]) showView(id);
+        for (const tab of ["tx", "cal"]) { showView("viewMoney"); document.querySelector(`[data-money-tab="${tab}"]`).click(); }
+        openLifeAnalysis(); closeModal(); openCalendar(); closeModal(); openDebtHistory("all"); closeModal(); lifeFacts();
+        out[k] = { ok: true, n: JSON.parse(JSON.stringify(n)) };
+      } catch (e) { out[k] = { ok: false, err: e.message + " " + (e.stack || "").split("\n")[1] }; }
+    }
+    return out;
+  });
+  for (const [k, v] of Object.entries(r)) assert.ok(v.ok, k + ": " + v.err);
+  const ids = (n, list) => (n[list] || []).map(x => x.id);
+  assert.equal(r.strings.n.income, 9000); assert.equal(r.strings.n.profits[0].amount, 100);
+  assert.deepEqual(ids(r.strings.n, "expenses"), ["b", "c"], "records with a broken date are kept");
+  assert.ok(ids(r.badItems.n, "expenses").includes("ok1") && ids(r.badItems.n, "profits").includes("ok2") && ids(r.badItems.n, "tasks").includes("t") && ids(r.badItems.n, "notes").includes("n") && ids(r.badItems.n, "achievements").includes("a1"), "valid records next to broken ones are kept");
+  assert.ok(r.badItems.n.expenses.every(x => x && typeof x === "object"), "no null inside lists");
+  assert.deepEqual(r.goalBroken.n.goal.finance.contributions.map(x => x.id), ["c1", "c2"]);
+  assert.ok(r.goalBroken.n.goal.milestones.some(m => m.title === "Этап"));
+  assert.equal(r.unknown.n.foo, 1); assert.equal(r.unknown.n.profits[0].extra, "keep");
+  assert.equal(r.schema58.n.profits[0].amount, 100); assert.equal(r.schema58.n.expenses[0].amount, 40);
+  // a record without id gets the same id on every device (so two devices never duplicate it)
+  const again = await page.evaluate(() => normalize({ expenses: [{ amount: 40, category: "Еда", at: "2026-09-02T00:00:00Z" }] }).expenses[0].id);
+  assert.ok(r.schema58.n.expenses[0].id && r.schema58.n.expenses[0].id === again, "stable id for old records: " + r.schema58.n.expenses[0].id + " vs " + again);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Синхронизация: старые записи без id + офлайн-правки на двух устройствах — ничего не теряется и не двоится", async () => {
+  const cloud = makeCloud();
+  const legacy = { version: 58, expenses: [{ amount: 40, category: "Еда", at: "2026-09-02T05:00:00Z" }, { amount: 60, category: "Такси", at: "2026-09-03T05:00:00Z" }], notes: [{ title: "Старая", body: "x", at: "2026-09-01T05:00:00Z" }] };
+  cloud.row = { user_id: UID, state: legacy, schema_version: 58, updated_at: cloud.nextStamp() };
+  const A = await device(cloud), B = await device(cloud);
+  await sync(A.page); await sync(B.page);
+  cloud.down = true;
+  await A.page.evaluate(() => { state.expenses.push({ id: "fromA", amount: 11, category: "Еда", at: new Date().toISOString() }); state.notes[0].body = "правка A"; saveState(); });
+  await B.page.evaluate(() => { state.expenses.push({ id: "fromB", amount: 22, category: "Еда", at: new Date().toISOString() }); saveState(); });
+  await A.page.evaluate(() => cloudAutoSync().catch(() => {})); await B.page.evaluate(() => cloudAutoSync().catch(() => {}));
+  cloud.down = false;
+  await sync(A.page); await sync(B.page); await sync(A.page);
+  const cl = cloud.row.state, a = await A.page.evaluate(() => state), b = await B.page.evaluate(() => state);
+  for (const [who, st] of [["cloud", cl], ["A", a], ["B", b]]) {
+    const am = st.expenses.map(x => x.amount).sort((x, y) => x - y);
+    assert.deepEqual(am, [11, 22, 40, 60], who + " expenses: " + JSON.stringify(st.expenses.map(x => [x.id, x.amount])));
+    assert.equal(st.notes.length, 1, who + " notes duplicated: " + st.notes.length); assert.equal(st.notes[0].body, "правка A", who);
+  }
+  assert.deepEqual(A.page.errors, []); assert.deepEqual(B.page.errors, []);
+  await A.ctx.close(); await B.ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

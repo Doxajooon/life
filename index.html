@@ -2540,7 +2540,7 @@ async function cloudLogout(){
 function getDeviceId(){try{let x=localStorage.getItem('LIFE_CONTROL_DEVICE_ID');if(!x){x=uid();localStorage.setItem('LIFE_CONTROL_DEVICE_ID',x)}return x}catch(e){return uid()}}
 
 const $=id=>document.getElementById(id), $$=sel=>Array.from(document.querySelectorAll(sel));
-const clone=x=>JSON.parse(JSON.stringify(x));
+const clone=x=>x===undefined?undefined:JSON.parse(JSON.stringify(x));
 function uid(){try{return crypto.randomUUID()}catch(e){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)}}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function clamp(n,a,b){return Math.max(a,Math.min(b,n))}
@@ -2618,7 +2618,15 @@ function syncMainGoalMirror(s=state){
   const f=s.goal.finance||{};
   m.title=String(s.goal.title||'Главная цель');m.description=String(s.goal.why||'');m.targetAmount=Math.max(0,Number(f.targetAmount)||0);m.targetDate=f.targetDate||'';m.completedAt=f.completedAt||'';m.manualSaved=0;m.contributions=[];delete m.goalData;
 }
+// Old or broken lists: drop holes (null, numbers, strings) and give a record without an id the SAME id on every
+// device (a hash of its content), so the 3-way merge can match it instead of copying the whole list over the other device.
+function stableId(prefix,x,seen){const t=JSON.stringify(x);let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;const k=prefix+(h>>>0).toString(36),n=seen[k]=(seen[k]||0)+1;return n>1?k+'-'+n:k}
+function cleanRecords(arr,prefix){const seen={};return (Array.isArray(arr)?arr:[]).filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).map(x=>x.id!=null&&x.id!==''?x:{...x,id:stableId(prefix,x,seen)})}
 function normalize(s){
+  if(!s||typeof s!=='object'||Array.isArray(s))s={};
+  for(const k of ['profits','expenses','tasks','notes','notesTrash','achievements','goals','budgets','habits'])if(k in s)s[k]=cleanRecords(s[k],k.slice(0,2)+'_');
+  if(s.goal&&typeof s.goal==='object'){if('milestones' in s.goal)s.goal.milestones=cleanRecords(s.goal.milestones,'ms_');if(s.goal.finance&&typeof s.goal.finance==='object'&&'contributions' in s.goal.finance)s.goal.finance.contributions=cleanRecords(s.goal.finance.contributions,'gc_')}
+  for(const k of ['debtHistory','notificationsLog'])if(Array.isArray(s[k]))s[k]=s[k].filter(x=>x&&typeof x==='object');
   const fromVersion=Number(s?.version)||0;
   if(fromVersion<57&&s&&typeof s==='object'&&(s.goal||Array.isArray(s.profits)))backupPreV57(s,'local');
   if(s&&Array.isArray(s.runtimeErrors)){const lim=Date.now()-14*DAY_MS;s.runtimeErrors=s.runtimeErrors.filter(e=>Date.parse(e?.at)>lim).slice(0,20)} // old errors of fixed versions are not today's problems
@@ -2645,6 +2653,7 @@ function normalize(s){
   }
   if(!Array.isArray(s.habits))s.habits=[];s.habits=s.habits.filter(h=>h&&typeof h==='object'&&h.title).map(h=>({...h,id:String(h.id||uid()),title:String(h.title).slice(0,60),kind:['daily','weekdays','weekly'].includes(h.kind)?h.kind:'daily',target:Math.max(1,Math.min(7,Number(h.target)||7))}));if(!s.habitLog||typeof s.habitLog!=='object'||Array.isArray(s.habitLog))s.habitLog={};if(!Array.isArray(s.budgets))s.budgets=[];s.budgets=s.budgets.map(b=>({id:b.id||uid(),name:String(b.name||'Без названия'),planned:Math.max(0,Number(b.planned)||0),emoji:typeof b.emoji==='string'?b.emoji.slice(0,8):'',tops:(Array.isArray(b.tops)?b.tops:[]).filter(x=>x&&Number(x.amount)>0).map(x=>({id:String(x.id||uid()),month:String(x.month||''),amount:Number(x.amount),at:x.at||''}))})).filter(b=>b.name);if(!Array.isArray(s.profits))s.profits=[];s.profits=s.profits.map(x=>{const y={...x};const g=normalizeProfitSource(y.sourceGroup||y.source);y.amount=Math.max(0,Number(y.amount)||0);y.source=g;y.sourceGroup=g;return y});if(!Array.isArray(s.expenses))s.expenses=[];s.expenses=s.expenses.map(x=>{const y={...x};y.amount=Math.max(0,Number(y.amount)||0);y.category=String(y.category||'Другое');y.categoryIcon=y.categoryIcon||'🧾';return y});if(!Array.isArray(s.notes))s.notes=[];s.notes=s.notes.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',category:NOTE_CATS[n.category]?n.category:'personal'}));if(!Array.isArray(s.notesTrash))s.notesTrash=[];s.notesTrash=s.notesTrash.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',deletedAt:n.deletedAt||new Date().toISOString()}));if(!Array.isArray(s.achievements))s.achievements=[];if(!Array.isArray(s.notificationsLog))s.notificationsLog=[];
   if(!s.reports||typeof s.reports!=='object')s.reports={};if(!s.dailyMotivations||typeof s.dailyMotivations!=='object')s.dailyMotivations={};if(!s._sent||typeof s._sent!=='object')s._sent={};if(!s.daily||typeof s.daily!=='object')s.daily={};if(!['normal','heavy','rest'].includes(s.dayMode))s.dayMode='normal';if(!Array.isArray(s.debtHistory))s.debtHistory=[];s.drafts=s.drafts&&typeof s.drafts==='object'?s.drafts:clone(DEFAULT.drafts);for(const k of Object.keys(DEFAULT.drafts))if(!(k in s.drafts))s.drafts[k]=clone(DEFAULT.drafts[k]);if(!(Number(s.debtBaseline)>0)){const base=Number(s.debts?.bank||0)+Number(s.debts?.firms||0);if(base>0)s.debtBaseline=base;}
+  s.income=Math.max(0,Number(s.income)||0);s.debts=s.debts&&typeof s.debts==='object'?s.debts:{};for(const k of ['bank','firms','monthlyPayment'])s.debts[k]=Math.max(0,Number(s.debts[k])||0);
   s.day=s.day&&Array.isArray(s.day.steps)?s.day:clone(DEFAULT.day);s.day.steps=s.day.steps.slice(0,3);while(s.day.steps.length<3)s.day.steps.push(clone(DEFAULT.day.steps[s.day.steps.length]));
   for(let i=0;i<s.day.steps.length;i++){const d=DEFAULT.day.steps[i];s.day.steps[i]=merge(s.day.steps[i],d);if(!Array.isArray(s.day.steps[i].details))s.day.steps[i].details=[]}
   s.goal=s.goal&&Array.isArray(s.goal.milestones)?s.goal:clone(DEFAULT.goal);s.goal.finance=merge(s.goal.finance||{},DEFAULT.goal.finance);s.goal.finance.targetAmount=Math.max(0,Number(s.goal.finance.targetAmount)||0);s.goal.finance.savedAmount=Math.max(0,Number(s.goal.finance.savedAmount)||0);s.goal.finance.manualSavedAmount=Math.max(0,Number(s.goal.finance.manualSavedAmount)||0);if(!('manualSavedAmount' in s.goal.finance))s.goal.finance.manualSavedAmount=s.goal.finance.savedAmount;s.goal.finance.targetDate=s.goal.finance.targetDate||'';s.goal.finance.startedAt=s.goal.finance.startedAt||'';s.goal.finance.completedAt=s.goal.finance.completedAt||'';s.goal.finance.contributions=Array.isArray(s.goal.finance.contributions)?s.goal.finance.contributions:[];if(s.goal.finance.contributions.length===0&&Number(s.goal.finance.manualSavedAmount||0)===0&&Number(s.goal.finance.savedAmount||0)>0)s.goal.finance.manualSavedAmount=Number(s.goal.finance.savedAmount||0);s.goal.milestones=s.goal.milestones.map((m,i)=>merge(m,DEFAULT.goal.milestones[i]||{id:uid(),title:`Этап ${i+1}`,done:false}));s.goal.milestones.forEach(m=>{if(m.autoOff!==true)delete m.autoOff});
@@ -2670,7 +2679,7 @@ function load(){
 let state=load(),toastTimer=null,lastDay='',autosaveTimer=null; let moneyViewDate=keyDay();
 
 
-function sumMoneyRange(arr,start,end){return (arr||[]).reduce((sum,x)=>{const k=x.dateKey||keyDay(validDate(x.at));return k>=start&&k<=end?sum+(Number(x.amount)||0):sum},0)}
+function sumMoneyRange(arr,start,end){return (arr||[]).reduce((sum,x)=>{const k=txDay(x);return k>=start&&k<=end?sum+(Number(x.amount)||0):sum},0)}
 
 
 
@@ -3655,7 +3664,7 @@ function liveMoneyForm(kind){
   stack.addEventListener('input',upd);stack.addEventListener('change',upd);stack.addEventListener('click',e=>{if(e.target.closest('[data-expense-quick]'))setTimeout(upd,0)});upd();
 }
 function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
-  const isProfit=kind==='profit',dk=isProfit?'moneyProfit':'moneyExpense',draft=editItem?{amount:editItem.amount,type:isProfit?(editItem.sourceGroup||editItem.source):editItem.category,note:editItem.note||'',customCategory:editItem.customCategory||'',debtPay:!!editItem.debtPayment,debtType:editItem.debtPayment||'bank',dateKey:keyDay(validDate(editItem.at))}:state.drafts?.[dk]||{};const editing=!!editItem;
+  const isProfit=kind==='profit',dk=isProfit?'moneyProfit':'moneyExpense',draft=editItem?{amount:editItem.amount,type:isProfit?(editItem.sourceGroup||editItem.source):editItem.category,note:editItem.note||'',customCategory:editItem.customCategory||'',debtPay:!!editItem.debtPayment,debtType:editItem.debtPayment||'bank',dateKey:txDay(editItem)||keyDay()}:state.drafts?.[dk]||{};const editing=!!editItem;
   const sourceValue=normalizeProfitSource(draft.type||draft.source||(isProfit?presetCategory:'Зарплата'));
   const savedCategory=draft.type||presetCategory||'Еда';
   const CATS=expenseCats(),category=CATS.some(x=>x.value===savedCategory)?savedCategory:'Другое';
