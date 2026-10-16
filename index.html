@@ -2051,6 +2051,27 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .jl-goalhero .goal-why{-webkit-line-clamp:unset!important;display:block!important;overflow:visible!important}
 .jl-habit .jl-habit-name b{-webkit-line-clamp:unset!important;display:block!important}
 .v-goal-name,.v-tx-title,.v-tx-meta,.jl-habit-name b,.v-row-main small,.jl-gh-tiles em,.jl-gh-tiles b,.jl-quote figcaption,.jl-lg-bar span,.distance-kpi .value,.ring-state,.ring-label,.v-note-title,.legend-name,.calendar-earned,.jl-receipt-main small,.v-kpi b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
+/* V72 D14: one style for every icon in «Цели» and «Деньги» — a gradient plaque in the category colour, a soft pop on appear and on press */
+@keyframes jlIconIn{from{opacity:0;transform:scale(.6) rotate(-8deg)}to{opacity:1;transform:none}}
+.v-goal-ico,.jl-bank-top>.jl-emo,.jl-src-tiles button i,.jl-stickers button i,.v-tx-ico{animation:jlIconIn .5s cubic-bezier(.34,1.56,.64,1) backwards}
+.v-goal-item:active .v-goal-ico,.jl-bank:active .jl-bank-top>.jl-emo,.v-tx:active .v-tx-ico{transform:scale(.88)}
+.jl-bank-top>.jl-emo{--tc:var(--gold);width:2.75rem;height:2.75rem;flex:0 0 2.75rem;border-radius:15px;display:grid!important;place-items:center;font-size:1.35rem;margin:0!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tc) 34%,var(--soft)),color-mix(in srgb,var(--tc) 10%,var(--soft)));box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 16px -8px color-mix(in srgb,var(--tc) 60%,transparent);transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+.jl-bank.warn .jl-bank-top>.jl-emo{--tc:var(--orange)}.jl-bank.over .jl-bank-top>.jl-emo{--tc:var(--red)}
+.jl-src-tiles button i,.jl-stickers button i{width:2.9rem;height:2.9rem;border-radius:15px;display:grid;place-items:center;font-size:1.45rem!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tc,var(--blue)) 34%,var(--soft)),color-mix(in srgb,var(--tc,var(--blue)) 10%,var(--soft)));box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 16px -8px color-mix(in srgb,var(--tc,var(--blue)) 60%,transparent)}
+.jl-src-tiles button:nth-child(4n+1){--tc:var(--green)}.jl-src-tiles button:nth-child(4n+2){--tc:var(--blue)}.jl-src-tiles button:nth-child(4n+3){--tc:var(--purple)}.jl-src-tiles button:nth-child(4n+4){--tc:var(--gold)}
+.jl-stickers button:nth-child(6n+1){--tc:var(--gold)}.jl-stickers button:nth-child(6n+2){--tc:var(--green)}.jl-stickers button:nth-child(6n+3){--tc:var(--blue)}.jl-stickers button:nth-child(6n+4){--tc:var(--purple)}.jl-stickers button:nth-child(6n+5){--tc:var(--orange)}.jl-stickers button:nth-child(6n+6){--tc:var(--cyan)}
+.jl-src-tiles button.active i,.jl-stickers button.active i{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 20px -6px color-mix(in srgb,var(--tc,var(--blue)) 80%,transparent)}
+.ge-icons button{background:linear-gradient(145deg,color-mix(in srgb,var(--gc,var(--blue)) 18%,var(--soft)),var(--soft))!important;animation:jlIconIn .45s cubic-bezier(.34,1.56,.64,1) backwards}
+.ge-icons button.active{background:linear-gradient(145deg,color-mix(in srgb,var(--gc,var(--blue)) 75%,#fff),var(--gc,var(--blue)))!important;color:#fff!important}
+.v-goal-ico .ui-icon,.ge-icons button .ui-icon{filter:drop-shadow(0 1px 1px rgba(0,0,0,.18))}
+/* filters of the transactions never get cut at 360 px: they wrap */
+#txFilters{flex-wrap:wrap;overflow:visible}
+/* numbers in the money tiles wrap only between the number and the currency */
+.v-kpi b{overflow-wrap:normal!important;word-break:normal!important}
+@media (prefers-reduced-motion:reduce){.v-goal-ico,.jl-bank-top>.jl-emo,.jl-src-tiles button i,.jl-stickers button i,.v-tx-ico,.ge-icons button{animation:none!important;transition:none!important}}
+.v-kpi b{display:flex!important;flex-wrap:wrap;align-items:baseline;column-gap:.25rem}
+.jl-gh-tiles b{font-size:clamp(.88rem,4vw,1.05rem)!important;overflow-wrap:normal!important}
+.jl-gh-tiles em{overflow-wrap:normal!important}
 </style>
 
 

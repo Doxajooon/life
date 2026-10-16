@@ -1383,6 +1383,24 @@ await test("V72 D13: праздник уходит быстро, тосты не
   await ctx.close();
 });
 
+await test("V72 D14: иконки целей, банков и источников — градиентная плашка с анимацией; фильтры транзакций не обрезаны на 360 px", async () => {
+  const { ctx, page } = await device(makeCloud(), { viewport: { width: 360, height: 760 } });
+  const r = await page.evaluate(async () => { const now = new Date().toISOString();
+    state.budgets = [{ id: "b1", name: "Еда", planned: 1500, tops: [], emoji: "🍲" }]; state.goals.push({ id: "g2", title: "Машина", targetAmount: 90000, icon: "car", color: "green", createdAt: now, contributions: [] }); saveState(); renderAll();
+    const look = el => { const cs = getComputedStyle(el); return { grad: cs.backgroundImage.includes("gradient"), anim: cs.animationName }; }, out = {};
+    showView("viewGoal"); out.goal = look(document.querySelector(".v-goal-ico"));
+    showView("viewMoney"); document.querySelector('[data-money-tab="overview"]').click(); out.bank = look(document.querySelector(".jl-bank-top>.jl-emo"));
+    document.querySelector('[data-money-tab="tx"]').click(); const W = document.documentElement.clientWidth;
+    out.filters = [...document.querySelectorAll("#txFilters button")].filter(b => { const x = b.getBoundingClientRect(); return x.left < 0 || x.right > W; }).map(b => b.textContent);
+    openMoneyForm("profit"); out.src = look(document.querySelector(".jl-src-tiles button i")); closeModal();
+    openBudget(); out.sticker = look(document.querySelector(".jl-stickers button:not(.active) i")); closeModal();
+    return out; });
+  for (const k of ["goal", "bank", "src", "sticker"]) { assert.ok(r[k].grad, k + " icon has a gradient plaque"); assert.ok(/jlIconIn|jlStickerIn/.test(r[k].anim), k + " icon pops in: " + r[k].anim); }
+  assert.deepEqual(r.filters, [], "filters cut at 360 px");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 // Every window, every button: each one does something visible and nothing throws.
 const WINDOWS = [
   ["Быстрое добавление", "openQuickAdd()"], ["Расход", "openMoneyForm('expense')"], ["Доход", "openMoneyForm('profit')"], ["Изменить расход", "openMoneyEdit('expense','swE')"],
