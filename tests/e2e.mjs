@@ -1132,6 +1132,96 @@ await test("Окна: «назад» (Android/браузер) и Esc закры�
   await ctx.close();
 });
 
+// Every window, every button: each one does something visible and nothing throws.
+const WINDOWS = [
+  ["Быстрое добавление", "openQuickAdd()"], ["Расход", "openMoneyForm('expense')"], ["Доход", "openMoneyForm('profit')"], ["Изменить расход", "openMoneyEdit('expense','swE')"],
+  ["Перевод", "openTransferForm()"], ["Тип операции", "openTxTypePicker()"], ["Задача", "openTaskForm()"], ["Привычка", "openHabitEditor()"], ["Новый банк", "openBudget()"], ["Банк", "openBudget('swB')"],
+  ["Пополнить банк", "openBankTopup('swB')"], ["Долг", "openDebtEdit()"], ["История долга", "openDebtHistory('all')"], ["Главная цель", "openGoalEdit()"], ["Сумма цели", "openGoalFinanceEdit()"],
+  ["В цель", "openGoalSaving()"], ["Календарь", "openCalendar()"], ["Настройки", "openSettings()"], ["Безопасность", "openSecurity()"], ["Корзина", "openTrash()"], ["Переезд", "openMoveDevice()"],
+  ["AI-анализ", "openGeminiAnalysis()"], ["Полный разбор", "openLifeAnalysis()"], ["Поиск", "openSearch()"], ["Достижение", "openAchievement()"], ["Резервная копия", "openBackupDialog()"],
+  ["Копии", "openBackups()"], ["Профиль", "openProfileEdit()"], ["Отчёты", "openReportHistory()"], ["День", "openDayProgress()"], ["Касса", "openMetricDetail('cash')"],
+  // the calendar opens on «1 January → today»; start from another period so its quick buttons have something to change
+  ["Календарь, период", "openCalendar(); calendarRangeStart = '2026-03-01'; calendarRangeEnd = '2026-03-05'; renderCalendar(new Date().getFullYear(), new Date().getMonth(), keyDay())"],
+];
+await test("Все окна: каждая кнопка работает, ошибок нет", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "swE", amount: 300, category: "Еда", at: now, dateKey: k }); state.profits.push({ id: "swP", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k });
+    state.budgets = [{ id: "swB", name: "Поездки", planned: 1000, tops: [] }]; state.debts = { bank: 9000, firms: 1000, monthlyPayment: 500 }; ensureDebtHistory();
+    state.tasks.push({ id: "swT", title: "Позвонить", time: "23:00", date: k }); state.habits = [{ id: "swH", title: "Спорт", kind: "daily", target: 7 }];
+    state.goal.finance.targetAmount = 50000; saveState(); renderAll();
+    window.__snap = JSON.stringify(state);
+    window.confirm = () => false; window.prompt = () => null; window.alert = () => {}; window.open = () => null;
+  });
+  const dead = [], errs = [];
+  for (const [name, open] of WINDOWS) {
+    const ok = await page.evaluate(open => { try { closeModal(); state = normalize(JSON.parse(window.__snap)); renderAll(); showView("viewToday"); eval(open); return !!document.getElementById("modalBack").classList.contains("open"); } catch (e) { return "ERR " + e.message; } }, open);
+    if (ok !== true) { errs.push(name + ": does not open " + ok); continue; }
+    const n = await page.evaluate(() => [...document.querySelectorAll("#modal button, #modal [role=button]")].length);
+    for (let i = 0; i < n; i++) {
+      const before = await page.evaluate(([open, i]) => {
+        closeModal(); state = normalize(JSON.parse(window.__snap)); saveState(); renderAll(); showView("viewToday"); eval(open);
+        const b = [...document.querySelectorAll("#modal button, #modal [role=button]")][i];
+        if (!b || b.offsetParent === null || b.disabled) return null;
+        window.__dl = 0; document.querySelectorAll("a[download]").forEach(a => a.addEventListener("click", () => window.__dl++));
+        const snap = { label: (b.getAttribute("aria-label") || b.textContent || b.id || b.className).trim().replace(/\s+/g, " ").slice(0, 40), html: document.getElementById("modal").innerHTML, open: document.getElementById("modalBack").classList.contains("open"), view: currentView, st: JSON.stringify(state), toast: document.getElementById("toast").textContent, cls: b.className, aria: b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded") };
+        window.__before = snap; b.click(); return snap.label;
+      }, [open, i]);
+      if (before === null) continue;
+      await page.waitForTimeout(260);
+      const changed = await page.evaluate(i => { const s = window.__before, b = [...document.querySelectorAll("#modal button, #modal [role=button]")][i];
+        return document.getElementById("modal").innerHTML !== s.html || document.getElementById("modalBack").classList.contains("open") !== s.open || currentView !== s.view || JSON.stringify(state) !== s.st || document.getElementById("toast").textContent !== s.toast || window.__dl > 0 || (b && (b.className !== s.cls || (b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded")) !== s.aria)) || document.activeElement?.closest?.("#modal input, #modal textarea, #modal select"); }, i);
+      // not a bug: the period already is «1 January → today» (the same as tapping an already chosen chip)
+      const already = name === "Календарь" && /^(С 1 января|До сегодня)$/.test(before);
+      if (!changed && !already) dead.push(name + " → «" + before + "»");
+    }
+  }
+  if (process.env.SWEEP_LOG) console.log("   dead buttons:\n   " + dead.join("\n   "));
+  assert.deepEqual(errs, []);
+  assert.deepEqual(page.errors, []);
+  assert.deepEqual(dead, [], "buttons that do nothing: " + dead.join("; "));
+  await ctx.close();
+});
+
+await test("Все экраны: каждая кнопка работает, ошибок нет", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "swE", amount: 300, category: "Еда", at: now, dateKey: k }); state.profits.push({ id: "swP", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k });
+    state.budgets = [{ id: "swB", name: "Поездки", planned: 1000, tops: [] }]; state.debts = { bank: 9000, firms: 1000, monthlyPayment: 500 }; ensureDebtHistory();
+    state.tasks.push({ id: "swT", title: "Позвонить", time: "23:00", date: k }); state.habits = [{ id: "swH", title: "Спорт", kind: "daily", target: 7 }];
+    state.notes.push({ id: "swN", title: "Идея", body: "текст", at: now, category: "work" }); state.goal.finance.targetAmount = 50000; saveState(); renderAll();
+    window.__snap = JSON.stringify(state);
+    window.confirm = () => false; window.prompt = () => null; window.alert = () => {}; window.open = () => null;
+  });
+  const VIEWS = [["viewToday", ""], ["viewGoal", ""], ["viewMoney", "overview"], ["viewMoney", "tx"], ["viewMoney", "cal"], ["viewNotes", ""], ["viewSettings", ""], ["viewDisplay", ""], ["viewNotifications", ""], ["viewProfile", ""]];
+  const dead = [];
+  for (const [view, tab] of VIEWS) {
+    const prep = `closeModal(); state = normalize(JSON.parse(window.__snap)); saveState(); renderAll(); showView("${view}"); ${tab ? `document.querySelector('[data-money-tab="${tab}"]').click();` : ""}`;
+    const n = await page.evaluate(prep => { eval(prep); return document.querySelectorAll(`#${currentView} button, #${currentView} [role=button]`).length; }, prep);
+    for (let i = 0; i < n; i++) {
+      const label = await page.evaluate(([prep, i]) => {
+        eval(prep);
+        const b = [...document.querySelectorAll(`#${currentView} button, #${currentView} [role=button]`)][i];
+        if (!b || b.offsetParent === null || b.disabled) return null;
+        window.__before = { html: document.getElementById(currentView).innerHTML, open: document.getElementById("modalBack").classList.contains("open"), view: currentView, st: JSON.stringify(state), toast: document.getElementById("toast").textContent, cls: b.className, aria: b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded") + b.getAttribute("aria-selected") };
+        window.__btn = b; b.click(); return (b.getAttribute("aria-label") || b.textContent || b.id || b.className).trim().replace(/\s+/g, " ").slice(0, 40);
+      }, [prep, i]);
+      if (label === null) continue;
+      await page.waitForTimeout(260);
+      const changed = await page.evaluate(() => { const s = window.__before, b = window.__btn, v = document.getElementById(s.view);
+        return v.innerHTML !== s.html || document.getElementById("modalBack").classList.contains("open") !== s.open || currentView !== s.view || JSON.stringify(state) !== s.st || document.getElementById("toast").textContent !== s.toast || (b.isConnected && (b.className !== s.cls || (b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded") + b.getAttribute("aria-selected")) !== s.aria)) || !!document.activeElement?.matches?.("input, textarea, select"); });
+      const active = await page.evaluate(() => /\bactive\b/.test(window.__before.cls) || /true/.test(window.__before.aria)); // already chosen tab or chip
+      if (!changed && !active) dead.push(view + (tab ? "/" + tab : "") + " → «" + label + "»");
+    }
+  }
+  if (process.env.SWEEP_LOG) console.log("   dead buttons:\n   " + dead.join("\n   "));
+  assert.deepEqual(page.errors, []);
+  assert.deepEqual(dead, [], "buttons that do nothing: " + dead.join("; "));
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
