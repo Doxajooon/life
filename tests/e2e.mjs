@@ -1138,6 +1138,31 @@ await test("Окна: «назад» (Android/браузер) и Esc закры�
   await ctx.close();
 });
 
+await test("Назад: экран возвращается на то же место прокрутки, а не наверх", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const y = () => page.evaluate(() => Math.round(scrollY));
+  await page.waitForTimeout(200); await page.evaluate(() => scrollTo(0, 1200)); await page.waitForTimeout(150);
+  const at = await y(); assert.ok(at > 600, "the page must be long enough to scroll: " + at);
+  // a sub-screen opens at the top; «back» (Android gesture / browser) returns to the same place
+  await page.evaluate(() => showView("viewSettings")); await page.waitForTimeout(200);
+  assert.equal(await y(), 0, "a sub-screen opens at the top");
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => currentView), "viewToday");
+  assert.ok(Math.abs(await y() - at) <= 2, `back must return to ${at}, got ${await y()}`);
+  // bottom tabs keep their own place too; tapping the active tab again scrolls up
+  await page.evaluate(() => showView("viewMoney")); await page.waitForTimeout(200);
+  await page.evaluate(() => scrollTo(0, 400)); await page.waitForTimeout(100);
+  const money = await y();
+  await page.evaluate(() => showView("viewToday")); await page.waitForTimeout(250);
+  assert.ok(Math.abs(await y() - at) <= 2, "Today keeps its place");
+  await page.evaluate(() => showView("viewMoney")); await page.waitForTimeout(250);
+  assert.ok(Math.abs(await y() - money) <= 2, "Money keeps its place");
+  await page.evaluate(() => showView("viewMoney")); await page.waitForTimeout(250);
+  assert.equal(await y(), 0, "the same tab again scrolls to the top");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 // Every window, every button: each one does something visible and nothing throws.
 const WINDOWS = [
   ["Быстрое добавление", "openQuickAdd()"], ["Расход", "openMoneyForm('expense')"], ["Доход", "openMoneyForm('profit')"], ["Изменить расход", "openMoneyEdit('expense','swE')"],
