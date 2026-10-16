@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "68.0.0");
-assert.match(gradle, /versionCode 680\b/); assert.match(gradle, /versionName '68\.0'/);
-assert.match(csproj, /<Version>68\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V68'), "app version must be V68 (state schema 58)");
-assert.ok(sw.includes("jamal-life-v68-0"), "service worker cache must be V68");
+assert.equal(pkg.version, "69.0.0");
+assert.match(gradle, /versionCode 690\b/); assert.match(gradle, /versionName '69\.0'/);
+assert.match(csproj, /<Version>69\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V69') && html.includes('<span>V69</span>') && html.includes('v-row-val">69.0</span>'), "app version must be V69 everywhere on screen (state schema 58)");
+assert.ok(sw.includes("jamal-life-v69-0"), "service worker cache must be V69");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -84,4 +84,18 @@ assert.ok(html.includes('id="setFont"') && html.includes("function applyFont"), 
 assert.ok(html.includes("rememberBaseStamp(state[CLOUD_BASE_KEY])") && html.includes("const st=baseStamp()"), "the cloud base stamp survives a quick restart (an edit made during the first upload is merged, not lost)");
 assert.ok(html.includes("function openDebtHistory") && html.includes("function liveMoneyForm") && html.includes("function autoMilestones") && html.includes("function maybeAutoGoalAI") && html.includes("function aiTextHtml"), "V68 features");
 assert.ok(fn.includes("function lifeContext") && fn.includes("ПЛЮСЫ") && fn.includes("КУДА Я ИДУ"), "life analysis: pluses, minuses and direction");
-console.log("JAMAL_LIFE_V68_STATIC_QA_OK");
+// V69: keyboard for the debt chart and the quote; AI answer parser tolerant of markdown; debt payments outside «Расход»; per-stage auto-close
+assert.ok(/<figure class="jl-quote" role="button" tabindex="0" aria-expanded="false"/.test(html) && html.includes("function toggleQuote") && /keydown[\s\S]{0,200}#debtChart \[data-debt-open\]/.test(html), "debt bars and the quote open from the keyboard");
+assert.ok(!/id="debtChart" role="img"/.test(html), "interactive bars must not sit inside role=img");
+assert.ok(/const md=\/\^#\{1,6\}/.test(html) && html.includes("bold=/^"), "AI parser must understand markdown and bold headings");
+assert.ok(html.includes("const spendOnly=") && html.includes("monthSum(spendOnly(state.expenses))") && ["tmDebtPay", "mvDebtPay", "mcDebtPay"].every(id => html.includes(`id="${id}"`)), "debt payments are shown apart from «Расход»");
+assert.ok(html.includes("(debt?debtPaysOnly:spendOnly)(state.expenses)") && html.includes("net:income-expense-debt") && html.includes("const out=spendOnly(state.expenses).filter(x=>inRange(x)") && html.includes("monthSum(spendOnly(state.expenses)));setText('dpLeft'") && ["calDayDebtPay", "calRangeDebtPay", "wkDebtPay"].every(id => html.includes(id)), "day, period, week and the debt-plan hint keep debt payments out of «Расход»");
+assert.ok(fn.includes("debtPaid: dp.reduce") && fn.includes("debtPaid:dp30") && fn.includes("!x?.debtPayment"), "AI context: debt payments are not spending");
+assert.ok(html.includes("if(m.done||m.autoOff)return") && html.includes("data-ms-auto") && html.includes("if(m.autoOff!==true)delete m.autoOff"), "auto-closing goal stages can be switched off");
+// no CSS for classes the app never uses
+{ const css = html.slice(html.indexOf("<style"), html.indexOf("</style>")), rest = html.replace(css, "");
+  const esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const classes = [...new Set([...css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{[^{}]*\}/g, "{}").matchAll(/\.([A-Za-z_][\w-]*)/g)].map(m => m[1]))].filter(c => !/^\d/.test(c));
+  const unused = classes.filter(c => !new RegExp("(?<![\\w-])" + esc(c) + "(?![\\w-])").test(rest) && !new RegExp(esc(c.replace(/-[^-]+$/, "-")) + "(?:'|\"|`|\\$\\{)").test(rest));
+  assert.deepEqual(unused, [], "CSS for classes nobody uses: " + unused.join(", ")); }
+console.log("JAMAL_LIFE_V69_STATIC_QA_OK");

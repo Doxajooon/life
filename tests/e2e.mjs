@@ -60,6 +60,7 @@ function makeCloud() {
     if (url.pathname.startsWith("/functions/")) {
       if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
       const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
+      if (cloud.aiFail) return send(429, { error: "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей." });
       if (b.mode === "week") return send(200, { ok: true, model: "mock", output_text: "СИЛЬНАЯ СТОРОНА — закрыл 5 дней.\nСЛАБОЕ МЕСТО — **телефон** <img src=x onerror=window.__xss=1>\nШАГ НА НЕДЕЛЮ — после 21:00 телефон на зарядку.", sources: [] });
       return send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] });
     }
@@ -417,11 +418,15 @@ await test("Нагрузка: 3000 операций и 500 заметок", asyn
     const now = Date.now();
     for (let i = 0; i < 3000; i++) state.expenses.push({ id: "e" + i, amount: (i % 97) + 1, category: "Еда", at: new Date(now - i * 3600e3).toISOString() });
     for (let i = 0; i < 500; i++) state.notes.push({ id: "n" + i, title: "Заметка " + i, body: "текст ".repeat(50), at: new Date(now - i * 864e5).toISOString(), category: "personal" });
-    const a = performance.now(); renderAll(); const b = performance.now(); saveState(); const c = performance.now();
-    return { render: b - a, save: c - b };
+    // best of three: one garbage-collection pause or a cold JIT must not fail the test, a real slowdown still does
+    const render = [], save = [];
+    for (let i = 0; i < 3; i++) { const a = performance.now(); renderAll(); const b = performance.now(); saveState(); const c = performance.now(); render.push(b - a); save.push(c - b); }
+    return { render: Math.min(...render), save: Math.min(...save), all: render.map(x => Math.round(x)) + " / " + save.map(x => Math.round(x)) };
   });
-  assert.ok(t.render < 600, "render " + t.render.toFixed(0) + " ms");
-  assert.ok(t.save < 200, "save " + t.save.toFixed(0) + " ms");
+  const slow = Math.max(1, Number(process.env.CPU_SLOW) || 1) ** 0.5; // a 4× slower CPU gets 2× the budget
+  if (process.env.PERF_LOG) console.log("   load render/save ms:", t.all);
+  assert.ok(t.render < 600 * slow, "render " + t.render.toFixed(0) + " ms (" + t.all + ")");
+  assert.ok(t.save < 200 * slow, "save " + t.save.toFixed(0) + " ms (" + t.all + ")");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -599,6 +604,7 @@ await test("Новый телефон: после входа приходит п
     state.achievements.push({ id: "a1", text: "Закрыл кредитку", at: now });
     state.day.steps[1].title = "Семья и спорт"; state.settings.every2h = false; state.settings.preMinutes = 15;
     state.ai.weekly = { [weekKey()]: { at: now, text: "СИЛЬНАЯ СТОРОНА — x" } };
+    autoCompleteExpiredStages(); // the rhythm closes past stages by time of day; do it here so the result does not depend on the hour
     ensureDebtHistory(); saveState();
   });
   await sync(A.page);
@@ -858,6 +864,195 @@ await test("AI-разбор жизни: шлёт цифры приложения
     assert.ok(body.facts && typeof body.facts === "object" && "cats" in body.facts, "life analysis must send the app's own numbers");
     assert.equal(await page.evaluate(() => window.__xss), undefined);
   }
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("AI: разбор понимает markdown и нумерацию; при лимите 429 — понятная причина и разбор без AI", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  const parsed = await page.evaluate(() => {
+    const heads = t => { const d = document.createElement("div"); d.innerHTML = aiTextHtml(t); return [...d.querySelectorAll(".jl-ai-sec")].map(x => [x.querySelector("b")?.textContent || "", x.querySelector("div")?.textContent || ""]); };
+    return {
+      caps: heads("ПЛЮСЫ — доход 9 000\nМИНУСЫ — кафе 1 200"),
+      md: heads("## Плюсы\n* доход 9 000\n### Минусы:\n- кафе 1 200"),
+      bold: heads("**Плюсы:** доход 9 000\n**МИНУСЫ** — кафе 1 200"),
+      num: heads("1. ПЛЮСЫ\nдоход 9 000\n2) МИНУСЫ:\nкафе 1 200"),
+    };
+  });
+  for (const [k, v] of Object.entries(parsed)) {
+    assert.equal(v.length, 2, k + " " + JSON.stringify(v));
+    assert.match(v[0][0], /Плюсы$/, k); assert.match(v[1][0], /Минусы$/, k);
+    assert.match(v[0][1], /доход 9 000/, k); assert.match(v[1][1], /кафе 1 200/, k);
+    assert.ok(!/[*#]/.test(JSON.stringify(v)), k + " keeps markdown: " + JSON.stringify(v));
+  }
+  cloud.aiFail = true;
+  await page.evaluate(() => openGeminiAnalysis());
+  await page.click("#aiRunBtn");
+  await page.waitForSelector("#aiResult .jl-ai-fail", { timeout: 8000 });
+  assert.match(await page.textContent("#aiResult"), /лимит Gemini/);
+  await page.click("#localFallbackBtn");
+  await page.waitForTimeout(400);
+  assert.ok(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open") && document.getElementById("modal").textContent.length > 50), "local analysis did not open");
+  await page.evaluate(() => { closeModal(); showView("viewToday"); renderWeek(); });
+  if (await page.evaluate(() => !!document.getElementById("wkRun"))) {
+    await page.evaluate(() => runWeekReview());
+    const wk = await page.textContent("#wkText");
+    assert.match(wk, /лимит Gemini/); assert.ok(wk.length > 60, "week card must keep the review without AI: " + wk);
+  }
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Клавиатура: столбики долга и цитата открываются Enter/Space; axe без нарушений", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const AXE = fs.readFileSync(path.join(ROOT, "node_modules/axe-core/axe.min.js"), "utf8");
+  // quote on Today
+  await page.evaluate(() => showView("viewToday"));
+  await page.focus(".jl-quote");
+  assert.equal(await page.getAttribute(".jl-quote", "aria-expanded"), "false");
+  await page.keyboard.press("Enter");
+  assert.equal(await page.getAttribute(".jl-quote", "aria-expanded"), "true");
+  await page.keyboard.press(" ");
+  assert.equal(await page.getAttribute(".jl-quote", "aria-expanded"), "false");
+  assert.equal(await page.evaluate(() => document.querySelector(".jl-quote").classList.contains("open")), false);
+  // debt bars on Money
+  await page.evaluate(() => { state.debts = { bank: 9000, firms: 1000, monthlyPayment: 500 }; ensureDebtHistory(); saveState(); showView("viewMoney"); renderAll(); });
+  await page.waitForSelector("#debtChart [data-debt-open]");
+  for (const key of ["Enter", " "]) {
+    await page.focus("#debtChart [data-debt-open]");
+    await page.keyboard.press(key);
+    assert.ok(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), "debt history did not open with " + JSON.stringify(key));
+    await page.evaluate(() => closeModal());
+  }
+  await page.addScriptTag({ content: AXE });
+  const run = sel => page.evaluate(sel => axe.run(sel, { runOnly: ["wcag2a", "wcag2aa"], rules: { "color-contrast": { enabled: false } } }).then(r => r.violations.map(v => v.id + ": " + v.nodes.map(n => n.target.join(" ")).slice(0, 3).join(", "))), sel);
+  assert.deepEqual(await run("#debtChart"), []);
+  await page.evaluate(() => showView("viewToday"));
+  assert.deepEqual(await run(".jl-quote"), []);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Светлая тема: новые компоненты читаются (контраст ≥ 4.5:1)", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const AXE = fs.readFileSync(path.join(ROOT, "node_modules/axe-core/axe.min.js"), "utf8");
+  const SHOTS = process.env.SHOTS; if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
+  await page.addScriptTag({ content: AXE });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.evaluate(() => {
+    const now = new Date().toISOString();
+    state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 }; ensureDebtHistory();
+    state.expenses.push({ id: "dp", amount: 4000, category: "Долг", debtPayment: true, at: now });
+    state.goal.target = 50000; state.goal.milestones.forEach((m, i) => { m.done = i === 0; });
+    state.ai.history.unshift({ id: "ah", at: now, scope: {}, result: "ПЛЮСЫ — доход 9 000\nМИНУСЫ — кафе 1 200\nШАГ НА СЕГОДНЯ — записать траты", sources: [] });
+    saveState(); renderAll();
+  });
+  const bad = [];
+  const check = async (name, sel) => {
+    await page.waitForSelector(sel, { timeout: 4000 }); await page.waitForTimeout(250);
+    const v = await page.evaluate(sel => axe.run(sel, { runOnly: ["color-contrast"] }).then(r => r.violations.flatMap(v => v.nodes.map(n => n.target.join(" ") + " " + (n.any[0]?.data?.contrastRatio ?? "")))), sel);
+    const th = await page.evaluate(() => document.documentElement.dataset.theme);
+    bad.push(...v.map(x => th + " " + name + ": " + x));
+    if (SHOTS) await page.screenshot({ path: path.join(SHOTS, `${name}-${await page.evaluate(() => document.documentElement.dataset.theme)}.png`) });
+  };
+  for (const theme of ["light", "dark"]) {
+    await page.evaluate(t => { state.settings.theme = t; setTheme(); closeModal(); }, theme);
+    await page.evaluate(() => openMoneyForm("expense")); await check("receipt-expense", ".jl-receipt");
+    await page.evaluate(() => { closeModal(); openMoneyForm("profit"); }); await check("receipt-profit", ".modal .stack, #modal");
+    await check("src-tiles", ".jl-src-tiles");
+    await page.evaluate(() => { closeModal(); openDebtHistory("bank"); }); await check("debt-history", "#modal");
+    await page.evaluate(() => { closeModal(); openBudget(); }); await check("stickers", ".jl-stickers");
+    await page.evaluate(() => { closeModal(); showView("viewGoal"); renderGoal(); }); await check("goal-milestones", "#milestones");
+    await page.evaluate(() => { const d = document.createElement("div"); d.id = "aiProbe"; d.className = "analysis-item jl-ai-result"; d.innerHTML = aiTextHtml(state.ai.history[0].result); document.getElementById("milestones").after(d); d.scrollIntoView(); });
+    await check("ai-cards", "#aiProbe"); await page.evaluate(() => document.getElementById("aiProbe").remove());
+    await page.evaluate(() => { showView("viewToday"); renderWeek(); document.getElementById("weekCard").scrollIntoView(); }); await check("week-card", "#weekCard");
+  }
+  if (bad.length) console.log(bad.join("\n"));
+  assert.deepEqual(bad, [], bad.join("\n"));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Деньги: платёж по долгу не входит в «Расход», показан отдельной строкой", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const r = await page.evaluate(async () => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.income = 9000; state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
+    state.expenses.push({ id: "e300", amount: 300, category: "Еда", at: now, dateKey: k }, { id: "d4000", amount: 4000, category: "Долг", debtPayment: "bank", at: now, dateKey: k });
+    saveState(); showView("viewToday"); renderAll(); await new Promise(r => setTimeout(r, 1500));
+    const n = id => (document.getElementById(id)?.title || document.getElementById(id)?.textContent || "").replace(/\s/g, " ");
+    const line = id => { const el = document.getElementById(id); return el && !el.hidden ? el.textContent.replace(/\s/g, " ") : ""; };
+    const today = { exp: n("tmExpense"), line: line("tmDebtPay") };
+    showView("viewMoney"); renderAll(); await new Promise(r => setTimeout(r, 1500));
+    const overview = { exp: n("mvExpense"), line: line("mvDebtPay") };
+    document.querySelector('[data-money-tab="cal"]')?.click(); renderMoneyCalendar();
+    const cal = { exp: document.getElementById("mcExpense").title.replace(/\s/g, " "), line: line("mcDebtPay") };
+    // old financial calendar: selected day and period
+    closeModal(); openCalendar();
+    const meta = document.querySelector(".calendar-selected .meta").textContent.replace(/\s/g, " ");
+    const rangeBox = document.querySelector(".calendar-range-summary").textContent.replace(/\s/g, " ");
+    const day = { exp: meta, line: line("calDayDebtPay") }, period = { exp: rangeBox, line: line("calRangeDebtPay"), net: calendarRangeMetrics(keyDay(), keyDay()).net };
+    closeModal();
+    // week card and the hint in the debt plan
+    showView("viewToday"); renderWeek(); renderDebtPlan();
+    const week = { exp: document.getElementById("wkExpense").textContent.replace(/\s/g, " "), line: line("wkDebtPay"), stats: weekStats(), local: localWeekText() };
+    const hint = document.getElementById("dpLeft")?.textContent.replace(/\s/g, " ") || "";
+    const a = analyzeLife(); return { today, overview, cal, day, period, week, hint, analysis: a.spend ?? a.month?.spend ?? a };
+  });
+  assert.match(r.day.exp, /Расход: −300 /, "calendar day: " + JSON.stringify(r.day));
+  assert.match(r.period.exp, /Потрачено−300 /, "calendar period: " + JSON.stringify(r.period));
+  assert.match(r.period.exp, /Чистый итог−4 300 /, "net still pays the debt: " + JSON.stringify(r.period));
+  assert.equal(r.period.net, -4300);
+  for (const [k, v] of Object.entries({ day: r.day, period: r.period, week: r.week })) assert.match(v.line, /Платежи по долгу: 4 000/, k + " " + JSON.stringify(v));
+  assert.equal(r.week.exp, "−300", "week card: " + JSON.stringify(r.week));
+  assert.equal(r.week.stats.out, 300); assert.equal(r.week.stats.debt, 4000);
+  assert.ok(!/4 300/.test(r.week.local), "week review without AI: " + r.week.local);
+  assert.match(r.hint, /обычно тратишь 300 /, "debt plan hint: " + r.hint);
+  for (const [k, v] of Object.entries({ today: r.today, overview: r.overview, cal: r.cal })) {
+    assert.match(v.exp, /^300\b/, k + " «Расход» must be 300: " + JSON.stringify(v));
+    assert.match(v.line, /Платежи по долгу: 4 000/, k + " " + JSON.stringify(v));
+  }
+  assert.equal(r.analysis, 300);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Цель: автоэтапы — переключатель в «Изменить цель» и ручное снятие", async () => {
+  const { ctx, page } = await device(makeCloud());
+  // the stage «закрыть основную часть долгов» closes itself once half the debt is paid
+  const setup = () => page.evaluate(() => {
+    state.debtBaseline = 100000; state.debts = { bank: 90000, firms: 0, monthlyPayment: 1000 }; // not yet half paid
+    state.goal.milestones = [{ id: "m1", title: "Закрыть основную часть долгов", done: false }, { id: "m2", title: "Купить машину", done: false }];
+    saveState();
+  });
+  // 1) switch off in the editor → the stage stays open
+  await setup();
+  await page.evaluate(() => { showView("viewGoal"); openGoalEdit(); });
+  assert.equal(await page.isChecked('[data-ms-auto="m1"]'), true, "auto-close is on by default");
+  await page.$eval('[data-ms-auto="m1"]', el => el.click());
+  await page.evaluate(() => { closeModal(); state.debts.bank = 40000; saveState(); autoMilestones(); renderGoal(); }); // now 60% paid
+  let m1 = await page.evaluate(() => state.goal.milestones[0]);
+  assert.equal(m1.autoOff, true, "switch off: " + JSON.stringify(m1)); assert.equal(m1.done, false, "a stage with auto-close off must not close itself: " + JSON.stringify(m1));
+  // switched back on → closes by the numbers
+  await page.evaluate(() => openGoalEdit());
+  await page.$eval('[data-ms-auto="m1"]', el => el.click());
+  m1 = await page.evaluate(() => { closeModal(); return state.goal.milestones[0]; });
+  assert.equal(m1.done, true, "switch on: " + JSON.stringify(m1)); assert.equal(m1.auto, true); assert.ok(!("autoOff" in m1));
+  // 2) an auto-closed stage unticked by hand stays open for good
+  await page.evaluate(() => { showView("viewGoal"); renderGoal(); });
+  await page.$eval('[data-ms="m1"]', el => el.click());
+  m1 = await page.evaluate(() => { autoMilestones(); renderAll(); return state.goal.milestones[0]; });
+  assert.equal(m1.done, false, "unticked by hand: " + JSON.stringify(m1)); assert.equal(m1.autoOff, true);
+  // editing the stage list in the textarea keeps the flag
+  await page.evaluate(() => openGoalEdit());
+  await page.fill("#gMilestones", "[ ] Закрыть основную часть долгов\n[ ] Купить машину\n[ ] Новый этап");
+  m1 = await page.evaluate(() => { closeModal(); return state.goal.milestones; });
+  assert.equal(m1[0].autoOff, true); assert.equal(m1.length, 3); assert.equal(m1[2].autoOff, undefined);
+  // 3) old data without the new fields works and is normalized
+  const old = await page.evaluate(() => { const s = clone(state); s.goal.milestones = [{ id: "o1", title: "Старый этап", done: true }, { id: "o2", title: "Ещё", done: false, autoOff: "x" }]; const n = normalize(s); return n.goal.milestones; });
+  assert.equal(old[0].done, true); assert.ok(!("autoOff" in old[1]));
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
