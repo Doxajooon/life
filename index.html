@@ -122,7 +122,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 
 
 
-@keyframes lcStagePulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 color-mix(in srgb,var(--blue) 0%,transparent)}50%{transform:scale(1.06);box-shadow:0 0 0 5px color-mix(in srgb,var(--blue) 10%,transparent)}}
+@keyframes lcStagePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 @media (prefers-reduced-motion:reduce){.check,.check::after{transition:none!important;animation:none!important}}
 .goal-title{line-height:1.12;font-weight:700;letter-spacing:-.03em}
 .goal-why{font-size:0.75rem;color:var(--muted);margin-top:7px}
@@ -1000,7 +1000,7 @@ html[data-theme="light"] .auth-stars{display:block}
 @keyframes lcRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
 @keyframes lcPop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
 @keyframes lcWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg) scale(1.1)}60%{transform:rotate(9deg) scale(1.1)}}
-@keyframes lcDot{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--orange) 55%,transparent)}70%{box-shadow:0 0 0 7px transparent}}
+@keyframes lcDot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.7}}
 @keyframes lcShimmer{to{transform:translateX(100%)}}
 @keyframes lcGrow{from{transform:scaleY(.05);opacity:.3}to{transform:scaleY(1);opacity:1}}
 @keyframes lcBackIn{from{opacity:0}to{opacity:1}}
@@ -1033,11 +1033,11 @@ html[data-theme="light"] .auth-stars{display:block}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 .jl-logo{display:grid;place-items:center;background:linear-gradient(145deg,#14304d,#08121e)!important;box-shadow:0 6px 18px rgba(8,18,30,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
 .jl-logo svg{width:76%;height:76%;color:#fff;overflow:visible}
-.jl-logo .jl-ring{stroke-dasharray:1060;stroke-dashoffset:1060;animation:jlDraw 1.4s cubic-bezier(.65,0,.35,1) .15s forwards}
+.jl-logo .jl-ring{animation:jlDraw 1.4s cubic-bezier(.65,0,.35,1) .15s backwards}
 .jl-logo .jl-dot{transform-origin:101px 191px;animation:jlPulse 2.6s ease-in-out 1.5s infinite}
 .jl-logo svg{transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
 .brand:hover .jl-logo svg,#homeBrand:hover .jl-logo svg{transform:rotate(-12deg) scale(1.06)}
-@keyframes jlDraw{to{stroke-dashoffset:0}}
+@keyframes jlDraw{from{opacity:0}to{opacity:1}}
 @keyframes jlPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.65}}
 .ui-icon{transition:transform .28s cubic-bezier(.34,1.56,.64,1),filter .28s ease,color .2s ease}
 button:hover>.ui-icon,a:hover>.ui-icon,[role=button]:hover>.ui-icon{transform:translateY(-1px) scale(1.12)}
@@ -1065,7 +1065,7 @@ button:hover>.ui-icon:has(use[href="#i-volume"]){animation:jlBeat .8s ease}
 body[data-sync=ok] #cloudSyncState::before{background:#3fd0a0;box-shadow:0 0 0 0 rgba(63,208,160,.5);animation:jlSyncOk 2.4s ease-out 1}
 body[data-sync=busy] #cloudSyncState::before{background:#f2b451}
 body[data-sync=offline] #cloudSyncState::before,body[data-sync=auth] #cloudSyncState::before{background:#f07167}
-@keyframes jlSyncOk{0%{box-shadow:0 0 0 0 rgba(63,208,160,.55)}100%{box-shadow:0 0 0 9px rgba(63,208,160,0)}}
+@keyframes jlSyncOk{0%{transform:scale(.6);opacity:.5}100%{transform:scale(1);opacity:1}}
 .v-goal-ico .ui-icon,.kpi .ui-icon{transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
 .v-goal-item:hover .v-goal-ico .ui-icon{transform:translateY(-3px) rotate(-6deg) scale(1.08)}
 .v-task{animation:jlRowIn .35s ease backwards}
@@ -1343,7 +1343,7 @@ button:active .ui-icon{transform:scale(.82)}
 .v-task.late .jl-task-bar i{background:var(--red)}
 .v-task.late [data-task-left]{color:var(--red);font-weight:700}
 .v-task.soon .jl-task-bar{animation:jlUrgent 1.6s ease-in-out infinite}
-@keyframes jlUrgent{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--orange) 0%,transparent)}50%{box-shadow:0 0 0 3px color-mix(in srgb,var(--orange) 35%,transparent)}}
+@keyframes jlUrgent{0%,100%{opacity:1}50%{opacity:.65}}
 .jl-deadline{margin-top:14px}
 .jl-deadline small{display:block;font-size:0.7812rem;color:#cfe0f2;margin-top:6px}
 .jl-deadline.soon .dp-track i{background:linear-gradient(90deg,#f59e0b,#ef4444)}
@@ -1361,8 +1361,8 @@ button:active .ui-icon{transform:scale(.82)}
 .jl-icon-btn.plain{background:var(--panel);border-color:var(--line);color:var(--muted);width:40px;height:40px}
 .jl-bank.glow-up{animation:jlGlowUp 1.4s ease}
 .jl-bank.glow-down{animation:jlGlowDown 1.4s ease}
-@keyframes jlGlowUp{0%{box-shadow:0 0 0 0 rgba(34,197,94,0)}25%{box-shadow:0 0 0 4px rgba(34,197,94,.45),0 0 26px rgba(34,197,94,.45);border-color:var(--green)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
-@keyframes jlGlowDown{0%{box-shadow:0 0 0 0 rgba(245,158,11,0)}25%{box-shadow:0 0 0 4px rgba(245,158,11,.45),0 0 26px rgba(245,158,11,.4);border-color:var(--orange)}100%{box-shadow:0 0 0 0 rgba(245,158,11,0)}}
+@keyframes jlGlowUp{0%,100%{transform:scale(1)}25%{transform:scale(1.03)}}
+@keyframes jlGlowDown{0%,100%{transform:scale(1)}25%{transform:scale(.98)}}
 /* living charts: bars grow, lines draw, donut turns in */
 .lc-plan{animation:jlFade .8s .5s ease backwards}
 .tm-day i{transform-origin:50% 100%;animation:jlBarUp .7s cubic-bezier(.2,.8,.2,1) backwards}
@@ -1457,7 +1457,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-step.done .jl-step-dot{background:var(--green);border-color:var(--green);color:#fff;animation:jlPop .5s cubic-bezier(.34,1.56,.64,1) backwards}
 .jl-step.current{background:color-mix(in srgb,var(--gold) 10%,transparent)}
 .jl-step.current .jl-step-dot{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 50%,transparent);animation:jlRingPulse 2s ease-in-out infinite}
-@keyframes jlRingPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 45%,transparent)}50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--gold) 0%,transparent)}}
+@keyframes jlRingPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .jl-step-body b{display:block;font-size:.95rem;line-height:1.3}
 .jl-step.done .jl-step-body b{color:var(--muted)}
 .jl-step-body small{display:block;font-size:.78rem;color:var(--muted);margin-top:4px}
@@ -1560,8 +1560,8 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .v-task.done .v-task-title{background-size:100% 2px;text-decoration:none!important;color:var(--muted)}
 .v-task.soon .jl-task-bar i{animation:jlBarGlow 1.4s ease-in-out infinite}
 @keyframes jlBell{0%,100%{transform:rotate(0)}10%{transform:rotate(-12deg)}20%{transform:rotate(10deg)}30%{transform:rotate(-6deg)}40%{transform:rotate(0)}}
-@keyframes jlDoneBurst{0%{transform:scale(.6);box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 60%,transparent)}60%{transform:scale(1.15)}100%{transform:scale(1);box-shadow:0 0 0 14px transparent}}
-@keyframes jlBarGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+@keyframes jlDoneBurst{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes jlBarGlow{0%,100%{opacity:1}50%{opacity:.7}}
 /* habits */
 .jl-habit{grid-template-columns:auto minmax(0,1fr) auto;transition:background .3s ease}
 .jl-habit-name .jl-dots{margin-top:7px}
@@ -1577,7 +1577,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-habit.just-done .jl-dots i.today{animation:jlPop .5s .1s cubic-bezier(.34,1.56,.64,1)}
 .jl-dots i.today:not(.on){animation:jlDotBlink 1.8s ease-in-out infinite}
 .jl-dots i{transition:background .3s ease,border-color .3s ease,transform .3s ease}
-@keyframes jlRingPulseG{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--green) 40%,transparent)}50%{box-shadow:0 0 0 6px transparent}}
+@keyframes jlRingPulseG{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
 @keyframes jlFlame{from{transform:scale(1) rotate(-6deg)}to{transform:scale(1.2) rotate(6deg)}}
 @keyframes jlDotBlink{0%,100%{opacity:1}50%{opacity:.45}}
 @media (max-width:420px){.jl-dots i{width:10px;height:10px}.jl-dots{gap:3px}.jl-habit{gap:8px}.jl-miniring{width:40px;height:40px}}
@@ -1721,7 +1721,7 @@ b,strong{font-weight:600}
 
 /* ===== V67 living charts and lists ===== */
 .lc-actual,.vc-line{stroke-dasharray:1;stroke-dashoffset:0;animation:jlDraw 1.3s .15s cubic-bezier(.4,0,.2,1) backwards}
-@keyframes jlDraw{from{stroke-dashoffset:1}}
+@keyframes jlDraw{from{opacity:0}to{opacity:1}}
 .vc-bar{transform-box:fill-box;transform-origin:50% 100%;animation:jlBarUp .7s cubic-bezier(.2,.8,.2,1) backwards}
 .vc-bar:nth-of-type(2n){animation-delay:.05s}.vc-bar:nth-of-type(3n){animation-delay:.1s}.vc-bar:nth-of-type(5n){animation-delay:.15s}
 @keyframes jlBarUp{from{transform:scaleY(0)}}
@@ -1902,7 +1902,7 @@ html[data-theme="dark"] .v-pulse{background:radial-gradient(120% 80% at 50% 0%,r
  .jl-habit-fire{animation:habitFlick 1.2s ease-in-out infinite}
 }
 @keyframes habitBurn{0%,100%{transform:scale(1) rotate(0)}25%{transform:scale(1.06) rotate(-3deg)}60%{transform:scale(.98) rotate(2deg)}}
-@keyframes habitEmber{0%,100%{box-shadow:0 0 0 0 rgba(251,191,77,0)}50%{box-shadow:0 0 0 5px rgba(251,191,77,.22)}}
+@keyframes habitEmber{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 @keyframes habitFlick{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1px) scale(1.08)}}
 
 /* V71 day report */
@@ -1920,14 +1920,14 @@ html[data-theme="dark"] .v-pulse{background:radial-gradient(120% 80% at 50% 0%,r
 .jl-lg-bar{display:grid;grid-template-columns:minmax(0,9rem) 1fr auto;gap:8px;align-items:center;font-size:.82rem}
 .jl-lg-bar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jl-lg-bar i{height:8px;border-radius:99px;background:color-mix(in srgb,var(--line) 70%,transparent);position:relative;overflow:hidden}
-.jl-lg-bar i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);border-radius:inherit;background:linear-gradient(90deg,#fb7185,#fbbf4d);animation:lgGrow .9s calc(var(--i)*90ms) cubic-bezier(.2,.8,.2,1) backwards}
+.jl-lg-bar i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);transform-origin:left;border-radius:inherit;background:linear-gradient(90deg,#fb7185,#fbbf4d);animation:lgGrow .9s calc(var(--i)*90ms) cubic-bezier(.2,.8,.2,1) backwards}
 .jl-lg-bar b{font-variant-numeric:tabular-nums}
 .jl-lg-empty{margin-top:10px;color:var(--muted);font-size:.85rem}
 .jl-lg-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
 .jl-lg-pill{display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:14px;background:color-mix(in srgb,var(--panel) 80%,transparent);border:1px solid var(--line)}
 .jl-lg-pill b{font-variant-numeric:tabular-nums}.jl-lg-pill small{color:var(--muted);font-size:.72rem}
 .jl-lg-pill.full{border-color:color-mix(in srgb,var(--green) 55%,var(--line));box-shadow:0 0 14px -4px color-mix(in srgb,var(--green) 60%,transparent)}
-@keyframes lgGrow{from{width:0}}
+@keyframes lgGrow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 
 /* V71 goal dashboard and wins */
 .jl-gh-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
@@ -1948,7 +1948,7 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .jl-ach-empty span{font-size:2.2rem}.jl-ach-empty small{color:var(--muted);max-width:32ch}
 #achievements{display:grid;gap:8px}
 @media (prefers-reduced-motion:no-preference){.jl-ach-ico{animation:achShine 3.6s ease-in-out infinite}.jl-ach:nth-child(2n) .jl-ach-ico{animation-delay:1.2s}}
-@keyframes achShine{0%,100%{transform:rotate(0) scale(1);box-shadow:none}45%{transform:rotate(-6deg) scale(1.06);box-shadow:0 0 18px -2px color-mix(in srgb,var(--gold) 70%,transparent)}}
+@keyframes achShine{0%,100%{transform:rotate(0) scale(1)}45%{transform:rotate(-6deg) scale(1.06)}}
 
 /* V71 goal forms */
 .jl-gprev{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--purple) 18%,var(--soft)),color-mix(in srgb,var(--blue) 10%,var(--soft)));border:1px solid var(--line)}
@@ -2024,6 +2024,33 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 /* V72: toasts come from the top, under the header — never over the «+» button or the bottom bar */
 .toast{top:calc(64px + env(safe-area-inset-top,0px));bottom:auto!important;transform:translate(-50%,-14px)}
 .toast.show{transform:translate(-50%,0)}
+/* V72 road map of the goal's stages */
+.jl-step.done .jl-step-dot{background:linear-gradient(140deg,#f6d27a,#d99a2b)!important;border-color:#f2b451!important;color:#3a2400!important}
+.jl-step.done .jl-step-body small{color:color-mix(in srgb,var(--gold) 70%,var(--text))}
+.jl-step.done{background:color-mix(in srgb,var(--gold) 6%,transparent)}
+.jl-step.locked{opacity:.62}
+.jl-step.locked .jl-step-dot{font-size:.95rem;filter:grayscale(.3)}
+.jl-step.current{padding:14px 12px 14px 0;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));box-shadow:0 10px 30px -18px color-mix(in srgb,var(--gold) 70%,transparent);animation:jlRise .55s cubic-bezier(.2,.8,.2,1) both}
+.jl-step.current .jl-step-dot{width:44px;height:44px;font-size:1.05rem}
+.jl-ms-eyebrow{display:block;font-size:.74rem;font-weight:800;letter-spacing:.03em;color:color-mix(in srgb,var(--gold) 75%,var(--text));margin-bottom:4px}
+.jl-step.current .jl-step-body>b{font-size:1.08rem!important;line-height:1.35}
+.jl-ms-prog{display:flex;align-items:center;gap:10px;margin-top:10px}
+.jl-ms-prog .jl-ms-bar{flex:1;height:10px;margin:0;border-radius:10px}
+.jl-ms-prog em{font-style:normal;font-weight:800;font-size:1.15rem;font-variant-numeric:tabular-nums;color:var(--text)}
+.jl-ms-todo{color:var(--text)!important;margin-top:6px!important;line-height:1.45}
+.jl-ms-add{margin-top:10px;min-height:40px;padding:0 14px;font-size:.82rem}
+.jl-ms-add .ui-icon{width:15px;height:15px}
+@media (prefers-reduced-motion:reduce){.jl-step.current{animation:none!important}}
+/* V72: «Деньги цели» — even 2×2 tiles, the three distance numbers in one row */
+.jl-goal-money-card .goal-finance-kpis .kpi:last-child{grid-column:auto!important}
+.jl-goal-money-card .goal-distance-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}
+.jl-goal-money-card .distance-kpi{padding:10px!important}
+.jl-goal-money-card .distance-kpi .label{font-size:.7rem!important;gap:4px}
+.jl-goal-money-card .distance-kpi .value{font-size:.95rem!important;white-space:normal!important;text-overflow:clip!important;overflow:visible!important;line-height:1.3}
+/* V72: nothing useful is cut off — long words wrap instead of «…» */
+.jl-goalhero .goal-why{-webkit-line-clamp:unset!important;display:block!important;overflow:visible!important}
+.jl-habit .jl-habit-name b{-webkit-line-clamp:unset!important;display:block!important}
+.v-goal-name,.v-tx-title,.v-tx-meta,.jl-habit-name b,.v-row-main small,.jl-gh-tiles em,.jl-gh-tiles b,.jl-quote figcaption,.jl-lg-bar span,.distance-kpi .value,.ring-state,.ring-label,.v-note-title,.legend-name,.calendar-earned,.jl-receipt-main small,.v-kpi b{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere}
 </style>
 
 
@@ -2783,6 +2810,12 @@ function countTo(el,next){
     el.textContent=k<1?_fmtCount(Math.abs(v),{...to,sign:v<0?(to.sign||'−'):''}):next;if(k<1)el._cnt=requestAnimationFrame(tick)};
   el._cnt=requestAnimationFrame(tick);
 }
+// `painter(el).html=…` writes the markup only when it changed: no flicker, no restarted animations, nothing re-laid out for nothing.
+// If anything else replaced the element's children meanwhile, it is written again.
+const _painted=new WeakMap();
+function painter(el){return {set html(h){if(!el)return;const p=_painted.get(el);if(p&&p.h===h&&el.firstChild===p.f&&el.lastChild===p.l)return;el.innerHTML=h;_painted.set(el,{h,f:el.firstChild,l:el.lastChild})}}}
+// `textOf(el).v=…` sets the text only when it differs (no needless repaint)
+function textOf(el){return {set v(x){x=String(x);if(el&&el.textContent!==x)el.textContent=x}}}
 function setText(id,value){const el=$(id);if(!el)return;const v=String(value);if((el.dataset.shown??el.textContent)===v)return;if(COUNT_IDS.has(id))countTo(el,v);else el.textContent=v}
 function setWidth(id,value){const el=$(id);if(el){const v=String(value);if(el.style.width!==v)el.style.width=v}}
 function dayReport(){const k=keyDay();state.reports[k]=state.reports[k]||{done:'',block:'',future:'',tomorrow:'',savedAt:'',steps:{}};state.reports[k].steps=state.reports[k].steps||{};return state.reports[k]}
@@ -3434,13 +3467,13 @@ function openDayProgress(){
 
 function renderToday(){
   autoCompleteExpiredStages();renderTodayLight();renderControlDashboard();const d=new Date(),info=getStageInfo(),rep=dayReport(),dd=dailyState();
-  $('todayTitle').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});$('todayDate').textContent=d.toLocaleDateString('ru-RU',{weekday:'long'})+' · '+d.getFullYear();
-  const mo=motivation();$('motivationText').textContent=String(mo.text||'').split(/\n+\s*Сегодня:/)[0].trim();$('motivationSource').textContent=`${mo.author} — ${mo.source}`;
+  textOf($('todayTitle')).v=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});textOf($('todayDate')).v=d.toLocaleDateString('ru-RU',{weekday:'long'})+' · '+d.getFullYear();
+  const mo=motivation();textOf($('motivationText')).v=String(mo.text||'').split(/\n+\s*Сегодня:/)[0].trim();textOf($('motivationSource')).v=`${mo.author} — ${mo.source}`;
   renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
   autoCompleteExpiredStages();renderRhythm(info);
   setText('todayBalance',fmtMoney(daySum(state.profits)-daySum(state.expenses)));const fs=financialSnapshot();setText('todayCashState',`Касса: ${fmtMoney(fs.cash)} · На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`);
   for(const k of ['done','block','tomorrow']){const el=$('r'+k[0].toUpperCase()+k.slice(1));if(el&&document.activeElement!==el)el.value=rep[k]||''}
-  $('reportSaved').textContent=rep.closedAt?`Закрыт в ${new Date(rep.closedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`:(rep.done||rep.block||rep.tomorrow)?'Черновик сохранён':'';
+  textOf($('reportSaved')).v=rep.closedAt?`Закрыт в ${new Date(rep.closedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`:(rep.done||rep.block||rep.tomorrow)?'Черновик сохранён':'';
   renderStreak();renderDayLedger();renderWeek();renderTodayLimit();renderHabits();renderFreePlan();pushWidget();
   renderPulseRings();renderTodayGoal();renderTodayMoney();renderTasks();setText('brandSub',greeting()+(state.profile.name?', '+state.profile.name:''));
 }
@@ -3476,14 +3509,14 @@ function renderRhythm(info=getStageInfo()){
   renderDayStrip(info);
 }
 function renderDayStrip(info=getStageInfo()){
-  const el=$('dayStrip');if(!el)return;const steps=state.day.steps||[];if(!steps.length){el.innerHTML='';return}
+  const el=$('dayStrip');if(!el)return;const steps=state.day.steps||[];if(!steps.length){painter(el).html='';return}
   const start=Math.min(...steps.map(s=>timeToMin(s.time))),end=Math.max(...steps.map(s=>timeToMin(s.end))),span=Math.max(1,end-start),now=Math.floor(nowMin());
   const nowPct=clamp((now-start)/span*100,0,100),rep=dayReport();
   const segs=steps.map((s,i)=>{const a=timeToMin(s.time),b=timeToMin(s.end),done=!!rep.steps[s.id]||now>=b,cur=!done&&info.kind==='active'&&info.i===i;
     return `<span class="jl-seg ${done?'done':cur?'current':''}" style="left:${((a-start)/span*100).toFixed(2)}%;width:${((b-a)/span*100).toFixed(2)}%" title="${esc(s.title)} ${esc(s.time)}–${esc(s.end)}">${(b-a)/span>.07?`<em>${stageEmoji(s,i)}</em>`:''}</span>`}).join('');
   const inDay=now>=start&&now<=end;const hh=String(Math.floor(now/60)).padStart(2,'0'),mm=String(now%60).padStart(2,'0');
   const left=clamp(end-now,0,span);
-  el.innerHTML=`<div class="jl-strip">${segs}<i class="jl-strip-fill" style="width:${nowPct.toFixed(2)}%"></i>${inDay?`<b class="jl-strip-now ${nowPct>82?'r':nowPct<18?'l':''}" style="left:${nowPct.toFixed(2)}%"><span>${hh}:${mm}</span></b>`:''}</div><div class="jl-strip-legend"><span>${esc(steps[0].time)}</span><span>${now<start?'день ещё не начался':now>end?'день завершён 🎉':`осталось ${durText(left)}`}</span><span>${esc(steps[steps.length-1].end)}</span></div>`;
+  painter(el).html=`<div class="jl-strip">${segs}<i class="jl-strip-fill" style="width:${nowPct.toFixed(2)}%"></i>${inDay?`<b class="jl-strip-now ${nowPct>82?'r':nowPct<18?'l':''}" style="left:${nowPct.toFixed(2)}%"><span>${hh}:${mm}</span></b>`:''}</div><div class="jl-strip-legend"><span>${esc(steps[0].time)}</span><span>${now<start?'день ещё не начался':now>end?'день завершён 🎉':`осталось ${durText(left)}`}</span><span>${esc(steps[steps.length-1].end)}</span></div>`;
 }
 function miniRing(id,done,total){const el=$(id);if(!el)return;if(!total){el.innerHTML='';el.hidden=true;return}el.hidden=false;const p=Math.round(done/total*100);
   el.innerHTML=`<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" pathLength="100" style="stroke-dasharray:${p} 100"/></svg><b>${p===100?'🏆':p+'%'}</b>`;el.classList.toggle('full',p===100)}
@@ -3597,8 +3630,8 @@ function goalChartData(){
 function renderGoalChart(){
   const box=$('goalChart'); if(!box)return;
   const data=goalChartData();
-  if(!data){box.innerHTML='<div class="lc-chart-empty">Задай сумму цели — здесь появится реальная динамика накопления.</div>';setText('goalChartStatus','Нет суммы');return}
-  box.innerHTML=svgLineChart(data.actual,data.plan,data.target,data.labels,v=>fmtAxisMoney(v),v=>fmtMoney(v));
+  if(!data){painter(box).html='<div class="lc-chart-empty">Задай сумму цели — здесь появится реальная динамика накопления.</div>';setText('goalChartStatus','Нет суммы');return}
+  painter(box).html=svgLineChart(data.actual,data.plan,data.target,data.labels,v=>fmtAxisMoney(v),v=>fmtMoney(v));
   const f=goalFinanceMetrics();
   setText('goalChartStatus',f.target?`Доступно к цели ${f.pct}%`:'—');
 }
@@ -3610,15 +3643,15 @@ function renderExpenseDonut(){
   const map=new Map();
   for(const e of spendOnly(state.expenses)){const d=new Date(e.at);if(Number.isNaN(d.getTime())||dateKeyFromDate(d).slice(0,7)!==month)continue;const k=(e.category||'Без категории').trim()||'Без категории';map.set(k,(map.get(k)||0)+(Number(e.amount)||0))}
   const rows=[...map.entries()].sort((a,b)=>b[1]-a[1]);const total=rows.reduce((a,[,v])=>a+v,0);
-  if(total<=0){box.style.background='var(--line)';$('expenseDonutCenter').innerHTML='<div>Нет<br>расходов</div>';legend.innerHTML='';setText('expenseChartNote','В этом месяце расходы ещё не записаны.');return}
+  if(total<=0){box.style.background='var(--line)';painter($('expenseDonutCenter')).html='<div>Нет<br>расходов</div>';painter(legend).html='';setText('expenseChartNote','В этом месяце расходы ещё не записаны.');return}
   let angle=0;const stops=[];
   rows.slice(0,6).forEach(([k,v],i)=>{const deg=v/total*360;const color=CHART_PALETTE[i%CHART_PALETTE.length];stops.push(`${color} ${angle}deg ${angle+deg}deg`);angle+=deg});
   const other=rows.slice(6).reduce((a,[,v])=>a+v,0);if(other>0){const deg=other/total*360;const color=CHART_PALETTE[6];stops.push(`${color} ${angle}deg ${angle+deg}deg`)}
   box.style.background=`conic-gradient(${stops.join(',')})`;
-  $('expenseDonutCenter').innerHTML=`<div><b>${esc(fmtMoney(total))}</b>Месяц</div>`;
+  painter($('expenseDonutCenter')).html=`<div><b>${esc(fmtMoney(total))}</b>Месяц</div>`;
   const legendRows=rows.slice(0,6).map(([k,v],i)=>{const pct=Math.round(v/total*100),color=CHART_PALETTE[i%CHART_PALETTE.length];return `<div class="legend-row"><i class="legend-dot" style="background:${color}"></i><span class="legend-name">${esc(k)}</span><span class="legend-val">${esc(fmtMoney(v))} · ${pct}%</span></div>`});
   if(other>0)legendRows.push(`<div class="legend-row"><i class="legend-dot" style="background:${CHART_PALETTE[6]}"></i><span class="legend-name">Другое</span><span class="legend-val">${esc(fmtMoney(other))} · ${Math.round(other/total*100)}%</span></div>`);
-  legend.innerHTML=legendRows.join('');
+  painter(legend).html=legendRows.join('');
   setText('expenseChartNote',`Всего расходов за месяц: ${fmtMoney(total)}.`);
 }
 function renderProfitSources(){
@@ -3626,7 +3659,7 @@ function renderProfitSources(){
   const now=new Date(),y=now.getFullYear(),mo=now.getMonth(),map=new Map();
   for(const p of state.profits||[]){const d=new Date(p.at);if(d.getFullYear()!==y||d.getMonth()!==mo)continue;const raw=String(p.sourceGroup||p.source||'').trim();let k=normalizeProfitSource(raw);if(!PROFIT_SOURCES.includes(k))k='Другое';map.set(k,(map.get(k)||0)+(Number(p.amount)||0))}
   const rows=[...map.entries()].filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);const total=rows.reduce((a,[,v])=>a+v,0);
-  list.innerHTML=total?rows.map(([k,v])=>{const pct=Math.round(v/total*100);return `<div class="source-row"><div><div class="source-name"><span class="source-ico">${esc(PROFIT_ICONS[k]||'💠')}</span>${esc(k)}</div><div class="source-track"><i class="source-fill" style="width:${pct}%"></i></div></div><div class="source-val">${esc(fmtMoney(v))} <span class="small muted">${pct}%</span></div></div>`}).join(''):'<div class="v-empty">В этом месяце доходов ещё нет — нажми «+ Доход».</div>';
+  painter(list).html=total?rows.map(([k,v])=>{const pct=Math.round(v/total*100);return `<div class="source-row"><div><div class="source-name"><span class="source-ico">${esc(PROFIT_ICONS[k]||'💠')}</span>${esc(k)}</div><div class="source-track"><i class="source-fill" style="width:${pct}%"></i></div></div><div class="source-val">${esc(fmtMoney(v))} <span class="small muted">${pct}%</span></div></div>`}).join(''):'<div class="v-empty">В этом месяце доходов ещё нет — нажми «+ Доход».</div>';
   setText('profitSourceNote',total?`Всего доходов за месяц: ${fmtMoney(total)}.`:'');
 }
 function renderMoneyCharts(){renderExpenseDonut();renderProfitSources()}
@@ -3638,11 +3671,11 @@ function goalAIKey(){
 function renderGoalAI(){
   const g=state.goal||{},plan=g.aiPlan,key=goalAIKey(),stateEl=$('goalAiState'),summary=$('goalAiSummary'),list=$('goalAiPlan');
   if(!stateEl||!summary||!list)return;
-  if(!String(g.title||'').trim()){stateEl.textContent='Сначала задай цель.';summary.textContent='';list.innerHTML='';return}
-  if(!plan){stateEl.textContent='AI-план ещё не сформирован — он построится сам, когда ты в сети.';summary.textContent='AI покажет: что уже достигнуто, что уже есть и что конкретно делать дальше.';list.innerHTML='';return}
-  if(plan.goalKey!==key){stateEl.textContent='Цель изменена — нужен новый AI-план.';summary.textContent='Сохрани новую формулировку цели и обнови AI.';list.innerHTML='';return}
-  stateEl.textContent=plan.at?'Обновлено '+fmtDateTime(new Date(plan.at)):'AI-план готов';summary.textContent=plan.summary||'';
-  list.innerHTML=(Array.isArray(plan.actions)?plan.actions:[]).map((x,i)=>'<div class="goal-ai-item"><div><span class="goal-ai-badge">'+esc(x.priority||('P'+(i+1)))+'</span> '+esc(x.action||'Действие')+'</div><div>'+esc(x.deadline||'Срок не указан')+' · '+esc(x.result||'Измеримый результат не указан')+'</div></div>').join('')||'<div class="empty">AI не вернул структурированный план. Нажми «Обновить AI».</div>';
+  if(!String(g.title||'').trim()){textOf(stateEl).v='Сначала задай цель.';textOf(summary).v='';painter(list).html='';return}
+  if(!plan){textOf(stateEl).v='AI-план ещё не сформирован — он построится сам, когда ты в сети.';textOf(summary).v='AI покажет: что уже достигнуто, что уже есть и что конкретно делать дальше.';painter(list).html='';return}
+  if(plan.goalKey!==key){textOf(stateEl).v='Цель изменена — нужен новый AI-план.';textOf(summary).v='Сохрани новую формулировку цели и обнови AI.';painter(list).html='';return}
+  textOf(stateEl).v=plan.at?'Обновлено '+fmtDateTime(new Date(plan.at)):'AI-план готов';textOf(summary).v=plan.summary||'';
+  painter(list).html=(Array.isArray(plan.actions)?plan.actions:[]).map((x,i)=>'<div class="goal-ai-item"><div><span class="goal-ai-badge">'+esc(x.priority||('P'+(i+1)))+'</span> '+esc(x.action||'Действие')+'</div><div>'+esc(x.deadline||'Срок не указан')+' · '+esc(x.result||'Измеримый результат не указан')+'</div></div>').join('')||'<div class="empty">AI не вернул структурированный план. Нажми «Обновить AI».</div>';
 }
 function parseGoalAI(text){
   const raw=String(text||'').trim(),actions=[],lines=raw.split(/\n+/).map(x=>x.trim()).filter(Boolean);
@@ -3711,15 +3744,43 @@ function renderGoal(){autoMilestones();
   setText('goalPotentialSub',f.target?`В цели ${fmtMoney(f.saved)} + свободная касса ${fmtMoney(f.cash)}. Деньги в руках автоматически учитываются в направлении к цели.`:'Сумма цели ещё не задана.');
   if(f.target){const d=f.days?`${f.completed?`Полный капитал собран за ${f.days} дн.`:`Идёт ${f.days}-й день накопления.`}`:'Первое пополнение запустит отсчёт дней.';setText('goalFinanceDays',d);renderGoalDistance();}else setText('goalFinanceDays','После задания суммы здесь появится срок накопления.');
   const contrib=[...(state.goal.finance.contributions||[])].sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,10);
-  $('goalSavingList').innerHTML=contrib.length?contrib.map(e=>`<div class="saving-item"><div class="saving-main"><div class="saving-title">${Number(e.amount)<0?'Вывод из цели':'Пополнение цели'}</div><div class="saving-meta">${esc(e.note||'Без комментария')} · ${esc(fmtDateTime(new Date(e.at)))}</div></div><div class="saving-amount">${Number(e.amount)<0?'−':'+'}${esc(fmtMoney(Math.abs(Number(e.amount)||0)))}</div><button class="delete-x" data-del-saving="${esc(e.id)}" aria-label="Удалить накопление">×</button></div>`).join(''):'<div class="empty">Пополнений пока нет. Можно вести сумму вручную или добавлять накопления кнопкой выше.</div>';
+  painter($('goalSavingList')).html=contrib.length?contrib.map(e=>`<div class="saving-item"><div class="saving-main"><div class="saving-title">${Number(e.amount)<0?'Вывод из цели':'Пополнение цели'}</div><div class="saving-meta">${esc(e.note||'Без комментария')} · ${esc(fmtDateTime(new Date(e.at)))}</div></div><div class="saving-amount">${Number(e.amount)<0?'−':'+'}${esc(fmtMoney(Math.abs(Number(e.amount)||0)))}</div><button class="delete-x" data-del-saving="${esc(e.id)}" aria-label="Удалить накопление">×</button></div>`).join(''):'<div class="empty">Пополнений пока нет. Можно вести сумму вручную или добавлять накопления кнопкой выше.</div>';
   $$('[data-del-saving]').forEach(b=>b.onclick=()=>{const id=b.dataset.delSaving;state.goal.finance.contributions=state.goal.finance.contributions.filter(x=>x.id!==id);syncGoalFinanceCompletion();saveState();renderAll();toast('Пополнение удалено')});
   renderGoalChart();renderGoalAI();renderGoalDeadline();renderGoalHero();
-  {const ms=state.goal.milestones,doneN=ms.filter(m=>m.done).length,cur=ms.findIndex(m=>!m.done);const box=$('milestones');if(box){box.style.setProperty('--f',ms.length>1?String(Math.min(1,doneN/(ms.length-1))):'0');box.innerHTML=ms.map((m,i)=>`<div class="jl-step ${m.done?'done':i===cur?'current':'todo'}"><span class="jl-step-dot">${m.done?'✓':i+1}</span><div class="jl-step-body"><b>${esc(m.title)}</b><small>${m.done?(m.auto?'✅ Закрыт автоматически':'✅ Этап закрыт'):(i===cur?'🔥 Сейчас в работе':'⏳ Впереди')}${!m.done&&m.autoOff?' · <span class="jl-ms-auto">закрываю вручную</span>':''}${!m.done&&!m.autoOff?(()=>{const a=milestoneAuto(m,i,ms.length);return a.hint?` · <span class="jl-ms-auto">${esc(a.hint)}</span>`:''})():''}</small>${!m.done&&!m.autoOff?(()=>{const a=milestoneAuto(m,i,ms.length);return a.p>0?`<span class="jl-ms-bar"><i style="width:${Math.round(a.p*100)}%"></i></span>`:''})():''}</div><input class="check" type="checkbox" data-ms="${esc(m.id)}" aria-label="Этап ${i+1}: ${esc(m.title)}" ${m.done?'checked':''}></div>`).join('')||'<div class="v-empty">Этапов нет — добавь их в «Изменить цель».</div>'}}
-  $$('[data-ms]').forEach(c=>c.onchange=()=>{const m=state.goal.milestones.find(x=>x.id===c.dataset.ms);if(!m)return;if(!c.checked&&m.done&&m.auto)m.autoOff=true;m.done=c.checked;if(!m.done){m.auto=false;m.doneAt=''}if(c.checked&&state.goal.milestones.every(x=>x.done))setTimeout(celebrate,200);else if(c.checked)haptic(16);const next=state.goal.milestones.find(x=>!x.done);state.goal.next=next?next.title:'Цель достигнута — выбери следующий финансовый ориентир.';saveState();renderAll();toast(c.checked?'Этап закрыт':'Этап открыт',m.title)});
+  renderMilestones();
+  $$('[data-ms]').forEach(c=>c.onchange=()=>{const m=state.goal.milestones.find(x=>x.id===c.dataset.ms);if(!m)return;if(!c.checked&&m.done&&m.auto)m.autoOff=true;m.done=c.checked;if(!m.done){m.auto=false;m.doneAt=''}else m.doneAt=m.doneAt||new Date().toISOString();if(c.checked){haptic(16);setTimeout(celebrate,200)}const next=state.goal.milestones.find(x=>!x.done);state.goal.next=next?next.title:'Цель достигнута — выбери следующий финансовый ориентир.';saveState();renderAll();toast(c.checked?'Этап закрыт':'Этап открыт',m.title)});
   renderAchievementsV71();
 }
 
-function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){chart.innerHTML='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);chart.innerHTML=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap" role="button" tabindex="0" data-debt-open="all" title="Открыть историю долга" aria-label="Долг ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}: ${esc(fmtMoney(x.total))} — открыть историю"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
+// V72: the goal's stages as a road map — the current one large with its numbers and «what closes it», done ones gold with the date, future ones locked
+function milestoneCloseHint(m,i,n){
+  if(m.autoOff)return 'закрываешь вручную — отметь галочкой, когда готово';
+  const t=String(m.title||'').toLowerCase(),f=goalFinanceMetrics(),cur=currencyLabel(),base=Number(state.debtBaseline)||0,paid=Math.max(0,base-debtTotal());
+  const tk=(state.tasks||[]).filter(x=>x.goal&&x.ms===m.id&&!x.done).length,tks=tk?` и закрой ${tk} ${plural(tk,'задачу','задачи','задач')} этапа`:'';
+  if(/рост.*долг|долг.*рост/.test(t))return 'плати по долгу каждый месяц и 30 дней не бери новых долгов'+tks;
+  if(/долг/.test(t)&&base>0)return `выплати ещё ${fmtMoney(Math.max(0,base*.5-paid))} долга`+tks;
+  if(/резерв|капитал|подушк|накоп|доход/.test(t)&&f.target>0)return `собери ещё ${fmtMoney(Math.max(0,f.target-f.available))} к цели`+tks;
+  if(f.target>0)return `собери ещё ${fmtMoney(Math.max(0,f.target*(i+1)/n-f.available))} — тогда этап закроется сам`+tks;
+  return tk?`закрой ${tk} ${plural(tk,'задачу','задачи','задач')} этапа`:'добавь задачу к этапу или отметь галочкой, когда готово';
+}
+function renderMilestones(){
+  const box=$('milestones');if(!box)return;const ms=state.goal.milestones||[],n=ms.length,cur=ms.findIndex(m=>!m.done),doneN=ms.filter(m=>m.done).length;
+  const day=d=>{const x=validDate(d);return x?x.toLocaleDateString('ru-RU',{day:'numeric',month:'long'}):''};
+  const html=ms.map((m,i)=>{
+    const chk=`<input class="check" type="checkbox" data-ms="${esc(m.id)}" aria-label="Этап ${i+1}: ${esc(m.title)}" ${m.done?'checked':''}>`;
+    if(m.done)return `<div class="jl-step done"><span class="jl-step-dot" aria-hidden="true">✓</span><div class="jl-step-body"><b>${esc(m.title)}</b><small>🏆 Закрыт${m.doneAt?' '+esc(day(m.doneAt)):''}${m.auto?' · сам, по цифрам':''}</small></div>${chk}</div>`;
+    const a=milestoneAuto(m,i,n),pct=Math.round(a.p*100);
+    if(i===cur)return `<div class="jl-step current" style="--mp:${pct}%"><span class="jl-step-dot" aria-hidden="true">${i+1}</span><div class="jl-step-body"><span class="jl-ms-eyebrow">🔥 Этап ${i+1} из ${n} · сейчас</span><b>${esc(m.title)}</b>
+      <div class="jl-ms-prog"><span class="jl-ms-bar"><i style="width:${pct}%"></i></span><em data-ms-pct>${pct}%</em></div>
+      ${a.hint?`<small class="jl-ms-auto">📊 ${esc(a.hint)}</small>`:''}<small class="jl-ms-todo">👉 Чтобы закрыть: ${esc(milestoneCloseHint(m,i,n))}</small>
+      <button class="jl-pill jl-ms-add" type="button" data-ms-task="${esc(m.id)}">${svgIcon('i-plus')} Задача к этапу</button></div>${chk}</div>`;
+    const prev=i>0?i:1;return `<div class="jl-step todo locked"><span class="jl-step-dot" aria-hidden="true">🔒</span><div class="jl-step-body"><b>${esc(m.title)}</b><small>🔒 Откроется после этапа ${prev}${pct>0?` · уже ${pct}%`:''}</small></div>${chk}</div>`;
+  }).join('')||'<div class="v-empty">Этапов нет — добавь их в «Изменить цель».</div>';
+  box.style.setProperty('--f',n>1?String(Math.min(1,doneN/(n-1))):'0');
+  if(box.dataset.sig!==html){box.dataset.sig=html;box.innerHTML=html}
+  box.querySelectorAll('[data-ms-task]').forEach(b=>b.onclick=()=>openTaskForm(b.dataset.msTask));
+}
+function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){painter(chart).html='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);painter(chart).html=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap" role="button" tabindex="0" data-debt-open="all" title="Открыть историю долга" aria-label="Долг ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}: ${esc(fmtMoney(x.total))} — открыть историю"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
 function normalizeProfitSource(v){
   const raw=String(v||'').trim();
   const s=raw.toLowerCase();
@@ -3751,8 +3812,8 @@ function financialSnapshot(){
 function monthKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
 function budgetSpent(name){const month=monthKey();return (state.expenses||[]).reduce((sum,e)=>{const at=new Date(e.at);if(Number.isNaN(at.getTime())||dateKeyFromDate(at).slice(0,7)!==month)return sum;return sum+(String(e.category||'').trim().toLowerCase()===String(name||'').trim().toLowerCase()?Math.max(0,Number(e.amount)||0):0)},0)}
 function renderBudgets(){const list=$('budgetList');if(!list)return;const rows=Array.isArray(state.budgets)?state.budgets:[];
-  if(!rows.length){list.innerHTML=`<div class="jl-bank-empty"><span class="jl-emo">🏦</span><b>Создай свой первый банк</b><small>Выбери эмодзи, название и сколько кладёшь на месяц — например 🍔 Еда 1 500 или 🎉 Развлечения 300</small><button class="btn primary" type="button" id="bankFirstBtn">${svgIcon('i-plus')} Создать банк</button></div>`;$('bankFirstBtn').onclick=()=>openBudget();return}
-  list.innerHTML=rows.map(b=>{const li=limitInfo(b),pct=clamp(li.pct,0,100),cls=li.remaining<0?'over':li.pct>=80?'warn':'';return `<div class="jl-bank ${cls}" data-bank="${esc(b.id)}"><div class="jl-bank-top"><span class="jl-emo" aria-hidden="true">${esc(bankIcon(b))}</span><button class="jl-bank-name" type="button" data-bank-edit="${esc(b.id)}"><b>${esc(b.name)} ✏️</b><small>потрачено ${esc(fmtMoney(li.spent))} из ${esc(fmtMoney(li.planned))}</small></button><div class="jl-bank-sum"><b data-bank-left="${esc(b.id)}">${li.remaining<0?'−':''}${esc(fmtNum(Math.abs(li.remaining)))}</b><small>${li.remaining<0?'перерасход':'в банке'}</small></div></div><div class="budget-track"><i class="budget-fill" style="width:${pct}%"></i></div><div class="budget-forecast">${esc(li.text)}</div><div class="jl-bank-actions"><button class="jl-pill green" type="button" data-bank-top="${esc(b.id)}">${svgIcon('i-plus')}Пополнить</button><button class="jl-pill red" type="button" data-bank-spend="${esc(b.name)}">${svgIcon('i-minus')}Расход</button><button class="jl-icon-btn plain" type="button" data-del-budget="${esc(b.id)}" aria-label="Удалить банк ${esc(b.name)}">${svgIcon('i-trash')}</button></div></div>`}).join('');
+  if(!rows.length){painter(list).html=`<div class="jl-bank-empty"><span class="jl-emo">🏦</span><b>Создай свой первый банк</b><small>Выбери эмодзи, название и сколько кладёшь на месяц — например 🍔 Еда 1 500 или 🎉 Развлечения 300</small><button class="btn primary" type="button" id="bankFirstBtn">${svgIcon('i-plus')} Создать банк</button></div>`;$('bankFirstBtn').onclick=()=>openBudget();return}
+  painter(list).html=rows.map(b=>{const li=limitInfo(b),pct=clamp(li.pct,0,100),cls=li.remaining<0?'over':li.pct>=80?'warn':'';return `<div class="jl-bank ${cls}" data-bank="${esc(b.id)}"><div class="jl-bank-top"><span class="jl-emo" aria-hidden="true">${esc(bankIcon(b))}</span><button class="jl-bank-name" type="button" data-bank-edit="${esc(b.id)}"><b>${esc(b.name)} ✏️</b><small>потрачено ${esc(fmtMoney(li.spent))} из ${esc(fmtMoney(li.planned))}</small></button><div class="jl-bank-sum"><b data-bank-left="${esc(b.id)}">${li.remaining<0?'−':''}${esc(fmtNum(Math.abs(li.remaining)))}</b><small>${li.remaining<0?'перерасход':'в банке'}</small></div></div><div class="budget-track"><i class="budget-fill" style="width:${pct}%"></i></div><div class="budget-forecast">${esc(li.text)}</div><div class="jl-bank-actions"><button class="jl-pill green" type="button" data-bank-top="${esc(b.id)}">${svgIcon('i-plus')}Пополнить</button><button class="jl-pill red" type="button" data-bank-spend="${esc(b.name)}">${svgIcon('i-minus')}Расход</button><button class="jl-icon-btn plain" type="button" data-del-budget="${esc(b.id)}" aria-label="Удалить банк ${esc(b.name)}">${svgIcon('i-trash')}</button></div></div>`}).join('');
   // the bank lights up when its money changes: green — more, orange — spent
   for(const b of rows){const li=limitInfo(b),v=li.remaining,prev=_bankShown[b.id];_bankShown[b.id]=v;if(prev===undefined||prev===v)continue;const el=list.querySelector(`[data-bank="${CSS.escape(b.id)}"]`);if(!el)continue;el.classList.remove('glow-up','glow-down');void el.offsetWidth;el.classList.add(v>prev?'glow-up':'glow-down');const num=el.querySelector('[data-bank-left]');if(num&&v>=0&&prev>=0){num.dataset.shown=fmtNum(prev);countTo(num,fmtNum(v))}}
   $$('[data-bank-edit]').forEach(b=>b.onclick=()=>openBudget(b.dataset.bankEdit));
@@ -3789,7 +3850,7 @@ function openBudget(id=''){
 function renderMoney(){
   const debt=debtTotal(),debtBase=Math.max(0,Number(state.debtBaseline)||debt),debtPaid=Math.max(0,debtBase-debt),incomePlan=Math.max(0,Number(state.income)||0),payShare=incomePlan?Math.round((Number(state.debts.monthlyPayment||0)/incomePlan)*100):0;
   const ds=$('debtSummary');if(ds){const cell=(key,ico,label,val,note,cls='')=>`<button type="button" class="kpi jl-debt-cell" data-debt-open="${key}"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#${ico}"></use></svg></span>${label}</div><div class="value ${cls}">${esc(val)}</div><div class="debt-kpi-note">${note}</div><span class="jl-debt-go" aria-hidden="true">${svgIcon('i-chevron-right')}</span></button>`;
-    ds.innerHTML=`<div class="kpi-row jl-debt-cells">${cell('bank','i-card','Банк',fmtMoney(state.debts.bank),'платежи и история')}${cell('firms','i-briefcase','Фирмы',fmtMoney(state.debts.firms),'платежи и история')}${cell('all','i-money','Всего',fmtMoney(debt),'всех обязательств')}${cell('pay','i-calendar','Платёж / месяц',fmtMoney(state.debts.monthlyPayment||0),payShare?`≈ ${payShare}% от плана дохода`:'изменить')}${cell('paid','i-check','Погашено',fmtMoney(debtPaid),'от стартовой суммы','blue')}</div>`;
+    painter(ds).html=`<div class="kpi-row jl-debt-cells">${cell('bank','i-card','Банк',fmtMoney(state.debts.bank),'платежи и история')}${cell('firms','i-briefcase','Фирмы',fmtMoney(state.debts.firms),'платежи и история')}${cell('all','i-money','Всего',fmtMoney(debt),'всех обязательств')}${cell('pay','i-calendar','Платёж / месяц',fmtMoney(state.debts.monthlyPayment||0),payShare?`≈ ${payShare}% от плана дохода`:'изменить')}${cell('paid','i-check','Погашено',fmtMoney(debtPaid),'от стартовой суммы','blue')}</div>`;
     $$('[data-debt-open]').forEach(b=>b.onclick=()=>b.dataset.debtOpen==='pay'?openDebtEdit():openDebtHistory(b.dataset.debtOpen))}
   renderDebtChart();renderDebtPlan();renderBudgets();renderMoneyCharts();renderMoneyV57();
 }
@@ -3800,10 +3861,10 @@ function renderNotes(){
   let notes=[...(state.notes||[])].sort((a,b)=>(Number(b.pinned)-Number(a.pinned))||(Date.parse(b.updatedAt||b.at||0)-Date.parse(a.updatedAt||a.at||0)));
   if(noteFilter!=='all')notes=notes.filter(n=>(n.category||'personal')===noteFilter);
   if(q)notes=notes.filter(n=>((n.title||'')+' '+(n.body||'')).toLowerCase().includes(q));
-  const trash=$('trashCount'); if(trash)trash.textContent=String((state.notesTrash||[]).length);
+  const trash=$('trashCount'); if(trash)textOf(trash).v=String((state.notesTrash||[]).length);
   $$('[data-note-filter]').forEach(b=>b.classList.toggle('active',b.dataset.noteFilter===noteFilter));
   const list=$('notesList'); if(!list)return;
-  list.innerHTML=notes.length?notes.map(n=>{const c=NOTE_CATS[n.category]||NOTE_CATS.personal;return `<button class="card v-note" type="button" data-edit-note="${esc(n.id)}" style="--nc:${c.color}"><span class="v-note-ico">${svgIcon(c.icon)}</span><span style="min-width:0"><span class="v-note-top"><span class="v-note-title">${n.pinned?'📌 ':''}${esc(n.title||'Без заголовка')}</span><span class="v-note-date">${esc(fmtNoteDate(n.updatedAt||n.at))}</span></span><span class="v-note-prev">${notePreviewHTML(n.body)}</span><span class="v-note-tag">${esc(c.label)}</span></span></button>`}).join(''):`<div class="v-empty">${q||noteFilter!=='all'?'Ничего не найдено.':'Заметок пока нет. Нажми «+», чтобы создать.'}</div>`;
+  painter(list).html=notes.length?notes.map(n=>{const c=NOTE_CATS[n.category]||NOTE_CATS.personal;return `<button class="card v-note" type="button" data-edit-note="${esc(n.id)}" style="--nc:${c.color}"><span class="v-note-ico">${svgIcon(c.icon)}</span><span style="min-width:0"><span class="v-note-top"><span class="v-note-title">${n.pinned?'📌 ':''}${esc(n.title||'Без заголовка')}</span><span class="v-note-date">${esc(fmtNoteDate(n.updatedAt||n.at))}</span></span><span class="v-note-prev">${notePreviewHTML(n.body)}</span><span class="v-note-tag">${esc(c.label)}</span></span></button>`}).join(''):`<div class="v-empty">${q||noteFilter!=='all'?'Ничего не найдено.':'Заметок пока нет. Нажми «+», чтобы создать.'}</div>`;
   $$('[data-edit-note]').forEach(b=>b.onclick=()=>openNote(b.dataset.editNote));
 }
 function renderTrashHTML(){
@@ -4432,12 +4493,12 @@ function habitSub(h){
 function renderHabits(){
   const box=$('habitList');if(!box)return;const list=state.habits||[],today=new Date(),tk=keyDay(today);
   if(!list.length){
-    box.innerHTML='<div class="v-sub" style="margin-top:4px">Добавь первую привычку — в один тап:</div><div class="jl-habit-ideas">'+HABIT_IDEAS.map((x,i)=>`<button class="jl-pill" type="button" data-habit-idea="${i}">${svgIcon('i-plus')}${esc(x[0])}</button>`).join('')+'</div>';
+    painter(box).html='<div class="v-sub" style="margin-top:4px">Добавь первую привычку — в один тап:</div><div class="jl-habit-ideas">'+HABIT_IDEAS.map((x,i)=>`<button class="jl-pill" type="button" data-habit-idea="${i}">${svgIcon('i-plus')}${esc(x[0])}</button>`).join('')+'</div>';
     $$('[data-habit-idea]').forEach(b=>b.onclick=()=>{const [title,kind,target,avoid]=HABIT_IDEAS[Number(b.dataset.habitIdea)];addHabit(title,kind,target,avoid)});
-    setText('habitSummary','Отмечай каждый день — серия растёт');miniRing('habitRing',0,0);const hw=$('habitWeek');if(hw)hw.innerHTML='';return;
+    setText('habitSummary','Отмечай каждый день — серия растёт');miniRing('habitRing',0,0);const hw=$('habitWeek');if(hw)painter(hw).html='';return;
   }
   let doneToday=0,dueToday=0;
-  box.innerHTML=list.map(h=>{
+  painter(box).html=list.map(h=>{
     const due=habitDue(h,today),done=habitDoneOn(h,tk);if(due){dueToday++;if(done)doneToday++}
     const d=new Date(today);d.setDate(d.getDate()-6);let dots='';
     for(let i=0;i<7;i++){const k=keyDay(d),on=habitDoneOn(h,k),dd=habitDue(h,d);dots+=`<i class="${on?'on':''}${!dd&&!on?' off':''}${i===6?' today':''}" title="${esc(d.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric'}))}${on?' — выполнено':''}"></i>`;d.setDate(d.getDate()+1)}
@@ -4448,11 +4509,11 @@ function renderHabits(){
   $$('[data-habit-check]').forEach(b=>b.onclick=()=>toggleHabit(b.dataset.habitCheck));
   $$('[data-habit-edit]').forEach(b=>b.onclick=()=>openHabitEditor(b.dataset.habitEdit));
 }
-function renderHabitWeek(){const el=$('habitWeek');if(!el)return;const list=state.habits||[];if(!list.length){el.innerHTML='';return}
+function renderHabitWeek(){const el=$('habitWeek');if(!el)return;const list=state.habits||[];if(!list.length){painter(el).html='';return}
   const d=new Date();d.setDate(d.getDate()-6);let bars='';
   for(let i=0;i<7;i++){const k=keyDay(d);let due=0,ok=0;for(const h of list){const on=habitDoneOn(h,k);if(habitDue(h,d)||on){due++;if(on)ok++}}
     const p=due?Math.round(ok/due*100):0;bars+=`<div class="jl-hw-col ${i===6?'today':''}" title="${esc(d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric'}))}: ${ok} из ${due}"><span class="jl-hw-bar"><i style="height:${Math.max(p,4)}%;${p===100?'background:var(--green)':''}"></i></span><small>${esc(d.toLocaleDateString('ru-RU',{weekday:'short'}).replace('.',''))}</small></div>`;d.setDate(d.getDate()+1)}
-  el.innerHTML=`<div class="jl-hw-head"><b>📊 Неделя привычек</b><small>столбик — сколько выполнено в этот день</small></div><div class="jl-hw-grid">${bars}</div>`}
+  painter(el).html=`<div class="jl-hw-head"><b>📊 Неделя привычек</b><small>столбик — сколько выполнено в этот день</small></div><div class="jl-hw-grid">${bars}</div>`}
 function toggleHabit(id){
   const h=(state.habits||[]).find(x=>x.id===id);if(!h)return;const k=keyDay();
   state.habitLog=state.habitLog&&typeof state.habitLog==='object'?state.habitLog:{};const log=state.habitLog[id]=state.habitLog[id]||{};
@@ -4791,13 +4852,13 @@ let mcRange=null,mcRangeMode=false;
 function mcSetRange(from,to){mcRange=from&&to?(from<=to?{from,to}:{from:to,to:from}):null;renderMoneyCalendar()}
 function renderCalendarRange(byAll){
   const box=$('mcRangeBox');if(!box)return;
-  if(!mcRange){box.innerHTML='';return}
+  if(!mcRange){painter(box).html='';return}
   const rows=allTransactions().filter(t=>t.dateKey>=mcRange.from&&t.dateKey<=mcRange.to);
   const inc=rows.filter(t=>t.kind==='income').reduce((a,t)=>a+t.amount,0),out=rows.filter(t=>t.kind==='expense'&&!t.xfer).reduce((a,t)=>a+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((a,t)=>a+t.amount,0);
   const cats={};for(const t of rows)if(t.kind==='expense'&&!t.xfer){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
   const top=Object.entries(cats).sort((a,b)=>b[1].v-a[1].v).slice(0,6),days=Math.round((Date.parse(mcRange.to)-Date.parse(mcRange.from))/DAY_MS)+1;
   const f=d=>new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
-  box.innerHTML=`<div class="jl-range"><div class="jl-range-head"><b>📅 ${esc(f(mcRange.from))} — ${esc(f(mcRange.to))}</b><small>${days} ${plural(days,'день','дня','дней')} · ${rows.length} ${plural(rows.length,'операция','операции','операций')}</small><button class="jl-icon-btn plain" type="button" id="mcRangeClear" aria-label="Сбросить период">${svgIcon('i-x')}</button></div>
+  painter(box).html=`<div class="jl-range"><div class="jl-range-head"><b>📅 ${esc(f(mcRange.from))} — ${esc(f(mcRange.to))}</b><small>${days} ${plural(days,'день','дня','дней')} · ${rows.length} ${plural(rows.length,'операция','операции','операций')}</small><button class="jl-icon-btn plain" type="button" id="mcRangeClear" aria-label="Сбросить период">${svgIcon('i-x')}</button></div>
   <div class="jl-deep-kpis"><div><span>Доход</span><b class="green-txt">${esc(fmtNum(inc))}</b></div><div><span>Расход</span><b class="red-txt">${esc(fmtNum(out))}</b></div><div><span>В день</span><b>${esc(fmtNum(Math.round(out/Math.max(1,days))))}</b></div></div>
   ${top.length?top.map(([k,x])=>`<div class="jl-deep-cat"><span class="jl-emo">${esc(x.e)}</span><span>${esc(k)}</span><div class="budget-track"><i class="budget-fill" style="width:${out?Math.round(x.v/out*100):0}%"></i></div><b>${esc(fmtNum(x.v))}</b></div>`).join(''):'<div class="v-sub">Расходов за период нет.</div>'}${dp>0?`<div class="jl-debtpay"><span aria-hidden="true">🏦</span> Платежи по долгу: <b>${esc(fmtMoney(dp))}</b></div>`:''}</div>`;
   $('mcRangeClear').onclick=()=>{mcRangeMode=false;mcSetRange(null)};
@@ -4814,7 +4875,7 @@ function lagText(l){if(!l)return '';if(Math.abs(l.diff)<1)return '✅ Идёшь
 function renderGoalHero(){
   const main=(state.goals||[]).find(g=>g.main),f=goalFinanceMetrics(),pct=f.target?clamp(f.pct,0,100):0,C=2*Math.PI*50,ring=$('goalRing');
   if(ring){ring.style.strokeDasharray=C.toFixed(1);ring.style.strokeDashoffset=(C*(1-pct/100)).toFixed(1)}
-  const ico=$('goalHeroIco');if(ico&&main){const h=svgIcon(ICON_IDS[main.icon]||'i-target');if(ico.innerHTML!==h)ico.innerHTML=h;ico.style.color=goalColor(main)}
+  const ico=$('goalHeroIco');if(ico&&main){const h=svgIcon(ICON_IDS[main.icon]||'i-target');if(ico.innerHTML!==h)painter(ico).html=h;ico.style.color=goalColor(main)}
   setText('goalLeftText',f.target?(f.completed?'🎉 Цель достигнута!':`Осталось ${fmtMoney(f.remaining)}${f.targetDate?' · до '+new Date(f.targetDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}):''}`):'');
   {const cur=currencyLabel(),ms=state.goal?.milestones||[],msDone=ms.filter(m=>m.done).length;
    setText('ghSaved',fmtShort(f.target?Math.min(f.target,f.available):f.saved));setText('ghSavedSub',cur+(f.saved?` · в цели ${fmtShort(f.saved)}`:''));
@@ -4879,7 +4940,7 @@ function setRing(id,pct){const el=$(id);if(!el)return;const v=clamp(Number(pct)|
 // Encouraging, never scolding: 0% early in the day is simply «ahead», not a failure.
 const RING_LEVELS=[[75,'Отлично','var(--green)'],[50,'Хорошо','var(--blue)'],[25,'В процессе','var(--cyan)'],[1,'Начало','var(--orange)'],[0,'Впереди','var(--muted)']];
 function ringLevel(v){return RING_LEVELS.find(x=>v>=x[0])||RING_LEVELS[RING_LEVELS.length-1]}
-function setRingState(name,v,label){const ring=$('ring'+name),st=$('ring'+name+'State');const lv=ringLevel(clamp(Number(v)||0,0,100)),text=label||lv[1];if(ring)ring.closest('.ring')?.style.setProperty('--rc',lv[2]);if(st){st.textContent=text;st.style.color=lv[2]}}
+function setRingState(name,v,label){const ring=$('ring'+name),st=$('ring'+name+'State');const lv=ringLevel(clamp(Number(v)||0,0,100)),text=label||lv[1];if(ring)ring.closest('.ring')?.style.setProperty('--rc',lv[2]);if(st){textOf(st).v=text;if(st.style.color!==lv[2])st.style.color=lv[2]}}
 
 function renderPulseRings(){
   const p=getLifePulse();setRing('ringDay',p.day);setRing('ringGoal',p.goal);setRing('ringFinance',p.finance);setRing('ringDiscipline',p.discipline);setRing('ringDebt',p.debt);
@@ -4929,7 +4990,7 @@ function todayTasks(){const k=keyDay();return (state.tasks||[]).filter(t=>t.date
 function renderTasks(){if(appReadyForSync)carryOverTasks();pushWidget();
   const list=$('taskList');if(!list)return;const rep=dayReport(),m=nowMin();
   const tasks=todayTasks().map(t=>{const late=!t.done&&t.time&&m>=timeToMin(t.time),lead=taskLead(t);return `<div class="v-task ${t.done?'done':''} ${late?'overdue':''} ${t.time&&!t.done?'timed':''}" data-task-row="${esc(t.id)}"><input class="v-check" type="checkbox" data-task-id="${esc(t.id)}" ${t.done?'checked':''} aria-label="${esc('Задача: '+t.title)}"><button class="jl-task-emo" type="button" data-task-emo="${esc(t.id)}" aria-label="${esc((t.done?'Вернуть: ':'Готово: ')+t.title)}">${t.done?'✅':taskEmoji(t.title)}</button><div><div class="v-task-title">${esc(t.title)}${t.goal?`<span class="jl-goal-tag" title="Задача к цели">🎯 ${esc(taskGoalLabel(t))}</span>`:''}</div><div class="v-task-meta">${t.done&&t.doneAt?'Выполнено в '+esc(new Date(t.doneAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})):late?'Время прошло — отметь или перенеси':t.time?`<span class="v-remind">${svgIcon('i-bell')} <span data-task-left>в ${esc(t.time)}</span></span>`:(t.carriedFrom?'↪️ перенесено с '+esc(new Date(t.carriedFrom+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})):'Задача')}</div>${t.time&&!t.done?`<div class="jl-task-bar" data-task-bar="${esc(t.id)}"><i></i></div>`:''}</div><span class="v-task-time">${esc(t.time||'')}</span><button class="v-task-del" type="button" data-task-del="${esc(t.id)}" aria-label="Удалить задачу">${svgIcon('i-x')}</button></div>`});
-  list.innerHTML=tasks.join('')||'<div class="v-empty">Задач на сегодня нет — нажми «+», чтобы добавить.</div>';
+  painter(list).html=tasks.join('')||'<div class="v-empty">Задач на сегодня нет — нажми «+», чтобы добавить.</div>';
   const all=todayTasks(),doneCount=all.filter(t=>t.done).length;setText('taskSummary',all.length?(doneCount===all.length?`Все ${all.length} готовы — отличный день 🎉`:`${doneCount} из ${all.length} задач выполнено`):'Добавь задачу кнопкой «+»');miniRing('taskRing',doneCount,all.length);
   $$('[data-task-emo]').forEach(b=>b.onclick=()=>{const c=document.querySelector(`[data-task-id="${CSS.escape(b.dataset.taskEmo)}"]`);if(c){c.checked=!c.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}});
   $$('[data-task-id]').forEach(c=>c.onchange=()=>{const t=(state.tasks||[]).find(x=>x.id===c.dataset.taskId);if(!t)return;t.done=c.checked;t.doneAt=c.checked?new Date().toISOString():'';saveState();renderTasks();scheduleNativeTasks();if(t.goal){renderGoal();renderDayLedger()}if(c.checked){const row=document.querySelector(`[data-task-row="${CSS.escape(t.id)}"]`);row?.classList.add('just-done');const a=todayTasks();if(a.length>1&&a.every(x=>x.done)){celebrate();toast('Все задачи на сегодня готовы','Сильный день 💪')}else if(t.goal){const m=(state.goal?.milestones||[]).find(x=>x.id===t.ms);toast('Шаг к цели сделан 🎯',m?'Этап «'+m.title+'» продвинулся':t.title)}else toast('Задача выполнена',t.title)}});
@@ -4946,17 +5007,17 @@ function openQuickAdd(){
   $('closeModalBtn').onclick=closeModal;
   $$('[data-quick]').forEach(b=>b.onclick=()=>{const k=b.dataset.quick;closeModal();if(k==='task')openTaskForm();else if(k==='note'){showView('viewNotes');openNoteEditor()}else openMoneyForm(k)});
 }
-function openTaskForm(){
+function openTaskForm(preMs){
   const ms=(state.goal?.milestones||[]),cm=currentMilestone(),gt=String(state.goal?.title||'Главная цель').slice(0,28);
   const goalOpts=[['Без цели','',''],[`🎯 ${gt}`+(cm?` · этап ${cm.i+1}`:''),'main',cm?.m.id||''],...ms.map((m,i)=>[m,i]).filter(([m,i])=>!m.done&&i!==cm?.i).slice(0,3).map(([m,i])=>[`🏁 Этап ${i+1}: ${String(m.title).slice(0,26)}`,'main',m.id])];
-  let goalPick=goalOpts[0];
+  const pre=typeof preMs==='string'?goalOpts.findIndex(o=>o[1]&&o[2]===preMs):-1,preI=pre>0?pre:0;let goalPick=goalOpts[preI];
   const quick=[['Без времени','',''],['Через 1 час','+60',''],['Через 3 часа','+180',''],['Сегодня 18:00','18:00',''],['Завтра 09:00','09:00','tomorrow']];
   openModal(`<div class="close-row"><div><div class="eyebrow">Задача</div><h2>Что нужно сделать?</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
   <div class="stack" style="margin-top:12px"><input id="taskTitle" class="jl-big-input" maxlength="140" placeholder="Например: позвонить в банк" enterkeyhint="done">
   <div class="jl-chips" id="taskWhen">${quick.map((q,i)=>`<button class="jl-chip ${i===0?'active':''}" type="button" data-when="${i}">${q[0]}</button>`).join('')}<button class="jl-chip" type="button" data-when="custom">🗓️ Своё время</button></div>
   <div class="grid g2" id="taskCustom" hidden><div class="field"><label for="taskTime">Время</label><input id="taskTime" type="time"></div><div class="field"><label for="taskDate">Дата</label><input id="taskDate" type="date" value="${esc(keyDay())}"></div></div>
   <div class="sub" id="taskHint">Без времени — просто в списке на сегодня.</div>
-  <div class="jl-task-goal"><div class="jl-task-goal-h">🎯 К цели <small>засчитается в этап цели</small></div><div class="jl-chips" id="taskGoal">${goalOpts.map((o,i)=>`<button class="jl-chip ${i===0?'active':''}" type="button" data-task-goal="${i}" aria-pressed="${i===0}">${esc(o[0])}</button>`).join('')}</div></div>
+  <div class="jl-task-goal"><div class="jl-task-goal-h">🎯 К цели <small>засчитается в этап цели</small></div><div class="jl-chips" id="taskGoal">${goalOpts.map((o,i)=>`<button class="jl-chip ${i===preI?'active':''}" type="button" data-task-goal="${i}" aria-pressed="${i===preI}">${esc(o[0])}</button>`).join('')}</div></div>
   <button class="btn primary jl-close-btn" id="saveTaskBtn" type="button">${svgIcon('i-check')} Добавить</button></div>`);
   $('closeModalBtn').onclick=closeModal;
   let when=quick[0];const lead=Math.max(0,Number(state.settings?.preMinutes)||10)||10;
@@ -4975,7 +5036,7 @@ function renderGoals(){
   const list=$('goalList');if(!list)return;
   const all=[...(state.goals||[])],goals=all.filter(g=>!g.main).sort((a,b)=>Date.parse(a.createdAt||0)-Date.parse(b.createdAt||0));
   let doneCount=all.filter(g=>g.main&&goalProgress(g).done).length;
-  list.innerHTML=goals.map(g=>{const p=goalProgress(g);if(p.done)doneCount++;const title=g.main?state.goal.title:g.title;return `<button class="card v-goal-item" type="button" data-goal-open="${esc(g.id)}" style="--gc:${goalColor(g)}"><span class="v-goal-ico">${svgIcon(ICON_IDS[g.icon]||'i-target')}</span><span style="min-width:0"><span class="v-goal-top"><span class="v-goal-name">${esc(title)}${g.main?'<span class="v-badge">Главная</span>':''}${p.done?'<span class="v-badge ok">Готово</span>':''}</span></span><span class="v-goal-sum" style="display:block">${p.target?`<b>${esc(fmtMoney(p.target))}</b> · собрано ${esc(fmtMoney(p.collected))}`:'Сумма не задана'}</span><span class="v-bar-row"><span class="v-bar" style="display:block"><i style="width:${p.pct}%"></i></span><span class="v-goal-pct">${p.pct}%</span></span><span class="v-goal-foot"><span>${esc(lagText(goalLag(g))||daysLeftText(p))}</span><span>${p.target&&!p.done?'Ещё '+esc(fmtMoney(p.remaining)):''}</span></span></span></button>`}).join('')||'<div class="v-empty">Других целей нет. Добавь кнопкой «+» вверху.</div>';
+  painter(list).html=goals.map(g=>{const p=goalProgress(g);if(p.done)doneCount++;const title=g.main?state.goal.title:g.title;return `<button class="card v-goal-item" type="button" data-goal-open="${esc(g.id)}" style="--gc:${goalColor(g)}"><span class="v-goal-ico">${svgIcon(ICON_IDS[g.icon]||'i-target')}</span><span style="min-width:0"><span class="v-goal-top"><span class="v-goal-name">${esc(title)}${g.main?'<span class="v-badge">Главная</span>':''}${p.done?'<span class="v-badge ok">Готово</span>':''}</span></span><span class="v-goal-sum" style="display:block">${p.target?`<b>${esc(fmtMoney(p.target))}</b> · собрано ${esc(fmtMoney(p.collected))}`:'Сумма не задана'}</span><span class="v-bar-row"><span class="v-bar" style="display:block"><i style="width:${p.pct}%"></i></span><span class="v-goal-pct">${p.pct}%</span></span><span class="v-goal-foot"><span>${esc(lagText(goalLag(g))||daysLeftText(p))}</span><span>${p.target&&!p.done?'Ещё '+esc(fmtMoney(p.remaining)):''}</span></span></span></button>`}).join('')||'<div class="v-empty">Других целей нет. Добавь кнопкой «+» вверху.</div>';
   setText('goalsSummary',`${all.length} ${plural(all.length,'цель','цели','целей')} · достигнуто ${doneCount}`);
   $$('[data-goal-open]').forEach(b=>b.onclick=()=>openGoalEditor(b.dataset.goalOpen));
 }
@@ -5119,8 +5180,10 @@ function moneyBuckets(period){
   else if(period<=90){for(let i=12;i>=0;i--){const e=new Date(now);e.setDate(now.getDate()-i*7);const s=new Date(e);s.setDate(e.getDate()-6);out.push({start:keyDay(s),end:keyDay(e),endTs:new Date(e.getFullYear(),e.getMonth(),e.getDate(),23,59,59,999).getTime(),label:shortDateLabel(keyDay(e))})}}
   else{for(let i=11;i>=0;i--){const s=new Date(now.getFullYear(),now.getMonth()-i,1),e=new Date(s.getFullYear(),s.getMonth()+1,0,23,59,59,999);out.push({start:keyDay(s),end:keyDay(e),endTs:Math.min(e.getTime(),Date.now()),label:s.toLocaleDateString('ru-RU',{month:'short'}).replace('.','')})}}
   const cashAt=cashSeriesFn();
-  const spend=spendOnly(state.expenses),pays=debtPaysOnly(state.expenses);
-  return out.map(b=>({...b,income:sumMoneyRange(state.profits,b.start,b.end),expense:sumMoneyRange(spend,b.start,b.end),debt:sumMoneyRange(pays,b.start,b.end),balance:cashAt(b.endTs)}));
+  // the same sums as sumMoneyRange, but each record's day is worked out once (not once per bucket) — 3000 operations stay fast
+  const dayMap=list=>{const m=new Map();for(const x of list||[]){const k=txDay(x);if(k)m.set(k,(m.get(k)||0)+(Number(x.amount)||0))}return m},range=(m,a,z)=>{let v=0;for(const [k,x] of m)if(k>=a&&k<=z)v+=x;return v};
+  const inc=dayMap(state.profits),spend=dayMap(spendOnly(state.expenses)),pays=dayMap(debtPaysOnly(state.expenses));
+  return out.map(b=>({...b,income:range(inc,b.start,b.end),expense:range(spend,b.start,b.end),debt:range(pays,b.start,b.end),balance:cashAt(b.endTs)}));
 }
 function barLineChartSVG(b){
   const ax=v=>{const a=Math.abs(v);return a>=1e6?(v/1e6).toLocaleString('ru-RU',{maximumFractionDigits:1})+'м':a>=1e3?(v/1e3).toLocaleString('ru-RU',{maximumFractionDigits:1})+'к':Math.round(v).toLocaleString('ru-RU')};
@@ -5140,9 +5203,9 @@ function renderMoneyOverview(){
   const b=moneyBuckets(mvPeriod),inc=b.reduce((s,x)=>s+x.income,0),out=b.reduce((s,x)=>s+x.expense,0);debtPayLine('mvDebtPay',b.reduce((s,x)=>s+x.debt,0));
   setMoneyKpi('mvBalance',walletMetrics().cash);setMoneyKpi('mvIncome',inc);setMoneyKpi('mvExpense',out);setMoneyKpi('mvDebt',debtTotal());
   setText('mvRange',b.length?shortDateLabel(b[0].start)+' — '+shortDateLabel(b[b.length-1].end):'—');
-  const chart=$('mvChart');if(chart)chart.innerHTML=(inc||out)?barLineChartSVG(b):'<div class="v-empty">За период операций нет — добавь доход или расход.</div>';
+  const chart=$('mvChart');if(chart)painter(chart).html=(inc||out)?barLineChartSVG(b):'<div class="v-empty">За период операций нет — добавь доход или расход.</div>';
   $$('[data-mv-period]').forEach(x=>x.classList.toggle('active',Number(x.dataset.mvPeriod)===mvPeriod));
-  const recent=allTransactions().slice(0,6),box=$('mvRecent');if(box){box.innerHTML=recent.length?recent.map(t=>txRowHTML(t,true)).join(''):'<div class="v-empty">Транзакций пока нет.</div>';bindTxRows(box)}
+  const recent=allTransactions().slice(0,6),box=$('mvRecent');if(box){painter(box).html=recent.length?recent.map(t=>txRowHTML(t,true)).join(''):'<div class="v-empty">Транзакций пока нет.</div>';bindTxRows(box)}
 }
 function txMatchesFilter(t){if(txFilter==='all')return true;if(txFilter==='income')return t.kind==='income';if(txFilter==='expense')return t.kind==='expense';return t.kind==='transfer'||t.kind==='debt'}
 function renderTxList(){
@@ -5150,7 +5213,7 @@ function renderTxList(){
   const rows=allTransactions().filter(txMatchesFilter).filter(t=>!q||(t.title+' '+t.note+' '+t.amount).toLowerCase().includes(q));
   const shown=rows.slice(0,txLimit);let html='',last='';
   for(const t of shown){if(t.dateKey!==last){last=t.dateKey;html+=`<div class="v-tx-date">${esc(new Date(t.dateKey+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}</div>`}html+=txRowHTML(t)}
-  box.innerHTML=html||'<div class="v-empty">Ничего не найдено.</div>';bindTxRows(box);
+  painter(box).html=html||'<div class="v-empty">Ничего не найдено.</div>';bindTxRows(box);
   const inc=rows.filter(t=>t.kind==='income').reduce((s,t)=>s+t.amount,0),out=rows.filter(t=>t.kind==='expense'&&!t.xfer).reduce((s,t)=>s+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((s,t)=>s+t.amount,0);
   setText('txSummary',`${rows.length} ${plural(rows.length,'операция','операции','операций')} · доход ${fmtMoney(inc)} · расход ${fmtMoney(out)}${dp>0?' · долг '+fmtMoney(dp):''}`);
   const more=$('txMore');if(more)more.hidden=rows.length<=txLimit;
@@ -5163,12 +5226,12 @@ function renderMoneyCalendar(){
   const byDay=new Map();for(const t of allTransactions()){if(!t.dateKey.startsWith(monthPrefix))continue;const d=byDay.get(t.dateKey)||{income:0,expense:0,debt:0,transfer:0,list:[]};if(t.kind==='income')d.income+=t.amount;else if(t.kind==='transfer'||t.xfer)d.transfer+=t.amount;else if(t.kind==='debt')d.debt+=t.amount;else d.expense+=t.amount;d.list.push(t);byDay.set(t.dateKey,d)}
   let html=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(w=>`<div class="mc-week">${w}</div>`).join('');for(let i=0;i<lead;i++)html+='<div class="mc-day empty" aria-hidden="true"></div>';
   for(let day=1;day<=days;day++){const k=keyDay(new Date(mcYear,mcMonth,day)),d=byDay.get(k),dots=d?[d.income?'<i style="--dc:var(--green)"></i>':'',d.expense||d.debt?'<i style="--dc:var(--red)"></i>':'',d.transfer?'<i style="--dc:var(--blue)"></i>':''].join(''):'';const inR=mcRange&&k>=mcRange.from&&k<=mcRange.to;html+=`<button type="button" class="mc-day${k===today?' today':''}${k===mcSelected&&!mcRange?' sel':''}${inR?' inrange':''}${mcRange&&(k===mcRange.from||k===mcRange.to)?' edge':''}" data-mc-day="${k}" aria-label="${esc(new Date(k+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}))}">${day}<span class="mc-dots">${dots}</span></button>`}
-  grid.innerHTML=html;$$('[data-mc-day]').forEach(b=>b.onclick=()=>{const k=b.dataset.mcDay;if(mcRangeMode){if(!mcRange||mcRange.from!==mcRange.to||mcRange._fresh!==true){mcRange={from:k,to:k,_fresh:true};renderMoneyCalendar();toast('Выбери последний день периода')}else{mcRangeMode=false;mcSetRange(mcRange.from,k);$('mcRangeBtn')?.classList.remove('active')}return}mcRange=null;mcSelected=k;renderMoneyCalendar()});
+  painter(grid).html=html;$$('[data-mc-day]').forEach(b=>b.onclick=()=>{const k=b.dataset.mcDay;if(mcRangeMode){if(!mcRange||mcRange.from!==mcRange.to||mcRange._fresh!==true){mcRange={from:k,to:k,_fresh:true};renderMoneyCalendar();toast('Выбери последний день периода')}else{mcRangeMode=false;mcSetRange(mcRange.from,k);$('mcRangeBtn')?.classList.remove('active')}return}mcRange=null;mcSelected=k;renderMoneyCalendar()});
   renderCalendarRange();
   let inc=0,out=0,dp=0;byDay.forEach(d=>{inc+=d.income;out+=d.expense;dp+=d.debt});const net=inc-out-dp;setText('mcIncome',fmtShort(inc));setText('mcExpense',fmtShort(out));setText('mcNet',(net<0?'−':'')+fmtShort(Math.abs(net)));$('mcIncome').title=fmtMoney(inc);$('mcExpense').title=fmtMoney(out);$('mcNet').title=fmtMoney(net);debtPayLine('mcDebtPay',dp);
   const sel=byDay.get(mcSelected);setText('mcDayTitle',new Date(mcSelected+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}));
   setText('mcDaySum',sel?`Доход ${fmtMoney(sel.income)} · расход ${fmtMoney(sel.expense)}${sel.debt?' · долг '+fmtMoney(sel.debt):''}${sel.transfer?' · переводы '+fmtMoney(sel.transfer):''}`:'Операций нет');
-  const list=$('mcDayList');list.innerHTML=sel?sel.list.map(t=>txRowHTML(t)).join(''):'<div class="v-empty">В этот день операций нет.</div>';bindTxRows(list);
+  const list=$('mcDayList');painter(list).html=sel?sel.list.map(t=>txRowHTML(t)).join(''):'<div class="v-empty">В этот день операций нет.</div>';bindTxRows(list);
 }
 function renderMoneyV57(){if(moneyTab==='overview')renderMoneyOverview();else if(moneyTab==='tx')renderTxList();else renderMoneyCalendar()}
 
@@ -5209,7 +5272,7 @@ const NOTICE_STYLE={tasks:{c:'var(--cyan)',i:'i-check',label:'Задачи'},fin
 function timeAgo(iso){const t=Date.parse(iso);if(!Number.isFinite(t))return '';const m=Math.round((Date.now()-t)/60000);if(m<1)return 'сейчас';if(m<60)return m+' мин';const h=Math.round(m/60);if(h<24)return h+' ч';const d=Math.round(h/24);return d<7?d+' дн':new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'})}
 function renderNotifications(){
   const list=$('notifList');if(!list)return;const all=state.notificationsLog||[],rows=all.filter(n=>notifFilter==='all'||noticeKind(n)===notifFilter).slice(0,80),unread=all.filter(noticeUnread).length;
-  list.innerHTML=rows.length?rows.map(n=>{const k=noticeKind(n),st=NOTICE_STYLE[k],u=noticeUnread(n);return `<button class="v-notif ${u?'unread':''}" type="button" data-notif="${esc(n.id||'')}"><span class="v-notif-ico" style="--nc:${st.c}">${svgIcon(st.i)}</span><span style="min-width:0"><span class="v-notif-title" style="display:block">${esc(n.title)}</span><span class="v-notif-body" style="display:block">${esc(n.body||'')}</span></span><span><span class="v-notif-time">${esc(timeAgo(n.at))}</span>${u?'<span class="v-unread-dot"></span>':''}</span></button>`}).join(''):'<div class="v-empty">Уведомлений нет.</div>';
+  painter(list).html=rows.length?rows.map(n=>{const k=noticeKind(n),st=NOTICE_STYLE[k],u=noticeUnread(n);return `<button class="v-notif ${u?'unread':''}" type="button" data-notif="${esc(n.id||'')}"><span class="v-notif-ico" style="--nc:${st.c}">${svgIcon(st.i)}</span><span style="min-width:0"><span class="v-notif-title" style="display:block">${esc(n.title)}</span><span class="v-notif-body" style="display:block">${esc(n.body||'')}</span></span><span><span class="v-notif-time">${esc(timeAgo(n.at))}</span>${u?'<span class="v-unread-dot"></span>':''}</span></button>`}).join(''):'<div class="v-empty">Уведомлений нет.</div>';
   setText('notifSummary',unread?`Непрочитанных: ${unread}`:'Все уведомления прочитаны');
   $$('[data-notif-filter]').forEach(b=>b.classList.toggle('active',b.dataset.notifFilter===notifFilter));
   $$('[data-notif]').forEach(b=>b.onclick=()=>{const n=all.find(x=>x.id===b.dataset.notif);if(n&&!n.read){n.read=true;saveState();updateBell();renderNotifications()}});
@@ -5327,7 +5390,7 @@ function bind(){
   $$('.bottom [data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
   const homeBrand=$('homeBrand');homeBrand.onclick=()=>{closeModal();showView('viewToday')};homeBrand.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();homeBrand.click()}};
   $('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=()=>{closeModal();showView('viewSettings')};bindV57();$('calendarBtn').onclick=openCalendar;$('pulseDayCard').onclick=openDayProgress;
-  ['rDone','rBlock','rTomorrow'].forEach(id=>$(id).addEventListener('input',()=>{const r=dayReport();r.done=$('rDone').value;r.block=$('rBlock').value;r.tomorrow=$('rTomorrow').value;r.savedAt=r.savedAt||new Date().toISOString();queueAutosave();$('reportSaved').textContent='Черновик сохранён'}));
+  ['rDone','rBlock','rTomorrow'].forEach(id=>$(id).addEventListener('input',()=>{const r=dayReport();r.done=$('rDone').value;r.block=$('rBlock').value;r.tomorrow=$('rTomorrow').value;r.savedAt=r.savedAt||new Date().toISOString();queueAutosave();textOf($('reportSaved')).v='Черновик сохранён'}));
   $('saveReportBtn').onclick=closeDay;
   $('mcRangeBtn')&&($('mcRangeBtn').onclick=()=>{mcRangeMode=!mcRangeMode;$('mcRangeBtn').classList.toggle('active',mcRangeMode);if(mcRangeMode)toast('Выбери первый день периода','потом последний');});
   $$('[data-mc-quick]').forEach(b=>b.onclick=()=>{const d=new Date(),q=b.dataset.mcQuick;let from,to;if(q==='week'){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));from=keyDay(x);to=keyDay(d)}else if(q==='month'){from=keyDay(new Date(d.getFullYear(),d.getMonth(),1));to=keyDay(d)}else{from=keyDay(new Date(d.getFullYear(),d.getMonth()-1,1));to=keyDay(new Date(d.getFullYear(),d.getMonth(),0))}const f=new Date(from+'T12:00:00');mcYear=f.getFullYear();mcMonth=f.getMonth();mcRangeMode=false;mcSetRange(from,to)});$('setEvery2h')?.addEventListener('change',e=>{state.settings.every2h=e.target.checked;saveState();scheduleNative2h();renderFreePlan();toast(e.target.checked?'Напоминания каждые 2 часа включены':'Напоминания каждые 2 часа выключены')});$('addHabitBtn').onclick=()=>openHabitEditor();$('setBackupRow').onclick=openBackups;$('setMoveRow').onclick=openMoveDevice;$('wkRun').onclick=runWeekReview;

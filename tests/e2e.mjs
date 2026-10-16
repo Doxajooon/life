@@ -429,10 +429,11 @@ await test("Нагрузка: 3000 операций и 500 заметок", asyn
   assert.ok(t.save < 200 * slow, "save " + t.save.toFixed(0) + " ms (" + t.all + ")");
   // every screen opens quickly with this much data (best of two)
   const scr = await page.evaluate(() => { const out = {}; for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"]) { const ms = []; for (let i = 0; i < 2; i++) { showView("viewDisplay"); const a = performance.now(); showView(v); ms.push(performance.now() - a); } out[v] = Math.round(Math.min(...ms)); }
-    for (const t of ["tx", "cal", "overview"]) { const a = performance.now(); document.querySelector(`[data-money-tab="${t}"]`).click(); out["money/" + t] = Math.round(performance.now() - a); }
+    for (const t of ["tx", "cal", "overview"]) { const ms = []; for (let i = 0; i < 2; i++) { document.querySelector(`[data-money-tab="${t === "overview" ? "tx" : "overview"}"]`).click(); const a = performance.now(); document.querySelector(`[data-money-tab="${t}"]`).click(); ms.push(performance.now() - a); } out["money/" + t] = Math.round(Math.min(...ms)); }
     const a = performance.now(); openSearch(); const q = document.querySelector("#modal input"); q.value = "Еда"; q.dispatchEvent(new Event("input", { bubbles: true })); out.search = Math.round(performance.now() - a); closeModal(); return out; });
   if (process.env.PERF_LOG) console.log("   screens ms:", JSON.stringify(scr));
-  for (const [k, v] of Object.entries(scr)) assert.ok(v < 400 * slow, `${k} opens in ${v} ms with 3000 operations`);
+  // V72 D13: every screen and tab opens in ≤ 150 ms even on a 4× slower phone
+  for (const [k, v] of Object.entries(scr)) assert.ok(v <= 150, `${k} opens in ${v} ms with 3000 operations and 500 notes (limit 150 ms)`);
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -1303,6 +1304,81 @@ await test("V72 D10: задача «к цели» — значок 🎯, зак�
   // old tasks without the new fields keep working
   const old = await page.evaluate(() => normalize({ tasks: [{ id: "o", title: "Старая", date: keyDay() }] }).tasks[0]);
   assert.ok(!("goal" in old));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D11: этапы цели — дорожка: текущий крупно с % из milestoneAuto и «чтобы закрыть», закрытые с датой, будущие под замком", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => { const td = new Date(); td.setMonth(td.getMonth() + 6);
+    state.goal.finance.targetAmount = 40000; state.goal.finance.targetDate = keyDay(td); state.goal.finance.manualSavedAmount = 8000;
+    state.goal.milestones = [{ id: "a", title: "Подушка 1 месяц", done: true, doneAt: "2026-10-01T10:00:00Z" }, { id: "b", title: "Первый взнос", done: false, autoOff: false }, { id: "c", title: "Ремонт", done: false }];
+    saveState(); showView("viewGoal"); renderGoal();
+    const steps = [...document.querySelectorAll("#milestones .jl-step")], a = milestoneAuto(state.goal.milestones[1], 1, 3);
+    return { cls: steps.map(x => x.className), pct: steps[1].querySelector("[data-ms-pct]")?.textContent, want: Math.round(a.p * 100) + "%", todo: steps[1].querySelector(".jl-ms-todo")?.textContent,
+      done: steps[0].textContent, lock: steps[2].textContent, add: !!steps[1].querySelector("[data-ms-task]") }; });
+  assert.deepEqual(r.cls, ["jl-step done", "jl-step current", "jl-step todo locked"]);
+  assert.equal(r.pct, r.want, "the current stage shows the percent of milestoneAuto");
+  assert.match(r.todo, /Чтобы закрыть: собери ещё/);
+  assert.match(r.done, /Закрыт 1 октября/); assert.match(r.lock, /🔒 Откроется после этапа 2/);
+  // a task straight from the stage
+  await page.click("#milestones [data-ms-task]");
+  assert.equal(await page.getAttribute('[data-task-goal][aria-pressed="true"]', "data-task-goal"), "1", "the stage is preselected in the task form");
+  await page.evaluate(() => closeModal());
+  // closing a stage by hand: date, celebration and a thank-you in «Достигнуто»
+  await page.$eval('[data-ms="b"]', el => el.click()); await page.waitForTimeout(300);
+  const w = await page.evaluate(() => ({ at: state.goal.milestones[1].doneAt, wins: document.getElementById("achievements").textContent }));
+  assert.ok(w.at, "the date is kept"); assert.match(w.wins, /Этап 2 закрыт/);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D12: ничего не скрыто и нет «мёртвых» иконок — нет руки-курсора без действия, кнопки-на-вид работают, текст не обрезан «…»", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const bad = await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay();
+    state.goal.finance.targetAmount = 50000; state.goal.why = "Очень длинное объяснение, зачем нужна эта цель: своя квартира для семьи, спокойствие, стабильность и уверенность в завтрашнем дне";
+    state.profits.push({ id: "p", amount: 8000, sourceGroup: "Зарплата", at: now, dateKey: k }); state.expenses.push({ id: "e", amount: 123456, category: "Очень длинная категория расходов для проверки", at: now, dateKey: k });
+    state.goals.push({ id: "g2", title: "Машина — очень длинное название второй цели для проверки переноса", targetAmount: 9000, icon: "car", color: "green", createdAt: now, contributions: [] });
+    state.habits = [{ id: "h", title: "Очень длинная привычка, которую надо видеть полностью", kind: "daily", target: 7 }]; state.budgets = [{ id: "b", name: "Поездки и отдых за городом с семьёй", planned: 1000, tops: [] }];
+    state.tasks.push({ id: "t", title: "Позвонить в банк и уточнить график платежей по кредиту на следующий месяц", time: "23:00", date: k, goal: "main", ms: state.goal.milestones[0].id }); saveState(); renderAll();
+    const out = [], LOOKS = ".btn,.jl-pill,.v-add,.iconbtn,.jl-chip,.v-link,.jl-icon-btn,.v-icon-btn";
+    for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile", "viewNotifications", "viewDisplay"]) {
+      showView(v);
+      for (const tab of ["overview", "tx", "cal"]) {
+        document.querySelector(`#${v} [data-money-tab="${tab}"]`)?.click();
+        for (const el of document.querySelectorAll(`#${v} *`)) {
+          if (!el.getClientRects().length) continue; const cs = getComputedStyle(el), name = v + "/" + tab + " " + el.tagName + "." + String(el.className.baseVal ?? el.className).slice(0, 30) + " «" + el.textContent.trim().slice(0, 24) + "»";
+          const ctl = el.closest("button,a,label,input,select,textarea,[role=button],[tabindex]");
+          if (cs.cursor === "pointer" && !ctl) out.push("pointer without action: " + name);
+          if (el.matches(LOOKS) && !ctl) out.push("looks like a button but is not one: " + name);
+          if ((cs.textOverflow === "ellipsis" || cs.webkitLineClamp !== "none") && !el.closest(".jl-quote") && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2)) out.push("cut text: " + name);
+        }
+        if (v !== "viewMoney") break;
+      }
+    }
+    return [...new Set(out)]; });
+  assert.deepEqual(bad, [], bad.slice(0, 12).join("\n"));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D13: праздник уходит быстро, тосты не перекрывают «+» и нижнюю панель; повторный рендер ничего не перерисовывает", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => { showView("viewToday"); celebrate(); toast("Спасибо! Этап закрыт 🏁", "Закрыть основную часть долгов — ты сделал это"); });
+  await page.waitForTimeout(450);
+  const r = await page.evaluate(() => { const t = document.getElementById("toast").getBoundingClientRect(), hit = el => { if (!el || !el.getClientRects().length) return false; const b = el.getBoundingClientRect(); return !(t.right <= b.left || t.left >= b.right || t.bottom <= b.top || t.top >= b.bottom); };
+    return { fab: hit(document.getElementById("quickAddBtn")), nav: [...document.querySelectorAll("nav")].some(n => getComputedStyle(n).position === "fixed" && hit(n)), shown: document.getElementById("toast").classList.contains("show") }; });
+  assert.ok(r.shown); assert.equal(r.fab, false, "the toast covers the «+» button"); assert.equal(r.nav, false, "the toast covers the bottom bar");
+  await page.waitForTimeout(1200);
+  assert.equal(await page.evaluate(() => document.querySelectorAll(".jl-confetti").length), 0, "the celebration is still on screen after 1.6 s");
+  // the same data rendered again does not touch the DOM (no flicker)
+  const changed = await page.evaluate(async () => { renderAll(); await new Promise(r => setTimeout(r, 1500)); /* let the number count-ups finish */ let n = 0; const mo = new MutationObserver(l => { n += l.filter(x => x.type === "childList" && !x.target.closest?.("#clock") && !(x.target.parentElement?.closest?.("#clock"))).length; /* the clock ticks by itself */ });
+    mo.observe(document.querySelector("main"), { childList: true, subtree: true }); renderAll(); runScheduler(); await new Promise(r => setTimeout(r, 50)); mo.disconnect(); return n; });
+  assert.equal(changed, 0, "a repeated render rebuilt " + changed + " blocks");
+  // animations: only transform and opacity
+  const css = fs.readFileSync(path.join(ROOT, "index.html"), "utf8").split("</style>")[0], bad = [];
+  for (const m of css.matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]*\{[^{}]*\})*)\s*\}/g)) { const props = [...m[2].matchAll(/([a-z-]+)\s*:/g)].map(x => x[1]).filter(x => !["transform", "opacity"].includes(x)); if (props.length) bad.push(m[1] + ": " + props.join(",")); }
+  assert.deepEqual(bad, [], "animations must move only transform/opacity");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
