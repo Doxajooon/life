@@ -1222,6 +1222,83 @@ await test("Все экраны: каждая кнопка работает, о�
   await ctx.close();
 });
 
+await test("Цифры: одни и те же операции дают одинаковые суммы на всех экранах", async () => {
+  // 3 October, 12:00 in Dushanbe: the week reaches back into September, the month has a midnight-crossing entry
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-03T12:00:00+05:00") });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const r = await page.evaluate(async () => {
+    const base = walletMetrics().cash;
+    state.profits.push({ id: "P1", amount: 9000, sourceGroup: "Зарплата", at: "2026-10-03T05:00:00Z", dateKey: "2026-10-03" },
+      { id: "P2", amount: 1000, sourceGroup: "Фриланс", at: "2026-09-20T05:00:00Z", dateKey: "2026-09-20" });
+    state.expenses.push(
+      { id: "E1", amount: 300, category: "Еда", at: "2026-10-03T05:00:00Z", dateKey: "2026-10-03" },
+      { id: "E2", amount: 200, category: "Кафе", at: "2026-09-30T19:30:00Z", dateKey: "2026-10-01" },      // 00:30 on 1 October in Dushanbe
+      { id: "E3", amount: 150, category: "Еда", at: "2026-10-02T07:00:00Z" },                               // old record without dateKey
+      { id: "D1", amount: 4000, category: "Платёж по долгу", debtPayment: "bank", transfer: true, at: "2026-10-03T06:00:00Z", dateKey: "2026-10-03" },
+      { id: "T1", amount: 500, category: "Перевод", transfer: true, at: "2026-10-02T06:00:00Z", dateKey: "2026-10-02" }, // old transfer stored as an expense
+      { id: "E4", amount: 700, category: "Такси", at: "2026-09-29T06:00:00Z", dateKey: "2026-09-29" },
+      { id: "E5", amount: 50, category: "Еда", at: "2025-12-31T18:30:00Z", dateKey: "2025-12-31" });       // last year
+    state.goal.finance.targetAmount = 50000; state.goal.finance.targetDate = "2027-04-03";
+    state.goal.finance.contributions.push({ id: "G1", amount: 1000, at: "2026-10-03T06:30:00Z" });
+    state.debts = { bank: 90000, firms: 0, monthlyPayment: 4000 };
+    state = normalize(state); saveState(); renderAll(); await new Promise(r => setTimeout(r, 50));
+    const num = id => { const el = document.getElementById(id); const t = (el?.title || el?.textContent || "").replace(/[^\d,−-]/g, "").replace(",", "."); return Number(t.replace("−", "-")); };
+    const out = {};
+    out.todayMonth = num("tmExpense");
+    showView("viewMoney"); mvPeriod = 30; renderMoneyOverview(); out.overview30 = num("mvExpense");
+    mvPeriod = 7; renderMoneyOverview(); out.overview7 = num("mvExpense");
+    mcYear = 2026; mcMonth = 9; mcSelected = "2026-10-03"; mcRange = null; renderMoneyCalendar(); out.calMonth = num("mcExpense"); out.calNet = num("mcNet");
+    out.calDaySum = document.getElementById("mcDaySum").textContent.replace(/\s/g, " ");
+    mcSetRange("2026-01-01", "2026-10-03"); out.calRange = document.getElementById("mcRangeBox").textContent.replace(/\s/g, " ");
+    mcSetRange(null); mcYear = 2025; mcMonth = 11; renderMoneyCalendar(); out.calDec2025 = num("mcExpense");
+    out.daySumOld = daySum(spendOnly(state.expenses), "2026-10-02"); out.dayOld = dayExpenses("2026-10-02"); out.rangeOld = calendarRangeMetrics("2026-01-01", "2026-10-03");
+    out.week = weekStats(); out.donut = document.getElementById("expenseDonutCenter")?.textContent.replace(/\s/g, " ");
+    out.facts = lifeFacts().spend; out.todayBalance = num("todayBalance"); out.cashDelta = walletMetrics().cash - base;
+    showView("viewGoal"); renderGoal(); out.goalNeed = document.getElementById("goalRequiredMonth").textContent.replace(/\s/g, " ");
+    openGoalEditor(mainGoal().id); await new Promise(r => setTimeout(r, 50)); renderGoalPreview(); out.goalFormNeed = (document.getElementById("geMonthly")?.textContent || "").replace(/\s/g, " ");
+    return out;
+  });
+  const ex = JSON.stringify(r, null, 1);
+  // «Расход» = spending only: no transfers, no debt payments
+  assert.equal(r.todayMonth, 650, "Сегодня, месяц " + ex);       // 300 + 200 + 150
+  assert.equal(r.calMonth, 650, "Календарь, месяц " + ex);
+  assert.equal(r.overview30, 1350, "Обзор, 30 дней " + ex);       // + 700 in September
+  assert.equal(r.overview7, 1350, "Обзор, 7 дней " + ex);
+  assert.equal(r.week.out, 1350, "Неделя " + ex); assert.equal(r.week.debt, 4000);
+  assert.equal(r.facts, 1350, "lifeFacts для AI, 30 дней " + ex);
+  assert.equal(r.daySumOld, 150, "daySum, запись без dateKey " + ex);
+  assert.match(r.calDaySum, /расход 300 .*долг 4 000/, "календарь, сумма дня " + ex);
+  assert.equal(r.dayOld, 150, "старый календарь, день без dateKey " + ex);
+  assert.equal(r.rangeOld.expense, 1350, "старый календарь, период " + ex); assert.equal(r.rangeOld.debt, 4000);
+  if (process.env.DBG) console.log(ex);
+  assert.match(r.calRange, /Расход1 350/, "календарь, период " + ex);
+  assert.equal(r.calDec2025, 50, "декабрь прошлого года " + ex);
+  assert.match(r.donut, /650/, "круговая диаграмма месяца " + ex);
+  // the remainder pays for everything
+  assert.equal(r.calNet, 9000 - 650 - 4000, "Баланс месяца " + ex);
+  assert.equal(r.todayBalance, 9000 - 300 - 4000, "Сегодня, остаток дня " + ex);
+  assert.equal(r.cashDelta, 10000 - (300 + 200 + 150 + 4000 + 500 + 700 + 50) - 1000, "касса " + ex);
+  // the goal form and the goal screen agree on «per month»
+  assert.ok(r.goalFormNeed.includes(r.goalNeed), "Нужно в месяц: экран цели «" + r.goalNeed + "», форма «" + r.goalFormNeed + "»");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Цифры: формат сумм — округление, минус, пустые и битые значения, валюта", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => { const sp = x => x.replace(/\s/g, " "), cur = state.profile.currency;
+    const rows = [0, 0.5, 12.345, 999.995, 1234.5, -1234.5, null, undefined, "", "abc", "12", NaN, Infinity, -Infinity, 1e7].map(v => [String(v), sp(fmtMoney(v)), sp(fmtNum(v)), sp(fmtShort(v))]);
+    state.profile.currency = "$"; const usd = sp(fmtMoney(5)); state.profile.currency = cur; return { rows, usd }; });
+  const m = Object.fromEntries(r.rows.map(x => [x[0], x.slice(1)]));
+  assert.deepEqual(m["1234.5"], ["1 235 сомони", "1 235", "1 234,5"]);
+  assert.deepEqual(m["-1234.5"].slice(0, 2), ["-1 235 сомони", "-1 235"], "negative amounts round the same way everywhere");
+  assert.deepEqual(m["12.345"], ["12,35 сомони", "12", "12,35"]);
+  for (const bad of ["null", "undefined", "", "abc", "NaN", "Infinity", "-Infinity"]) assert.deepEqual(m[bad], ["0 сомони", "0", "0"], "bad value " + bad);
+  assert.equal(r.usd, "5 $");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

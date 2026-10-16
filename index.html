@@ -2549,7 +2549,9 @@ function keyDay(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1
 function validDate(d){const x=d instanceof Date?d:new Date(d);return !Number.isNaN(x.getTime())?x:null}
 
 function fmtDateTime(d){const x=validDate(d);return x?x.toLocaleString('ru-RU',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'}
-function fmtMoney(n){const v=Number(n)||0;return v.toLocaleString('ru-RU',{maximumFractionDigits:Math.abs(v)>=1000?0:2})+' '+(state.profile.currency||'сомони')}
+// any money value: a broken or missing number shows as 0, never «NaN», «∞» or «не число»
+function moneyNum(n){const v=Number(n);return Number.isFinite(v)?v:0}
+function fmtMoney(n){const v=moneyNum(n);return v.toLocaleString('ru-RU',{maximumFractionDigits:Math.abs(v)>=1000?0:2})+' '+(state.profile.currency||'сомони')}
 function timeToMin(v){const [h,m]=String(v).split(':').map(Number);return (Number(h)||0)*60+(Number(m)||0)}
 function nowMin(){const d=new Date();return d.getHours()*60+d.getMinutes()+d.getSeconds()/60}
 function fmtDuration(mins){mins=Math.max(0,Math.round(mins));const h=Math.floor(mins/60),m=mins%60;return h?`${h} ч ${String(m).padStart(2,'0')} мин`:`${m} мин`}
@@ -3012,9 +3014,12 @@ function renderStagePercents(info=getStageInfo()){
   });
 }
 function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${state.day.steps.length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info)}
-function daySum(arr,key=keyDay()){return arr.filter(x=>x.dateKey===key).reduce((a,x)=>a+Number(x.amount||0),0)}
+// the day of a record: its dateKey, or for old records without one, the local day of «at»
+function txDay(x){return x?.dateKey||(validDate(x?.at)?keyDay(validDate(x.at)):'')}
+function daySum(arr,key=keyDay()){return (arr||[]).filter(x=>x&&txDay(x)===key).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0)}
+// «Расход» = spending only: a transfer or a debt payment is not spending (the cash still pays for them).
 // A debt payment is not spending: «Расход» never counts it, it is shown as its own line «Платежи по долгу».
-const spendOnly=list=>(list||[]).filter(x=>!x.debtPayment),debtPaysOnly=list=>(list||[]).filter(x=>x.debtPayment);
+const spendOnly=list=>(list||[]).filter(x=>x&&!x.debtPayment&&!x.transfer),debtPaysOnly=list=>(list||[]).filter(x=>x.debtPayment);
 function debtPayLine(id,sum){const el=$(id);if(!el)return;el.hidden=!(sum>0);el.innerHTML=sum>0?`<span aria-hidden="true">🏦</span> Платежи по долгу: <b>${esc(fmtMoney(sum))}</b>`:''}
 function monthSum(arr,d=new Date()){const y=d.getFullYear(),m=d.getMonth();return arr.filter(x=>{const z=new Date(x.at);return z.getFullYear()===y&&z.getMonth()===m}).reduce((a,x)=>a+Number(x.amount||0),0)}
 
@@ -3034,7 +3039,9 @@ function dayMood(){const mode=applyAutoDayMode(),income=(state.profits||[]).filt
 function renderLifePulse(){applyAutoDayMode();const p=getLifePulse();for(const [name,val] of Object.entries(p)){const cap=name.charAt(0).toUpperCase()+name.slice(1);setText('pulse'+cap,val+'%');setWidth('pulse'+cap+'Bar',val+'%')}const d=dailyState(),modeLabel={normal:'Нормальный день',heavy:'Тяжёлый день',rest:'Выходной'}[d.mode]||'Нормальный день',tips={normal:'Работа → семья → итог. Держи одно главное действие.',heavy:'Минимум на сегодня: обязательное → один шаг по цели → итог → сон.',rest:'Выходной: восстановление, семья и одно полезное действие без гонки.'};setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);const mood=dayMood();setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);setText('dayMoodEmoji',mood.emoji);setText('dayMoodLabel',mood.label);const mb=$('dayMoodBadge');if(mb)mb.className='day-mood '+(d.mode==='rest'?'rest':d.mode==='normal'?'good':'');const sel=$('dayMode');if(sel){sel.disabled=true;sel.value=d.mode}}
 function profitsBefore(dt){const t=dt?.getTime?.()||Date.now();return (state.profits||[]).reduce((a,x)=>{const z=Date.parse(x.at||'');return a+(Number.isFinite(z)&&z<=t?Math.max(0,Number(x.amount)||0):0)},0)}
 function expensesBefore(dt){const t=dt?.getTime?.()||Date.now();return (state.expenses||[]).reduce((a,x)=>{const z=Date.parse(x.at||'');return a+(Number.isFinite(z)&&z<=t?Math.max(0,Number(x.amount)||0):0)},0)}
-function goalDistanceMetrics(){const f=goalFinanceMetrics(),now=new Date();let daysLeft=null,requiredMonth=null,actualRate=null,variance=null;const date=f.targetDate?new Date(f.targetDate+'T23:59:59'):null;if(date&&!Number.isNaN(date.getTime())){daysLeft=Math.max(0,Math.ceil((date-now)/DAY_MS));const months=Math.max(1,daysLeft/30.4375);requiredMonth=f.remaining/months}const contributions=Array.isArray(f.contributions)?f.contributions:[];if(f.startedAt){const start=new Date(f.startedAt),elapsed=Math.max(1,(Date.now()-start.getTime())/DAY_MS);const startCapital=Math.max(0,Number(state.wallet?.openingBalance)||0)+Math.max(0,Number(state.goal?.finance?.manualSavedAmount)||0)+profitsBefore(start)-expensesBefore(start);const currentAvailable=Math.max(0,goalFinanceMetrics().available);const delta=Math.max(0,currentAvailable-Math.max(0,startCapital));actualRate=delta/elapsed;if(daysLeft!==null&&daysLeft>0){const reqDay=f.remaining/daysLeft;variance=reqDay>0?((actualRate-reqDay)/reqDay*100):100}}return {daysLeft,requiredMonth,actualRate,variance,remaining:f.remaining,complete:f.completed,targetDate:f.targetDate}}
+// «Нужно в месяц»: what is still missing, spread over the months left (the goal screen and the goal form use the same rule).
+function monthlyNeed(remaining,dateStr){const days=goalDaysLeft(dateStr);if(days===null)return null;return Math.ceil(Math.max(0,Number(remaining)||0)/Math.max(1,days/30.4375))}
+function goalDistanceMetrics(){const f=goalFinanceMetrics(),now=new Date();let daysLeft=null,requiredMonth=null,actualRate=null,variance=null;const date=f.targetDate?new Date(f.targetDate+'T23:59:59'):null;if(date&&!Number.isNaN(date.getTime())){daysLeft=Math.max(0,Math.ceil((date-now)/DAY_MS));const months=Math.max(1,daysLeft/30.4375);requiredMonth=monthlyNeed(f.remaining,f.targetDate)}const contributions=Array.isArray(f.contributions)?f.contributions:[];if(f.startedAt){const start=new Date(f.startedAt),elapsed=Math.max(1,(Date.now()-start.getTime())/DAY_MS);const startCapital=Math.max(0,Number(state.wallet?.openingBalance)||0)+Math.max(0,Number(state.goal?.finance?.manualSavedAmount)||0)+profitsBefore(start)-expensesBefore(start);const currentAvailable=Math.max(0,goalFinanceMetrics().available);const delta=Math.max(0,currentAvailable-Math.max(0,startCapital));actualRate=delta/elapsed;if(daysLeft!==null&&daysLeft>0){const reqDay=f.remaining/daysLeft;variance=reqDay>0?((actualRate-reqDay)/reqDay*100):100}}return {daysLeft,requiredMonth,actualRate,variance,remaining:f.remaining,complete:f.completed,targetDate:f.targetDate}}
 function renderGoalDistance(){const g=goalDistanceMetrics();setText('goalDistanceDays',g.daysLeft===null?'—':g.complete?'Цель закрыта':g.daysLeft+' дн.');setText('goalRequiredMonth',g.requiredMonth===null?'—':fmtMoney(g.requiredMonth));setText('goalActualRate',g.actualRate===null?'—':fmtMoney(g.actualRate));setText('goalDistanceState',g.targetDate?`Срок: ${new Date(g.targetDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric'})}`:'Срок не задан');const box=$('goalTempoAlert');if(!box)return;if(g.complete){box.className='tempo-alert ok';box.textContent='Капитал собран. Следующий ориентир — сохранить результат.'}else if(g.variance===null){box.className='tempo-alert';box.textContent=g.targetDate?'Недостаточно истории накоплений для оценки темпа. Добавь пополнения — сравнение появится автоматически.':'Задай срок и фиксируй накопления, чтобы видеть требуемый темп.'}else if(g.variance<0){box.className='tempo-alert warn';box.textContent=`Темп ниже необходимого на ${Math.round(Math.abs(g.variance))}%. Нужно в среднем ${fmtMoney(g.requiredMonth)} в месяц.`}else{box.className='tempo-alert ok';box.textContent=`Темп выше необходимого примерно на ${Math.round(g.variance)}%. Текущего ритма достаточно.`}}
 function analyzeLife(){
   const now=Date.now(),D=DAY_MS,t=x=>Date.parse(x?.at||'')||0,amt=x=>Math.max(0,Number(x?.amount)||0);
@@ -3941,7 +3948,7 @@ function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;
 function closeModal(fromHistory=false){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open');document.body.classList.remove('modal-open');if(modalHistory){modalHistory=false;const q=pendingPushes.findIndex(x=>x.lcModal);if(q>=0)pendingPushes.splice(q,1);else if(fromHistory!==true){skipPops++;try{history.back()}catch(e){skipPops--}}}}
 initLayoutMode();
 
-function fmtNum(n){return Math.round(Number(n)||0).toLocaleString('ru-RU')}
+function fmtNum(n){return moneyNum(n).toLocaleString('ru-RU',{maximumFractionDigits:0})}
 /* ===== V59: закрыть день и серия ===== */
 const V59_DAY='2026-10-15',WEEK_REVIEW_TIME='20:00';
 function closeDayTime(){const t=state.settings?.closeDayTime;return /^\d{2}:\d{2}$/.test(t||'')?t:'21:30'}
@@ -4378,8 +4385,8 @@ function renderCalendarRange(byAll){
   const box=$('mcRangeBox');if(!box)return;
   if(!mcRange){box.innerHTML='';return}
   const rows=allTransactions().filter(t=>t.dateKey>=mcRange.from&&t.dateKey<=mcRange.to);
-  const inc=rows.filter(t=>t.kind==='income').reduce((a,t)=>a+t.amount,0),out=rows.filter(t=>t.kind==='expense').reduce((a,t)=>a+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((a,t)=>a+t.amount,0);
-  const cats={};for(const t of rows)if(t.kind==='expense'){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
+  const inc=rows.filter(t=>t.kind==='income').reduce((a,t)=>a+t.amount,0),out=rows.filter(t=>t.kind==='expense'&&!t.xfer).reduce((a,t)=>a+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((a,t)=>a+t.amount,0);
+  const cats={};for(const t of rows)if(t.kind==='expense'&&!t.xfer){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
   const top=Object.entries(cats).sort((a,b)=>b[1].v-a[1].v).slice(0,6),days=Math.round((Date.parse(mcRange.to)-Date.parse(mcRange.from))/DAY_MS)+1;
   const f=d=>new Date(d+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
   box.innerHTML=`<div class="jl-range"><div class="jl-range-head"><b>📅 ${esc(f(mcRange.from))} — ${esc(f(mcRange.to))}</b><small>${days} ${plural(days,'день','дня','дней')} · ${rows.length} ${plural(rows.length,'операция','операции','операций')}</small><button class="jl-icon-btn plain" type="button" id="mcRangeClear" aria-label="Сбросить период">${svgIcon('i-x')}</button></div>
@@ -4430,7 +4437,7 @@ function goalProgress(g){
 }
 function daysLeftText(p){if(p.done)return 'Цель достигнута';if(p.daysLeft===null)return 'Срок не задан';if(p.daysLeft===0)return 'Срок сегодня';return 'Осталось '+p.daysLeft+' '+plural(p.daysLeft,'день','дня','дней')}
 function plural(n,a,b,c){n=Math.abs(Math.round(n));const m10=n%10,m100=n%100;if(m10===1&&m100!==11)return a;if(m10>=2&&m10<=4&&(m100<12||m100>14))return b;return c}
-function fmtShort(n){const v=Number(n||0);return Math.abs(v)>=1e6?(v/1e6).toLocaleString('ru-RU',{maximumFractionDigits:1})+' млн':Math.abs(v)>=1e4?(v/1e3).toLocaleString('ru-RU',{maximumFractionDigits:1})+' тыс.':v.toLocaleString('ru-RU',{maximumFractionDigits:2})}
+function fmtShort(n){const v=moneyNum(n);return Math.abs(v)>=1e6?(v/1e6).toLocaleString('ru-RU',{maximumFractionDigits:1})+' млн':Math.abs(v)>=1e4?(v/1e3).toLocaleString('ru-RU',{maximumFractionDigits:1})+' тыс.':v.toLocaleString('ru-RU',{maximumFractionDigits:2})}
 function setMoneyKpi(id,v){const el=$(id);if(!el)return;const n=Number(v||0),txt=(n<0?'−':'')+Math.abs(n).toLocaleString('ru-RU'),cur=state.profile.currency||'сомони';let num=el.querySelector(':scope>.num');if(!num||el.querySelector(':scope>small')?.textContent!==cur){el.innerHTML='<span class="num">0</span><small>'+esc(cur)+'</small>';num=el.querySelector(':scope>.num')}if((num.dataset.shown??num.textContent)!==txt)countTo(num,txt)}
 function noticeAllowed(kind){const k={tasks:'notifyTasks',finance:'notifyFinance',goals:'notifyGoals'}[kind];return !k||state.settings?.[k]!==false}
 
@@ -4523,7 +4530,7 @@ function renderGoalPreview(){
   setText('gePvTitle',name||'Новая цель');
   let meta=amount>0?fmtMoney(amount):'Сумма не задана';let note='',monthly='';
   if(date){const d=new Date(date+'T12:00:00'),days=Math.round((d-new Date())/DAY_MS);meta+=' · до '+d.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
-    if(days<=0)note='⚠️ Эта дата уже прошла — выбери срок впереди';else{const mo=Math.max(1,Math.round(days/30.4));note=`⏳ Осталось ${days} ${plural(days,'день','дня','дней')} · около ${mo} ${plural(mo,'месяц','месяца','месяцев')}`;if(amount>0)monthly=`Откладывай ≈ ${fmtMoney(Math.ceil(amount/mo))} в месяц`}}
+    if(days<=0)note='⚠️ Эта дата уже прошла — выбери срок впереди';else{const mo=Math.max(1,Math.round(days/30.4));note=`⏳ Осталось ${days} ${plural(days,'день','дня','дней')} · около ${mo} ${plural(mo,'месяц','месяца','месяцев')}`;if(amount>0){const g=geState.id?goalById(geState.id):null,have=g?goalProgress(g).collected:0,need=monthlyNeed(amount-have,date);monthly=have>=amount?'Сумма уже собрана':`Откладывай ≈ ${fmtMoney(need)} в месяц`}}}
   setText('gePvMeta',meta);setText('geDateNote',note);const m=$('geMonthly');if(m){m.hidden=!monthly;m.textContent=monthly}
   $$('[data-ge-sum]').forEach(b=>b.classList.toggle('active',Number(b.dataset.geSum)===amount));
   $$('[data-ge-months]').forEach(b=>{const d=new Date();d.setMonth(d.getMonth()+Number(b.dataset.geMonths));b.classList.toggle('active',keyDay(d)===date)});
@@ -4589,7 +4596,7 @@ function makeGoalMain(id){
 function allTransactions(){
   const rows=[];
   for(const p of state.profits||[]){const src=normalizeProfitSource(p.sourceGroup||p.source);rows.push({kind:'income',id:p.id,at:p.at,dateKey:p.dateKey||keyDay(validDate(p.at)||new Date()),amount:Math.max(0,Number(p.amount)||0),title:src,note:p.note||'',emoji:PROFIT_ICONS[src]||'💠'})}
-  for(const e of state.expenses||[]){const debt=!!e.debtPayment;rows.push({kind:debt?'debt':'expense',id:e.id,at:e.at,dateKey:e.dateKey||keyDay(validDate(e.at)||new Date()),amount:Math.max(0,Number(e.amount)||0),title:debt?'Платёж по долгу · '+(e.debtPayment==='bank'?'Банк':'Фирмы'):(e.category||'Расход'),note:e.note||'',emoji:debt?'':(e.categoryIcon||EXPENSE_ICONS[e.category]||'🧾')})}
+  for(const e of state.expenses||[]){const debt=!!e.debtPayment;rows.push({kind:debt?'debt':'expense',xfer:!debt&&!!e.transfer,id:e.id,at:e.at,dateKey:e.dateKey||keyDay(validDate(e.at)||new Date()),amount:Math.max(0,Number(e.amount)||0),title:debt?'Платёж по долгу · '+(e.debtPayment==='bank'?'Банк':'Фирмы'):(e.category||'Расход'),note:e.note||'',emoji:debt?'':(e.categoryIcon||EXPENSE_ICONS[e.category]||'🧾')})}
   const pushContrib=(g,list,title)=>{for(const c of list||[]){const amt=Number(c.amount)||0;if(!amt)continue;rows.push({kind:'transfer',id:c.id,goalId:g.id,at:c.at,dateKey:keyDay(validDate(c.at)||new Date()),amount:Math.abs(amt),out:amt>0,title:(amt>0?'В цель · ':'Из цели · ')+title,note:c.note||'',emoji:''})}};
   for(const g of state.goals||[]){if(g.main)pushContrib(g,state.goal.finance?.contributions,state.goal.title);else pushContrib(g,g.contributions,g.title)}
   return rows.sort((a,b)=>(Date.parse(b.at)||0)-(Date.parse(a.at)||0));
@@ -4687,7 +4694,7 @@ function renderTxList(){
   const shown=rows.slice(0,txLimit);let html='',last='';
   for(const t of shown){if(t.dateKey!==last){last=t.dateKey;html+=`<div class="v-tx-date">${esc(new Date(t.dateKey+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}))}</div>`}html+=txRowHTML(t)}
   box.innerHTML=html||'<div class="v-empty">Ничего не найдено.</div>';bindTxRows(box);
-  const inc=rows.filter(t=>t.kind==='income').reduce((s,t)=>s+t.amount,0),out=rows.filter(t=>t.kind==='expense').reduce((s,t)=>s+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((s,t)=>s+t.amount,0);
+  const inc=rows.filter(t=>t.kind==='income').reduce((s,t)=>s+t.amount,0),out=rows.filter(t=>t.kind==='expense'&&!t.xfer).reduce((s,t)=>s+t.amount,0),dp=rows.filter(t=>t.kind==='debt').reduce((s,t)=>s+t.amount,0);
   setText('txSummary',`${rows.length} ${plural(rows.length,'операция','операции','операций')} · доход ${fmtMoney(inc)} · расход ${fmtMoney(out)}${dp>0?' · долг '+fmtMoney(dp):''}`);
   const more=$('txMore');if(more)more.hidden=rows.length<=txLimit;
   $$('[data-tx-filter]').forEach(b=>b.classList.toggle('active',b.dataset.txFilter===txFilter));
@@ -4696,14 +4703,14 @@ function renderMoneyCalendar(){
   const grid=$('mcGrid');if(!grid)return;const first=new Date(mcYear,mcMonth,1),days=new Date(mcYear,mcMonth+1,0).getDate(),lead=(first.getDay()+6)%7,today=keyDay(),monthPrefix=calendarMonthKey(first);
   if(!mcSelected.startsWith(monthPrefix))mcSelected=today.startsWith(monthPrefix)?today:keyDay(first);
   setText('mcTitle',first.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}));
-  const byDay=new Map();for(const t of allTransactions()){if(!t.dateKey.startsWith(monthPrefix))continue;const d=byDay.get(t.dateKey)||{income:0,expense:0,debt:0,transfer:0,list:[]};if(t.kind==='income')d.income+=t.amount;else if(t.kind==='transfer')d.transfer+=t.amount;else if(t.kind==='debt')d.debt+=t.amount;else d.expense+=t.amount;d.list.push(t);byDay.set(t.dateKey,d)}
+  const byDay=new Map();for(const t of allTransactions()){if(!t.dateKey.startsWith(monthPrefix))continue;const d=byDay.get(t.dateKey)||{income:0,expense:0,debt:0,transfer:0,list:[]};if(t.kind==='income')d.income+=t.amount;else if(t.kind==='transfer'||t.xfer)d.transfer+=t.amount;else if(t.kind==='debt')d.debt+=t.amount;else d.expense+=t.amount;d.list.push(t);byDay.set(t.dateKey,d)}
   let html=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(w=>`<div class="mc-week">${w}</div>`).join('');for(let i=0;i<lead;i++)html+='<div class="mc-day empty" aria-hidden="true"></div>';
   for(let day=1;day<=days;day++){const k=keyDay(new Date(mcYear,mcMonth,day)),d=byDay.get(k),dots=d?[d.income?'<i style="--dc:var(--green)"></i>':'',d.expense||d.debt?'<i style="--dc:var(--red)"></i>':'',d.transfer?'<i style="--dc:var(--blue)"></i>':''].join(''):'';const inR=mcRange&&k>=mcRange.from&&k<=mcRange.to;html+=`<button type="button" class="mc-day${k===today?' today':''}${k===mcSelected&&!mcRange?' sel':''}${inR?' inrange':''}${mcRange&&(k===mcRange.from||k===mcRange.to)?' edge':''}" data-mc-day="${k}" aria-label="${esc(new Date(k+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}))}">${day}<span class="mc-dots">${dots}</span></button>`}
   grid.innerHTML=html;$$('[data-mc-day]').forEach(b=>b.onclick=()=>{const k=b.dataset.mcDay;if(mcRangeMode){if(!mcRange||mcRange.from!==mcRange.to||mcRange._fresh!==true){mcRange={from:k,to:k,_fresh:true};renderMoneyCalendar();toast('Выбери последний день периода')}else{mcRangeMode=false;mcSetRange(mcRange.from,k);$('mcRangeBtn')?.classList.remove('active')}return}mcRange=null;mcSelected=k;renderMoneyCalendar()});
   renderCalendarRange();
   let inc=0,out=0,dp=0;byDay.forEach(d=>{inc+=d.income;out+=d.expense;dp+=d.debt});const net=inc-out-dp;setText('mcIncome',fmtShort(inc));setText('mcExpense',fmtShort(out));setText('mcNet',(net<0?'−':'')+fmtShort(Math.abs(net)));$('mcIncome').title=fmtMoney(inc);$('mcExpense').title=fmtMoney(out);$('mcNet').title=fmtMoney(net);debtPayLine('mcDebtPay',dp);
   const sel=byDay.get(mcSelected);setText('mcDayTitle',new Date(mcSelected+'T12:00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}));
-  setText('mcDaySum',sel?`Доход ${fmtMoney(sel.income)} · расход ${fmtMoney(sel.expense)}${sel.transfer?' · переводы '+fmtMoney(sel.transfer):''}`:'Операций нет');
+  setText('mcDaySum',sel?`Доход ${fmtMoney(sel.income)} · расход ${fmtMoney(sel.expense)}${sel.debt?' · долг '+fmtMoney(sel.debt):''}${sel.transfer?' · переводы '+fmtMoney(sel.transfer):''}`:'Операций нет');
   const list=$('mcDayList');list.innerHTML=sel?sel.list.map(t=>txRowHTML(t)).join(''):'<div class="v-empty">В этот день операций нет.</div>';bindTxRows(list);
 }
 function renderMoneyV57(){if(moneyTab==='overview')renderMoneyOverview();else if(moneyTab==='tx')renderTxList();else renderMoneyCalendar()}
