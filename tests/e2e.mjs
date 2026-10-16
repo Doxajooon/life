@@ -87,8 +87,8 @@ function makeCloud() {
 }
 
 const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
-async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock } = {}) {
-  const ctx = await browser.newContext({ viewport, serviceWorkers: sw, locale: "ru-RU", timezoneId: "Asia/Dushanbe" });
+async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock, touch = false } = {}) {
+  const ctx = await browser.newContext({ viewport, serviceWorkers: sw, locale: "ru-RU", timezoneId: "Asia/Dushanbe", hasTouch: touch, isMobile: touch });
   await ctx.route(/supabase\.co/, r => cloud.handle(r));
   if (session !== null) {
     const s = session || cloud.session();
@@ -1053,6 +1053,49 @@ await test("Цель: автоэтапы — переключатель в «И�
   // 3) old data without the new fields works and is normalized
   const old = await page.evaluate(() => { const s = clone(state); s.goal.milestones = [{ id: "o1", title: "Старый этап", done: true }, { id: "o2", title: "Ещё", done: false, autoOff: "x" }]; const n = normalize(s); return n.goal.milestones; });
   assert.equal(old[0].done, true); assert.ok(!("autoOff" in old[1]));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Деньги: тап по строке операции открывает изменение (обзор, транзакции, календарь, поиск)", async () => {
+  const { ctx, page } = await device(makeCloud(), { touch: true });
+  await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "tapE", amount: 300, category: "Еда", at: now, dateKey: k }); state.profits.push({ id: "tapP", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k });
+    saveState(); showView("viewMoney"); renderAll(); });
+  const opened = async (where, sel) => {
+    await page.waitForSelector(sel, { state: "visible", timeout: 4000 });
+    await page.tap(sel);
+    await page.waitForTimeout(350);
+    const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), amount: document.getElementById("moneyAmount")?.value || "" }));
+    assert.ok(r.open && r.amount === "300", where + ": tap did not open the edit form " + JSON.stringify(r));
+    await page.evaluate(() => closeModal());
+  };
+  await opened("overview", '#mvRecent [data-tx-id="tapE"]');
+  await page.evaluate(() => document.querySelector('[data-money-tab="tx"]').click());
+  await opened("transactions", '#txList [data-tx-id="tapE"]');
+  await page.evaluate(() => document.querySelector('[data-money-tab="cal"]').click());
+  await opened("calendar", '#mcDayList [data-tx-id="tapE"]');
+  // a real finger drifts a little during a tap (Chrome on Android still counts up to ~15 px as a tap)
+  const cdp = await ctx.newCDPSession(page);
+  for (const [dx, dy] of [[11, 2], [-12, 3], [4, 9]]) {
+    const b = await page.locator('#mcDayList [data-tx-id="tapE"]').boundingBox(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + dx / 2, y: y + dy / 2 }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + dx, y: y + dy }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), amount: document.getElementById("moneyAmount")?.value || "", rowOpen: !!document.querySelector(".jl-swipe.open") }));
+    assert.ok(r.open && r.amount === "300", `tap with ${dx},${dy} px drift did not open the edit form ` + JSON.stringify(r));
+    await page.evaluate(() => closeModal());
+  }
+  // a real swipe still opens the actions instead of the form
+  { const b = await page.locator('#mcDayList [data-tx-id="tapE"]').boundingBox(), x = b.x + b.width - 30, y = b.y + b.height / 2;
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let i = 1; i <= 6; i++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x - i * 25, y }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => ({ modal: document.getElementById("modalBack").classList.contains("open"), rowOpen: !!document.querySelector(".jl-swipe.open") }));
+    assert.deepEqual(r, { modal: false, rowOpen: true }, "swipe left must reveal the actions"); }
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

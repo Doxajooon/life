@@ -4348,13 +4348,15 @@ function deleteTx(kind,id,goalId){
   snack('Перевод отменён',()=>{list.splice(i,0,it);if(g.main)syncGoalFinanceCompletion();else syncOtherGoalCompletion(g);saveState();renderAll()});
 }
 const SWIPE_OPEN=148;
+// A finger drifts during a tap; Chrome on Android still treats up to ~15 px as a tap, so the swipe starts only after that.
+const TAP_SLOP=16;
 function bindSwipe(root){
   (root||document).querySelectorAll('.jl-swipe').forEach(w=>{
     if(w._sw)return;w._sw=1;const row=w.querySelector('.v-tx');let x0=0,y0=0,dx=0,drag=false,lock='',base=0,moved=false;
     const set=(v,anim)=>{row.style.transition=anim?'transform .28s cubic-bezier(.2,.8,.2,1)':'none';row.style.transform=v?`translateX(${v}px)`:''};
     const close=()=>{w.classList.remove('open');set(0,true)};
     row.addEventListener('pointerdown',e=>{if(e.button>0)return;x0=e.clientX;y0=e.clientY;dx=0;drag=true;lock='';moved=false;base=w.classList.contains('open')?-SWIPE_OPEN:0});
-    row.addEventListener('pointermove',e=>{if(!drag)return;const ddx=e.clientX-x0,ddy=e.clientY-y0;if(!lock){if(Math.abs(ddx)>8&&Math.abs(ddx)>Math.abs(ddy))lock='x';else if(Math.abs(ddy)>8){lock='y';drag=false;return}else return;try{row.setPointerCapture(e.pointerId)}catch(_){}}
+    row.addEventListener('pointermove',e=>{if(!drag)return;const ddx=e.clientX-x0,ddy=e.clientY-y0;if(!lock){if(Math.abs(ddx)>TAP_SLOP&&Math.abs(ddx)>Math.abs(ddy))lock='x';else if(Math.abs(ddy)>TAP_SLOP){lock='y';drag=false;return}else return;try{row.setPointerCapture(e.pointerId)}catch(_){}}
       moved=true;w.classList.add('drag');dx=Math.max(-SWIPE_OPEN-30,Math.min(0,base+ddx));set(dx,false)});
     const end=()=>{w.classList.remove('drag');if(!drag)return;drag=false;if(lock!=='x')return;if(dx<-SWIPE_OPEN/2){document.querySelectorAll('.jl-swipe.open').forEach(o=>o!==w&&o._close?.());w.classList.add('open');set(-SWIPE_OPEN,true);haptic(8)}else close()};
     row.addEventListener('pointerup',end);row.addEventListener('pointercancel',end);
