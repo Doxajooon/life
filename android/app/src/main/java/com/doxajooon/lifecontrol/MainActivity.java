@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                 APP_URL,
                 "<!doctype html><meta name='viewport' content='width=device-width,initial-scale=1'>" +
                         "<body style='font-family:sans-serif;background:#101827;color:white;padding:24px'>" +
-                        "<h2>Jamal Life</h2>" +
+                        "<h2>" + getString(R.string.app_name) + "</h2>" +
                         "<p>Не удалось загрузить приложение.</p>" +
                         "<p style='opacity:.7'>Повторная попытка загрузит локальную версию приложения.</p>" +
                         "<a href='" + APP_URL + "' style='display:inline-block;padding:12px 18px;background:#fff;color:#101827;text-decoration:none;border-radius:8px'>Повторить</a>" +
@@ -341,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
             logo.setImageResource(R.mipmap.ic_launcher);
             box.addView(logo, new LinearLayout.LayoutParams(dp(88), dp(88)));
             TextView name = new TextView(this);
-            name.setText("Jamal Life");
+            name.setText(R.string.app_name);
             name.setTextColor(0xFFF3F7FC);
             name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
             name.setTypeface(name.getTypeface(), android.graphics.Typeface.BOLD);
@@ -383,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         BiometricPrompt.PromptInfo info = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Jamal Life")
+                .setTitle(getString(R.string.app_name))
                 .setSubtitle("Приложи палец, чтобы открыть")
                 .setAllowedAuthenticators(AUTH)
                 .build();
@@ -467,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
 
         /** Short preview of the reminder sound (settings → «Проверить звук»). */
         @JavascriptInterface public void previewSound() {
-            NotificationUtil.show(ctx, "Jamal Life", "Так звучат напоминания ✨", 4242, null, 0);
+            NotificationUtil.show(ctx, ctx.getString(R.string.app_name), "Так звучат напоминания ✨", 4242, null, 0);
         }
 
         @JavascriptInterface public void cancel(String id) {

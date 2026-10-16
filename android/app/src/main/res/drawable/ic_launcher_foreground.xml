@@ -1,13 +1,13 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <!-- Jamal Life mark: progress ring + JL monogram, inside the 66dp adaptive-icon safe zone. -->
+    <!-- Life mark: progress ring + a sprout, inside the 66dp adaptive-icon safe zone. -->
     <path android:pathData="M54,26.31 A27.69,27.69 0 1,1 53.99,26.31 Z" android:fillColor="#00000000"
         android:strokeColor="#14FFFFFF" android:strokeWidth="3.63"/>
     <path android:pathData="M54.0,26.31 A27.69,27.69 0 1,1 28.46,43.29" android:fillColor="#00000000"
         android:strokeColor="#38B6E0" android:strokeWidth="3.63" android:strokeLineCap="round"/>
     <path android:pathData="M28.46,43.29 m-2.8,0 a2.8,2.8 0 1,0 5.6,0 a2.8,2.8 0 1,0 -5.6,0" android:fillColor="#3FD0C9"/>
-    <path android:pathData="M50.7,40.82 L50.7,59.27 A7.91,7.91 0 0,1 35.87,62.24" android:fillColor="#00000000"
-        android:strokeColor="#F2B451" android:strokeWidth="5.93" android:strokeLineCap="round" android:strokeLineJoin="round"/>
-    <path android:pathData="M58.94,40.82 L58.94,66.85 L71.8,66.85" android:fillColor="#00000000"
-        android:strokeColor="#F2B451" android:strokeWidth="5.93" android:strokeLineCap="round" android:strokeLineJoin="round"/>
+    <path android:pathData="M54,69.82 L54,52.02" android:fillColor="#00000000"
+        android:strokeColor="#EEAC45" android:strokeWidth="4.94" android:strokeLineCap="round"/>
+    <path android:pathData="M52.68,56.31 C43.12,56.64 37.52,51.36 36.86,42.46 C46.75,42.13 52.35,47.08 52.68,56.31 Z" android:fillColor="#F2B451"/>
+    <path android:pathData="M55.32,51.03 C55.65,40.81 61.91,35.87 71.47,35.87 C71.47,45.76 65.54,51.03 55.32,51.03 Z" android:fillColor="#F2B451"/>
 </vector>

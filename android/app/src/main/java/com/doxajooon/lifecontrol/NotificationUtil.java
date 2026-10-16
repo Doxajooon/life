@@ -19,7 +19,7 @@ import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-/** Reminders with the Jamal Dawn sound (res/raw/jamal_dawn.wav, made by tools/make-dawn.py) on a high-importance channel. */
+/** Reminders with the Dawn sound (res/raw/jamal_dawn.wav, made by tools/make-dawn.py) on a high-importance channel. */
 public final class NotificationUtil {
     // A channel's sound can't be changed after creation, so the chime gets its own channel id.
     private static final String CHANNEL = "jamal_life_dawn";
@@ -36,9 +36,15 @@ public final class NotificationUtil {
         NotificationManager nm = ctx.getSystemService(NotificationManager.class);
         if (nm == null) return;
         for (String old : OLD_CHANNELS) { try { nm.deleteNotificationChannel(old); } catch (Exception ignored) {} }
-        if (nm.getNotificationChannel(CHANNEL) != null) return;
+        String about = "Задачи и этапы дня · " + ctx.getString(R.string.app_name);
+        NotificationChannel had = nm.getNotificationChannel(CHANNEL);
+        if (had != null) {
+            // same id, so the sound and the user's settings stay; only the visible description follows the app name
+            if (!about.equals(had.getDescription())) { had.setDescription(about); nm.createNotificationChannel(had); }
+            return;
+        }
         NotificationChannel ch = new NotificationChannel(CHANNEL, "Напоминания", NotificationManager.IMPORTANCE_HIGH);
-        ch.setDescription("Задачи и этапы дня Jamal Life");
+        ch.setDescription(about);
         ch.enableVibration(true);
         ch.setVibrationPattern(VIBRATION);
         ch.enableLights(true);
@@ -106,11 +112,11 @@ public final class NotificationUtil {
                 .setLargeIcon(appIcon(ctx))
                 .setSubText(taskId != null && !taskId.startsWith("stage:") ? "Задача" : "Ритм дня")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setContentTitle(title == null ? "Jamal Life" : title)
+                .setContentTitle(title == null ? ctx.getString(R.string.app_name) : title)
                 .setContentText(text)
                 .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(content(ctx, title == null ? "Jamal Life" : title, text, false))
-                .setCustomBigContentView(content(ctx, title == null ? "Jamal Life" : title, text, true))
+                .setCustomContentView(content(ctx, title == null ? ctx.getString(R.string.app_name) : title, text, false))
+                .setCustomBigContentView(content(ctx, title == null ? ctx.getString(R.string.app_name) : title, text, true))
                 .setContentIntent(pi)
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)

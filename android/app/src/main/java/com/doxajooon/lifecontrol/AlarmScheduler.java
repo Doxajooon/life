@@ -92,7 +92,7 @@ public final class AlarmScheduler {
         if ("once".equals(kind)) prefs(ctx).edit().remove(id).apply();
     }
 
-    /** Removes alarms registered by Life Control (before the Jamal Life rename). */
+    /** Removes alarms registered under the oldest internal name (lc_alarms). */
     static void dropLegacy(Context ctx) {
         SharedPreferences old = ctx.getSharedPreferences("lc_alarms", Context.MODE_PRIVATE);
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);

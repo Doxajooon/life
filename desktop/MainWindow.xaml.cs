@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Threading;
@@ -12,12 +13,14 @@ using Forms = System.Windows.Forms;
 namespace JamalLife.Desktop;
 
 /// <summary>
-/// Jamal Life for Windows: the web app in a WebView2 window plus what a browser tab can't do —
+/// The app for Windows: the web app in a WebView2 window plus what a browser tab can't do —
 /// it keeps running in the tray so reminders arrive with the window closed, shows Windows
 /// notifications and can start together with Windows.
 /// </summary>
 public partial class MainWindow : Window
 {
+    // the visible name lives in one place: <Product> in the .csproj (internal ids below stay as they were, so data and autostart keep working)
+    private static readonly string AppName = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyProductAttribute>()?.Product ?? "Life";
     private const string Host = "appassets.jamal-life";
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private readonly Forms.NotifyIcon _tray = new();
@@ -29,6 +32,8 @@ public partial class MainWindow : Window
     public MainWindow(bool startHidden)
     {
         InitializeComponent();
+        Title = AppName;
+        if (IsAutostart()) SetAutostart(true); // after an update the exe may have a new name — keep the autostart pointing at this one
         Browser.DefaultBackgroundColor = System.Drawing.Color.FromArgb(8, 18, 30);
         BuildTray();
         _startHidden = startHidden;
@@ -95,12 +100,12 @@ public partial class MainWindow : Window
         }
         catch (WebView2RuntimeNotFoundException)
         {
-            ShowError("Для работы Jamal Life нужен Microsoft Edge WebView2 Runtime.\nОн уже есть в Windows 10/11; если нет — установите его с сайта Microsoft и перезапустите приложение.");
+            ShowError("Для работы " + AppName + " нужен Microsoft Edge WebView2 Runtime.\nОн уже есть в Windows 10/11; если нет — установите его с сайта Microsoft и перезапустите приложение.");
             OpenExternal("https://developer.microsoft.com/microsoft-edge/webview2/");
         }
         catch (Exception ex)
         {
-            ShowError("Не удалось запустить Jamal Life: " + ex.Message);
+            ShowError("Не удалось запустить " + AppName + ": " + ex.Message);
         }
     }
 
@@ -121,7 +126,7 @@ public partial class MainWindow : Window
             var type = root.TryGetProperty("type", out var t) ? t.GetString() : null;
             if (type == "notify")
             {
-                var title = root.TryGetProperty("title", out var ti) ? ti.GetString() ?? "Jamal Life" : "Jamal Life";
+                var title = root.TryGetProperty("title", out var ti) ? ti.GetString() ?? AppName : AppName;
                 var body = root.TryGetProperty("body", out var b) ? b.GetString() ?? "" : "";
                 _tray.ShowBalloonTip(8000, title, string.IsNullOrWhiteSpace(body) ? " " : body, Forms.ToolTipIcon.None);
                 if (!IsVisible || WindowState == WindowState.Minimized) FlashTaskbar();
@@ -155,12 +160,12 @@ public partial class MainWindow : Window
             if (stream != null) _tray.Icon = new System.Drawing.Icon(stream);
         }
         catch { }
-        _tray.Text = "Jamal Life";
+        _tray.Text = AppName;
         _tray.Visible = true;
         _tray.DoubleClick += (_, _) => ShowFromTray();
         _tray.BalloonTipClicked += (_, _) => ShowFromTray();
         var menu = new Forms.ContextMenuStrip();
-        menu.Items.Add("Открыть Jamal Life", null, (_, _) => ShowFromTray());
+        menu.Items.Add("Открыть " + AppName, null, (_, _) => ShowFromTray());
         var auto = new Forms.ToolStripMenuItem("Запускать вместе с Windows") { Checked = IsAutostart(), CheckOnClick = true };
         auto.CheckedChanged += (_, _) => SetAutostart(auto.Checked);
         menu.Items.Add(auto);
@@ -181,13 +186,13 @@ public partial class MainWindow : Window
     private void OnClosing(object? sender, CancelEventArgs e)
     {
         if (_exiting) return;
-        // Closing the window keeps Jamal Life in the tray so reminders keep coming.
+        // Closing the window keeps the app in the tray so reminders keep coming.
         e.Cancel = true;
         Hide();
         if (!_trayHintShown)
         {
             _trayHintShown = true;
-            _tray.ShowBalloonTip(5000, "Jamal Life работает в трее", "Напоминания продолжат приходить. Выход — правой кнопкой по значку.", Forms.ToolTipIcon.Info);
+            _tray.ShowBalloonTip(5000, AppName + " работает в трее", "Напоминания продолжат приходить. Выход — правой кнопкой по значку.", Forms.ToolTipIcon.Info);
         }
     }
 

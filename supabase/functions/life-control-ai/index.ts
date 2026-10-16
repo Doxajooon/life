@@ -1,7 +1,7 @@
 // @ts-nocheck — compact JSON shaping code; runtime is covered by the app tests.
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-// Jamal Life AI — analysis of the user's own data with Gemini (generateContent).
+// Life AI — analysis of the user's own data with Gemini (generateContent).
 // The Gemini key lives only in Supabase Secrets (GEMINI_API_KEY).
 // Free-tier quotas are per model, so when one model answers 429 (quota) or is not available
 // for this key, the next model is tried automatically. The first model that answers is remembered.
@@ -28,17 +28,20 @@ const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: 
 const clip = (v: unknown, n = 900) => String(v ?? "").trim().slice(0, n);
 const configured = () => Boolean(Deno.env.get("GEMINI_API_KEY"));
 
+// the visible name of the app (the same as APP_NAME in index.html)
+const APP_NAME = "Life";
+
 function scope(s: any) {
   return { goal: s?.goal !== false, money: s?.money !== false, reports: s?.reports !== false, notes: s?.notes === true, webSearch: s?.webSearch === true };
 }
 
 function promptRules() {
-  return ["Ты — Jamal Life AI, персональный аналитический агент.","Работай только с фактами из переданных данных Jamal Life. Не придумывай суммы, даты, достижения, события или причины.","Отделяй факт от предположения.","Не давай мелких общих советов вроде «будь дисциплинированнее», «отдыхай больше», «продолжай работать» без конкретного действия.","Каждый вывод должен приводить к практическому решению.","Дай короткий управленческий разбор и затем КОНКРЕТНЫЙ ПЛАН ДЕЙСТВИЙ.","План должен содержать 3–5 действий с приоритетом P1/P2/P3, конкретным сроком, измеримым результатом и основанием из данных.","P1 — действие, которое нужно сделать первым и которое сильнее всего влияет на текущую проблему.","Если есть долги или финансовое давление, отдельно укажи конкретное действие по деньгам: сумму/лимит, срок или правило, только если это можно вывести из данных. Не придумывай возможность платить больше, чем позволяют данные.","Если есть цель, свяжи действия с ближайшим измеримым этапом цели.","Для режима goal обязательно отдельно покажи: ЧТО УЖЕ ДОСТИГНУТО — закрытые этапы и реальные результаты; ЧТО УЖЕ ЕСТЬ — собранный капитал, доступная касса и другие подтверждённые ресурсы; ЧТО МЕШАЕТ — один главный ограничитель; ЗАТЕМ ПЛАН — 3–5 конкретных действий.","Если есть незавершённые задачи или препятствия из отчётов, преврати наиболее существенное препятствие в конкретное действие.","Заверши блоком «ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ» — ровно одно действие, которое пользователь может выполнить сразу.","Не предлагай десять действий. Отсекай второстепенное.","Для денег показывай арифметику; не обещай гарантированный результат.","Спортивную аналитику не выдавай за гарантированный доход и не советуй ставки для закрытия долгов.","Пиши по-русски, прямо, серьёзно и без мотивационной воды.","Не изменяй данные пользователя."].join("\n");
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", персональный аналитический агент.","Работай только с фактами из переданных данных приложения. Не придумывай суммы, даты, достижения, события или причины.","Отделяй факт от предположения.","Если цель, доход или долги не заданы (пусто или 0) — не придумывай их; скажи, что их стоит добавить в приложении, и дай совет по тому, что есть.","Не давай мелких общих советов вроде «будь дисциплинированнее», «отдыхай больше», «продолжай работать» без конкретного действия.","Каждый вывод должен приводить к практическому решению.","Дай короткий управленческий разбор и затем КОНКРЕТНЫЙ ПЛАН ДЕЙСТВИЙ.","План должен содержать 3–5 действий с приоритетом P1/P2/P3, конкретным сроком, измеримым результатом и основанием из данных.","P1 — действие, которое нужно сделать первым и которое сильнее всего влияет на текущую проблему.","Если есть долги или финансовое давление, отдельно укажи конкретное действие по деньгам: сумму/лимит, срок или правило, только если это можно вывести из данных. Не придумывай возможность платить больше, чем позволяют данные.","Если есть цель, свяжи действия с ближайшим измеримым этапом цели.","Для режима goal обязательно отдельно покажи: ЧТО УЖЕ ДОСТИГНУТО — закрытые этапы и реальные результаты; ЧТО УЖЕ ЕСТЬ — собранный капитал, доступная касса и другие подтверждённые ресурсы; ЧТО МЕШАЕТ — один главный ограничитель; ЗАТЕМ ПЛАН — 3–5 конкретных действий.","Если есть незавершённые задачи или препятствия из отчётов, преврати наиболее существенное препятствие в конкретное действие.","Заверши блоком «ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ» — ровно одно действие, которое пользователь может выполнить сразу.","Не предлагай десять действий. Отсекай второстепенное.","Для денег показывай арифметику; не обещай гарантированный результат.","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов.","Пиши по-русски, прямо, серьёзно и без мотивационной воды.","Не изменяй данные пользователя."].join("\n");
 }
 
 // WEEK mode: short Sunday review of the last 7 days (strong side, weak spot, one step).
 function weekRules() {
-  return ["Ты — Jamal Life AI, личный наставник по итогам недели.","Работай только с фактами из переданных данных за последние 7 дней. Не придумывай суммы, события и причины.","Пиши по-русски, коротко, прямо, по-человечески, без воды и без markdown (#, **, списков).","Спортивную аналитику не выдавай за гарантированный доход и не советуй ставки для закрытия долгов."].join("\n");
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", личный наставник по итогам недели.","Работай только с фактами из переданных данных за последние 7 дней. Не придумывай суммы, события и причины.","Пиши по-русски, коротко, прямо, по-человечески, без воды и без markdown (#, **, списков).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
 }
 // deno-lint-ignore no-explicit-any
 function weekContext(s: any, today: string): any {
@@ -59,7 +62,7 @@ function weekContext(s: any, today: string): any {
 
 // DEEP mode: honest money leaks + weak/strong side, from the whole state and the app's own numbers.
 function deepRules() {
-  return ["Ты — Jamal Life AI, честный личный аналитик денег и дисциплины.","Опирайся только на переданные данные и цифры. Не придумывай суммы и события.","Говори прямо, по-человечески, коротко, с конкретными цифрами из данных. Без воды, без markdown (#, **, списков со звёздочками).","Спортивную аналитику не выдавай за гарантированный доход и не советуй ставки для закрытия долгов."].join("\n");
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", честный личный аналитик денег и дисциплины.","Опирайся только на переданные данные и цифры. Не придумывай суммы и события.","Говори прямо, по-человечески, коротко, с конкретными цифрами из данных. Без воды, без markdown (#, **, списков со звёздочками).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
 }
 // deno-lint-ignore no-explicit-any
 function deepContext(s: any, facts: any): any {
@@ -92,7 +95,7 @@ function lifeContext(s: any, sc: any, facts: any): any {
 function context(s: any, c: any): any {
  const o={generated_at:new Date().toISOString(),currency:String(s?.profile?.currency||"сомони")};
  if(c.goal){const g=s?.goal||{},f=g?.finance||{},target=Number(f.targetAmount)||0,saved=Number(f.savedAmount)||0;o.goal={title:clip(g.title,300),why:clip(g.why,900),next:clip(g.next,900),milestones:Array.isArray(g.milestones)?g.milestones.slice(0,20).map(m=>({title:clip(m?.title,300),done:!!m?.done})):[],achievements:Array.isArray(s?.achievements)?s.achievements.slice().sort((a,b)=>String(b?.at||"").localeCompare(String(a?.at||""))).slice(0,20).map(a=>({at:a?.at||"",text:clip(a?.text,500)})):[],finance:{target,saved,remaining:Math.max(0,target-saved),pct:target?Math.min(100,Math.round(saved/target*100)):0,targetDate:clip(f.targetDate,40)}}}
- if(c.money){const p=Array.isArray(s?.profits)?s.profits:[],e=Array.isArray(s?.expenses)?s.expenses:[],cut=Date.now()-30*86400000,p30=p.filter(x=>Date.parse(x?.at||"")>=cut),e30=e.filter(x=>Date.parse(x?.at||"")>=cut&&!x?.transfer&&!x?.debtPayment),dp30=e.filter(x=>Date.parse(x?.at||"")>=cut&&x?.debtPayment).reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),inc=p30.reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),out=e30.reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),src={},cat={};for(const x of p30){const v=String(x?.sourceGroup||x?.source||"Другое"),k=["Зарплата","Фриланс","Спортивная аналитика"].includes(v)?v:"Другое";src[k]=(src[k]||0)+Math.max(0,Number(x?.amount)||0)}for(const x of e30){const k=clip(x?.category||"Другое",80);cat[k]=(cat[k]||0)+Math.max(0,Number(x?.amount)||0)}o.money={cash:Number(s?.wallet?.openingBalance)||0,goalCapital:Number(s?.goal?.finance?.savedAmount)||0,debt:(Number(s?.debts?.bank)||0)+(Number(s?.debts?.firms)||0),bankDebt:Number(s?.debts?.bank)||0,firmsDebt:Number(s?.debts?.firms)||0,monthlyPayment:Number(s?.debts?.monthlyPayment)||0,last30Days:{income:inc,spent:out,debtPaid:dp30,net:inc-out-dp30},sources:src,expenses_by_category:cat}}
+ if(c.money){const p=Array.isArray(s?.profits)?s.profits:[],e=Array.isArray(s?.expenses)?s.expenses:[],cut=Date.now()-30*86400000,p30=p.filter(x=>Date.parse(x?.at||"")>=cut),e30=e.filter(x=>Date.parse(x?.at||"")>=cut&&!x?.transfer&&!x?.debtPayment),dp30=e.filter(x=>Date.parse(x?.at||"")>=cut&&x?.debtPayment).reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),inc=p30.reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),out=e30.reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),src={},cat={};for(const x of p30){const v=String(x?.sourceGroup||x?.source||"Другое"),k=["Зарплата","Фриланс","Бизнес","Спортивная аналитика"].includes(v)?v:"Другое";src[k]=(src[k]||0)+Math.max(0,Number(x?.amount)||0)}for(const x of e30){const k=clip(x?.category||"Другое",80);cat[k]=(cat[k]||0)+Math.max(0,Number(x?.amount)||0)}o.money={cash:Number(s?.wallet?.openingBalance)||0,goalCapital:Number(s?.goal?.finance?.savedAmount)||0,debt:(Number(s?.debts?.bank)||0)+(Number(s?.debts?.firms)||0),bankDebt:Number(s?.debts?.bank)||0,firmsDebt:Number(s?.debts?.firms)||0,monthlyPayment:Number(s?.debts?.monthlyPayment)||0,last30Days:{income:inc,spent:out,debtPaid:dp30,net:inc-out-dp30},sources:src,expenses_by_category:cat}}
  if(c.reports){const rs=s?.reports&&typeof s.reports==="object"?s.reports:{},r=Object.entries(rs).filter(([d,v])=>v&&new Date(d+"T23:59:59").getTime()>=Date.now()-30*86400000).sort((a,b)=>String(b[0]).localeCompare(String(a[0]))).slice(0,30);o.reports=r.map(([day,v])=>({day,done:clip(v?.done,800),block:clip(v?.block,800),future:clip(v?.future,800),tomorrow:clip(v?.tomorrow,800),steps:v?.steps||{}}))}
  if(c.notes){const ns=Array.isArray(s?.notes)?s.notes:[];o.notes=ns.slice().sort((a,b)=>String(b?.at||"").localeCompare(String(a?.at||""))).slice(0,15).map(n=>({createdAt:n?.at||"",title:clip(n?.title,180),body:clip(n?.body,900)}))}
  return o;
@@ -145,7 +148,7 @@ async function candidates(key: string): Promise<string[]> {
 }
 
 function ruError(status: number, raw: string) {
-  if (status === 429 || /quota|rate.?limit|exhausted/i.test(raw)) return "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей. Он обновится около 12:00–13:00 по Душанбе. Пока работает «Полный разбор» на телефоне — он считает всё сам, без интернета. Чтобы лимита не было совсем, включи оплату ключа в Google AI Studio (aistudio.google.com → Billing).";
+  if (status === 429 || /quota|rate.?limit|exhausted/i.test(raw)) return "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей. Он обновится примерно через сутки (у Google — в полночь по тихоокеанскому времени). Пока работает «Полный разбор» на телефоне — он считает всё сам, без интернета. Чтобы лимита не было совсем, включи оплату ключа в Google AI Studio (aistudio.google.com → Billing).";
   if (status === 400 && /api key|API_KEY_INVALID/i.test(raw)) return "Ключ Gemini недействителен. Создай новый ключ в Google AI Studio и замени GEMINI_API_KEY в Supabase → Edge Functions → Secrets.";
   if (status === 403) return "Ключ Gemini не имеет доступа к модели. Проверь ключ в Google AI Studio.";
   if (status === 503 || status === 504) return "Google сейчас перегружен — все модели Gemini заняты. Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
@@ -204,7 +207,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
     const a = await getUser(req);
-    if (!a) return json({ error: "Требуется вход в Jamal Life." }, 401);
+    if (!a) return json({ error: "Требуется вход в " + APP_NAME + "." }, 401);
     // Health check: answers instantly and costs nothing (no Gemini call, no rate limit).
     if (req.method === "GET") return json({ ok: true, configured: configured(), model: MODEL });
     if (req.method !== "POST") return json({ error: "Method not allowed." }, 405);
@@ -217,7 +220,7 @@ Deno.serve(async (req) => {
     }
     const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
-    if (error) return json({ error: "Не удалось прочитать данные Jamal Life из Supabase." }, 500);
+    if (error) return json({ error: "Не удалось прочитать данные " + APP_NAME + " из Supabase." }, 500);
     const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
     const p = mode === "deep"
       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
