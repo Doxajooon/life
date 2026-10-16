@@ -427,6 +427,12 @@ await test("Нагрузка: 3000 операций и 500 заметок", asyn
   if (process.env.PERF_LOG) console.log("   load render/save ms:", t.all);
   assert.ok(t.render < 600 * slow, "render " + t.render.toFixed(0) + " ms (" + t.all + ")");
   assert.ok(t.save < 200 * slow, "save " + t.save.toFixed(0) + " ms (" + t.all + ")");
+  // every screen opens quickly with this much data (best of two)
+  const scr = await page.evaluate(() => { const out = {}; for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"]) { const ms = []; for (let i = 0; i < 2; i++) { showView("viewDisplay"); const a = performance.now(); showView(v); ms.push(performance.now() - a); } out[v] = Math.round(Math.min(...ms)); }
+    for (const t of ["tx", "cal", "overview"]) { const a = performance.now(); document.querySelector(`[data-money-tab="${t}"]`).click(); out["money/" + t] = Math.round(performance.now() - a); }
+    const a = performance.now(); openSearch(); const q = document.querySelector("#modal input"); q.value = "Еда"; q.dispatchEvent(new Event("input", { bubbles: true })); out.search = Math.round(performance.now() - a); closeModal(); return out; });
+  if (process.env.PERF_LOG) console.log("   screens ms:", JSON.stringify(scr));
+  for (const [k, v] of Object.entries(scr)) assert.ok(v < 400 * slow, `${k} opens in ${v} ms with 3000 operations`);
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -1479,9 +1485,6 @@ await test("Вид: 6 ширин × 2 темы — нет горизонталь
   assert.deepEqual(bad, [], bad.slice(0, 12).join("\n"));
 });
 
-await browser.close(); server.close();
-console.log(`\n${results.length - failed}/${results.length} passed`);
-process.exit(failed ? 1 : 0);
 await test("Окна: закрыл окно, пока идёт запрос (AI, облако) — ошибок нет", async () => {
   const cloud = makeCloud();
   const { ctx, page } = await device(cloud);
@@ -1500,3 +1503,6 @@ await test("Окна: закрыл окно, пока идёт запрос (AI,
   await ctx.close();
 });
 
+await browser.close(); server.close();
+console.log(`\n${results.length - failed}/${results.length} passed`);
+process.exit(failed ? 1 : 0);
