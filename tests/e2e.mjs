@@ -1257,7 +1257,7 @@ await test("V72 D8: ритм дня — «главное» этапа связа
   // the hero and the day strip are open at once, no tap needed
   const ui = await page.evaluate(() => { showView("viewToday"); renderToday(); const v = id => { const e = document.getElementById(id); return !!e && e.offsetParent !== null && e.getBoundingClientRect().height > 10; }; return { focus: v("nowFocus"), strip: v("dayStrip"), text: document.getElementById("nowFocus").textContent, main: document.querySelector('#timeline .jl-rstep.current .jl-rstep-main')?.textContent || "" }; });
   assert.ok(ui.focus && ui.strip, "focus and the day strip are visible");
-  assert.match(ui.text, /Главное сейчас.*Квартира/); assert.match(ui.main, /Главное сейчас/);
+  assert.match(ui.text, /Главное сейчас · до цели 45 тыс. сомони/); assert.match(ui.main, /Главное сейчас/);
   // «Да» from the reminder marks the main action done; «Перенести» moves it on as a goal task
   const act = await page.evaluate(() => { applyReminderAction("done", "stage:w"); applyReminderAction("snooze", "stage:f"); const t = state.tasks.find(x => x.goal && x.title.includes("Первый взнос"));
     return { done: !!dailyState().stageDone?.w, moved: dailyState().stageMoved?.f, task: t && { date: t.date, time: t.time, ms: t.ms }, report: dayLedger().gActs }; });
@@ -1462,6 +1462,21 @@ await test("V72 D16: AI видит отчёт дня, привычки-отка�
   assert.deepEqual(f.avoidHabits.map(h => [h.title, h.heldToday]), [["Без соцсетей", true]]);
   assert.ok(f.wins.some(w => /Этап 1 закрыт/.test(w.title)), "wins go to the AI");
   assert.ok(f.goalStage && f.goalStage.n === 2 && typeof f.goalStage.toClose === "string", "the current goal stage goes to the AI");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72: цитата дня — хадис Пророка ﷺ с источником, каждый день новый (40 дней без повтора), читается в обеих темах", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T09:00:00+05:00") });
+  const seen = [];
+  for (let d = 0; d < 40; d++) {
+    await page.clock.setSystemTime(new Date(Date.parse("2026-10-16T09:00:00+05:00") + d * 864e5));
+    seen.push(await page.evaluate(() => { const m = motivation(); return m.author + "|" + m.text + "|" + m.source; }));
+  }
+  assert.ok(seen.every(x => x.startsWith("Пророк Мухаммад ﷺ|«") && x.split("|")[2].length > 3), "a hadith with its source every day");
+  assert.equal(new Set(seen).size, 40, "40 days — 40 different hadiths");
+  const c = await page.evaluate(() => { showView("viewToday"); renderToday(); state.settings.theme = "light"; setTheme(); const q = document.querySelector(".jl-quote blockquote"); return getComputedStyle(q).color; });
+  assert.notEqual(c, "rgb(58, 47, 18)", "the quote on the dark hero must be light in the light theme too");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

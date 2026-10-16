@@ -1102,9 +1102,9 @@ html[data-theme="light"]{--gold:#b7841f;--gold-2:#e3b04b}
 .jl-hero-date h1{margin:0;font-size:1.5rem;font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.1}
 .jl-hero-date span{font-size:0.8125rem;color:#a9bdd3}
 .jl-hero-clock{text-align:right}
-.jl-hero .clock-time{display:flex;align-items:flex-start;justify-content:flex-end;font-family:"Inter",var(--font,system-ui),sans-serif;font-size:clamp(40px,12vw,58px);font-weight:250;font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"cv11" 1;letter-spacing:-.045em;line-height:.95;color:var(--clock-ink,#fff);text-shadow:0 2px 24px rgba(120,170,255,.18)}
-.jl-hero .clock-time .ck-colon{margin:0 .02em;opacity:.55;transform:translateY(-.06em);animation:ckBreath 2s ease-in-out infinite}
-.jl-hero .clock-time .ck-s{font-size:.32em;font-weight:400;letter-spacing:0;margin:.32em 0 0 .3em;padding:.12em .36em;border-radius:999px;background:rgba(255,255,255,.08);color:var(--gold-2);line-height:1}
+.jl-hero .clock-time{display:flex;align-items:flex-start;justify-content:flex-end;font-family:"Inter",var(--font,system-ui),sans-serif;font-size:clamp(40px,12vw,58px);font-weight:340;font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"cv11" 1;letter-spacing:-.045em;line-height:.95;color:var(--clock-ink,#fff);text-shadow:0 2px 24px rgba(120,170,255,.18)}
+.jl-hero .clock-time .ck-colon{margin:0 .02em;opacity:.6;transform:translateY(-.06em);animation:ckBreath 2s ease-in-out infinite}
+.jl-hero .clock-time .ck-s{font-size:.32em;font-weight:500;letter-spacing:0;margin:.32em 0 0 .3em;padding:.12em .36em;border-radius:999px;background:rgba(255,255,255,.08);color:var(--gold-2);line-height:1}
 @keyframes ckBreath{0%,100%{opacity:.35}50%{opacity:.8}}
 .jl-hero .clock-state{font-size:0.7812rem;color:var(--gold-2);margin-top:6px;font-variant-numeric:tabular-nums}
 .jl-now{margin-top:16px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09)}
@@ -1570,14 +1570,14 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-habit-emo:active{transform:scale(.88)}
 .jl-habit-emo:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .jl-habit.is-done .jl-habit-emo{border-color:var(--green);background:color-mix(in srgb,var(--green) 18%,var(--panel))}
-.jl-habit.is-due .jl-habit-emo{animation:jlRingPulseG 2.4s ease-in-out infinite}
+.jl-habit.is-due .jl-habit-emo{position:relative}
 .jl-fl{display:inline-block;font-style:normal;transform-origin:50% 90%;animation:jlFlame 1.2s ease-in-out infinite alternate}
 .jl-habit-emo.hot{border-color:color-mix(in srgb,var(--orange) 60%,var(--line))}
 .jl-habit.just-done .jl-habit-emo{animation:jlDoneBurst .6s cubic-bezier(.34,1.56,.64,1)}
 .jl-habit.just-done .jl-dots i.today{animation:jlPop .5s .1s cubic-bezier(.34,1.56,.64,1)}
 .jl-dots i.today:not(.on){animation:jlDotBlink 1.8s ease-in-out infinite}
 .jl-dots i{transition:background .3s ease,border-color .3s ease,transform .3s ease}
-@keyframes jlRingPulseG{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
 @keyframes jlFlame{from{transform:scale(1) rotate(-6deg)}to{transform:scale(1.2) rotate(6deg)}}
 @keyframes jlDotBlink{0%,100%{opacity:1}50%{opacity:.45}}
 @media (max-width:420px){.jl-dots i{width:10px;height:10px}.jl-dots{gap:3px}.jl-habit{gap:8px}.jl-miniring{width:40px;height:40px}}
@@ -1615,7 +1615,6 @@ body{line-height:1.55}
 .jl-quote blockquote{font-family:"Noto Serif",Georgia,"Times New Roman",serif;letter-spacing:.005em;color:#f4efe3!important}
 .jl-quote figcaption{line-height:1.5;color:var(--gold)!important;opacity:.85;}
 .jl-quote figcaption::before{content:"— "}
-html[data-theme="light"] .jl-quote blockquote{color:#3a2f12!important}
 /* shared form layout */
 .jl-form{display:grid;gap:22px;margin-top:16px}
 .jl-fsec{display:grid;gap:12px}
@@ -1808,7 +1807,7 @@ b,strong{font-weight:600}
 .jl-now-foot{font-size:.76rem!important}
 .jl-quote{margin-top:12px!important;padding:12px 14px 12px 40px!important;border-radius:16px!important;cursor:pointer}
 .jl-quote::before{font-size:2.2rem!important;left:12px!important;top:4px!important}
-.jl-quote blockquote{font-size:.88rem!important;line-height:1.55!important;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.jl-quote blockquote{font-size:.88rem!important;line-height:1.55!important;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
 .jl-quote.open blockquote{-webkit-line-clamp:unset;display:block}
 .jl-quote figcaption{margin-top:6px!important;font-size:.72rem!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jl-quote.open figcaption{white-space:normal}
@@ -1898,11 +1897,11 @@ html[data-theme="dark"] .v-pulse{background:radial-gradient(120% 80% at 50% 0%,r
 @media (prefers-reduced-motion:no-preference){
  .jl-habit.is-done .jl-habit-emo{animation:habitBurn 1.8s ease-in-out infinite;filter:drop-shadow(0 0 calc(4px + var(--fire,0)*10px) rgba(255,150,60,.75))}
  .jl-habit.is-avoid.is-done .jl-habit-emo{filter:drop-shadow(0 0 calc(4px + var(--fire,0)*10px) rgba(52,211,153,.7))}
- .jl-habit.is-due .jl-habit-check{animation:habitEmber 2.4s ease-in-out infinite}
+ .jl-habit.is-due .jl-habit-check{position:relative}
  .jl-habit-fire{animation:habitFlick 1.2s ease-in-out infinite}
 }
 @keyframes habitBurn{0%,100%{transform:scale(1) rotate(0)}25%{transform:scale(1.06) rotate(-3deg)}60%{transform:scale(.98) rotate(2deg)}}
-@keyframes habitEmber{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
 @keyframes habitFlick{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1px) scale(1.08)}}
 
 /* V71 day report */
@@ -1984,12 +1983,11 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 @keyframes txPop{from{transform:scale(.4) rotate(-12deg);opacity:0}}
 /* V72: «Главное» of a stage — in the hero and in the rhythm */
 .jl-nf:empty{display:none}
-.jl-nf{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:start;margin-top:12px;padding:11px 12px;border-radius:14px;background:linear-gradient(120deg,rgba(242,180,81,.16),rgba(63,208,201,.10));border:1px solid rgba(242,180,81,.32);animation:jlRise .5s cubic-bezier(.2,.8,.2,1) both}
-.jl-nf-ico{font-size:1.25rem;display:inline-block;animation:jlBreath 3.2s ease-in-out infinite}
-.jl-nf-txt small{display:block;font-size:.72rem;color:#f2c879;font-weight:700;letter-spacing:.02em}
-.jl-nf-txt b{display:block;color:#fff;font-size:.92rem;line-height:1.4;margin-top:4px;font-weight:650}
-.jl-nf-txt em{display:block;font-style:normal;color:#b9cde2;font-size:.75rem;margin-top:4px}
-.jl-nf-btn{grid-column:2;justify-self:start;margin-top:6px;min-height:40px;padding:0 13px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-weight:700;font-size:.8rem;cursor:pointer;transition:transform .25s cubic-bezier(.2,.8,.2,1),background .3s ease}
+.jl-nf{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;margin-top:10px;padding:8px 10px;border-radius:14px;background:linear-gradient(120deg,rgba(242,180,81,.16),rgba(63,208,201,.10));border:1px solid rgba(242,180,81,.32);animation:jlRise .5s cubic-bezier(.2,.8,.2,1) both}
+.jl-nf-ico{font-size:1.05rem;display:inline-block;animation:jlBreath 3.2s ease-in-out infinite}
+.jl-nf-txt small{display:block;font-size:.7rem;color:#f2c879;font-weight:700;letter-spacing:.01em;line-height:1.35}
+.jl-nf-txt b{display:block;color:#fff;font-size:.84rem;line-height:1.35;margin-top:4px;font-weight:600}
+.jl-nf-btn{min-height:36px;min-width:44px;padding:0 11px;border-radius:11px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-weight:700;font-size:.76rem;cursor:pointer;transition:transform .25s cubic-bezier(.2,.8,.2,1),background .3s ease}
 .jl-nf-btn:active{transform:scale(.94)}
 .jl-nf-btn.on{background:#1f9d6b;border-color:#34d399}
 .jl-rstep-main{display:flex;gap:8px;align-items:flex-start;margin-top:8px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--gold) 9%,transparent);border:1px dashed color-mix(in srgb,var(--gold) 35%,var(--line));font-size:.84rem;line-height:1.4;color:var(--text)}
@@ -2072,6 +2070,12 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .v-kpi b{display:flex!important;flex-wrap:wrap;align-items:baseline;column-gap:.25rem}
 .jl-gh-tiles b{font-size:clamp(.88rem,4vw,1.05rem)!important;overflow-wrap:normal!important}
 .jl-gh-tiles em{overflow-wrap:normal!important}
+/* V72: buttons stand still (a moving button is hard to tap); the soft glow breathes on a layer behind them — opacity only */
+@keyframes jlGlowFade{0%,100%{opacity:0}50%{opacity:1}}
+.jl-habit.is-due .jl-habit-check::after,.jl-habit.is-due .jl-habit-emo::after{content:"";position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;opacity:0;animation:jlGlowFade 2.4s ease-in-out infinite}
+.jl-habit.is-due .jl-habit-check::after{box-shadow:0 0 0 4px rgba(251,191,77,.3)}
+.jl-habit.is-due .jl-habit-emo::after{box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 35%,transparent)}
+@media (prefers-reduced-motion:reduce){.jl-habit .jl-habit-check::after,.jl-habit .jl-habit-emo::after{animation:none!important}}
 </style>
 
 
@@ -3085,15 +3089,48 @@ function initPersistence(){
   try{navigator.storage?.persist?.().then(ok=>{state._persistentStorageRequestedAt=new Date().toISOString();state._persistentStorageGranted=!!ok;queueAutosave()}).catch(()=>{});}catch(e){}
 }
 function getStageInfo(){const m=nowMin();for(let i=0;i<state.day.steps.length;i++){const s=state.day.steps[i],st=timeToMin(s.time),endRaw=timeToMin(s.end);let en=endRaw;if(en<=st)en=i<state.day.steps.length-1?timeToMin(state.day.steps[i+1].time):1440;if(m>=st&&m<en)return {kind:'active',i,s,start:st,end:en,now:m,pct:clamp((m-st)/(en-st)*100,0,100)}}const next=state.day.steps.find(s=>timeToMin(s.time)>m);return next?{kind:'between',next,now:m,pct:0}:{kind:'after',now:m,pct:100}}
+// 40 hadiths of the Prophet ﷺ (Russian meaning, with the source): a new one every day, the list turns over in 40 days
 const MOTIVATIONS=[
-  {author:'Пророк Мухаммад ﷺ',text:'«Поистине, дела оцениваются по намерениям, и каждому человеку — лишь то, что он намеревался совершить».',source:'Сахих аль-Бухари 1; Сахих Муслим 1907'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Самые любимые Аллахом дела — постоянные, даже если они малы».',source:'Сахих аль-Бухари 6464–6465; Сахих Муслим 783b'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Поистине, дела оцениваются по намерениям, и каждому человеку — лишь то, что он намеревался».',source:'Сахих аль-Бухари 1; Муслим 1907'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Самые любимые Аллахом дела — постоянные, даже если они малы».',source:'Сахих аль-Бухари 6464; Муслим 783'},
   {author:'Пророк Мухаммад ﷺ',text:'«Стремись к тому, что приносит тебе пользу, проси помощи у Аллаха и не проявляй беспомощности».',source:'Сахих Муслим 2664'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Сильный верующий лучше и более любим Аллахом, чем слабый верующий, хотя в каждом есть благо».',source:'Сахих Муслим 2664'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Кто верует в Аллаха и Судный день, пусть говорит благое или молчит».',source:'Сахих аль-Бухари 6018'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Никто из вас не уверует по-настоящему, пока не пожелает своему брату того же, чего желает себе».',source:'Сахих аль-Бухари 13; Сахих Муслим 45'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Сильный верующий лучше и более любим Аллахом, чем слабый верующий, хотя в каждом из них есть благо».',source:'Сахих Муслим 2664'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Кто верует в Аллаха и Последний день, пусть говорит благое или молчит».',source:'Сахих аль-Бухари 6018; Муслим 47'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Никто из вас не уверует по-настоящему, пока не пожелает своему брату того же, чего желает себе».',source:'Сахих аль-Бухари 13; Муслим 45'},
   {author:'Пророк Мухаммад ﷺ',text:'«Облегчайте и не затрудняйте; радуйте и не отталкивайте».',source:'Сахих аль-Бухари 69; 6124'},
-  {author:'Пророк Мухаммад ﷺ',text:'«Кому Аллах желает добра, тому даёт понимание религии».',source:'Сахих аль-Бухари 71'}
+  {author:'Пророк Мухаммад ﷺ',text:'«Кому Аллах желает добра, тому даёт понимание религии».',source:'Сахих аль-Бухари 71'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Не тот силён, кто побеждает в борьбе, а силён тот, кто владеет собой в гневе».',source:'Сахих аль-Бухари 6114; Муслим 2609'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Верхняя рука лучше нижней».',source:'Сахих аль-Бухари 1429; Муслим 1033'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Никто никогда не ел пищи лучше той, что заработал трудом своих рук».',source:'Сахих аль-Бухари 2072'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Две милости, в которых многие люди обмануты: здоровье и свободное время».',source:'Сахих аль-Бухари 6412'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Бойся Аллаха, где бы ты ни был; вслед за плохим поступком соверши хороший — он сотрёт его; и обращайся с людьми хорошо».',source:'ат-Тирмизи 1987'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Будь в этом мире словно чужестранец или путник».',source:'Сахих аль-Бухари 6416'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Не гневайся».',source:'Сахих аль-Бухари 6116'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Лучший из вас — тот, кто лучше всех относится к своей семье».',source:'ат-Тирмизи 3895'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Мусульманин — тот, от языка и рук которого в безопасности другие мусульмане».',source:'Сахих аль-Бухари 10; Муслим 40'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Садака не уменьшает имущества».',source:'Сахих Муслим 2588'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Богатство — не в обилии имущества, богатство — в довольстве души».',source:'Сахих аль-Бухари 6446; Муслим 1051'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Не благодарит Аллаха тот, кто не благодарит людей».',source:'Абу Дауд 4811; ат-Тирмизи 1954'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Если наступит Час, а в руке у кого-то из вас росток пальмы — пусть посадит его, если успеет».',source:'аль-Бухари, аль-Адаб аль-Муфрад 479; Ахмад 12902'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Аллах не смотрит на ваши облики и ваше имущество, но смотрит на ваши сердца и ваши дела».',source:'Сахих Муслим 2564'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Кто вступит на путь в поисках знания, тому Аллах облегчит путь в Рай».',source:'Сахих Муслим 2699'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Привяжи верблюда и уповай на Аллаха».',source:'ат-Тирмизи 2517'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Оставь то, что вызывает у тебя сомнение, ради того, что не вызывает сомнений».',source:'ат-Тирмизи 2518; ан-Насаи 5711'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Из совершенства ислама человека — оставлять то, что его не касается».',source:'ат-Тирмизи 2317'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Чистота — половина веры».',source:'Сахих Муслим 223'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Аллах мягок и любит мягкость во всех делах».',source:'Сахих аль-Бухари 6927; Муслим 2165'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Кто облегчит трудность попавшему в затруднение, тому Аллах облегчит в этом мире и в мире вечном».',source:'Сахих Муслим 2699'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Каждое доброе дело — садака».',source:'Сахих аль-Бухари 6021; Муслим 1005'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Кто старается быть терпеливым, тому Аллах даёт терпение, и никому не дано дара лучше и обширнее терпения».',source:'Сахих аль-Бухари 1469; Муслим 1053'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Отдайте работнику его плату прежде, чем высохнет его пот».',source:'Ибн Маджа 2443'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Дела оцениваются по их завершению».',source:'Сахих аль-Бухари 6607'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Твоя улыбка в лицо брату — садака».',source:'ат-Тирмизи 1956'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Воспользуйся пятью прежде пяти: молодостью до старости, здоровьем до болезни, достатком до бедности, свободным временем до занятости и жизнью до смерти».',source:'аль-Хаким, аль-Мустадрак 7846'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Милосердных помилует Милостивый. Будьте милосердны к тем, кто на земле, — и помилует вас Тот, Кто на небе».',source:'Абу Дауд 4941; ат-Тирмизи 1924'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Стыдливость не приносит ничего, кроме блага».',source:'Сахих аль-Бухари 6117; Муслим 37'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Лучший из вас тот, кто изучает Коран и обучает ему других».',source:'Сахих аль-Бухари 5027'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Не будет вреда и не будет ответного вреда».',source:'Ибн Маджа 2340'},
+  {author:'Пророк Мухаммад ﷺ',text:'«Кто не проявляет милосердия, к тому не проявят милосердия».',source:'Сахих аль-Бухари 5997; Муслим 2318'}
  ];
 function motivation(){const k=keyDay();const idx=Math.floor(Date.UTC(...keyDay().split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS)%MOTIVATIONS.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);if(state.dailyMotivations[k]?.idx===idx)return state.dailyMotivations[k];const m=MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length];const result={idx,text:m.text,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
 function applyLayoutMode(mode,persist=true){
@@ -3539,16 +3576,17 @@ function renderToday(){
 }
 
 function stageEmoji(s,i){const t=String(s?.title||'').toLowerCase();
-  if(/итог|вечер|сон|спать|ноч/.test(t))return '🌙';if(/работ|офис|смен|бизнес/.test(t))return '💼';if(/дом|семь|отдых/.test(t))return '🏡';
+  if(/итог|вечер|сон|спать|ноч/.test(t))return '🌙';if(/работ|офис|смен|бизнес/.test(t))return '💼';if(/дом|семь|отдых/.test(t))return '🏠';
   if(/утр|подъём|подъем|завтрак/.test(t))return '🌅';if(/учёб|учеб|курс|англ|чтен/.test(t))return '📚';if(/спорт|трен|зал/.test(t))return '🏃';if(/намаз|молит/.test(t))return '🕌';
-  return ['🌅','💼','🏡','🌙','⭐'][i%5]}
+  return ['🌅','💼','🏠','🌙','⭐'][i%5]}
 function durText(min){min=Math.max(0,Math.round(min));const h=Math.floor(min/60),m=min%60;return h?(m?`${h} ч ${m} мин`:`${h} ч`):`${m} мин`}
 // «Главное сейчас» in the hero: the current stage (or the next one) — one action, tied to the goal
 function renderNowFocus(info=getStageInfo()){
   const el=$('nowFocus');if(!el)return;const i=info.kind==='active'?info.i:info.kind==='between'?(state.day.steps||[]).indexOf(info.next):-1;
   const k=Math.floor(nowMin())+'|'+i+'|'+(state._lastSavedAt||'');if(el._k===k)return;el._k=k; // once a minute or after a change, not every second
   const f=i>=0?stageFocus(i):null,goal=state.goal?.title||mainGoal()?.title||'';
-  const html=!f?'':`<span class="jl-nf-ico" aria-hidden="true">🎯</span><div class="jl-nf-txt"><small>${info.kind==='active'?'Главное сейчас':'Главное в '+esc(f.s.time)}${goal?' · к цели «'+esc(goal.slice(0,40))+'»':''}</small><b>${esc(f.main)}</b><em>До цели: ${esc(goalLeftText())}</em></div>${f.src==='close'?'':`<button class="jl-nf-btn ${f.done?'on':''}" type="button" data-stage-main="${esc(f.s.id)}" aria-pressed="${f.done}">${f.done?'✅ Сделал':'Сделал'}</button>`}`;
+  const main=f?f.main.replace(/\s*\([^)]*\)\s*$/,''):''; // the hint in brackets stays in «Ритм дня»
+  const html=!f?'':`<span class="jl-nf-ico" aria-hidden="true">🎯</span><div class="jl-nf-txt"><small>${info.kind==='active'?'Главное сейчас':'Главное в '+esc(f.s.time)} · до цели ${esc(goalLeftText())}</small><b>${esc(main)}</b></div>${f.src==='close'?'':`<button class="jl-nf-btn ${f.done?'on':''}" type="button" data-stage-main="${esc(f.s.id)}" aria-pressed="${f.done}" aria-label="${f.done?'Сделано: ':'Сделал: '}${esc(main)}">${f.done?'✅':'Сделал'}</button>`}`;
   if(el.dataset.sig===html)return;el.dataset.sig=html;el.innerHTML=html;
   el.querySelectorAll('[data-stage-main]').forEach(b=>b.onclick=()=>toggleStageMain(b.dataset.stageMain));
 }
