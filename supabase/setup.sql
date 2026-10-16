@@ -46,3 +46,21 @@ create policy "ai_usage_select_own" on public.ai_usage for select to authenticat
 drop policy if exists "ai_usage_insert_own" on public.ai_usage;
 create policy "ai_usage_insert_own" on public.ai_usage for insert to authenticated with check (user_id = (select auth.uid()));
 grant select, insert on public.ai_usage to authenticated;
+-- V72: cloud copies — one snapshot of the state a day per user, the app keeps 30 days (only new objects; nothing existing is changed)
+create table if not exists public.life_state_history (
+  id bigint generated always as identity primary key,
+  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  day date not null,
+  state jsonb not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, day)
+);
+create index if not exists life_state_history_user_day on public.life_state_history (user_id, day desc);
+alter table public.life_state_history enable row level security;
+drop policy if exists "life_state_history_select_own" on public.life_state_history;
+create policy "life_state_history_select_own" on public.life_state_history for select to authenticated using (user_id = (select auth.uid()));
+drop policy if exists "life_state_history_insert_own" on public.life_state_history;
+create policy "life_state_history_insert_own" on public.life_state_history for insert to authenticated with check (user_id = (select auth.uid()));
+drop policy if exists "life_state_history_delete_own" on public.life_state_history;
+create policy "life_state_history_delete_own" on public.life_state_history for delete to authenticated using (user_id = (select auth.uid()));
+grant select, insert, delete on public.life_state_history to authenticated;

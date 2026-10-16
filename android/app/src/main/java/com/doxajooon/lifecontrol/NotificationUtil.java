@@ -104,7 +104,7 @@ public final class NotificationUtil {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setColor(0xFFE3B04B)
                 .setLargeIcon(appIcon(ctx))
-                .setSubText(taskId != null ? "Задача" : "Ритм дня")
+                .setSubText(taskId != null && !taskId.startsWith("stage:") ? "Задача" : "Ритм дня")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentTitle(title == null ? "Jamal Life" : title)
                 .setContentText(text)
@@ -123,8 +123,9 @@ public final class NotificationUtil {
         }
         int nid = id == 0 ? (int) (System.currentTimeMillis() & 0x7fffffff) : id;
         if (taskId != null && !taskId.isEmpty()) {
-            b.addAction(0, "Готово", action(ctx, ActionReceiver.DONE, taskId, nid, title, text, dueAt));
-            b.addAction(0, "Через 15 мин", action(ctx, ActionReceiver.SNOOZE, taskId, nid, title, text, dueAt));
+            boolean stage = taskId.startsWith("stage:"); // «Этап заканчивается. Сделал главное?»
+            b.addAction(0, stage ? "Да" : "Готово", action(ctx, ActionReceiver.DONE, taskId, nid, title, text, dueAt));
+            b.addAction(0, stage ? "Перенести" : "Через 15 мин", action(ctx, ActionReceiver.SNOOZE, taskId, nid, title, text, dueAt));
         }
         NotificationManagerCompat.from(ctx).notify(nid, b.build());
     }

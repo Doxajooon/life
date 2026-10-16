@@ -11,6 +11,12 @@ let goodModel = "";
 let modelList: string[] = [];
 let modelListAt = 0;
 const MAX_REQUESTS_PER_HOUR = 10;
+// Google's 503 «high demand» can hold a request for many seconds: each model gets a time limit, the whole answer
+// comes within ~19 s, and a model that just answered 503 waits at the end of the queue for 3 minutes.
+const DEADLINE_MS = () => Number(Deno.env.get("AI_DEADLINE_MS")) || 19000;
+const ATTEMPT_MS = () => Number(Deno.env.get("AI_ATTEMPT_MS")) || 12000;
+const BUSY_MS = 180_000;
+const busyUntil: Record<string, number> = {};
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info, x-life-control",
@@ -61,7 +67,7 @@ function deepContext(s: any, facts: any): any {
   const habits = (Array.isArray(s?.habits) ? s.habits : []).slice(0, 12).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind }));
   const banks = (Array.isArray(s?.budgets) ? s.budgets : []).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthly: Number(b?.planned) || 0 }));
   let f = "";
-  try { f = JSON.stringify(facts ?? {}).slice(0, 12000); } catch { f = ""; }
+  try { f = JSON.stringify(facts ?? {}); if (f.length > 24000) f = ""; } catch { f = ""; } // too big → no numbers rather than broken JSON
   return { ...c, habits, banks, app_numbers: f ? JSON.parse(f.endsWith("}") ? f : "{}") : {} };
 }
 
@@ -76,7 +82,7 @@ function lifeContext(s: any, sc: any, facts: any): any {
     c.tasks = { total: tasks.length, done: tasks.filter((t: any) => t?.done).length, open: tasks.filter((t: any) => !t?.done).slice(0, 10).map((t: any) => clip(t?.title, 120)) };
   }
   let f = "";
-  try { f = JSON.stringify(facts ?? {}).slice(0, 12000); } catch { f = ""; }
+  try { f = JSON.stringify(facts ?? {}); if (f.length > 24000) f = ""; } catch { f = ""; } // too big → no numbers rather than broken JSON
   c.app_numbers = f && f.endsWith("}") ? JSON.parse(f) : {};
   return c;
 }
@@ -142,6 +148,7 @@ function ruError(status: number, raw: string) {
   if (status === 429 || /quota|rate.?limit|exhausted/i.test(raw)) return "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей. Он обновится около 12:00–13:00 по Душанбе. Пока работает «Полный разбор» на телефоне — он считает всё сам, без интернета. Чтобы лимита не было совсем, включи оплату ключа в Google AI Studio (aistudio.google.com → Billing).";
   if (status === 400 && /api key|API_KEY_INVALID/i.test(raw)) return "Ключ Gemini недействителен. Создай новый ключ в Google AI Studio и замени GEMINI_API_KEY в Supabase → Edge Functions → Secrets.";
   if (status === 403) return "Ключ Gemini не имеет доступа к модели. Проверь ключ в Google AI Studio.";
+  if (status === 503 || status === 504) return "Google сейчас перегружен — все модели Gemini заняты. Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
   return "Gemini сейчас не отвечает (" + status + "). Попробуй через минуту.";
 }
 
@@ -155,17 +162,26 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
   };
   if (useSearch) body.tools = [{ google_search: {} }];
   let lastStatus = 502, lastRaw = "";
-  for (const m of await candidates(key)) {
-    let r: Response;
+  const t0 = Date.now(), now = Date.now(), all = await candidates(key);
+  const order = [...all.filter((m) => !(busyUntil[m] > now)), ...all.filter((m) => busyUntil[m] > now)];
+  for (const m of order) {
+    const left = DEADLINE_MS() - (Date.now() - t0);
+    if (left < Math.min(1500, DEADLINE_MS() / 6)) { console.error("gemini deadline", Date.now() - t0); lastStatus = lastStatus === 429 ? 429 : 503; break; }
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), Math.min(ATTEMPT_MS(), left));
+    let r: Response, raw = "";
     try {
-      r = await fetch(`${API}/models/${m}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body) });
-    } catch { lastStatus = 502; lastRaw = "network"; continue; }
-    const raw = await r.text();
+      r = await fetch(`${API}/models/${m}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body), signal: ac.signal });
+      raw = await r.text();
+    } catch {
+      const slow = ac.signal.aborted; lastStatus = slow ? 504 : 502; lastRaw = slow ? "timeout" : "network";
+      console.error("gemini error", m, lastStatus, lastRaw, Date.now() - t0); if (slow) busyUntil[m] = Date.now() + BUSY_MS; continue;
+    } finally { clearTimeout(timer); }
     let d: any = {};
     try { d = JSON.parse(raw || "{}"); } catch { /* ignore */ }
     if (!r.ok) {
       console.error("gemini error", m, r.status, raw.slice(0, 300));
       lastStatus = r.status; lastRaw = raw;
+      if (r.status === 503) busyUntil[m] = Date.now() + BUSY_MS;
       if (r.status === 400 && /api key|API_KEY_INVALID/i.test(raw)) break; // a bad key fails on every model
       if (goodModel === m) goodModel = "";
       continue; // 429 quota, 404 unknown model, 403, 5xx → next model
@@ -177,11 +193,11 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
     for (const ch of Array.isArray(cand?.groundingMetadata?.groundingChunks) ? cand.groundingMetadata.groundingChunks : []) {
       const u = ch?.web?.uri; if (u && !sources.some((x) => x.url === u)) sources.push({ title: clip(ch?.web?.title || u, 180), url: u });
     }
-    goodModel = m; MODEL = m;
-    console.log("gemini ok", m);
+    goodModel = m; MODEL = m; delete busyUntil[m];
+    console.log("gemini ok", m, Date.now() - t0 + "ms");
     return { output_text: out, sources: useSearch ? sources.slice(0, 8) : [], model: m };
   }
-  return { error: ruError(lastStatus, lastRaw), status: lastStatus === 429 ? 429 : 502 };
+  return { error: ruError(lastStatus, lastRaw), status: lastStatus === 429 ? 429 : lastStatus === 503 || lastStatus === 504 ? 503 : 502 };
 }
 
 Deno.serve(async (req) => {
@@ -209,7 +225,7 @@ Deno.serve(async (req) => {
       ? weekRules() + "\n\nРЕЖИМ: WEEK. Подведи итог последних 7 дней ровно тремя блоками, каждый с новой строки и начинается с названия заглавными буквами:\nСИЛЬНАЯ СТОРОНА — 1–2 предложения: что реально получилось, с цифрой или фактом из данных.\nСЛАБОЕ МЕСТО — 1–2 предложения: что чаще всего мешало (смотри block в днях, траты, незакрытые дни и задачи).\nШАГ НА НЕДЕЛЮ — ровно одно конкретное действие на следующие 7 дней, которое можно проверить (время, сумма или количество).\nНичего кроме этих трёх блоков. Если данных почти нет, честно скажи это в СЛАБОМ МЕСТЕ и дай шаг: закрывать день каждый вечер.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "goal"
       ? promptRules() + "\n\nРЕЖИМ: GOAL. Проанализируй именно главную цель пользователя. Ответь в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — 2–3 подтверждённых факта.\n2) ЧТО УЖЕ ДОСТИГНУТО — только закрытые этапы и реальные результаты из данных.\n3) ЧТО УЖЕ ЕСТЬ — капитал в цели, свободная касса, доходы/расходы и другие подтверждённые ресурсы.\n4) ГЛАВНАЯ ПРОБЛЕМА — один главный ограничитель.\n5) ГЛАВНЫЙ ФОКУС — один приоритет на ближайшие 7 дней.\n6) ПЛАН ДЕЙСТВИЙ — 3–5 строк в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n7) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — ровно одно действие.\n\nНе выдумывай отсутствующие данные. Если цель не имеет суммы или срока, прямо укажи это и дай ближайшее измеримое действие без выдуманной цифры.\n\nДанные:\n" + JSON.stringify(ctx)
-      : promptRules() + "\n\nРЕЖИМ: LIFE. Сделай самый полезный честный разбор жизни пользователя. Ответь ровно восемью блоками, каждый с новой строки, название ЗАГЛАВНЫМИ буквами и тире:\nГДЕ Я СЕЙЧАС — 3 главных факта с цифрами (деньги, долг, цель, дисциплина).\nПЛЮСЫ — 2–4 реальные сильные стороны, каждая с цифрой из данных.\nМИНУСЫ — 2–4 слабых места и утечки: где теряются деньги (категории, мелкие траты, перерасход банков), что проседает в дисциплине (незакрытые дни, привычки, задачи). С цифрами.\nКУДА Я ИДУ — прогноз при текущем темпе, с арифметикой: когда будет достигнута цель, когда закроется долг (используй app_numbers.debtFreeLine, если есть), что будет через 3 месяца, если ничего не менять, и что изменится, если исправить главный минус.\nГЛАВНЫЙ РИСК — одна вещь, которая сильнее всего угрожает цели.\nПЛАН НА 7 ДНЕЙ — 3–5 строк: P1/P2/P3 | действие | срок | измеримый результат.\nШАГ НА СЕГОДНЯ — ровно одно действие на сегодня.\nКАК ЛУЧШЕ ИСПОЛЬЗОВАТЬ ПРИЛОЖЕНИЕ — 1–2 конкретных совета, если из данных видно, что чего-то не хватает (не записываются расходы, нет банков, нет привычек, дни не закрываются). Если всего хватает — напиши это одной строкой.\nБез markdown, без звёздочек и решёток. app_numbers — точные расчёты приложения, используй их. Не выдумывай данные; если чего-то нет, так и скажи.\n\nДанные:\n" + JSON.stringify(ctx);
+      : promptRules() + "\n\nРЕЖИМ: LIFE. Сделай самый полезный честный разбор жизни пользователя. Ответь ровно восемью блоками, каждый с новой строки, название ЗАГЛАВНЫМИ буквами и тире:\nГДЕ Я СЕЙЧАС — 3 главных факта с цифрами (деньги, долг, цель, дисциплина).\nПЛЮСЫ — 2–4 реальные сильные стороны, каждая с цифрой из данных.\nМИНУСЫ — 2–4 слабых места и утечки: где теряются деньги (категории, мелкие траты, перерасход банков), что проседает в дисциплине (незакрытые дни, привычки, задачи). С цифрами.\nКУДА Я ИДУ — прогноз при текущем темпе, с арифметикой: когда будет достигнута цель, когда закроется долг (используй app_numbers.debtFreeLine, если есть), что будет через 3 месяца, если ничего не менять, и что изменится, если исправить главный минус.\nГЛАВНЫЙ РИСК — одна вещь, которая сильнее всего угрожает цели.\nПЛАН НА 7 ДНЕЙ — 3–5 строк: P1/P2/P3 | действие | срок | измеримый результат.\nШАГ НА СЕГОДНЯ — ровно одно действие на сегодня.\nКАК ЛУЧШЕ ИСПОЛЬЗОВАТЬ ПРИЛОЖЕНИЕ — 1–2 конкретных совета, если из данных видно, что чего-то не хватает (не записываются расходы, нет банков, нет привычек, дни не закрываются). Если всего хватает — напиши это одной строкой.\nБез markdown, без звёздочек и решёток. app_numbers — точные расчёты приложения, используй их: dayReport — отчёт сегодняшнего дня (заработал, потратил, куда ушло, что сделано для цели), avoidHabits — привычки-отказы и их серии, wins — победы, goalStage — текущий этап цели и что нужно, чтобы его закрыть. Не выдумывай данные; если чего-то нет, так и скажи.\n\nДанные:\n" + JSON.stringify(ctx);
     const r = mode === "week" ? await gemini(p, false, weekRules()) : mode === "deep" ? await gemini(p, false, deepRules()) : await gemini(p, sc.webSearch);
     if ("error" in r) return json({ error: r.error }, r.status);
     return json({ ok: true, model: r.model || MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });

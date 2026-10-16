@@ -45,6 +45,18 @@ function makeCloud() {
     const req = route.request(), url = new URL(req.url()), m = req.method(), cors = { "access-control-allow-origin": "*" };
     const send = (status, body) => route.fulfill({ status, headers: cors, contentType: "application/json", body: JSON.stringify(body) });
     if (cloud.down) return route.abort("internetdisconnected");
+    // V72: daily cloud copies (life_state_history): one row per user and day, own rows only
+    if (url.pathname === "/rest/v1/life_state_history") {
+      if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
+      if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
+      if (cloud.noHistory) return send(404, { code: "PGRST205", message: "relation not found" });
+      const H = cloud.history = cloud.history || [], q = url.searchParams, val = k => (q.get(k) || "").replace(/^(eq|lt)\./, "");
+      if (m === "POST") { const b = JSON.parse(req.postData() || "{}"); if (b.user_id !== UID) return send(403, { message: "RLS" });
+        if (!H.some(r => r.user_id === b.user_id && r.day === b.day)) H.push({ id: "h" + (cloud.hseq = (cloud.hseq || 0) + 1), ...b, created_at: new Date().toISOString() }); return send(201, null); }
+      if (m === "DELETE") { const before = H.length; cloud.history = H.filter(r => !(r.user_id === val("user_id") && q.get("day")?.startsWith("lt.") && r.day < val("day"))); cloud.deleted = (cloud.deleted || 0) + before - cloud.history.length; return send(204, null); }
+      if (m === "GET") { let rows = H.filter(r => r.user_id === UID); if (q.get("id")) rows = rows.filter(r => r.id === val("id")); rows = [...rows].sort((a, b) => b.day.localeCompare(a.day));
+        const sel = (q.get("select") || "").split(","); return send(200, rows.map(r => Object.fromEntries(sel.map(k => [k, r[k]])))); }
+    }
     cloud.hits.push(m + " " + url.pathname + (url.search.includes("select=updated_at") ? "?meta" : ""));
     if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
     if (url.pathname === "/auth/v1/token") {
@@ -60,6 +72,7 @@ function makeCloud() {
     if (url.pathname.startsWith("/functions/")) {
       if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
       const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
+      if (cloud.aiDelay) await new Promise(r => setTimeout(r, cloud.aiDelay));
       if (cloud.aiFail) return send(429, { error: "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей." });
       if (b.mode === "week") return send(200, { ok: true, model: "mock", output_text: "СИЛЬНАЯ СТОРОНА — закрыл 5 дней.\nСЛАБОЕ МЕСТО — **телефон** <img src=x onerror=window.__xss=1>\nШАГ НА НЕДЕЛЮ — после 21:00 телефон на зарядку.", sources: [] });
       return send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] });
@@ -429,10 +442,11 @@ await test("Нагрузка: 3000 операций и 500 заметок", asyn
   assert.ok(t.save < 200 * slow, "save " + t.save.toFixed(0) + " ms (" + t.all + ")");
   // every screen opens quickly with this much data (best of two)
   const scr = await page.evaluate(() => { const out = {}; for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"]) { const ms = []; for (let i = 0; i < 2; i++) { showView("viewDisplay"); const a = performance.now(); showView(v); ms.push(performance.now() - a); } out[v] = Math.round(Math.min(...ms)); }
-    for (const t of ["tx", "cal", "overview"]) { const a = performance.now(); document.querySelector(`[data-money-tab="${t}"]`).click(); out["money/" + t] = Math.round(performance.now() - a); }
+    for (const t of ["tx", "cal", "overview"]) { const ms = []; for (let i = 0; i < 2; i++) { document.querySelector(`[data-money-tab="${t === "overview" ? "tx" : "overview"}"]`).click(); const a = performance.now(); document.querySelector(`[data-money-tab="${t}"]`).click(); ms.push(performance.now() - a); } out["money/" + t] = Math.round(Math.min(...ms)); }
     const a = performance.now(); openSearch(); const q = document.querySelector("#modal input"); q.value = "Еда"; q.dispatchEvent(new Event("input", { bubbles: true })); out.search = Math.round(performance.now() - a); closeModal(); return out; });
   if (process.env.PERF_LOG) console.log("   screens ms:", JSON.stringify(scr));
-  for (const [k, v] of Object.entries(scr)) assert.ok(v < 400 * slow, `${k} opens in ${v} ms with 3000 operations`);
+  // V72 D13: every screen and tab opens in ≤ 150 ms even on a 4× slower phone
+  for (const [k, v] of Object.entries(scr)) assert.ok(v <= 150, `${k} opens in ${v} ms with 3000 operations and 500 notes (limit 150 ms)`);
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -1200,6 +1214,270 @@ await test("V71: пульс-шкала, отчёт дня, привычка-от
   assert.ok(await page.evaluate(id => document.querySelector(`[data-habit-row="${id}"]`).classList.contains("is-done"), h.id), "the held habit burns");
   await page.reload(); await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true);
   assert.equal(await page.evaluate(() => state.habits.find(x => x.title === "Без соцсетей до обеда")?.avoid), true, "the kind survives a reload");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+
+// ---------- V72 ----------
+const V72_SEED = () => {
+  const k = keyDay(), td = new Date(); td.setMonth(td.getMonth() + 6);
+  state.goal.title = "Квартира"; state.goal.finance.targetAmount = 50000; state.goal.finance.targetDate = keyDay(td); state.goal.finance.manualSavedAmount = 5000;
+  state.goal.milestones = [{ id: "m1", title: "Первый взнос", done: false, autoOff: true }, { id: "m2", title: "Ремонт", done: false, autoOff: true }];
+  state.day.steps = [{ id: "w", time: "08:00", end: "12:00", title: "Работа", details: ["Отчёт клиенту", "Звонки поставщикам"], text: "" },
+    { id: "f", time: "12:00", end: "18:00", title: "Дом и отдых", details: [], text: "" }, { id: "c", time: "18:00", end: "18:30", title: "Итог дня", details: [], text: "" }];
+  state.settings.every2h = true; state.settings.notifications = true; state.settings.wakeTime = "07:00"; saveState(); renderAll(); };
+
+await test("V72 D8: ритм дня — «главное» этапа связано с целью; напоминания начала и конца этапа из данных, каждый день разные", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T07:30:00+05:00") });
+  await page.evaluate(V72_SEED);
+  const texts = () => page.evaluate(() => { const r = state.day.steps.map((s, i) => stageReminderTexts(i)); return { r, slots: twoHourSlots().map(x => x.title + " | " + x.body) }; });
+  const d1 = await texts();
+  for (const [i, x] of d1.r.entries()) {
+    for (const n of [x.start, x.end]) assert.ok((n.title + n.body).includes("Квартира"), `stage ${i}: the goal name is in the reminder: ${n.title} — ${n.body}`);
+    assert.ok(x.start.body.includes(x.focus.main), "the start reminder names the action of the stage");
+    assert.match(x.start.body, /До цели «Квартира»: 45 тыс\. сомони, \d+ д/, "the start reminder says what is left and the days");
+    assert.match(x.end.body, /^Сделал главное\?/);
+  }
+  assert.ok(["Отчёт клиенту", "Звонки поставщикам"].includes(d1.r[0].focus.main), "work: the user's own words for the stage, picked by the day: " + d1.r[0].focus.main);
+  assert.match(d1.r[1].focus.main, /Первый взнос/, "free time: the next goal stage");
+  assert.match(d1.r[2].focus.main, /Закрыть день/);
+  const all1 = [...d1.r.flatMap(x => [x.start.title + "|" + x.start.body, x.end.title + "|" + x.end.body]), ...d1.slots];
+  assert.equal(new Set(all1).size, all1.length, "no reminder repeats another one: " + all1.join("\n"));
+  // the next day the words are different (numbers and the rotating fact come from the data)
+  await page.clock.setSystemTime(new Date("2026-10-17T07:30:00+05:00"));
+  const d2 = await texts();
+  d1.r.forEach((x, i) => assert.notEqual(x.start.body, d2.r[i].start.body, "stage " + i + " says the same thing two days in a row"));
+  // the scheduler: start of a stage, then 10 minutes before its end — «Сделал главное?» with Да / Перенести
+  await page.clock.setSystemTime(new Date("2026-10-17T08:01:00+05:00")); await page.evaluate(() => { state.notificationsLog = []; runScheduler(); });
+  await page.clock.setSystemTime(new Date("2026-10-17T11:51:00+05:00")); await page.evaluate(() => runScheduler());
+  const n = await page.evaluate(() => state.notificationsLog.map(x => x.title + " | " + x.body));
+  assert.ok(n.some(x => /^Сейчас: .*Работа \| Главное: .+До цели «Квартира»/.test(x)), "start reminder: " + n.join(" || "));
+  assert.ok(n.some(x => /Этап заканчивается: Работа \| Сделал главное\?.*Квартира/.test(x)), "end reminder: " + n.join(" || "));
+  // the hero and the day strip are open at once, no tap needed
+  const ui = await page.evaluate(() => { showView("viewToday"); renderToday(); const v = id => { const e = document.getElementById(id); return !!e && e.offsetParent !== null && e.getBoundingClientRect().height > 10; }; return { focus: v("nowFocus"), strip: v("dayStrip"), text: document.getElementById("nowFocus").textContent, main: document.querySelector('#timeline .jl-rstep.current .jl-rstep-main')?.textContent || "" }; });
+  assert.ok(ui.focus && ui.strip, "focus and the day strip are visible");
+  assert.match(ui.text, /Главное сейчас · до цели 45 тыс. сомони/); assert.match(ui.main, /Главное сейчас/);
+  // «Да» from the reminder marks the main action done; «Перенести» moves it on as a goal task
+  const act = await page.evaluate(() => { applyReminderAction("done", "stage:w"); applyReminderAction("snooze", "stage:f"); const t = state.tasks.find(x => x.goal && x.title.includes("Первый взнос"));
+    return { done: !!dailyState().stageDone?.w, moved: dailyState().stageMoved?.f, task: t && { date: t.date, time: t.time, ms: t.ms }, report: dayLedger().gActs }; });
+  assert.ok(act.done, "«Да» marks the stage"); assert.ok(act.moved && act.task && act.task.ms === "m1" && act.task.time === "12:00" && act.task.date === "2026-10-18", "«Перенести» → a goal task in the same stage tomorrow (no other stage left today): " + JSON.stringify(act));
+  assert.ok(act.report.some(x => /Отчёт|Звонки/.test(x)), "the done stage goes to the day report: " + act.report);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D8: Android — у конца этапа кнопки «Да / Перенести», тексты будильников из данных", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T07:30:00+05:00"), init: () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 5 : undefined; } }); } });
+  await page.evaluate(V72_SEED);
+  const c = await page.evaluate(() => { __calls.length = 0; scheduleNative(); return __calls.filter(x => x[0] === "scheduleDaily").map(x => x.slice(1)); });
+  const byId = Object.fromEntries(c.map(x => [x[0], x]));
+  assert.ok(byId.w && /Сейчас: .*Работа/.test(byId.w[2]) && /Квартира/.test(byId.w[3]), "stage start alarm: " + JSON.stringify(byId.w));
+  assert.ok(byId.stend_w && byId.stend_w[1] === "11:50" && /Сделал главное/.test(byId.stend_w[3]), "10 minutes before the end: " + JSON.stringify(byId.stend_w));
+  const java = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java"), "utf8") + fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8");
+  assert.ok(java.includes('"stend_"') && java.includes('"Перенести"') && java.includes('"Да"'), "Android shows «Да / Перенести» on stage reminders");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D9: «Свободное время» — сначала главное по цели, время следующего напоминания из twoHourSlots, «Сделал» переживает перезагрузку", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T12:20:00+05:00") });
+  await page.evaluate(V72_SEED);
+  const r = await page.evaluate(() => { showView("viewToday"); renderFreePlan(); const box = document.getElementById("freePlan"), first = box.querySelector(".jl-free-item");
+    const next = twoHourSlots().find(x => !x.work && x.min > nowMin()); return { first: first?.textContent || "", isGoal: first?.hasAttribute("data-free-goal"), next: box.querySelector("[data-next-2h]")?.textContent, want: next?.time, main: goalFocusLine().main, items: box.querySelectorAll(".jl-free-item").length }; });
+  assert.ok(r.isGoal && r.first.includes(r.main) && r.first.includes("Сделал"), "the first line is the goal's main step: " + r.first);
+  assert.ok(r.want && r.next === r.want, `next reminder ${r.next} = twoHourSlots ${r.want}`);
+  assert.ok(r.items <= 3, "fewer generic ideas");
+  await page.click("[data-free-goal]"); await page.waitForTimeout(200);
+  await page.reload(); await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true);
+  const after = await page.evaluate(() => ({ pressed: document.querySelector("[data-free-goal]")?.getAttribute("aria-pressed"), led: document.getElementById("dayLedger").textContent, acts: dayLedger().gActs }));
+  assert.equal(after.pressed, "true", "the mark survives a reload");
+  assert.ok(after.acts.some(x => x.includes("Первый взнос")) && after.led.includes("Первый взнос"), "and goes to the day report");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D10: задача «к цели» — значок 🎯, закрытие двигает этап, в уведомлении — цель", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T09:00:00+05:00") });
+  await page.evaluate(V72_SEED);
+  await page.evaluate(() => openTaskForm());
+  await page.fill("#taskTitle", "Узнать цены на квартиры"); await page.click('[data-task-goal="1"]'); await page.click('[data-when="custom"]'); await page.fill("#taskTime", "09:05");
+  await page.click("#saveTaskBtn");
+  const t = await page.evaluate(() => state.tasks.find(x => x.title === "Узнать цены на квартиры"));
+  assert.ok(t && t.goal === "main" && t.ms === "m1", "the task is linked to the current goal stage: " + JSON.stringify(t));
+  const before = await page.evaluate(() => { showView("viewToday"); return { p: milestoneAuto(state.goal.milestones[0], 0, 2).p, tag: document.querySelector(`[data-task-row="${state.tasks.find(x => x.goal).id}"] .jl-goal-tag`)?.textContent }; });
+  assert.match(before.tag || "", /🎯/, "a goal task wears 🎯");
+  await page.clock.setSystemTime(new Date("2026-10-16T09:05:30+05:00"));
+  const n = await page.evaluate(() => { state.notificationsLog = []; runScheduler(); return state.notificationsLog.map(x => x.title + " | " + x.body); });
+  assert.ok(n.some(x => /^\S+ Пора: Узнать цены/.test(x) && !x.startsWith("⏰") && x.includes("Квартира")), "the reminder has the task emoji and the goal: " + n.join(" || "));
+  await page.click(`[data-task-emo="${t.id}"]`); await page.waitForTimeout(200);
+  const after = await page.evaluate(() => ({ p: milestoneAuto(state.goal.milestones[0], 0, 2).p, hint: milestoneAuto(state.goal.milestones[0], 0, 2).hint, done: state.goal.milestones[0].done }));
+  assert.ok(after.p > before.p, `closing a goal task moves the stage: ${before.p} → ${after.p}`);
+  assert.match(after.hint, /задачи 1\/1/, "the stage shows its tasks");
+  // old tasks without the new fields keep working
+  const old = await page.evaluate(() => normalize({ tasks: [{ id: "o", title: "Старая", date: keyDay() }] }).tasks[0]);
+  assert.ok(!("goal" in old));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D11: этапы цели — дорожка: текущий крупно с % из milestoneAuto и «чтобы закрыть», закрытые с датой, будущие под замком", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => { const td = new Date(); td.setMonth(td.getMonth() + 6);
+    state.goal.finance.targetAmount = 40000; state.goal.finance.targetDate = keyDay(td); state.goal.finance.manualSavedAmount = 8000;
+    state.goal.milestones = [{ id: "a", title: "Подушка 1 месяц", done: true, doneAt: "2026-10-01T10:00:00Z" }, { id: "b", title: "Первый взнос", done: false, autoOff: false }, { id: "c", title: "Ремонт", done: false }];
+    saveState(); showView("viewGoal"); renderGoal();
+    const steps = [...document.querySelectorAll("#milestones .jl-step")], a = milestoneAuto(state.goal.milestones[1], 1, 3);
+    return { cls: steps.map(x => x.className), pct: steps[1].querySelector("[data-ms-pct]")?.textContent, want: Math.round(a.p * 100) + "%", todo: steps[1].querySelector(".jl-ms-todo")?.textContent,
+      done: steps[0].textContent, lock: steps[2].textContent, add: !!steps[1].querySelector("[data-ms-task]") }; });
+  assert.deepEqual(r.cls, ["jl-step done", "jl-step current", "jl-step todo locked"]);
+  assert.equal(r.pct, r.want, "the current stage shows the percent of milestoneAuto");
+  assert.match(r.todo, /Чтобы закрыть: собери ещё/);
+  assert.match(r.done, /Закрыт 1 октября/); assert.match(r.lock, /🔒 Откроется после этапа 2/);
+  // a task straight from the stage
+  await page.click("#milestones [data-ms-task]");
+  assert.equal(await page.getAttribute('[data-task-goal][aria-pressed="true"]', "data-task-goal"), "1", "the stage is preselected in the task form");
+  await page.evaluate(() => closeModal());
+  // closing a stage by hand: date, celebration and a thank-you in «Достигнуто»
+  await page.$eval('[data-ms="b"]', el => el.click()); await page.waitForTimeout(300);
+  const w = await page.evaluate(() => ({ at: state.goal.milestones[1].doneAt, wins: document.getElementById("achievements").textContent }));
+  assert.ok(w.at, "the date is kept"); assert.match(w.wins, /Этап 2 закрыт/);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D12: ничего не скрыто и нет «мёртвых» иконок — нет руки-курсора без действия, кнопки-на-вид работают, текст не обрезан «…»", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const bad = await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay();
+    state.goal.finance.targetAmount = 50000; state.goal.why = "Очень длинное объяснение, зачем нужна эта цель: своя квартира для семьи, спокойствие, стабильность и уверенность в завтрашнем дне";
+    state.profits.push({ id: "p", amount: 8000, sourceGroup: "Зарплата", at: now, dateKey: k }); state.expenses.push({ id: "e", amount: 123456, category: "Очень длинная категория расходов для проверки", at: now, dateKey: k });
+    state.goals.push({ id: "g2", title: "Машина — очень длинное название второй цели для проверки переноса", targetAmount: 9000, icon: "car", color: "green", createdAt: now, contributions: [] });
+    state.habits = [{ id: "h", title: "Очень длинная привычка, которую надо видеть полностью", kind: "daily", target: 7 }]; state.budgets = [{ id: "b", name: "Поездки и отдых за городом с семьёй", planned: 1000, tops: [] }];
+    state.tasks.push({ id: "t", title: "Позвонить в банк и уточнить график платежей по кредиту на следующий месяц", time: "23:00", date: k, goal: "main", ms: state.goal.milestones[0].id }); saveState(); renderAll();
+    const out = [], LOOKS = ".btn,.jl-pill,.v-add,.iconbtn,.jl-chip,.v-link,.jl-icon-btn,.v-icon-btn";
+    for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile", "viewNotifications", "viewDisplay"]) {
+      showView(v);
+      for (const tab of ["overview", "tx", "cal"]) {
+        document.querySelector(`#${v} [data-money-tab="${tab}"]`)?.click();
+        for (const el of document.querySelectorAll(`#${v} *`)) {
+          if (!el.getClientRects().length) continue; const cs = getComputedStyle(el), name = v + "/" + tab + " " + el.tagName + "." + String(el.className.baseVal ?? el.className).slice(0, 30) + " «" + el.textContent.trim().slice(0, 24) + "»";
+          const ctl = el.closest("button,a,label,input,select,textarea,[role=button],[tabindex]");
+          if (cs.cursor === "pointer" && !ctl) out.push("pointer without action: " + name);
+          if (el.matches(LOOKS) && !ctl) out.push("looks like a button but is not one: " + name);
+          if ((cs.textOverflow === "ellipsis" || cs.webkitLineClamp !== "none") && !el.closest(".jl-quote") && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2)) out.push("cut text: " + name);
+        }
+        if (v !== "viewMoney") break;
+      }
+    }
+    return [...new Set(out)]; });
+  assert.deepEqual(bad, [], bad.slice(0, 12).join("\n"));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D13: праздник уходит быстро, тосты не перекрывают «+» и нижнюю панель; повторный рендер ничего не перерисовывает", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => { showView("viewToday"); celebrate(); toast("Спасибо! Этап закрыт 🏁", "Закрыть основную часть долгов — ты сделал это"); });
+  await page.waitForTimeout(450);
+  const r = await page.evaluate(() => { const t = document.getElementById("toast").getBoundingClientRect(), hit = el => { if (!el || !el.getClientRects().length) return false; const b = el.getBoundingClientRect(); return !(t.right <= b.left || t.left >= b.right || t.bottom <= b.top || t.top >= b.bottom); };
+    return { fab: hit(document.getElementById("quickAddBtn")), nav: [...document.querySelectorAll("nav")].some(n => getComputedStyle(n).position === "fixed" && hit(n)), shown: document.getElementById("toast").classList.contains("show") }; });
+  assert.ok(r.shown); assert.equal(r.fab, false, "the toast covers the «+» button"); assert.equal(r.nav, false, "the toast covers the bottom bar");
+  await page.waitForTimeout(1200);
+  assert.equal(await page.evaluate(() => document.querySelectorAll(".jl-confetti").length), 0, "the celebration is still on screen after 1.6 s");
+  // the same data rendered again does not touch the DOM (no flicker)
+  const changed = await page.evaluate(async () => { renderAll(); for (let q = 0; q < 40; q++) { let busy = false; const w = new MutationObserver(() => { busy = true; }); w.observe(document.querySelector("main"), { childList: true, subtree: true, characterData: true }); await new Promise(r => setTimeout(r, 400)); w.disconnect(); if (!busy) break; } /* wait until the number count-ups have finished (slow phones take longer) */ let n = 0; const mo = new MutationObserver(l => { n += l.filter(x => x.type === "childList" && !x.target.closest?.("#clock") && !(x.target.parentElement?.closest?.("#clock"))).length; /* the clock ticks by itself */ });
+    mo.observe(document.querySelector("main"), { childList: true, subtree: true }); renderAll(); runScheduler(); await new Promise(r => setTimeout(r, 50)); mo.disconnect(); return n; });
+  assert.equal(changed, 0, "a repeated render rebuilt " + changed + " blocks");
+  // animations: only transform and opacity
+  const css = fs.readFileSync(path.join(ROOT, "index.html"), "utf8").split("</style>")[0], bad = [];
+  for (const m of css.matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]*\{[^{}]*\})*)\s*\}/g)) { const props = [...m[2].matchAll(/([a-z-]+)\s*:/g)].map(x => x[1]).filter(x => !["transform", "opacity"].includes(x)); if (props.length) bad.push(m[1] + ": " + props.join(",")); }
+  assert.deepEqual(bad, [], "animations must move only transform/opacity");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D14: иконки целей, банков и источников — градиентная плашка с анимацией; фильтры транзакций не обрезаны на 360 px", async () => {
+  const { ctx, page } = await device(makeCloud(), { viewport: { width: 360, height: 760 } });
+  const r = await page.evaluate(async () => { const now = new Date().toISOString();
+    state.budgets = [{ id: "b1", name: "Еда", planned: 1500, tops: [], emoji: "🍲" }]; state.goals.push({ id: "g2", title: "Машина", targetAmount: 90000, icon: "car", color: "green", createdAt: now, contributions: [] }); saveState(); renderAll();
+    const look = el => { const cs = getComputedStyle(el); return { grad: cs.backgroundImage.includes("gradient"), anim: cs.animationName }; }, out = {};
+    showView("viewGoal"); out.goal = look(document.querySelector(".v-goal-ico"));
+    showView("viewMoney"); document.querySelector('[data-money-tab="overview"]').click(); out.bank = look(document.querySelector(".jl-bank-top>.jl-emo"));
+    document.querySelector('[data-money-tab="tx"]').click(); const W = document.documentElement.clientWidth;
+    out.filters = [...document.querySelectorAll("#txFilters button")].filter(b => { const x = b.getBoundingClientRect(); return x.left < 0 || x.right > W; }).map(b => b.textContent);
+    openMoneyForm("profit"); out.src = look(document.querySelector(".jl-src-tiles button i")); closeModal();
+    openBudget(); out.sticker = look(document.querySelector(".jl-stickers button:not(.active) i")); closeModal();
+    return out; });
+  for (const k of ["goal", "bank", "src", "sticker"]) { assert.ok(r[k].grad, k + " icon has a gradient plaque"); assert.ok(/jlIconIn|jlStickerIn/.test(r[k].anim), k + " icon pops in: " + r[k].anim); }
+  assert.deepEqual(r.filters, [], "filters cut at 360 px");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D15: облачные копии — снимок раз в сутки, старше 30 дней удаляются, восстановление возвращает те же данные", async () => {
+  const cloud = makeCloud();
+  cloud.history = [{ id: "old", user_id: UID, day: "2026-09-01", state: { notes: [] }, created_at: "2026-09-01T10:00:00Z" }, { id: "x", user_id: "someone-else", day: "2026-09-01", state: {}, created_at: "2026-09-01T10:00:00Z" }];
+  const { ctx, page } = await device(cloud, { clock: new Date("2026-10-16T23:40:00+05:00"), session: cloud.session(5 * 86400) }); /* a login valid across the fixed clock */
+  // the user's records (what the app works out by itself for the new day — motivation, empty report — is left aside)
+  const strip = (src) => page.evaluate(src => { const x = snapshotOf(normalize(clone(src || state))); return JSON.stringify(["profits", "expenses", "notes", "tasks", "goal", "goals", "habits", "budgets", "achievements", "debts"].map(k => x[k])); }, src);
+  await page.evaluate(async () => { const now = new Date().toISOString(), k = keyDay(); state.profits.push({ id: "cp", amount: 700, sourceGroup: "Фриланс", at: now, dateKey: k }); state.notes.push({ id: "cn", title: "Облако", body: "x", at: now, category: "work" }); state.goal.title = "Дом"; saveState(); });
+  await page.evaluate(async () => { await _cloudSnapBusy; localStorage.removeItem(CLOUD_SNAP_KEY); }); /* the start-up copy was taken before these records: start the day over */
+  cloud.history = cloud.history.filter(r => r.id === "old" || r.user_id !== UID);
+  await sync(page); await page.evaluate(() => _cloudSnapBusy); await sync(page); await page.evaluate(() => _cloudSnapBusy);
+  const mine = () => cloud.history.filter(r => r.user_id === UID);
+  assert.deepEqual(mine().map(r => r.day), ["2026-10-16"], "one copy a day; the copy older than 30 days is gone: " + JSON.stringify(mine().map(r => r.day)));
+  assert.ok(cloud.history.some(r => r.user_id === "someone-else"), "other users' rows are not touched");
+  // the next day: another copy
+  await page.clock.setSystemTime(new Date("2026-10-17T00:05:00+05:00")); /* past midnight; the login stays valid */
+  await page.evaluate(() => { state.goal.title = "Машина"; state.notes = state.notes.filter(n => n.id !== "cn"); saveState(); });
+  await sync(page); await page.evaluate(() => _cloudSnapBusy);
+  assert.deepEqual(mine().map(r => r.day).sort(), ["2026-10-16", "2026-10-17"]);
+  // restore the 16th from the cloud: list → preview → confirm
+  await page.evaluate(() => { window.confirm = () => true; openBackups(); });
+  await page.waitForSelector("[data-cloud-bk]");
+  const id = mine().find(r => r.day === "2026-10-16").id;
+  await page.click(`[data-cloud-bk="${id}"]`); await page.waitForFunction(id => document.querySelector(`[data-cloud-bk="${id}"]`)?.dataset.ready === "1", id);
+  const preview = await page.textContent(`[data-cloud-row="${id}"] [data-cloud-sum]`);
+  assert.match(preview, /операц.*цел.*замет/, "preview shows how many operations, goals, notes: " + preview);
+  await page.click(`[data-cloud-bk="${id}"]`); await page.waitForTimeout(300);
+  const snap = await strip(cloud.history.find(r => r.id === id).state);
+  assert.ok(snap.includes("Облако") && snap.includes("Дом"), "the copy holds that day's data");
+  assert.equal(await strip(), snap, "restored data equal the copy");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D16: AI видит отчёт дня, привычки-отказы, победы и этап цели; при долгом ответе — «Google перегружен, пробую другую модель…»", async () => {
+  const cloud = makeCloud(); cloud.aiDelay = 8200;
+  const { ctx, page } = await device(cloud);
+  await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay(); state.profits.push({ id: "ai1", amount: 1200, sourceGroup: "Фриланс", at: now, dateKey: k }); state.expenses.push({ id: "ai2", amount: 200, category: "Еда", at: now, dateKey: k });
+    state.habits = [{ id: "hv", title: "Без соцсетей", kind: "daily", target: 7, avoid: true }]; state.habitLog = { hv: { [k]: 1 } };
+    state.goal.milestones[0].done = true; state.goal.milestones[0].doneAt = now; state.goal.milestones[1].autoOff = true; saveState(); renderAll(); openGeminiAnalysis(); });
+  await page.click("#aiRunBtn");
+  await page.waitForSelector("[data-ai-slow]", { timeout: 9000 });
+  assert.match(await page.textContent("[data-ai-slow]"), /Google перегружен, пробую другую модель/);
+  await page.waitForSelector(".jl-ai-result", { timeout: 15000 });
+  const f = cloud.aiBodies.at(-1).facts;
+  assert.equal(f.dayReport.income, 1200); assert.equal(f.dayReport.spent, 200); assert.ok(Array.isArray(f.dayReport.where) && f.dayReport.where[0].category === "Еда");
+  assert.deepEqual(f.avoidHabits.map(h => [h.title, h.heldToday]), [["Без соцсетей", true]]);
+  assert.ok(f.wins.some(w => /Этап 1 закрыт/.test(w.title)), "wins go to the AI");
+  assert.ok(f.goalStage && f.goalStage.n === 2 && typeof f.goalStage.toClose === "string", "the current goal stage goes to the AI");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72: цитата дня — хадис Пророка ﷺ с источником, каждый день новый (год без повтора), читается в обеих темах", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T09:00:00+05:00") });
+  const seen = [];
+  for (let d = 0; d < 40; d++) {
+    await page.clock.setSystemTime(new Date(Date.parse("2026-10-16T09:00:00+05:00") + d * 864e5));
+    seen.push(await page.evaluate(() => { const m = motivation(); return m.author + "|" + m.text + "|" + m.source; }));
+  }
+  assert.ok(seen.every(x => x.startsWith("Пророк Мухаммад ﷺ|«") && x.split("|")[2].length > 3), "a hadith with its source every day");
+  assert.equal(new Set(seen).size, 40, "40 days — 40 different hadiths");
+  assert.ok(await page.evaluate(() => MOTIVATIONS.length >= 365 && new Set(MOTIVATIONS.map(m => m.text)).size === MOTIVATIONS.length), "a year without a repeat: 365+ different hadiths");
+  const c = await page.evaluate(() => { showView("viewToday"); renderToday(); state.settings.theme = "light"; setTheme(); const q = document.querySelector(".jl-quote blockquote"); return getComputedStyle(q).color; });
+  assert.notEqual(c, "rgb(58, 47, 18)", "the quote on the dark hero must be light in the light theme too");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

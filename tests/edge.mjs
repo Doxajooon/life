@@ -26,6 +26,7 @@ globalThis.fetch = async (url, init = {}) => {
   if (url.includes("/models?")) return new Response(JSON.stringify({ models: ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.5-flash-lite"].map(n => ({ name: "models/" + n, supportedGenerationMethods: ["generateContent"] })) }));
   const model = url.match(/models\/([^:]+):generateContent/)?.[1];
   const body = JSON.parse(init.body || "{}"); gem.calls.push({ model, body });
+  if (gem.hang) return new Promise((_, bad) => init.signal?.addEventListener("abort", () => bad(Object.assign(new Error("aborted"), { name: "AbortError" }))));
   const p = gem.plan(model);
   if (p.status !== 200) return new Response(JSON.stringify({ error: { message: p.message || "Your project has exceeded a quota.", code: p.status } }), { status: p.status });
   return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "ПЛЮСЫ — ответ " + model }] } }] }));
@@ -78,6 +79,18 @@ await test("Неверный ключ Gemini → понятная ошибка, 
 });
 await test("Сервис Gemini недоступен (500) → ошибка по-русски", async () => {
   gem.plan = () => ({ status: 500 }); const r = await call("POST", { mode: "deep" }); assert.equal(r.status, 502); assert.ok(ru(r.body.error), r.body.error);
+});
+await test("Google перегружен (503) → другая модель; занятая модель потом идёт последней", async () => {
+  gem.plan = m => m === "gemini-flash-latest" ? { status: 503, message: "This model is currently experiencing high demand." } : { status: 200 };
+  let r = await call("POST", { mode: "life" }); assert.equal(r.status, 200); assert.equal(r.body.model, "gemini-2.5-flash");
+  gem.calls = []; gem.plan = () => ({ status: 200 }); r = await call("POST", { mode: "life" });
+  assert.notEqual(gem.calls[0].model, "gemini-flash-latest", "the overloaded model must wait at the end of the queue");
+});
+await test("Модель зависла → ответ в пределах общего срока, причина по-русски", async () => {
+  env.AI_DEADLINE_MS = "900"; env.AI_ATTEMPT_MS = "300"; gem.hang = true;
+  const t = Date.now(); const r = await call("POST", { mode: "life" }); const ms = Date.now() - t;
+  gem.hang = false; delete env.AI_DEADLINE_MS; delete env.AI_ATTEMPT_MS;
+  assert.ok(ms < 1500, "answered in " + ms + " ms"); assert.equal(r.status, 503); assert.match(r.body.error, /перегружен/);
 });
 await test("Лимит 10 запросов в час", async () => {
   db.usage = 10; const r = await call("POST", { mode: "life" });
