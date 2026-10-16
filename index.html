@@ -1102,7 +1102,10 @@ html[data-theme="light"]{--gold:#b7841f;--gold-2:#e3b04b}
 .jl-hero-date h1{margin:0;font-size:1.5rem;font-weight:700;letter-spacing:-.01em;color:#fff;line-height:1.1}
 .jl-hero-date span{font-size:0.8125rem;color:#a9bdd3}
 .jl-hero-clock{text-align:right}
-.jl-hero .clock-time{font-size:clamp(34px,10.5vw,52px);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;color:#fff}
+.jl-hero .clock-time{display:flex;align-items:flex-start;justify-content:flex-end;font-family:"Inter",var(--font,system-ui),sans-serif;font-size:clamp(40px,12vw,58px);font-weight:250;font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"cv11" 1;letter-spacing:-.045em;line-height:.95;color:var(--clock-ink,#fff);text-shadow:0 2px 24px rgba(120,170,255,.18)}
+.jl-hero .clock-time .ck-colon{margin:0 .02em;opacity:.55;transform:translateY(-.06em);animation:ckBreath 2s ease-in-out infinite}
+.jl-hero .clock-time .ck-s{font-size:.32em;font-weight:400;letter-spacing:0;margin:.32em 0 0 .3em;padding:.12em .36em;border-radius:999px;background:rgba(255,255,255,.08);color:var(--gold-2);line-height:1}
+@keyframes ckBreath{0%,100%{opacity:.35}50%{opacity:.8}}
 .jl-hero .clock-state{font-size:0.7812rem;color:var(--gold-2);margin-top:6px;font-variant-numeric:tabular-nums}
 .jl-now{margin-top:16px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09)}
 .jl-now-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:0.7812rem}
@@ -1375,7 +1378,7 @@ button:active .ui-icon{transform:scale(.82)}
 body[data-layout="desktop"] .view{max-width:1000px;margin-left:auto;margin-right:auto}
 body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:auto}
 @media (min-width:1010px){body[data-layout="mobile"] .jl-fab{right:calc(50% - 430px - 78px)}}
-.jl-hero-date h1{white-space:nowrap}@media (max-width:430px){.jl-hero .clock-time{font-size:2.5rem}.jl-hero-date h1{font-size:1.3rem}}
+.jl-hero-date h1{white-space:nowrap}@media (max-width:430px){.jl-hero .clock-time{font-size:2.9rem}.jl-hero-date h1{font-size:1.3rem}}
 
 /* ===== V62: полный разбор ===== */
 .jl-deep{display:grid;gap:10px;margin-top:12px}
@@ -1693,7 +1696,7 @@ body{font-size:.94rem;letter-spacing:-.003em;font-feature-settings:"cv11","ss01"
 .v-task-meta,.jl-habit-name small,.jl-rstep-meta,.jl-rstep-note,.v-tx small,.jl-step-body small{font-size:.8rem!important}
 .eyebrow,.field label,.jl-now-label,.kpi .label,.distance-kpi .label{letter-spacing:.04em!important}
 b,strong{font-weight:600}
-.clock-time,.dp-sum,.jl-bank-sum b,.v-kpi b,.kpi .value{font-weight:700!important;font-variant-numeric:tabular-nums}
+.dp-sum,.jl-bank-sum b,.v-kpi b,.kpi .value{font-weight:700!important;font-variant-numeric:tabular-nums}
 /* Today hero: the stage is a calm headline, not a banner */
 
 .jl-now-meta,.jl-now-foot{font-size:.82rem!important}
@@ -1826,11 +1829,166 @@ html[data-theme="light"]{--green:#157a3a;--orange:#b45309;--orange-dark:#92400e;
 html[data-theme="dark"] .btn.red{color:#fca5a5}
 .v-goal-card{background-color:#0f2242}
 html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)}
+
+/* ===== V71 «Jamal Dawn»: a lighter dark theme, a living sky behind the app, icons that breathe, a brighter pulse ===== */
+:root,html[data-theme="dark"]{--bg:#0f1d33;--panel:#192b48;--soft:#15253f;--line:#2b4064;--text:#eef3fb;--muted:#a9b8ce;--blue:#5b9cff;--blue-dark:#9cc4ff;--blue-soft:#1b3561;--green:#34d399;--green-soft:#123a32;--purple:#b69cff;--cyan:#38d6f0;--orange:#fbbf4d;--orange-soft:#3d2f14;--red:#fb7185;--red-soft:#3e1c2a;--shadow:0 14px 34px rgba(4,10,24,.32);--clock-ink:#f7fbff}
+html[data-theme="light"]{--bg:#eef3fa;--panel:#ffffff;--soft:#f3f7fc;--clock-ink:#fff}
+body{background:var(--bg)}
+/* the sky: three slow lights and a few fireflies; transforms only, so it costs the phone almost nothing */
+.jl-sky{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,#14284a 0%,#0f1d33 55%,#0c182b 100%)}
+html[data-theme="light"] .jl-sky{background:linear-gradient(180deg,#dfeafb 0%,#eef3fa 55%,#f6f1e8 100%)}
+.jl-sky i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;will-change:transform}
+.jl-sky .s1{width:70vmax;height:70vmax;left:-25vmax;top:-30vmax;background:radial-gradient(circle,#3b6fd8 0%,transparent 65%);animation:skyA 26s ease-in-out infinite alternate}
+.jl-sky .s2{width:60vmax;height:60vmax;right:-25vmax;top:10vh;background:radial-gradient(circle,#13a39a 0%,transparent 65%);opacity:.38;animation:skyB 32s ease-in-out infinite alternate}
+.jl-sky .s3{width:55vmax;height:55vmax;left:5vw;bottom:-35vmax;background:radial-gradient(circle,#c98b2b 0%,transparent 65%);opacity:.3;animation:skyC 38s ease-in-out infinite alternate}
+html[data-theme="light"] .jl-sky i{opacity:.32}
+.jl-sky b{position:absolute;width:3px;height:3px;border-radius:50%;background:#ffe9a8;box-shadow:0 0 8px 2px rgba(255,220,140,.55);opacity:0;animation:firefly 9s ease-in-out infinite}
+html[data-theme="light"] .jl-sky b{background:#f4b63d;box-shadow:0 0 6px 1px rgba(244,182,61,.5)}
+.jl-sky b:nth-of-type(1){left:12%;top:22%;animation-delay:0s}.jl-sky b:nth-of-type(2){left:78%;top:30%;animation-delay:1.8s}
+.jl-sky b:nth-of-type(3){left:40%;top:62%;animation-delay:3.6s}.jl-sky b:nth-of-type(4){left:86%;top:74%;animation-delay:5.4s}
+.jl-sky b:nth-of-type(5){left:22%;top:84%;animation-delay:7.2s}.jl-sky b:nth-of-type(6){left:60%;top:12%;animation-delay:2.7s}
+@keyframes skyA{to{transform:translate3d(18vw,14vh,0) scale(1.15)}}
+@keyframes skyB{to{transform:translate3d(-20vw,18vh,0) scale(.9)}}
+@keyframes skyC{to{transform:translate3d(16vw,-12vh,0) scale(1.1)}}
+@keyframes firefly{0%,100%{opacity:0;transform:translate3d(0,0,0)}30%{opacity:.9}60%{opacity:.5;transform:translate3d(14px,-26px,0)}80%{opacity:0;transform:translate3d(-6px,-44px,0)}}
+body.jl-hidden .jl-sky *{animation-play-state:paused}
+/* cards let the sky shine through a little */
+html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 86%,transparent);border-color:color-mix(in srgb,#8fb4ff 16%,var(--line));box-shadow:inset 0 1px 0 rgba(255,255,255,.05),var(--shadow)}
+html[data-theme="light"] .card{background:color-mix(in srgb,#fff 92%,transparent)}
+/* icons breathe: every title emoji floats gently, each a little out of step; a tap makes it hop */
+@media (prefers-reduced-motion:no-preference){
+ .jl-emo{animation:jlEmoIn .7s cubic-bezier(.34,1.56,.64,1) backwards,jlBreath 4.2s ease-in-out .8s infinite}
+ .card:nth-child(3n) .jl-emo{animation-delay:0s,1.6s}.card:nth-child(3n+1) .jl-emo{animation-delay:0s,2.4s}
+ .bottom button.active svg{animation:jlNavHop .55s cubic-bezier(.34,1.56,.64,1)}
+ .ui-icon{transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+ button:active .ui-icon,.jl-icon-btn:active svg{transform:scale(.82) rotate(-6deg)}
+ .ring .ring-fg{filter:drop-shadow(0 0 4px color-mix(in srgb,var(--rc) 70%,transparent))}
+ .ring-item .ring::after{content:"";position:absolute;inset:6px;border-radius:50%;box-shadow:0 0 18px 2px color-mix(in srgb,var(--rc) 35%,transparent);opacity:.0;animation:ringGlow 3.4s ease-in-out infinite}
+ .ring-item:nth-child(2) .ring::after{animation-delay:.6s}.ring-item:nth-child(3) .ring::after{animation-delay:1.2s}.ring-item:nth-child(4) .ring::after{animation-delay:1.8s}.ring-item:nth-child(5) .ring::after{animation-delay:2.4s}
+}
+@keyframes jlBreath{0%,100%{transform:translateY(0) rotate(0)}30%{transform:translateY(-2px) rotate(-5deg)}60%{transform:translateY(1px) rotate(4deg)}}
+@keyframes jlNavHop{0%{transform:translateY(0) scale(1)}40%{transform:translateY(-5px) scale(1.15)}100%{transform:translateY(0) scale(1)}}
+@keyframes ringGlow{0%,100%{opacity:.15}50%{opacity:.75}}
+/* Life pulse: brighter rings and an overall gauge in percent and degrees */
+.v-pulse{position:relative;overflow:hidden}
+html[data-theme="dark"] .v-pulse{background:radial-gradient(120% 80% at 50% 0%,rgba(91,156,255,.16),transparent 60%),color-mix(in srgb,var(--panel) 88%,transparent)}
+.ring{width:min(4.3rem,100%)}
+.ring circle{stroke-width:5}
+.ring .ring-bg{stroke:color-mix(in srgb,var(--rc) 16%,var(--soft))}
+.ring b{font-size:.86rem;font-variant-numeric:tabular-nums}
+.ring-label{font-weight:700;margin-top:4px;font-size:.72rem;letter-spacing:-.02em;max-width:none;overflow:visible;white-space:nowrap}
+.pulse-gauge{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin:10px 0 12px;padding:12px 14px;border-radius:18px;background:color-mix(in srgb,var(--soft) 80%,transparent);border:1px solid var(--line)}
+.pulse-gauge svg{width:132px;height:76px;overflow:visible}
+.pulse-gauge .pg-track{fill:none;stroke:color-mix(in srgb,var(--line) 80%,transparent);stroke-width:11;stroke-linecap:round}
+.pulse-gauge .pg-arc{fill:none;stroke:url(#pgGrad);stroke-width:11;stroke-linecap:round;stroke-dasharray:0 100;transition:stroke-dasharray 1.2s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 6px rgba(91,156,255,.45))}
+.pulse-gauge .pg-needle{transform-origin:66px 66px;transform:rotate(-90deg);transition:transform 1.2s cubic-bezier(.34,1.3,.5,1)}
+.pulse-gauge .pg-needle line{stroke:var(--text);stroke-width:3;stroke-linecap:round}
+.pulse-gauge .pg-needle circle{fill:var(--text)}
+.pg-text b{display:block;font-size:2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.pg-text b small{font-size:.5em;font-weight:700;color:var(--muted);margin-left:4px}
+.pg-text span{display:block;margin-top:4px;font-weight:700}
+.pg-text em{display:block;font-style:normal;color:var(--muted);font-size:.8rem;margin-top:2px}
+@media (max-width:360px){.pulse-gauge svg{width:110px;height:64px}}
+
+/* V71 habits burn: a done habit glows with a living flame (stronger the longer the streak); a due one smoulders gently */
+.jl-habit{border-radius:16px;padding:10px 8px;margin:0 -8px;transition:background .4s ease,box-shadow .4s ease}
+.jl-habit-emo{position:relative}
+.jl-habit-fire{position:absolute;right:-8px;bottom:-6px;font-style:normal;font-size:.7rem;font-weight:800;padding:1px 5px;border-radius:999px;background:linear-gradient(135deg,#ff8a3d,#ffcf5c);color:#3a1600;box-shadow:0 2px 8px rgba(255,138,61,.45);line-height:1.4}
+.jl-habit.is-done{background:linear-gradient(90deg,rgba(255,138,61,calc(.08 + var(--fire,0)*.14)),transparent 70%)}
+.jl-habit.is-avoid.is-done{background:linear-gradient(90deg,rgba(52,211,153,calc(.08 + var(--fire,0)*.14)),transparent 70%)}
+@media (prefers-reduced-motion:no-preference){
+ .jl-habit.is-done .jl-habit-emo{animation:habitBurn 1.8s ease-in-out infinite;filter:drop-shadow(0 0 calc(4px + var(--fire,0)*10px) rgba(255,150,60,.75))}
+ .jl-habit.is-avoid.is-done .jl-habit-emo{filter:drop-shadow(0 0 calc(4px + var(--fire,0)*10px) rgba(52,211,153,.7))}
+ .jl-habit.is-due .jl-habit-check{animation:habitEmber 2.4s ease-in-out infinite}
+ .jl-habit-fire{animation:habitFlick 1.2s ease-in-out infinite}
+}
+@keyframes habitBurn{0%,100%{transform:scale(1) rotate(0)}25%{transform:scale(1.06) rotate(-3deg)}60%{transform:scale(.98) rotate(2deg)}}
+@keyframes habitEmber{0%,100%{box-shadow:0 0 0 0 rgba(251,191,77,0)}50%{box-shadow:0 0 0 5px rgba(251,191,77,.22)}}
+@keyframes habitFlick{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-1px) scale(1.08)}}
+
+/* V71 day report */
+.jl-ledger{margin:12px 0 14px;padding:14px;border-radius:18px;background:linear-gradient(160deg,color-mix(in srgb,var(--blue) 12%,var(--soft)),var(--soft));border:1px solid var(--line)}
+.jl-lg-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.jl-lg-head small,.jl-lg-where>small{color:var(--muted);font-size:.75rem}
+.jl-lg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.jl-lg-k{padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--panel) 80%,transparent);border:1px solid var(--line);min-width:0}
+.jl-lg-k small{display:block;color:var(--muted);font-size:.75rem}
+.jl-lg-k b{display:block;font-size:1.12rem;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-lg-k.in b{color:var(--green)}.jl-lg-k.out b,.jl-lg-k.debt b{color:var(--red)}.jl-lg-k.goal b{color:var(--purple)}
+.jl-lg-k.net{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center}
+.jl-lg-k.net b{font-size:1.4rem}.jl-lg-k.net.pos b{color:var(--green)}.jl-lg-k.net.neg b{color:var(--red)}.jl-lg-k.net i{font-style:normal;font-size:.6em;color:var(--muted)}
+.jl-lg-where{margin-top:12px;display:grid;gap:7px}
+.jl-lg-bar{display:grid;grid-template-columns:minmax(0,9rem) 1fr auto;gap:8px;align-items:center;font-size:.82rem}
+.jl-lg-bar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-lg-bar i{height:8px;border-radius:99px;background:color-mix(in srgb,var(--line) 70%,transparent);position:relative;overflow:hidden}
+.jl-lg-bar i::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);border-radius:inherit;background:linear-gradient(90deg,#fb7185,#fbbf4d);animation:lgGrow .9s calc(var(--i)*90ms) cubic-bezier(.2,.8,.2,1) backwards}
+.jl-lg-bar b{font-variant-numeric:tabular-nums}
+.jl-lg-empty{margin-top:10px;color:var(--muted);font-size:.85rem}
+.jl-lg-pills{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.jl-lg-pill{display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:14px;background:color-mix(in srgb,var(--panel) 80%,transparent);border:1px solid var(--line)}
+.jl-lg-pill b{font-variant-numeric:tabular-nums}.jl-lg-pill small{color:var(--muted);font-size:.72rem}
+.jl-lg-pill.full{border-color:color-mix(in srgb,var(--green) 55%,var(--line));box-shadow:0 0 14px -4px color-mix(in srgb,var(--green) 60%,transparent)}
+@keyframes lgGrow{from{width:0}}
+
+/* V71 goal dashboard and wins */
+.jl-gh-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.jl-gh-tiles>div{padding:10px 10px 9px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);min-width:0}
+html[data-theme="light"] .jl-gh-tiles>div{background:rgba(255,255,255,.75);border-color:var(--line)}
+.jl-gh-tiles small{display:block;font-size:.72rem;color:var(--muted);white-space:nowrap}
+.jl-gh-tiles b{display:block;margin-top:3px;font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-gh-tiles em{display:block;font-style:normal;font-size:.7rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jl-gh-tiles .t-saved b{color:var(--green)}.jl-gh-tiles .t-left b{color:var(--orange)}.jl-gh-tiles .t-pass b{color:var(--blue-dark)}
+html[data-theme="light"] .jl-gh-tiles .t-pass b{color:var(--blue)}
+.jl-ach{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 16%,var(--soft)),var(--soft));border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));animation:jlRowIn .5s calc(var(--i)*70ms) cubic-bezier(.2,.8,.2,1) backwards}
+.jl-ach.goal{background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 34%,var(--soft)),var(--soft))}
+.jl-ach-ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:1.5rem;background:color-mix(in srgb,var(--gold) 22%,transparent)}
+.jl-ach b{display:block;font-size:.95rem}.jl-ach>div>span{display:block;font-size:.85rem;margin-top:2px}
+.jl-ach small{display:block;color:var(--gold-2);font-size:.75rem;margin-top:4px}
+html[data-theme="light"] .jl-ach small{color:#7a5410}
+.jl-ach-empty{display:grid;justify-items:center;text-align:center;gap:4px;padding:18px 10px;border:1px dashed var(--line);border-radius:16px}
+.jl-ach-empty span{font-size:2.2rem}.jl-ach-empty small{color:var(--muted);max-width:32ch}
+#achievements{display:grid;gap:8px}
+@media (prefers-reduced-motion:no-preference){.jl-ach-ico{animation:achShine 3.6s ease-in-out infinite}.jl-ach:nth-child(2n) .jl-ach-ico{animation-delay:1.2s}}
+@keyframes achShine{0%,100%{transform:rotate(0) scale(1);box-shadow:none}45%{transform:rotate(-6deg) scale(1.06);box-shadow:0 0 18px -2px color-mix(in srgb,var(--gold) 70%,transparent)}}
+
+/* V71 goal forms */
+.jl-gprev{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--purple) 18%,var(--soft)),color-mix(in srgb,var(--blue) 10%,var(--soft)));border:1px solid var(--line)}
+.jl-gprev-ring{position:relative;width:84px;height:84px;display:grid;place-items:center}
+.jl-gprev-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.jl-gprev-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+.jl-gprev-ring .bg{stroke:color-mix(in srgb,var(--line) 85%,transparent)}
+.jl-gprev-ring .now{stroke:var(--purple);stroke-dasharray:0 100;transition:stroke-dasharray .7s cubic-bezier(.2,.8,.2,1)}
+.jl-gprev-ring .add{stroke:var(--green);stroke-dasharray:0 100;transition:stroke-dasharray .5s cubic-bezier(.2,.8,.2,1),stroke-dashoffset .5s;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--green) 70%,transparent))}
+.jl-gprev-ring b{position:relative;font-size:1.1rem;font-weight:800;font-variant-numeric:tabular-nums}
+.jl-gprev-txt b{display:block;font-size:1rem}.jl-gprev-txt span{display:block;margin-top:3px;font-size:.85rem}.jl-gprev-txt small{display:block;margin-top:4px;color:var(--muted);font-size:.78rem}
+.jl-chips{display:flex;flex-wrap:wrap;gap:8px}
+.jl-chips .jl-chip{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--text);font:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s}
+.jl-chips .jl-chip:active{transform:scale(.92)}
+.jl-chips .jl-chip.gold{background:linear-gradient(135deg,#e3b04b,#f6d58a);color:#2a1d00;border-color:transparent}
+
+/* V71 money: KPI tiles 2×2 with living icons and big numbers; transaction icons on soft gradients */
+.v-kpi4{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.v-kpi4 .v-kpi{position:relative;overflow:hidden;padding:12px 12px 11px!important;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--kc) 22%,var(--soft)),color-mix(in srgb,var(--kc) 6%,var(--soft)))!important;border:1px solid color-mix(in srgb,var(--kc) 30%,var(--line))!important}
+.v-kpi4 .v-kpi>span{font-size:.78rem!important;color:var(--text);opacity:.85}
+.v-kpi4 .v-kpi>span i{display:inline-grid!important;place-items:center;width:28px!important;height:28px!important;border-radius:10px!important;background:color-mix(in srgb,var(--kc) 28%,transparent)!important;font-style:normal;font-size:.95rem}
+.v-kpi4 .v-kpi:nth-child(1)>span i::before{content:"💳"}.v-kpi4 .v-kpi:nth-child(2)>span i::before{content:"📈"}
+.v-kpi4 .v-kpi:nth-child(3)>span i::before{content:"🧾"}.v-kpi4 .v-kpi:nth-child(4)>span i::before{content:"🏦"}
+.v-kpi4 .v-kpi b{font-size:1.3rem!important;font-weight:800!important;letter-spacing:-.01em;white-space:normal!important;overflow:visible!important}
+.v-kpi4 .v-kpi b small{font-size:.62em;font-weight:700;color:var(--muted);margin-left:4px}
+.v-kpi b .num{font-size:inherit!important;color:inherit!important;font-weight:inherit!important;display:inline!important;opacity:1!important}
+.v-kpi4 .v-kpi b small{display:inline!important}
+.v-kpi4 .v-kpi::after{content:"";position:absolute;right:-18px;top:-18px;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--kc) 40%,transparent),transparent 70%);opacity:.6}
+@media (prefers-reduced-motion:no-preference){.v-kpi4 .v-kpi span i{animation:jlBreath 4.6s ease-in-out infinite}.v-kpi4 .v-kpi:nth-child(2n) span i{animation-delay:1.3s}}
+@media (min-width:900px){.v-kpi4{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+.v-tx-ico{width:2.75rem!important;height:2.75rem!important;border-radius:15px!important;font-size:1.25rem!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tc) 30%,var(--soft)),color-mix(in srgb,var(--tc) 10%,var(--soft)))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px -6px color-mix(in srgb,var(--tc) 70%,transparent)}
+@media (prefers-reduced-motion:no-preference){.v-tx .v-tx-ico{animation:txPop .5s cubic-bezier(.34,1.56,.64,1) backwards}.v-tx:active .v-tx-ico{transform:scale(.88) rotate(-8deg)}.v-tx .v-tx-ico{transition:transform .25s cubic-bezier(.34,1.56,.64,1)}}
+@keyframes txPop{from{transform:scale(.4) rotate(-12deg);opacity:0}}
 </style>
 
 
 </head>
 <body>
+<div class="jl-sky" aria-hidden="true"><i class="s1"></i><i class="s2"></i><i class="s3"></i><b></b><b></b><b></b><b></b><b></b><b></b></div>
 <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden"><defs>
 <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 18h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
 <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 21h8M12 17v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
@@ -1904,7 +2062,7 @@ html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)
   <div class="auth-scene" aria-hidden="true"><i class="auth-stars"></i><svg viewBox="0 0 400 320" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="authGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f59e0b" stop-opacity="0"/><stop offset=".6" stop-color="#f97316" stop-opacity=".5"/><stop offset="1" stop-color="#9a3412" stop-opacity=".15"/></linearGradient><linearGradient id="authRidge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3a5f"/><stop offset="1" stop-color="#0b1426"/></linearGradient></defs><rect x="0" y="36" width="400" height="150" fill="url(#authGlow)"/><path d="M0 320V150l38-30 26 18 48-62 40 48 30-26 46 54 36-34 52 44 44-28 40 26v130z" fill="#3b3f62" opacity=".8"/><path d="M0 320V190l56-34 40 28 52-46 54 52 44-30 60 42 38-22 56 30v110z" fill="url(#authRidge)"/><path d="M0 320v-70l74-30 62 24 68-34 70 30 64-22 62 22v80z" fill="#070e1c"/></svg></div>
   <div class="auth-box">
     <div class="auth-crown"><svg class="ui-icon" aria-hidden="true"><use href="#i-crown"></use></svg></div>
-    <h1 class="auth-title">Jamal Life <span>V70</span></h1>
+    <h1 class="auth-title">Jamal Life <span>V71</span></h1>
     <div class="auth-intro">Контролируй жизнь<br>Достигай цели<br>Будь лучше каждый день</div>
     <div class="field"><label for="gateEmail">Email</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-mail"></use></svg><input id="gateEmail" type="email" autocomplete="username" value="doxajooon@gmail.com" placeholder="Email"></div></div>
     <div class="field"><label for="gatePassword">Пароль</label><div class="auth-input"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock"></use></svg><input id="gatePassword" type="password" autocomplete="current-password" placeholder="Пароль"><button type="button" class="auth-eye" id="gateEyeBtn" aria-label="Показать пароль" title="Показать пароль"><svg class="ui-icon" aria-hidden="true"><use href="#i-eye"></use></svg></button></div></div>
@@ -1915,7 +2073,7 @@ html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V70</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M236 176 V288 A48 48 0 0 1 146 306 M286 176 V334 H364" fill="none" stroke="#f2b451" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="brand-name">Jamal Life <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg> <span class="brand-ver">V71</span></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -1967,6 +2125,7 @@ html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)
   <div class="card v-pulse">
     <div class="v-pulse-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">⚡</span>Пульс жизни</h2></div>
     <div class="v-pulse-sub"><span class="v-sub" id="pulseStatus">—</span><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">—</strong></div></div>
+    <div class="pulse-gauge" id="pulseGauge"><svg viewBox="0 0 132 76" aria-hidden="true"><defs><linearGradient id="pgGrad" x1="0" x2="1"><stop offset="0" stop-color="#fb7185"/><stop offset=".45" stop-color="#fbbf4d"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs><path class="pg-track" d="M10 66 A56 56 0 0 1 122 66" pathLength="100"/><path class="pg-arc" id="pgArc" d="M10 66 A56 56 0 0 1 122 66" pathLength="100"/><g class="pg-needle" id="pgNeedle"><line x1="66" y1="66" x2="66" y2="22"/><circle cx="66" cy="66" r="5"/></g></svg><div class="pg-text"><b id="pgValue">0<small>%</small></b><span id="pgLabel">—</span><em id="pgDeg">0° из 180°</em></div></div>
     <div class="ring-grid">
       <button class="ring-item" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="День: открыть ход дня"><span class="ring" style="--rc:var(--blue)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDay" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDay">0%</b></span><span class="ring-label">День</span><span class="ring-state" id="ringDayState">—</span></button>
       <button class="ring-item" type="button" data-ring="goal" aria-label="Цель"><span class="ring" style="--rc:var(--purple)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringGoal" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseGoal">0%</b></span><span class="ring-label">Цель</span><span class="ring-state" id="ringGoalState">—</span></button>
@@ -2011,6 +2170,7 @@ html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)
     <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🌙</span>Итог дня</h2><div class="v-sub">2 минуты — и день закрыт</div></div>
       <button class="jl-pill" type="button" id="historyBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg>История</button></div>
     <div class="jl-streak" id="streakBox"><span class="jl-flame" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5C7 10 8.5 8.5 9.5 7.5 10 10 11.5 10.5 12 10.5 12 7 11 4.5 12 2Z"/></svg></span><div><b><span id="streakDays">0</span> <span id="streakWord">дней</span> подряд</b><small id="streakBest">Закрой сегодняшний день — начнётся серия</small></div></div>
+    <div class="jl-ledger" id="dayLedger" aria-live="polite"></div>
     <div class="report-shell">
       <div class="jl-close-fields">
         <div class="field"><label for="rDone">Что сделал сегодня</label><textarea id="rDone" rows="2" placeholder="Коротко: главное, что реально сделано"></textarea></div>
@@ -2044,6 +2204,7 @@ html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)
     <div class="goal-why" id="goalWhy">—</div>
     <div class="jl-goalring-row"><div class="jl-goalring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="gr-bg" cx="60" cy="60" r="50"/><circle class="gr-fill" id="goalRing" cx="60" cy="60" r="50"/></svg><span class="jl-goalring-ico" id="goalHeroIco"></span><b id="goalFinancePct">—</b></div>
       <div class="jl-goalring-info"><span id="goalFinanceStatus">Сумма ещё не задана</span><small id="goalLeftText"></small><span class="jl-lag" id="goalLag" hidden></span></div></div>
+    <div class="jl-gh-tiles" id="goalTiles"><div class="t-saved"><small>💰 Собрано</small><b id="ghSaved">—</b><em id="ghSavedSub"></em></div><div class="t-left"><small>🎯 Осталось</small><b id="ghLeft">—</b><em id="ghLeftSub"></em></div><div class="t-pass"><small>🚀 Пройдено</small><b id="ghPassed">—</b><em id="ghPassedSub"></em></div></div>
     <div class="jl-deadline" id="goalDeadline" hidden><div class="dp-track"><i id="goalDeadlineBar"></i></div><small id="goalDeadlineText">—</small></div>
     <div class="jl-goalhero-next"><span>Следующий шаг</span><b id="goalNext">—</b></div>
     <div class="jl-goalhero-actions"><button class="jl-pill gold" type="button" id="addGoalSavingBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg>Пополнить</button><button class="jl-pill ghost" type="button" id="editGoalFinanceBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg>Сумма и срок</button></div>
@@ -2084,7 +2245,7 @@ html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)
       <div class="goal-ai-summary" id="goalAiSummary">AI покажет, что уже достигнуто и какие действия нужны дальше.</div>
       <div class="goal-ai-plan" id="goalAiPlan"></div>
     </div>
-  <div class="card"><div class="row"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🏆</span>Достигнуто</h2><button class="btn small" id="addAchBtn"><svg class="ui-icon"><use href="#i-plus"></use></svg> Результат</button></div><div class="stack" id="achievements" style="margin-top:10px"></div></div>
+  <div class="card"><div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🏆</span>Достигнуто</h2><div class="v-sub" id="achCount"></div></div><button class="btn small" id="addAchBtn"><svg class="ui-icon"><use href="#i-plus"></use></svg> Результат</button></div><div class="stack" id="achievements" style="margin-top:10px"></div></div>
   
   <div class="card"><div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🎯</span>Другие цели</h2><div class="v-sub">Нажми на цель, чтобы изменить или пополнить</div></div></div><div class="v-goal-list" id="goalList"></div></div>
 </section>
@@ -2221,7 +2382,7 @@ html[data-theme="light"] .v-note-tag{color:color-mix(in srgb,var(--nc) 45%,#111)
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">70.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small>Jamal Life · офлайн-first · Supabase</small></span><span class="v-row-val">71.0</span></div>
   </div>
 </section>
 
@@ -2661,7 +2822,7 @@ function normalize(s){
       v.done=String(v.done||'');v.block=String(v.block||'');v.future=String(v.future||'');v.tomorrow=String(v.tomorrow||'');v.savedAt=String(v.savedAt||'');
     }
   }
-  if(!Array.isArray(s.habits))s.habits=[];s.habits=s.habits.filter(h=>h&&typeof h==='object'&&h.title).map(h=>({...h,id:String(h.id||uid()),title:String(h.title).slice(0,60),kind:['daily','weekdays','weekly'].includes(h.kind)?h.kind:'daily',target:Math.max(1,Math.min(7,Number(h.target)||7))}));if(!s.habitLog||typeof s.habitLog!=='object'||Array.isArray(s.habitLog))s.habitLog={};if(!Array.isArray(s.budgets))s.budgets=[];s.budgets=s.budgets.map(b=>({id:b.id||uid(),name:String(b.name||'Без названия'),planned:Math.max(0,Number(b.planned)||0),emoji:typeof b.emoji==='string'?b.emoji.slice(0,8):'',tops:(Array.isArray(b.tops)?b.tops:[]).filter(x=>x&&Number(x.amount)>0).map(x=>({id:String(x.id||uid()),month:String(x.month||''),amount:Number(x.amount),at:x.at||''}))})).filter(b=>b.name);if(!Array.isArray(s.profits))s.profits=[];s.profits=s.profits.map(x=>{const y={...x};const g=normalizeProfitSource(y.sourceGroup||y.source);y.amount=Math.max(0,Number(y.amount)||0);y.source=g;y.sourceGroup=g;return y});if(!Array.isArray(s.expenses))s.expenses=[];s.expenses=s.expenses.map(x=>{const y={...x};y.amount=Math.max(0,Number(y.amount)||0);y.category=String(y.category||'Другое');y.categoryIcon=y.categoryIcon||'🧾';return y});if(!Array.isArray(s.notes))s.notes=[];s.notes=s.notes.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',category:NOTE_CATS[n.category]?n.category:'personal'}));if(!Array.isArray(s.notesTrash))s.notesTrash=[];s.notesTrash=s.notesTrash.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',deletedAt:n.deletedAt||new Date().toISOString()}));if(!Array.isArray(s.achievements))s.achievements=[];if(!Array.isArray(s.notificationsLog))s.notificationsLog=[];
+  if(!Array.isArray(s.habits))s.habits=[];s.habits=s.habits.filter(h=>h&&typeof h==='object'&&h.title).map(h=>({...h,id:String(h.id||uid()),title:String(h.title).slice(0,60),kind:['daily','weekdays','weekly'].includes(h.kind)?h.kind:'daily',target:Math.max(1,Math.min(7,Number(h.target)||7)),avoid:h.avoid===true}));if(!s.habitLog||typeof s.habitLog!=='object'||Array.isArray(s.habitLog))s.habitLog={};if(!Array.isArray(s.budgets))s.budgets=[];s.budgets=s.budgets.map(b=>({id:b.id||uid(),name:String(b.name||'Без названия'),planned:Math.max(0,Number(b.planned)||0),emoji:typeof b.emoji==='string'?b.emoji.slice(0,8):'',tops:(Array.isArray(b.tops)?b.tops:[]).filter(x=>x&&Number(x.amount)>0).map(x=>({id:String(x.id||uid()),month:String(x.month||''),amount:Number(x.amount),at:x.at||''}))})).filter(b=>b.name);if(!Array.isArray(s.profits))s.profits=[];s.profits=s.profits.map(x=>{const y={...x};const g=normalizeProfitSource(y.sourceGroup||y.source);y.amount=Math.max(0,Number(y.amount)||0);y.source=g;y.sourceGroup=g;return y});if(!Array.isArray(s.expenses))s.expenses=[];s.expenses=s.expenses.map(x=>{const y={...x};y.amount=Math.max(0,Number(y.amount)||0);y.category=String(y.category||'Другое');y.categoryIcon=y.categoryIcon||'🧾';return y});if(!Array.isArray(s.notes))s.notes=[];s.notes=s.notes.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',category:NOTE_CATS[n.category]?n.category:'personal'}));if(!Array.isArray(s.notesTrash))s.notesTrash=[];s.notesTrash=s.notesTrash.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',deletedAt:n.deletedAt||new Date().toISOString()}));if(!Array.isArray(s.achievements))s.achievements=[];if(!Array.isArray(s.notificationsLog))s.notificationsLog=[];
   if(!s.reports||typeof s.reports!=='object')s.reports={};if(!s.dailyMotivations||typeof s.dailyMotivations!=='object')s.dailyMotivations={};if(!s._sent||typeof s._sent!=='object')s._sent={};if(!s.daily||typeof s.daily!=='object')s.daily={};if(!['normal','heavy','rest'].includes(s.dayMode))s.dayMode='normal';if(!Array.isArray(s.debtHistory))s.debtHistory=[];s.drafts=s.drafts&&typeof s.drafts==='object'?s.drafts:clone(DEFAULT.drafts);for(const k of Object.keys(DEFAULT.drafts))if(!(k in s.drafts))s.drafts[k]=clone(DEFAULT.drafts[k]);if(!(Number(s.debtBaseline)>0)){const base=Number(s.debts?.bank||0)+Number(s.debts?.firms||0);if(base>0)s.debtBaseline=base;}
   s.income=Math.max(0,Number(s.income)||0);s.debts=s.debts&&typeof s.debts==='object'?s.debts:{};for(const k of ['bank','firms','monthlyPayment'])s.debts[k]=Math.max(0,Number(s.debts[k])||0);
   s.day=s.day&&Array.isArray(s.day.steps)?s.day:clone(DEFAULT.day);s.day.steps=s.day.steps.slice(0,3);while(s.day.steps.length<3)s.day.steps.push(clone(DEFAULT.day.steps[s.day.steps.length]));
@@ -2834,14 +2995,14 @@ function toast(title,body=''){clearTimeout(toastTimer);$('toast').innerHTML=`<st
 function logNotice(title,body,kind='tasks',read=false){state.notificationsLog.unshift({id:uid(),title,body,kind,read:!!read,at:new Date().toISOString()});state.notificationsLog=state.notificationsLog.slice(0,80);saveState();updateBell();if(currentView==='viewNotifications')renderNotifications()}
 let notificationAudioCtx=null;function audioCtx(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;notificationAudioCtx=notificationAudioCtx||new AC();if(notificationAudioCtx.state==='suspended')notificationAudioCtx.resume().catch(()=>{});return notificationAudioCtx}
 let _lastChimeAt=0,_glassBuf=null,_glassLoading=null;
-function loadGlass(){const ctx=audioCtx();if(!ctx||_glassBuf||_glassLoading)return _glassLoading;_glassLoading=fetch('sounds/jamal-glass.wav').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,no)=>ctx.decodeAudioData(b,ok,no))).then(buf=>{_glassBuf=buf}).catch(()=>{}).finally(()=>{_glassLoading=null});return _glassLoading}
+function loadGlass(){const ctx=audioCtx();if(!ctx||_glassBuf||_glassLoading)return _glassLoading;_glassLoading=fetch('sounds/jamal-dawn.wav').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,no)=>ctx.decodeAudioData(b,ok,no))).then(buf=>{_glassBuf=buf}).catch(()=>{}).finally(()=>{_glassLoading=null});return _glassLoading}
 /* Jamal chime: a soft ascending major arpeggio (E5 · G#5 · B5 · E6) with bell partials and a short echo. */
 function playNotificationSound(force=false){
   if(!force&&state.settings?.sound===false)return;
   const now=Date.now();if(now-_lastChimeAt<1200)return;_lastChimeAt=now;
   try{
     const ctx=audioCtx();if(!ctx)return;
-    // «Jamal Glass» — the same soft glassy tone as on Android (sounds/jamal-glass.wav)
+    // «Jamal Dawn» — the same soft nature tone as on Android (sounds/jamal-dawn.wav: a water drop, kalimba, a breath of wind)
     if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
     loadGlass();
     const t0=ctx.currentTime+.03,out=ctx.createGain(),echo=ctx.createDelay(),fb=ctx.createGain();
@@ -2967,7 +3128,7 @@ function scheduleNativeTasks(){
         const at=new Date(t.date+'T'+t.time+':00').getTime();if(!(at>now))continue;
         once('task_'+t.id,at,'⏰ Пора: '+t.title,'Задача на '+t.time+' — отметь «Готово», когда сделаешь',at);ids.push('task_'+t.id);
         const lead=taskLead(t);
-        if(lead>0&&at-lead*60000>now){once('taskpre_'+t.id,at-lead*60000,'⏳ Через '+lead+' мин: '+t.title,'Задача в '+t.time+' · Jamal Glow',at);ids.push('taskpre_'+t.id)}
+        if(lead>0&&at-lead*60000>now){once('taskpre_'+t.id,at-lead*60000,'⏳ Через '+lead+' мин: '+t.title,'Задача в '+t.time+' · Jamal Life',at);ids.push('taskpre_'+t.id)}
       }
       const cd=nextCloseDayAt();if(cd){br.scheduleOnce('closeday',cd,'🌙 Закрой день','2 минуты: что сделал, что помешало и один шаг на завтра.');ids.push('closeday')}
       const wk=nextWeekReviewAt();if(wk){br.scheduleOnce('weekreview',wk,'✨ Разбор недели','Воскресенье: AI подведёт итог недели и даст один шаг.');ids.push('weekreview')}
@@ -3010,7 +3171,7 @@ function runScheduler(){
     if(t.date!==day||!t.time)continue;
     const tm=timeToMin(t.time),lead=taskLead(t);
     const due=new Date(t.date+'T'+t.time+':00').getTime();
-    if(lead>0&&isDue(m,tm-lead)&&m<tm)once('tp|'+day+'|'+t.id,()=>notify('⏳ Через '+lead+' мин: '+t.title,'Задача в '+t.time+' · Jamal Glow','tasks',{native:true,taskId:t.id,due}));
+    if(lead>0&&isDue(m,tm-lead)&&m<tm)once('tp|'+day+'|'+t.id,()=>notify('⏳ Через '+lead+' мин: '+t.title,'Задача в '+t.time+' · Jamal Life','tasks',{native:true,taskId:t.id,due}));
     if(isDue(m,tm))once('t|'+day+'|'+t.id,()=>{notify('⏰ Пора: '+t.title,'Задача на '+t.time+' — отметь «Готово», когда сделаешь','tasks',{native:true,taskId:t.id,due});if(currentView==='viewToday')renderTasks()});
   }
   for(const sl of twoHourSlots())if(isDue(m,sl.min))once('2h|'+day+'|'+sl.time,()=>notify(sl.title,sl.body,'tasks',{native:true}));
@@ -3021,7 +3182,9 @@ function runScheduler(){
   if(autoDone)renderToday();else if(!hasTextSelection()){renderClock(info);renderAuto(info);renderTodayLight()}
 }
 window.__jlTick=()=>{try{runScheduler()}catch(e){}}; // the Windows host calls this even when the window is hidden
-function renderClock(info=getStageInfo()){const d=new Date();setText('clock',d.toLocaleTimeString('ru-RU',{hour12:false}));setText('clockState',info.kind==='active'?`${info.s.time}–${info.s.end}`:info.kind==='between'?'перерыв между этапами':'день завершён')}
+// the clock: thin hours and minutes, small seconds; only the parts that change are touched (no flicker)
+function paintClock(d=new Date()){const el=$('clock');if(!el)return;const p=n=>String(n).padStart(2,'0');if(!el.querySelector('.ck-h')){el.innerHTML='<span class="ck-h"></span><span class="ck-colon" aria-hidden="true">:</span><span class="ck-m"></span><span class="ck-s"></span>';el.setAttribute('role','timer');}const set=(c,v)=>{const x=el.querySelector(c);if(x.textContent!==v)x.textContent=v};set('.ck-h',p(d.getHours()));set('.ck-m',p(d.getMinutes()));set('.ck-s',p(d.getSeconds()));const label=p(d.getHours())+':'+p(d.getMinutes());if(el.getAttribute('aria-label')!==label)el.setAttribute('aria-label',label)}
+function renderClock(info=getStageInfo()){paintClock();setText('clockState',info.kind==='active'?`${info.s.time}–${info.s.end}`:info.kind==='between'?'перерыв между этапами':'день завершён')}
 function renderStagePercents(info=getStageInfo()){
   const now=nowMin();
   state.day.steps.forEach((s,i)=>{
@@ -3228,7 +3391,7 @@ function renderToday(){
   setText('todayBalance',fmtMoney(daySum(state.profits)-daySum(state.expenses)));const fs=financialSnapshot();setText('todayCashState',`Касса: ${fmtMoney(fs.cash)} · На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`);
   for(const k of ['done','block','tomorrow']){const el=$('r'+k[0].toUpperCase()+k.slice(1));if(el&&document.activeElement!==el)el.value=rep[k]||''}
   $('reportSaved').textContent=rep.closedAt?`Закрыт в ${new Date(rep.closedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`:(rep.done||rep.block||rep.tomorrow)?'Черновик сохранён':'';
-  renderStreak();renderWeek();renderTodayLimit();renderHabits();renderFreePlan();pushWidget();
+  renderStreak();renderDayLedger();renderWeek();renderTodayLimit();renderHabits();renderFreePlan();pushWidget();
   renderPulseRings();renderTodayGoal();renderTodayMoney();renderTasks();setText('brandSub',greeting()+(state.profile.name?', '+state.profile.name:''));
 }
 
@@ -3261,8 +3424,8 @@ function renderDayStrip(info=getStageInfo()){
 function miniRing(id,done,total){const el=$(id);if(!el)return;if(!total){el.innerHTML='';el.hidden=true;return}el.hidden=false;const p=Math.round(done/total*100);
   el.innerHTML=`<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="bg"/><circle cx="18" cy="18" r="15" class="fg" pathLength="100" style="stroke-dasharray:${p} 100"/></svg><b>${p===100?'🏆':p+'%'}</b>`;el.classList.toggle('full',p===100)}
 function taskEmoji(t){const x=String(t||'').toLowerCase();const m=[[/позвон|звон|созвон/,'📞'],[/оплат|заплат|плат[её]ж|долг|кредит/,'💳'],[/купи|покуп|магаз/,'🛒'],[/подар/,'🎁'],[/отчёт|отчет|отправ|письм|почт|док/,'📄'],[/встреч|собран/,'🤝'],[/врач|клиник|аптек|лекар/,'💊'],[/спорт|трен|бег|зал/,'🏃'],[/учи|англ|урок|курс|чита|книг/,'📚'],[/убор|дом|ремонт/,'🧹'],[/машин|авто|бензин|заправ/,'🚗'],[/намаз|мечет/,'🕌'],[/мам|пап|семь|дет/,'👨‍👩‍👧'],[/интернет|телефон|связ/,'📶'],[/еда|приготов|ужин|обед/,'🍲'],[/банк/,'🏦']];for(const [r,e] of m)if(r.test(x))return e;return '📌'}
-function habitEmoji(h){if(h?.emoji)return h.emoji;const x=String(h?.title||'').toLowerCase();const m=[[/намаз|молит|коран/,'🕌'],[/англ|язык|учи|урок/,'🗣️'],[/спорт|трен|бег|зал|отжим/,'🏃'],[/чтен|чита|книг/,'📚'],[/вод/,'💧'],[/сон|спать|подъ/,'😴'],[/медит|дыха/,'🧘'],[/день|деньг|эконом|трат/,'💰'],[/сладк|сахар|еда|питан/,'🥗'],[/телефон|соцсет|экран/,'📵']];for(const [r,e] of m)if(r.test(x))return e;return '✨'}
-function renderTodayLight(){const d=new Date();$('clock').textContent=d.toLocaleTimeString('ru-RU',{hour12:false})}
+function habitEmoji(h){if(h?.emoji)return h.emoji;if(h?.avoid)return '🛡️';const x=String(h?.title||'').toLowerCase();const m=[[/намаз|молит|коран/,'🕌'],[/англ|язык|учи|урок/,'🗣️'],[/спорт|трен|бег|зал|отжим/,'🏃'],[/чтен|чита|книг/,'📚'],[/вод/,'💧'],[/сон|спать|подъ/,'😴'],[/медит|дыха/,'🧘'],[/день|деньг|эконом|трат/,'💰'],[/сладк|сахар|еда|питан/,'🥗'],[/телефон|соцсет|экран/,'📵']];for(const [r,e] of m)if(r.test(x))return e;return '✨'}
+function renderTodayLight(){paintClock()}
 function goalContributionTotal(f){return (Array.isArray(f.contributions)?f.contributions:[]).reduce((sum,x)=>sum+(Number(x.amount)||0),0)}
 function syncGoalFinanceCompletion(){
   const f=state.goal.finance;
@@ -3451,7 +3614,7 @@ function milestoneAuto(m,i,n){
 }
 function autoMilestones(){
   const ms=state.goal?.milestones;if(!Array.isArray(ms)||!ms.length)return false;let changed=false;
-  ms.forEach((m,i)=>{if(m.done||m.autoOff)return;const a=milestoneAuto(m,i,ms.length);if(a.p>=1){m.done=true;m.auto=true;m.doneAt=new Date().toISOString();changed=true;toast('Этап закрыт сам','🏁 '+m.title);celebrate()}});
+  ms.forEach((m,i)=>{if(m.done||m.autoOff)return;const a=milestoneAuto(m,i,ms.length);if(a.p>=1){m.done=true;m.auto=true;m.doneAt=new Date().toISOString();changed=true;toast('Спасибо! Этап закрыт 🏁',m.title+' — ты сделал это');celebrate()}});
   if(changed)saveState();return changed;
 }
 let _goalAiAutoAt=0;
@@ -3482,7 +3645,7 @@ function renderGoal(){autoMilestones();
   renderGoalChart();renderGoalAI();renderGoalDeadline();renderGoalHero();
   {const ms=state.goal.milestones,doneN=ms.filter(m=>m.done).length,cur=ms.findIndex(m=>!m.done);const box=$('milestones');if(box){box.style.setProperty('--f',ms.length>1?String(Math.min(1,doneN/(ms.length-1))):'0');box.innerHTML=ms.map((m,i)=>`<div class="jl-step ${m.done?'done':i===cur?'current':'todo'}"><span class="jl-step-dot">${m.done?'✓':i+1}</span><div class="jl-step-body"><b>${esc(m.title)}</b><small>${m.done?(m.auto?'✅ Закрыт автоматически':'✅ Этап закрыт'):(i===cur?'🔥 Сейчас в работе':'⏳ Впереди')}${!m.done&&m.autoOff?' · <span class="jl-ms-auto">закрываю вручную</span>':''}${!m.done&&!m.autoOff?(()=>{const a=milestoneAuto(m,i,ms.length);return a.hint?` · <span class="jl-ms-auto">${esc(a.hint)}</span>`:''})():''}</small>${!m.done&&!m.autoOff?(()=>{const a=milestoneAuto(m,i,ms.length);return a.p>0?`<span class="jl-ms-bar"><i style="width:${Math.round(a.p*100)}%"></i></span>`:''})():''}</div><input class="check" type="checkbox" data-ms="${esc(m.id)}" aria-label="Этап ${i+1}: ${esc(m.title)}" ${m.done?'checked':''}></div>`).join('')||'<div class="v-empty">Этапов нет — добавь их в «Изменить цель».</div>'}}
   $$('[data-ms]').forEach(c=>c.onchange=()=>{const m=state.goal.milestones.find(x=>x.id===c.dataset.ms);if(!m)return;if(!c.checked&&m.done&&m.auto)m.autoOff=true;m.done=c.checked;if(!m.done){m.auto=false;m.doneAt=''}if(c.checked&&state.goal.milestones.every(x=>x.done))setTimeout(celebrate,200);else if(c.checked)haptic(16);const next=state.goal.milestones.find(x=>!x.done);state.goal.next=next?next.title:'Цель достигнута — выбери следующий финансовый ориентир.';saveState();renderAll();toast(c.checked?'Этап закрыт':'Этап открыт',m.title)});
-  $('achievements').innerHTML=state.achievements.length?state.achievements.slice().sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).map(a=>`<div class="note"><div class="note-title">Результат</div><div class="note-body">${esc(a.text)}</div><div class="note-time">${esc(fmtDateTime(new Date(a.at)))}</div></div>`).join(''):'<div class="empty">Здесь остаются реальные завершённые результаты.</div>';
+  renderAchievementsV71();
 }
 
 function renderDebtChart(){ensureDebtHistory();const arr=state.debtHistory.slice(-8),chart=$('debtChart');if(!chart)return;if(!arr.length){chart.innerHTML='';return}const vals=arr.map(x=>Number(x.total)||0),max=Math.max(...vals,1);chart.innerHTML=arr.map(x=>{const h=Math.max(4,(Number(x.total||0)/max)*100),d=new Date(x.day+'T12:00:00');return `<div class="debt-bar-wrap" role="button" tabindex="0" data-debt-open="all" title="Открыть историю долга" aria-label="Долг ${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}: ${esc(fmtMoney(x.total))} — открыть историю"><i class="debt-bar" style="height:${h}%" title="${esc(fmtMoney(x.total))}"></i><span class="debt-bar-label">${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}</span></div>`}).join('');const month=monthKey(),monthArr=state.debtHistory.filter(x=>String(x.day).startsWith(month));const first=(monthArr[0]||arr[0])?.total,last=(monthArr[monthArr.length-1]||arr[arr.length-1])?.total,delta=(Number(first)||0)-(Number(last)||0);setText('debtChartNote',delta>0?`За текущий месяц долг уменьшился на ${fmtMoney(delta)}.`:delta<0?`За текущий месяц долг вырос на ${fmtMoney(Math.abs(delta))}.`:'За текущий месяц зафиксированных изменений долга нет.')}
@@ -3693,18 +3856,36 @@ function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
   syncCustomVisibility();
   $('saveMoneyBtn').onclick=()=>{const amount=Number($('moneyAmount').value),dateKey=$('moneyDate').value||moneyViewDate||keyDay();if(!(amount>0)){toast('Укажи сумму');return}const at=moneyDateIso(dateKey,editItem?editItem.at:''),common={amount,at,dateKey,note:$('moneyNote').value.trim()};if(editing){const old=Number(editItem.amount)||0;if(!isProfit&&editItem.debtPayment)state.debts[editItem.debtPayment]=Math.max(0,Number(state.debts[editItem.debtPayment]||0)+old);Object.assign(editItem,common);if(isProfit){const g=normalizeProfitSource($('moneyType').value);editItem.source=g;editItem.sourceGroup=g}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';Object.assign(editItem,{category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;saveState();closeModal();renderAll();toast('Операция изменена','Все показатели и графики пересчитаны.');return}if(isProfit){const g=normalizeProfitSource($('moneyType').value);state.profits.push({...common,id:uid(),source:g,sourceGroup:g})}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';state.expenses.push({...common,id:uid(),category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;if(noticeAllowed('finance'))logNotice(isProfit?'Доход добавлен':'Расход добавлен',`${isProfit?'+':'−'}${fmtMoney(amount)} · ${isProfit?normalizeProfitSource($('moneyType').value):($('moneyType').value==='Другое'?(String($('moneyCustomCategory')?.value||'').trim()||'Другое'):$('moneyType').value)}`,'finance',true);saveState();closeModal();renderAll();toast(isProfit?'Прибыль добавлена':'Расход добавлен','Цель, капитал, графики и шкалы обновлены.')};focusSoon('moneyAmount',50)
 }
+
+// a live goal preview inside the goal forms: the ring, «было → станет», what is left and what to put aside each month
+function goalPreviewHTML(){return `<div class="jl-gprev" id="gPrev"><div class="jl-gprev-ring"><svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="32" class="bg"/><circle cx="40" cy="40" r="32" class="now" id="gPrevNow" pathLength="100"/><circle cx="40" cy="40" r="32" class="add" id="gPrevAdd" pathLength="100"/></svg><b id="gPrevPct">0%</b></div><div class="jl-gprev-txt"><b id="gPrevTitle">—</b><span id="gPrevLine">—</span><small id="gPrevMonth">—</small></div></div>`}
+function goalPreviewUpdate(target,before,after,date,o={}){
+  const pct=v=>target>0?clamp(Math.round(v/target*100),0,100):0,p0=pct(before),p1=pct(after),cur=currencyLabel();
+  const now=$('gPrevNow'),add=$('gPrevAdd');if(!now)return;
+  now.style.strokeDasharray=p0+' 100';add.style.strokeDasharray=Math.max(0,p1-p0)+' 100';add.style.strokeDashoffset=String(-p0);
+  setText('gPrevPct',p1+'%');setText('gPrevTitle',target>0?(p1>=100?'🎉 Цель будет достигнута!':p1>p0?`${o.label||'Было'} ${p0}% → ${p1}%`:`${o.label||'Собрано'} ${p1}%`):'Задай сумму цели');
+  const rem=o.remaining??Math.max(0,target-after);
+  setText('gPrevLine',target>0?(o.line||`Осталось ${fmtMoney(rem)} из ${fmtMoney(target)}`):'Например 50 000 '+cur);
+  const need=target>0&&date?monthlyNeed(rem,date):null;
+  setText('gPrevMonth',need===null?(date?'':'Укажи срок — посчитаю, сколько откладывать в месяц'):need>0?`📅 Откладывай ≈ ${fmtMoney(need)} в месяц до ${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}`:'');
+}
 function openGoalSaving(){
   syncGoalFinanceCompletion();const f=state.goal.finance||{},draft=state.drafts?.goalSaving||{};
   if(!(Number(f.targetAmount)>0)){toast('Сначала задай сумму цели');openGoalFinanceEdit();return}
-  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><h2>Внести накопление</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Сумма пополнения</label><input id="gsAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" value="${esc(draft.amount||'')}"></div><div class="field"><label>Комментарий</label><input id="gsNote" placeholder="Например: отложил с зарплаты" value="${esc(draft.note||'')}"></div><div class="sub">Поля сохраняются автоматически. Сейчас собрано: ${esc(fmtMoney(f.savedAmount))} · осталось: ${esc(fmtMoney(Math.max(0,Number(f.targetAmount||0)-Number(f.savedAmount||0))))}</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveGoalSavingBtn"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Внести</button></div></div>`);
+  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><h2>Внести накопление</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px">${goalPreviewHTML()}<div class="field"><label>Сумма пополнения</label><input id="gsAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" value="${esc(draft.amount||'')}"></div><div class="jl-chips" id="gsChips">${[500,1000,2000,5000].map(v=>`<button type="button" class="jl-chip" data-gs="${v}">+${v.toLocaleString('ru-RU')}</button>`).join('')}<button type="button" class="jl-chip gold" data-gs="all">Всё свободное</button></div><div class="field"><label>Комментарий</label><input id="gsNote" placeholder="Например: отложил с зарплаты" value="${esc(draft.note||'')}"></div><div class="sub">Свободно в кассе: ${esc(fmtMoney(walletMetrics().cash))} · поля сохраняются сами</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveGoalSavingBtn"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Внести</button></div></div>`);
   $('closeModalBtn').onclick=closeModal;const autosave=()=>saveDraft('goalSaving',{amount:$('gsAmount').value,note:$('gsNote').value});['gsAmount','gsNote'].forEach(id=>$(id).addEventListener('input',autosave));
+  {const fm=goalFinanceMetrics(),live=()=>{const a=Math.max(0,Number($('gsAmount').value)||0);goalPreviewUpdate(fm.target,fm.saved,fm.saved+a,fm.targetDate,{label:'Отложено',remaining:fm.remaining,line:`В цели ${fmtMoney(fm.saved)}${a?' → '+fmtMoney(fm.saved+a):''} · с кассой ${fm.pct}%`})};$('gsAmount').addEventListener('input',live);live();
+   $$('[data-gs]').forEach(b=>b.onclick=()=>{const v=b.dataset.gs==='all'?Math.max(0,Math.floor(walletMetrics().cash)):(Number($('gsAmount').value)||0)+Number(b.dataset.gs);$('gsAmount').value=String(v);autosave();live();haptic(8)})}
   $('saveGoalSavingBtn').onclick=()=>{const amount=Number($('gsAmount').value);if(!(amount>0)){toast('Укажи сумму');$('gsAmount').focus();return}syncGoalFinanceCompletion();const remaining=Math.max(0,Number(state.goal.finance.targetAmount||0)-Number(state.goal.finance.savedAmount||0));if(!(remaining>0)){toast('Капитал уже собран полностью');clearDraft('goalSaving');closeModal();return}const cashBefore=walletMetrics().cash;if(!(cashBefore>0)){toast('В кассе нет доступной суммы','Сначала добавь прибыль или уменьши расход.');return}const applied=Math.min(amount,remaining,cashBefore);if(!(applied>0)){toast('Недостаточно доступных денег','Сумма накопления не может превышать текущую кассу.');return}if(!state.goal.finance.startedAt)state.goal.finance.startedAt=new Date().toISOString();state.goal.finance.contributions=Array.isArray(state.goal.finance.contributions)?state.goal.finance.contributions:[];state.goal.finance.contributions.unshift({id:uid(),amount:applied,note:$('gsNote').value.trim(),at:new Date().toISOString()});syncGoalFinanceCompletion();clearDraft('goalSaving');saveState();closeModal();renderAll();toast('Накопление добавлено',`${fmtMoney(applied)} внесено в капитал цели. Все разделы обновлены.`)};focusSoon('gsAmount',50)
 }
 
 function openGoalFinanceEdit(){
   syncGoalFinanceCompletion();const f=state.goal.finance||{targetAmount:0,savedAmount:0,manualSavedAmount:0,targetDate:'',startedAt:'',completedAt:'',contributions:[]},d=state.drafts?.goalFinance||{},started=f.startedAt?new Date(f.startedAt):null,startValue=started&&!Number.isNaN(started.getTime())?started.toISOString().slice(0,10):'';
-  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Финансовая цель</div><h2>Настройка капитала</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="grid g2"><div class="field"><label>Нужная сумма</label><input id="gfTarget" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(d.target??f.targetAmount)}"></div><div class="field"><label>Уже собрано всего</label><input id="gfSaved" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(d.saved??f.savedAmount)}"></div></div><div class="grid g2"><div class="field"><label>Начало накопления</label><input id="gfStart" type="date" value="${esc(d.start??startValue)}"></div><div class="field"><label>Плановая дата</label><input id="gfDate" type="date" value="${esc((d.date??f.targetDate)||'')}"></div></div><div class="sub">Поля сохраняются автоматически. Добавленные пополнения сохраняются отдельно.</div><div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn primary" id="saveGoalFinanceBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;
+  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Финансовая цель</div><h2>Сумма и срок цели</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px">${goalPreviewHTML()}<div class="jl-chips">${[10000,50000,100000,500000].map(v=>`<button type="button" class="jl-chip" data-gf-sum="${v}">${v.toLocaleString('ru-RU')}</button>`).join('')}</div><div class="grid g2"><div class="field"><label>Нужная сумма</label><input id="gfTarget" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(d.target??f.targetAmount)}"></div><div class="field"><label>Уже собрано всего</label><input id="gfSaved" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(d.saved??f.savedAmount)}"></div></div><div class="grid g2"><div class="field"><label>Начало накопления</label><input id="gfStart" type="date" value="${esc(d.start??startValue)}"></div><div class="field"><label>Плановая дата</label><input id="gfDate" type="date" value="${esc((d.date??f.targetDate)||'')}"></div></div><div class="jl-chips">${[[3,'3 месяца'],[6,'полгода'],[12,'1 год'],[24,'2 года']].map(([m,l])=>`<button type="button" class="jl-chip" data-gf-months="${m}">⏳ ${l}</button>`).join('')}</div><div class="sub">Поля сохраняются автоматически. Добавленные пополнения сохраняются отдельно.</div><div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn primary" id="saveGoalFinanceBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;
   const autosave=()=>saveDraft('goalFinance',{target:$('gfTarget').value,saved:$('gfSaved').value,start:$('gfStart').value,date:$('gfDate').value});['gfTarget','gfSaved','gfStart','gfDate'].forEach(id=>{$(id).addEventListener('input',autosave);$(id).addEventListener('change',autosave)});
+  {const live=()=>{const t=Math.max(0,Number($('gfTarget').value)||0),sv=Math.max(0,Number($('gfSaved').value)||0);goalPreviewUpdate(t,sv,sv,$('gfDate').value||'')};['gfTarget','gfSaved','gfDate'].forEach(id=>{$(id).addEventListener('input',live);$(id).addEventListener('change',live)});live();
+   $$('[data-gf-sum]').forEach(b=>b.onclick=()=>{$('gfTarget').value=b.dataset.gfSum;autosave();live();haptic(8)});
+   $$('[data-gf-months]').forEach(b=>b.onclick=()=>{const d=new Date();d.setMonth(d.getMonth()+Number(b.dataset.gfMonths));$('gfDate').value=keyDay(d);autosave();live();haptic(8)})}
   $('saveGoalFinanceBtn').onclick=()=>{const target=Math.max(0,Number($('gfTarget').value)||0),savedTotal=Math.max(0,Number($('gfSaved').value)||0),startDate=$('gfStart').value||'',targetDate=$('gfDate').value||'',contributions=Array.isArray(f.contributions)?f.contributions:[],contributionTotal=goalContributionTotal({contributions}),baseline=Math.max(0,savedTotal-contributionTotal);let startedAt=f.startedAt||'';if(startDate){const dt=new Date(startDate+'T00:00:00');startedAt=Number.isNaN(dt.getTime())?'':dt.toISOString()}else if(!startedAt&&(target>0||savedTotal>0))startedAt=new Date().toISOString();state.goal.finance={targetAmount:target,savedAmount:baseline+contributionTotal,manualSavedAmount:baseline,targetDate,startedAt,completedAt:f.completedAt||'',contributions};syncGoalFinanceCompletion();clearDraft('goalFinance');saveState();closeModal();renderGoal();toast('Капитал цели обновлён')};
 }
 function openGoalEdit(){
@@ -3939,7 +4120,10 @@ function showView(id){
   const opts=arguments[1]||{};
   const target=document.getElementById(id);
   if(!target||!target.classList.contains('view'))return;
-  const prev=currentView;currentView=id;
+  const prev=currentView;
+  // every screen remembers where it was scrolled: «назад» and the bottom tabs return to that place
+  if(prev&&prev!==id)viewScroll[prev]=window.scrollY;
+  currentView=id;
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
   const navId=VIEW_PARENT[id]||id;
   document.querySelectorAll('.bottom button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===navId));
@@ -3948,8 +4132,11 @@ function showView(id){
   if(id==='viewGoal')setTimeout(maybeAutoGoalAI,1500);
   if(opts.push!==false&&prev!==id){histPush({lcView:id});navDepth++}
   onViewShown(id);
-  requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'}));
+  // a sub-screen opened fresh starts at the top; going back or switching tabs restores the place; the same tab again scrolls up
+  const fresh=prev===id||(opts.push!==false&&VIEW_PARENT[id]),top=fresh?0:(viewScroll[id]||0);
+  requestAnimationFrame(()=>{window.scrollTo({top,left:0,behavior:'auto'});if(top)requestAnimationFrame(()=>{if(currentView===id&&Math.abs(window.scrollY-top)>2)window.scrollTo({top,left:0,behavior:'auto'})})});
 }
+var viewScroll={};
 
 /* V55.1 navigation hardening */
 (function(){
@@ -3999,6 +4186,33 @@ function renderStreak(){
   box.classList.toggle('hot',st.cur>=3);
   const card=box.closest('.jl-report');if(card)card.classList.toggle('closed',st.todayClosed);
   setText('closeDayLabel',st.todayClosed?'День закрыт · обновить':'Закрыть день');
+}
+
+// «Итог дня» as a full report: earned, spent and where it went, debt paid, put into the goal, the day's net; tasks, habits, rhythm
+function dayLedger(key=keyDay()){
+  const rows=allTransactions().filter(t=>t.dateKey===key);
+  const sum=f=>rows.filter(f).reduce((a,t)=>a+t.amount,0);
+  const inc=sum(t=>t.kind==='income'),out=sum(t=>t.kind==='expense'&&!t.xfer),debt=sum(t=>t.kind==='debt'),goal=sum(t=>t.kind==='transfer'&&t.out)-sum(t=>t.kind==='transfer'&&!t.out);
+  const cats={};for(const t of rows)if(t.kind==='expense'&&!t.xfer){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
+  const tasks=todayTasks(),habits=(state.habits||[]).filter(h=>habitDue(h,new Date())),steps=state.day?.steps||[],rep=dayReport();
+  return {inc,out,debt,goal,net:inc-out-debt,cats:Object.entries(cats).sort((a,b)=>b[1].v-a[1].v),count:rows.length,
+    tasks:[tasks.filter(t=>t.done).length,tasks.length],habits:[habits.filter(h=>habitDoneOn(h,key)).length,habits.length],steps:[steps.filter(st=>!!rep.steps?.[st.id]).length,steps.length]};
+}
+function renderDayLedger(){
+  const box=$('dayLedger');if(!box)return;const L=dayLedger(),cur=esc(currencyLabel()),m=v=>esc(fmtShort(v));
+  const sig=JSON.stringify(L);if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  const max=Math.max(1,...L.cats.map(c=>c[1].v));
+  const pill=(e,label,[a,b])=>`<div class="jl-lg-pill${b&&a>=b?' full':''}"><span aria-hidden="true">${e}</span><b>${a}/${b}</b><small>${label}</small></div>`;
+  box.innerHTML=`<div class="jl-lg-head"><b>📒 Отчёт за сегодня</b><small>${L.count} ${plural(L.count,'операция','операции','операций')}</small></div>
+  <div class="jl-lg-grid">
+   <div class="jl-lg-k in"><small>Заработал</small><b>+${m(L.inc)}</b></div>
+   <div class="jl-lg-k out"><small>Потратил</small><b>−${m(L.out)}</b></div>
+   ${L.debt?`<div class="jl-lg-k debt"><small>Долг</small><b>−${m(L.debt)}</b></div>`:''}
+   ${L.goal?`<div class="jl-lg-k goal"><small>В цель</small><b>${L.goal>0?'→ ':'← '}${m(Math.abs(L.goal))}</b></div>`:''}
+   <div class="jl-lg-k net ${L.net<0?'neg':'pos'}"><small>Итог дня</small><b>${L.net<0?'−':'+'}${m(Math.abs(L.net))} <i>${cur}</i></b></div>
+  </div>
+  ${L.cats.length?`<div class="jl-lg-where"><small>Куда ушло</small>${L.cats.slice(0,5).map(([k,c],i)=>`<div class="jl-lg-bar" style="--i:${i}"><span>${esc(c.e)} ${esc(k)}</span><i style="--w:${Math.max(6,c.v/max*100)}%"></i><b>${m(c.v)}</b></div>`).join('')}</div>`:'<div class="jl-lg-empty">Сегодня трат нет — отличный день для цели 🌿</div>'}
+  <div class="jl-lg-pills">${pill('✅','задачи',L.tasks)}${pill('🔥','привычки',L.habits)}${pill('🗓️','этапы',L.steps)}</div>`;
 }
 function closeDay(){
   const r=dayReport();r.done=$('rDone').value.trim();r.block=$('rBlock').value.trim();r.tomorrow=$('rTomorrow').value.trim();
@@ -4123,7 +4337,7 @@ function renderBiometricRow(){
 
 /* ===== V60: привычки ===== */
 const HABIT_KINDS={daily:'каждый день',weekdays:'по будням',weekly:'раз в неделю'};
-const HABIT_IDEAS=[['Пять намазов','daily',7],['Английский 20 минут','weekdays',5],['Спорт','weekly',3],['Чтение 15 минут','daily',7]];
+const HABIT_IDEAS=[['Пять намазов','daily',7],['Английский 20 минут','weekdays',5],['Спорт','weekly',3],['Чтение 15 минут','daily',7],['Без соцсетей до обеда','daily',7,true],['Без сладкого','daily',7,true]];
 function habitDue(h,d){const wd=d.getDay();return h.kind==='weekdays'?(wd>=1&&wd<=5):true}
 function habitDoneOn(h,key){return !!state.habitLog?.[h.id]?.[key]}
 function habitWeekCount(h,d=new Date()){const x=new Date(d);const wd=(x.getDay()+6)%7;x.setDate(x.getDate()-wd);let n=0;for(let i=0;i<7;i++){if(habitDoneOn(h,keyDay(x)))n++;x.setDate(x.getDate()+1)}return n}
@@ -4137,13 +4351,13 @@ function habitStreak(h){
 function habitSub(h){
   const st=habitStreak(h),unit=h.kind==='weekly'?plural(st,'неделя','недели','недель'):plural(st,'день','дня','дней');
   const base=h.kind==='weekly'?`${habitWeekCount(h)} из ${Math.max(1,Number(h.target)||1)} на этой неделе`:HABIT_KINDS[h.kind]||'каждый день';
-  return esc(base)+(st>1?` · <span class="jl-flame-mini"><i class="jl-fl" aria-hidden="true">🔥</i> ${st} ${unit}</span>`:'');
+  return (h.avoid?'🛡️ отказ · ':'')+esc(base)+(st>1?` · <span class="jl-flame-mini"><i class="jl-fl" aria-hidden="true">🔥</i> ${st} ${unit}</span>`:'');
 }
 function renderHabits(){
   const box=$('habitList');if(!box)return;const list=state.habits||[],today=new Date(),tk=keyDay(today);
   if(!list.length){
     box.innerHTML='<div class="v-sub" style="margin-top:4px">Добавь первую привычку — в один тап:</div><div class="jl-habit-ideas">'+HABIT_IDEAS.map((x,i)=>`<button class="jl-pill" type="button" data-habit-idea="${i}">${svgIcon('i-plus')}${esc(x[0])}</button>`).join('')+'</div>';
-    $$('[data-habit-idea]').forEach(b=>b.onclick=()=>{const [title,kind,target]=HABIT_IDEAS[Number(b.dataset.habitIdea)];addHabit(title,kind,target)});
+    $$('[data-habit-idea]').forEach(b=>b.onclick=()=>{const [title,kind,target,avoid]=HABIT_IDEAS[Number(b.dataset.habitIdea)];addHabit(title,kind,target,avoid)});
     setText('habitSummary','Отмечай каждый день — серия растёт');miniRing('habitRing',0,0);const hw=$('habitWeek');if(hw)hw.innerHTML='';return;
   }
   let doneToday=0,dueToday=0;
@@ -4151,7 +4365,7 @@ function renderHabits(){
     const due=habitDue(h,today),done=habitDoneOn(h,tk);if(due){dueToday++;if(done)doneToday++}
     const d=new Date(today);d.setDate(d.getDate()-6);let dots='';
     for(let i=0;i<7;i++){const k=keyDay(d),on=habitDoneOn(h,k),dd=habitDue(h,d);dots+=`<i class="${on?'on':''}${!dd&&!on?' off':''}${i===6?' today':''}" title="${esc(d.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric'}))}${on?' — выполнено':''}"></i>`;d.setDate(d.getDate()+1)}
-    const st=habitStreak(h);return `<div class="jl-habit ${done?'is-done':''} ${due&&!done?'is-due':''}" data-habit-row="${esc(h.id)}"><button class="jl-habit-emo ${st>=3?'hot':''}" type="button" data-habit-emo="${esc(h.id)}" aria-label="${esc((done?'Снять отметку: ':'Отметить сегодня: ')+h.title)}">${habitEmoji(h)}</button><button class="jl-habit-name" type="button" data-habit-edit="${esc(h.id)}"><b>${esc(h.title)}</b><small>${habitSub(h)}</small><span class="jl-dots" aria-hidden="true">${dots}</span></button><button class="jl-habit-check ${done?'on':''}" type="button" data-habit-check="${esc(h.id)}" aria-pressed="${done}" aria-label="${esc((done?'Снять отметку: ':'Отметить сегодня: ')+h.title)}">${svgIcon('i-check')}</button></div>`;
+    const st=habitStreak(h);return `<div class="jl-habit ${done?'is-done':''} ${due&&!done?'is-due':''} ${h.avoid?'is-avoid':''}" data-habit-row="${esc(h.id)}" style="--fire:${Math.min(1,st/14).toFixed(2)}"><button class="jl-habit-emo ${st>=3?'hot':''}" type="button" data-habit-emo="${esc(h.id)}" aria-label="${esc((done?'Снять отметку: ':h.avoid?'Удержался сегодня: ':'Отметить сегодня: ')+h.title)}">${habitEmoji(h)}${st>0?`<em class="jl-habit-fire" aria-hidden="true">🔥${st}</em>`:''}</button><button class="jl-habit-name" type="button" data-habit-edit="${esc(h.id)}"><b>${esc(h.title)}</b><small>${habitSub(h)}</small><span class="jl-dots" aria-hidden="true">${dots}</span></button><button class="jl-habit-check ${done?'on':''}" type="button" data-habit-check="${esc(h.id)}" aria-pressed="${done}" aria-label="${esc((done?'Снять отметку: ':h.avoid?'Удержался сегодня: ':'Отметить сегодня: ')+h.title)}">${svgIcon('i-check')}</button></div>`;
   }).join('');
   setText('habitSummary',dueToday?(doneToday===dueToday?`Сегодня всё выполнено — ${dueToday} из ${dueToday} 🔥`:`Сегодня ${doneToday} из ${dueToday}`):'Сегодня можно отдохнуть');miniRing('habitRing',doneToday,dueToday);renderHabitWeek();
   $$('[data-habit-emo]').forEach(b=>b.onclick=()=>toggleHabit(b.dataset.habitEmo));
@@ -4170,22 +4384,23 @@ function toggleHabit(id){
   saveState();renderHabits();const b=document.querySelector(`[data-habit-check="${CSS.escape(id)}"]`);if(b&&on){b.classList.add('pop');b.closest('.jl-habit')?.classList.add('just-done')}
   haptic(on?16:8);if(on){const st=habitStreak(h);toast(h.title,st>1?`${st} ${h.kind==='weekly'?plural(st,'неделя','недели','недель'):plural(st,'день','дня','дней')} подряд`:'Отмечено на сегодня')}
 }
-function addHabit(title,kind='daily',target=7){
+function addHabit(title,kind='daily',target=7,avoid=false){
   state.habits=Array.isArray(state.habits)?state.habits:[];
   if(state.habits.some(h=>h.title.toLowerCase()===title.toLowerCase())){toast('Такая привычка уже есть');return}
-  state.habits.push({id:uid(),title,kind,target:Math.max(1,Math.min(7,Number(target)||1)),createdAt:new Date().toISOString()});saveState();renderHabits();toast('Привычка добавлена',title);
+  state.habits.push({id:uid(),title,kind,target:Math.max(1,Math.min(7,Number(target)||1)),avoid:avoid===true,createdAt:new Date().toISOString()});saveState();renderHabits();toast('Привычка добавлена',title);
 }
 function openHabitEditor(id=''){
   const h=id?(state.habits||[]).find(x=>x.id===id):null;
   openModal(`<div class="close-row"><div><div class="eyebrow">Привычки</div><h2>${h?'Изменить привычку':'Новая привычка'}</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
   <div class="stack" style="margin-top:12px"><div class="field"><label for="hbTitle">Что делаешь</label><input id="hbTitle" maxlength="60" placeholder="Например: Английский 20 минут" value="${esc(h?.title||'')}"></div>
+  <div class="field"><label for="hbType">Тип</label><select id="hbType"><option value="good">✅ Делать хорошее</option><option value="avoid">🛡️ Отказ от приятного — отмечаю, если удержался</option></select></div>
   <div class="field"><label for="hbKind">Как часто</label><select id="hbKind"><option value="daily">Каждый день</option><option value="weekdays">По будням (пн–пт)</option><option value="weekly">Несколько раз в неделю</option></select></div>
   <div class="field" id="hbTargetWrap"><label for="hbTarget">Сколько раз в неделю</label><input id="hbTarget" type="number" min="1" max="7" inputmode="numeric" value="${esc(h?.target||3)}"></div>
   <button class="btn primary" id="hbSave">${svgIcon('i-check')} Сохранить</button>${h?`<button class="btn red" id="hbDelete">${svgIcon('i-trash')} Удалить привычку</button>`:''}</div>`);
-  $('closeModalBtn').onclick=closeModal;$('hbKind').value=h?.kind||'daily';
+  $('closeModalBtn').onclick=closeModal;$('hbKind').value=h?.kind||'daily';$('hbType').value=h?.avoid?'avoid':'good';
   const sync=()=>{$('hbTargetWrap').hidden=$('hbKind').value!=='weekly'};sync();$('hbKind').onchange=sync;
-  $('hbSave').onclick=()=>{const title=$('hbTitle').value.trim();if(!title){toast('Напиши привычку');$('hbTitle').focus();return}const kind=$('hbKind').value,target=kind==='weekly'?Math.max(1,Math.min(7,Number($('hbTarget').value)||3)):kind==='weekdays'?5:7;
-    if(h){Object.assign(h,{title,kind,target});saveState();renderHabits();closeModal();toast('Привычка сохранена')}else{closeModal();addHabit(title,kind,target)}};
+  $('hbSave').onclick=()=>{const title=$('hbTitle').value.trim();if(!title){toast('Напиши привычку');$('hbTitle').focus();return}const kind=$('hbKind').value,target=kind==='weekly'?Math.max(1,Math.min(7,Number($('hbTarget').value)||3)):kind==='weekdays'?5:7,avoid=$('hbType').value==='avoid';
+    if(h){Object.assign(h,{title,kind,target,avoid});saveState();renderHabits();closeModal();toast('Привычка сохранена')}else{closeModal();addHabit(title,kind,target,avoid)}};
   if(h)$('hbDelete').onclick=()=>{if(!confirm('Удалить привычку «'+h.title+'» и её отметки?'))return;state.habits=state.habits.filter(x=>x.id!==h.id);if(state.habitLog)delete state.habitLog[h.id];saveState();renderHabits();closeModal();toast('Привычка удалена')};
   focusSoon('hbTitle',60);
 }
@@ -4269,20 +4484,33 @@ function renderFreePlan(){
     (state.settings?.every2h!==false?'<div class="jl-free-note">🔔 Каждые 2 часа напомню, чем заняться</div>':'');
   $$('[data-free]').forEach(b=>b.onclick=()=>{const dd=dailyState();dd.freeDone=dd.freeDone||{};const t=b.dataset.free;dd.freeDone[t]=!dd.freeDone[t];saveState();renderFreePlan();if(dd.freeDone[t]){haptic(14);toast('Отлично! '+t,'Ещё один шаг к успеху')}});
 }
+// «Главное сейчас» for a reminder: the goal (what is missing, days left), its next stage and the open tasks of the day
+function goalFocusLine(){
+  const g=mainGoal(),p=g?goalProgress(g):null,parts=[];
+  const nextMs=(state.goal?.milestones||[]).find(m=>!m.done);
+  if(p&&p.target&&!p.done)parts.push(`до цели ${fmtShort(p.remaining)} ${currencyLabel()}`+(p.daysLeft!==null?`, ${p.daysLeft} ${plural(p.daysLeft,'день','дня','дней')}`:''));
+  const open=todayTasks().filter(t=>!t.done);
+  const main=nextMs?.title||state.goal?.next||open[0]?.title||'';
+  return {title:(state.goal?.title||g?.title||'Главная цель'),pct:p?.pct??0,parts,main,open:open.length};
+}
 function twoHourSlots(){
   if(state.settings?.every2h===false||state.settings?.notifications===false)return [];
   const steps=state.day?.steps||[];if(!steps.length)return [];
-  const start=timeToMin(state.settings?.wakeTime||'06:30'),end=timeToMin(steps[steps.length-1].end);
   const edges=steps.flatMap(st=>[timeToMin(st.time),timeToMin(st.end)]);
-  const out=[];
-  for(let mm=start+120;mm<end;mm+=120){
-    if(edges.some(e=>Math.abs(e-mm)<=10))continue; // a stage reminder already rings at this time
-    const st=steps.find(x=>mm>=timeToMin(x.time)&&mm<timeToMin(x.end));
-    const idea=successIdeas(4)[(mm/120|0)%4]||SUCCESS_IDEAS[0];
-    const work=st&&isWorkStage(st);
-    out.push({min:mm,time:fmtMin(mm),title:work?'💼 2 часа работы — короткая пауза':`${idea[0]} Свободное время: ${idea[1]}`,body:work?'Вода, 5 минут без экрана, потом снова главное: '+(st.details?.[0]||st.title):idea[2]+' — шаг к успеху сегодня'});
-  }
-  return out;
+  const f=goalFocusLine(),out=[],seen=new Set();
+  const add=(mm,work,st)=>{
+    if(seen.has(mm)||edges.some(e=>Math.abs(e-mm)<=10))return; // a stage reminder already rings at this time
+    seen.add(mm);
+    const focus=`🎯 ${f.title} — ${f.pct}%`+(f.parts.length?' · '+f.parts.join(' · '):'');
+    out.push({min:mm,time:fmtMin(mm),
+      title:work?'💼 2 часа работы — короткая пауза':`🌿 Свободное время — главное: ${f.main?String(f.main).slice(0,48):'шаг к цели'}`,
+      body:work?'Вода, 5 минут без экрана, потом снова главное: '+(st?.details?.[0]||st?.title||''):focus+(f.open?` · задач открыто: ${f.open}`:'')});
+  };
+  // every 2 hours inside each stage, counted from the stage's start; the morning counts from waking up
+  const wake=timeToMin(state.settings?.wakeTime||'06:30');
+  if(Number.isFinite(wake)&&wake<timeToMin(steps[0].time))for(let mm=wake+120;mm<timeToMin(steps[0].time);mm+=120)add(mm,false);
+  for(const st of steps){const a=timeToMin(st.time),b=timeToMin(st.end),work=isWorkStage(st);if(/итог/i.test(st.title||''))continue;for(let mm=a+120;mm<b-10;mm+=120)add(mm,work,st)}
+  return out.sort((x,y)=>x.min-y.min);
 }
 const NATIVE_2H_KEY='JL_NATIVE_2H_V1';
 function scheduleNative2h(){
@@ -4435,7 +4663,32 @@ function renderGoalHero(){
   if(ring){ring.style.strokeDasharray=C.toFixed(1);ring.style.strokeDashoffset=(C*(1-pct/100)).toFixed(1)}
   const ico=$('goalHeroIco');if(ico&&main){const h=svgIcon(ICON_IDS[main.icon]||'i-target');if(ico.innerHTML!==h)ico.innerHTML=h;ico.style.color=goalColor(main)}
   setText('goalLeftText',f.target?(f.completed?'🎉 Цель достигнута!':`Осталось ${fmtMoney(f.remaining)}${f.targetDate?' · до '+new Date(f.targetDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}):''}`):'');
+  {const cur=currencyLabel(),ms=state.goal?.milestones||[],msDone=ms.filter(m=>m.done).length;
+   setText('ghSaved',fmtShort(f.target?Math.min(f.target,f.available):f.saved));setText('ghSavedSub',cur+(f.saved?` · в цели ${fmtShort(f.saved)}`:''));
+   setText('ghLeft',f.target?(f.completed?'0 🎉':fmtShort(f.remaining)):'—');setText('ghLeftSub',f.target?(f.targetDate&&goalDaysLeft(f.targetDate)!==null?`${cur} · ${goalDaysLeft(f.targetDate)} дн.`:cur):'задай сумму');
+   setText('ghPassed',f.target?pct+'%':ms.length?`${msDone}/${ms.length}`:'—');setText('ghPassedSub',ms.length?`этапов ${msDone} из ${ms.length}`:'пути');}
   const l=main?goalLag(main):null,el=$('goalLag');if(el){el.hidden=!l;if(l){el.textContent=lagText(l);el.className='jl-lag '+(l.diff<0?'behind':'ahead')}}
+}
+
+// «Достигнуто»: what you wrote yourself plus what the app sees you earned — closed stages, the reached goal,
+// series of closed days and habits. Every win says thank you.
+const THANKS=['Спасибо тебе — ты сделал это! 🙏','Ты держишь слово перед собой. Горжусь! ✨','Шаг за шагом — и вот результат. Браво! 👏','Это было непросто, но ты справился 💪','Так строится свобода. Спасибо за упорство 🌿'];
+function earnedAchievements(){
+  const out=[],ms=state.goal?.milestones||[];
+  ms.forEach((m,i)=>{if(m.done)out.push({id:'ms'+m.id,icon:'🏁',title:'Этап '+(i+1)+' закрыт',text:m.title,at:m.doneAt||'',kind:'stage'})});
+  const f=state.goal?.finance||{};if(f.completedAt)out.push({id:'goal',icon:'🏆',title:'Цель достигнута!',text:state.goal.title||'Главная цель',at:f.completedAt,kind:'goal'});
+  const st=streakInfo(),best=st.best;for(const n of [3,7,14,30,60,100])if(best>=n)out.push({id:'days'+n,icon:'🔥',title:n+' '+plural(n,'день','дня','дней')+' подряд',text:'Дни закрыты один за другим',at:'',kind:'streak'});
+  for(const h of state.habits||[]){const n=habitStreak(h),top=[30,14,7].find(x=>n>=x);if(top)out.push({id:'hb'+h.id+top,icon:h.avoid?'🛡️':'⭐',title:`${top} ${plural(top,'день','дня','дней')}: ${h.title}`,text:h.avoid?'Ты выбрал полезное вместо приятного':'Привычка стала частью тебя',at:'',kind:'habit'})}
+  return out;
+}
+function renderAchievementsV71(){
+  const box=$('achievements');if(!box)return;
+  const mine=(state.achievements||[]).map(a=>({id:'a'+a.id,icon:'✍️',title:'Результат',text:a.text,at:a.at,kind:'mine'}));
+  const all=[...earnedAchievements(),...mine].sort((a,b)=>(Date.parse(b.at)||0)-(Date.parse(a.at)||0));
+  const sig=JSON.stringify(all.map(a=>a.id+a.text));if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  const head=$('achCount');if(head)head.textContent=all.length?all.length+' '+plural(all.length,'победа','победы','побед'):'';
+  box.innerHTML=all.length?all.map((a,i)=>`<div class="jl-ach ${a.kind}" style="--i:${i}"><span class="jl-ach-ico" aria-hidden="true">${a.icon}</span><div><b>${esc(a.title)}</b><span>${esc(a.text)}</span><small>${esc(THANKS[(a.id.length+i)%THANKS.length])}${a.at?' · '+esc(new Date(a.at).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})):''}</small></div></div>`).join('')
+   :'<div class="jl-ach-empty"><span aria-hidden="true">🏆</span><b>Первая победа уже близко</b><small>Закрой этап цели, 3 дня подряд или запиши результат — и он засияет здесь.</small></div>';
 }
 function celebrate(){if(!_motionOK())return;const box=document.createElement('div');box.className='jl-confetti';box.innerHTML=Array.from({length:18},(_,i)=>`<i style="--x:${Math.round(Math.random()*100)}vw;--d:${(Math.random()*.6).toFixed(2)}s;--r:${Math.round(Math.random()*360)}deg">${['🎉','✨','🏆','⭐','💛'][i%5]}</i>`).join('');document.body.appendChild(box);setTimeout(()=>box.remove(),2600)}
 
@@ -4481,7 +4734,19 @@ function renderPulseRings(){
   setRingState('Day',p.day);setRingState('Goal',p.goal,gp?.done?'Достигнута':p.goal>0?'В процессе':'Не начата');setRingState('Finance',p.finance);setRingState('Discipline',p.discipline);setRingState('Debt',p.debt,debtTotal()<=0?'Нет долга':'');
   const avg=Math.round((p.goal+p.finance+p.discipline+p.debt)/4);
   setText('pulseStatus',avg>=70?'Отличный темп':avg>=45?'Стабильно':avg>=25?'Нужен шаг вперёд':'Начни с малого');
+  renderPulseGauge(Math.round((p.day+p.goal+p.finance+p.discipline+p.debt)/5));
 }
+// the overall pulse: one gauge, the needle turns 0–180°, the number counts up to the new value
+function renderPulseGauge(v){
+  v=clamp(Math.round(Number(v)||0),0,100);const arc=$('pgArc'),needle=$('pgNeedle'),val=$('pgValue');if(!arc||!val)return;
+  if(val.dataset.v===String(v))return;const from=Number(val.dataset.v)||0;val.dataset.v=String(v);
+  arc.style.strokeDasharray=v+' 100';needle.style.transform=`rotate(${-90+v*1.8}deg)`;
+  setText('pgLabel',v>=80?'🔥 Жизнь кипит':v>=60?'✨ Отличный темп':v>=40?'🌤 Ровный день':v>=20?'🌱 Шаг за шагом':'🌙 Начни с малого');
+  setText('pgDeg',Math.round(v*1.8)+'° из 180° · общий пульс');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,t0=performance.now(),dur=reduce?0:900;
+  const step=t=>{const k=dur?Math.min(1,(t-t0)/dur):1,n=Math.round(from+(v-from)*(1-Math.pow(1-k,3)));val.innerHTML=n+'<small>%</small>';if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step);
+}
+document.addEventListener('visibilitychange',()=>document.body.classList.toggle('jl-hidden',document.hidden));
 function greeting(){const h=new Date().getHours();return h<5?'Доброй ночи':h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер'}
 function renderTodayGoal(){
   const g=mainGoal();if(!g)return;const p=goalProgress(g),card=$('tgCard');if(!card)return;
@@ -4878,7 +5143,7 @@ function bindV57(){
   $$('[data-fmt]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>noteFormat(b.dataset.fmt)});
   ['neTitle','neBody'].forEach(id=>$(id).addEventListener('input',noteEditorSync));$('nePinned').addEventListener('change',noteEditorSync);$('neSave').onclick=noteEditorSave;
   $('neTrash').onclick=()=>{if(noteEditId){const id=noteEditId;noteEditId='';showView('viewNotes');moveToTrash(id)}else{clearDraft('note');showView('viewNotes');toast('Черновик удалён')}};
-  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify)playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 Jamal Life','Так звучат напоминания — Jamal Glow ✨');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:'Jamal Life',body:'Так звучат напоминания.'});return}}catch(e){}showWebNotification('Jamal Life','Так звучат напоминания.');toast('Jamal Life','Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
+  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify)playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 Jamal Life','Так звучат напоминания — Jamal Dawn 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:'Jamal Life',body:'Так звучат напоминания.'});return}}catch(e){}showWebNotification('Jamal Life','Так звучат напоминания.');toast('Jamal Life','Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
   $('setDarkTheme').onchange=e=>{state.settings.theme=e.target.checked?'dark':'light';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');
