@@ -1385,7 +1385,7 @@ await test("V72 D13: праздник уходит быстро, тосты не
   await page.waitForTimeout(1200);
   assert.equal(await page.evaluate(() => document.querySelectorAll(".jl-confetti").length), 0, "the celebration is still on screen after 1.6 s");
   // the same data rendered again does not touch the DOM (no flicker)
-  const changed = await page.evaluate(async () => { renderAll(); await new Promise(r => setTimeout(r, 1500)); /* let the number count-ups finish */ let n = 0; const mo = new MutationObserver(l => { n += l.filter(x => x.type === "childList" && !x.target.closest?.("#clock") && !(x.target.parentElement?.closest?.("#clock"))).length; /* the clock ticks by itself */ });
+  const changed = await page.evaluate(async () => { renderAll(); for (let q = 0; q < 40; q++) { let busy = false; const w = new MutationObserver(() => { busy = true; }); w.observe(document.querySelector("main"), { childList: true, subtree: true, characterData: true }); await new Promise(r => setTimeout(r, 400)); w.disconnect(); if (!busy) break; } /* wait until the number count-ups have finished (slow phones take longer) */ let n = 0; const mo = new MutationObserver(l => { n += l.filter(x => x.type === "childList" && !x.target.closest?.("#clock") && !(x.target.parentElement?.closest?.("#clock"))).length; /* the clock ticks by itself */ });
     mo.observe(document.querySelector("main"), { childList: true, subtree: true }); renderAll(); runScheduler(); await new Promise(r => setTimeout(r, 50)); mo.disconnect(); return n; });
   assert.equal(changed, 0, "a repeated render rebuilt " + changed + " blocks");
   // animations: only transform and opacity
