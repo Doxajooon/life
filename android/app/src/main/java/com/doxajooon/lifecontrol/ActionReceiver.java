@@ -10,6 +10,7 @@ import androidx.core.app.NotificationManagerCompat;
  *  «Готово»        — remembered until the app opens (the web app marks the task done and syncs it),
  *                    all remaining alarms of that task are cancelled right away;
  *  «Через 15 мин»  — the same reminder rings again in 15 minutes, even if the app is closed.
+ * On a stage reminder (task «stage:<id>») the buttons are «Да» / «Перенести» and both go to the web app.
  */
 public class ActionReceiver extends BroadcastReceiver {
     static final String DONE = "com.doxajooon.lifecontrol.TASK_DONE";
@@ -20,6 +21,12 @@ public class ActionReceiver extends BroadcastReceiver {
         String task = i.getStringExtra("task");
         if (task == null || task.isEmpty()) return;
         NotificationManagerCompat.from(ctx).cancel(i.getIntExtra("nid", 0));
+        if (task.startsWith("stage:")) {
+            // a stage of the day: «Да» marks its main action done, «Перенести» moves it on — the web app does both on start/resume
+            PendingActions.add(ctx, SNOOZE.equals(i.getAction()) ? "snooze" : "done", task);
+            MainActivity.deliverActions();
+            return;
+        }
         if (DONE.equals(i.getAction())) {
             PendingActions.add(ctx, "done", task);
             AlarmScheduler.cancelTask(ctx, task);

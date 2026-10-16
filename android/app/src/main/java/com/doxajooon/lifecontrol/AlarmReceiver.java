@@ -15,9 +15,10 @@ public class AlarmReceiver extends BroadcastReceiver {
         else AlarmScheduler.fired(ctx, id, kind);
     }
 
-    /** task_<id>, taskpre_<id>, tasksnz_<id> → <id>; other alarms have no buttons. */
+    /** task_<id>, taskpre_<id>, tasksnz_<id> → <id>; stend_<stage> (10 min before a stage ends) → stage:<stage>; other alarms have no buttons. */
     static String taskOf(String id) {
         if (id == null) return null;
+        if (id.startsWith("stend_")) return "stage:" + id.substring(6);
         if (id.startsWith("task_")) return id.substring(5);
         if (id.startsWith("taskpre_") || id.startsWith("tasksnz_")) return id.substring(8);
         return null;

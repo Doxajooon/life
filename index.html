@@ -1462,8 +1462,8 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-step.done .jl-step-body b{color:var(--muted)}
 .jl-step-body small{display:block;font-size:.78rem;color:var(--muted);margin-top:4px}
 .jl-confetti{position:fixed;inset:0;pointer-events:none;z-index:500;overflow:hidden}
-.jl-confetti i{position:absolute;top:-40px;left:var(--x);font-style:normal;font-size:26px;animation:jlFall 2.2s var(--d) cubic-bezier(.3,.6,.4,1) forwards}
-@keyframes jlFall{to{transform:translateY(110vh) rotate(var(--r));opacity:.2}}
+.jl-confetti i{position:absolute;top:-40px;left:var(--x);font-style:normal;font-size:24px;will-change:transform,opacity;animation:jlFall 1.15s var(--d) cubic-bezier(.3,.6,.4,1) forwards}
+@keyframes jlFall{70%{opacity:1}to{transform:translateY(105vh) rotate(var(--r));opacity:0}}
 @media (prefers-reduced-motion:reduce){.jl-goalring-ico,.jl-step.current .jl-step-dot,.jl-step.done .jl-step-dot,.milestones::after,.jl-range{animation:none!important}.milestones::after{transform:none}.gr-fill{transition:none}}
 /* ===== V58.5 living motion: values move, rings sweep, things respond to the finger ===== */
 .ring circle:last-of-type,.ring .ring-fg,.ring svg circle+circle{transition:stroke-dasharray 1.1s cubic-bezier(.2,.8,.2,1),stroke .4s ease}
@@ -1543,7 +1543,6 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-rstep-bar i::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:translateX(-100%);animation:jlShine 2.6s ease-in-out infinite}
 @keyframes jlShine{to{transform:translateX(100%)}}
 .jl-rstep-note{font-size:.84rem;color:var(--muted);margin-top:6px;line-height:1.45}
-.jl-rstep.done .jl-rstep-note,.jl-rstep.todo .jl-rstep-note{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .jl-rstep .check{margin-top:5px}
 /* tasks */
 #viewToday .v-task{grid-template-columns:auto minmax(0,1fr) auto auto}
@@ -1983,6 +1982,48 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .v-tx-ico{width:2.75rem!important;height:2.75rem!important;border-radius:15px!important;font-size:1.25rem!important;background:linear-gradient(145deg,color-mix(in srgb,var(--tc) 30%,var(--soft)),color-mix(in srgb,var(--tc) 10%,var(--soft)))!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 4px 12px -6px color-mix(in srgb,var(--tc) 70%,transparent)}
 @media (prefers-reduced-motion:no-preference){.v-tx .v-tx-ico{animation:txPop .5s cubic-bezier(.34,1.56,.64,1) backwards}.v-tx:active .v-tx-ico{transform:scale(.88) rotate(-8deg)}.v-tx .v-tx-ico{transition:transform .25s cubic-bezier(.34,1.56,.64,1)}}
 @keyframes txPop{from{transform:scale(.4) rotate(-12deg);opacity:0}}
+/* V72: «Главное» of a stage — in the hero and in the rhythm */
+.jl-nf:empty{display:none}
+.jl-nf{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;align-items:start;margin-top:12px;padding:11px 12px;border-radius:14px;background:linear-gradient(120deg,rgba(242,180,81,.16),rgba(63,208,201,.10));border:1px solid rgba(242,180,81,.32);animation:jlRise .5s cubic-bezier(.2,.8,.2,1) both}
+.jl-nf-ico{font-size:1.25rem;display:inline-block;animation:jlBreath 3.2s ease-in-out infinite}
+.jl-nf-txt small{display:block;font-size:.72rem;color:#f2c879;font-weight:700;letter-spacing:.02em}
+.jl-nf-txt b{display:block;color:#fff;font-size:.92rem;line-height:1.4;margin-top:4px;font-weight:650}
+.jl-nf-txt em{display:block;font-style:normal;color:#b9cde2;font-size:.75rem;margin-top:4px}
+.jl-nf-btn{grid-column:2;justify-self:start;margin-top:6px;min-height:40px;padding:0 13px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-weight:700;font-size:.8rem;cursor:pointer;transition:transform .25s cubic-bezier(.2,.8,.2,1),background .3s ease}
+.jl-nf-btn:active{transform:scale(.94)}
+.jl-nf-btn.on{background:#1f9d6b;border-color:#34d399}
+.jl-rstep-main{display:flex;gap:8px;align-items:flex-start;margin-top:8px;padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--gold) 9%,transparent);border:1px dashed color-mix(in srgb,var(--gold) 35%,var(--line));font-size:.84rem;line-height:1.4;color:var(--text)}
+.jl-rstep-main small{display:block;font-size:.72rem;font-weight:700;color:var(--muted);margin-bottom:4px}
+.jl-rstep-main.on{background:color-mix(in srgb,var(--green) 10%,transparent);border-color:color-mix(in srgb,var(--green) 40%,var(--line));border-style:solid}
+.jl-rstep.done .jl-rstep-main:not(.on){opacity:.75}
+.jl-rstep-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.jl-rstep-acts .jl-pill{min-height:40px;padding:0 14px;font-size:.82rem}
+.jl-rstep-acts .jl-pill.on{background:color-mix(in srgb,var(--green) 16%,var(--panel));border-color:color-mix(in srgb,var(--green) 50%,var(--line))}
+@media (prefers-reduced-motion:reduce){.jl-nf,.jl-nf-ico{animation:none!important}.jl-nf-btn{transition:none!important}}
+.jl-free-goal{border-color:color-mix(in srgb,var(--gold) 45%,var(--line));background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 12%,var(--panel)),var(--panel))}
+.jl-free-goal .jl-emo{display:inline-block;animation:jlBreath 3.2s ease-in-out infinite}
+.jl-free-k{color:color-mix(in srgb,var(--gold) 70%,var(--text))!important;font-weight:700;margin:0 0 4px!important}
+.jl-free-do{font-style:normal;display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 12px;border-radius:11px;background:var(--gold);color:#2a1a00;font-weight:800;font-size:.8rem;white-space:nowrap}
+.jl-free-do .ui-icon{width:14px;height:14px}
+.jl-free-goal.done .jl-free-do{background:var(--green);color:#fff}
+.jl-free-note b{color:var(--text)}
+.jl-lg-goal{margin-top:12px;padding:10px 12px;border-radius:14px;border:1px dashed var(--line);font-size:.82rem;color:var(--muted);line-height:1.45}
+.jl-lg-goal small{display:block;font-weight:700;color:var(--text);margin-bottom:4px}
+.jl-lg-goal ul{margin:0;padding-left:18px;color:var(--text)}
+.jl-lg-goal li+li{margin-top:4px}
+.jl-lg-goal.on{border-style:solid;border-color:color-mix(in srgb,var(--green) 40%,var(--line));background:color-mix(in srgb,var(--green) 7%,transparent)}
+@media (prefers-reduced-motion:reduce){.jl-free-goal .jl-emo{animation:none!important}}
+.jl-goal-tag{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700;vertical-align:2px;color:color-mix(in srgb,var(--gold) 75%,var(--text));background:color-mix(in srgb,var(--gold) 14%,transparent);border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line))}
+.jl-task-goal{display:grid;gap:8px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--soft)}
+.jl-task-goal-h{font-weight:700;font-size:.88rem}.jl-task-goal-h small{font-weight:500;color:var(--muted);margin-left:6px}
+/* a task that is late «smoulders»: a soft red glow breathes (opacity only) */
+.jl-task-emo{position:relative}
+.v-task.overdue:not(.done) .jl-task-emo::after,.v-task.late:not(.done) .jl-task-emo::after{content:"";position:absolute;inset:-4px;border-radius:17px;box-shadow:0 0 14px 2px color-mix(in srgb,var(--red) 55%,transparent);opacity:.25;animation:jlSmoulder 2.4s ease-in-out infinite;pointer-events:none}
+@keyframes jlSmoulder{0%,100%{opacity:.2}50%{opacity:.85}}
+@media (prefers-reduced-motion:reduce){.jl-task-emo::after{animation:none!important}}
+/* V72: toasts come from the top, under the header — never over the «+» button or the bottom bar */
+.toast{top:calc(64px + env(safe-area-inset-top,0px));bottom:auto!important;transform:translate(-50%,-14px)}
+.toast.show{transform:translate(-50%,0)}
 </style>
 
 
@@ -2097,6 +2138,7 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
       <div class="jl-track"><i class="auto-fill" id="autoProgress"></i></div>
       <div class="jl-now-foot"><span id="currentProgressText">—</span><span id="nextAlertText">—</span></div>
       <div class="detail-list jl-now-details" id="currentDetails"></div>
+      <div class="jl-nf" id="nowFocus" aria-live="polite"></div>
     </div>
     <figure class="jl-quote" role="button" tabindex="0" aria-expanded="false" aria-label="Цитата дня — раскрыть полностью">
       <blockquote id="motivationText">—</blockquote>
@@ -2774,7 +2816,7 @@ function migrateV57(s,fromVersion){
   if(!s.profile.createdAt)s.profile.createdAt=earliestActivityISO(s);
   s.settings.lang='ru';
   for(const k of ['notifyTasks','notifyFinance','notifyGoals','sound'])if(typeof s.settings[k]!=='boolean')s.settings[k]=true;
-  s.tasks=(Array.isArray(s.tasks)?s.tasks:[]).filter(t=>t&&typeof t==='object').map(t=>({...t,id:String(t.id||uid()),title:String(t.title||'Задача'),time:/^\d{2}:\d{2}$/.test(t.time||'')?t.time:'',date:/^\d{4}-\d{2}-\d{2}$/.test(t.date||'')?t.date:keyDay(),done:!!t.done,doneAt:String(t.doneAt||''),createdAt:t.createdAt||now}));
+  s.tasks=(Array.isArray(s.tasks)?s.tasks:[]).filter(t=>t&&typeof t==='object').map(t=>({...t,id:String(t.id||uid()),title:String(t.title||'Задача'),time:/^\d{2}:\d{2}$/.test(t.time||'')?t.time:'',date:/^\d{4}-\d{2}-\d{2}$/.test(t.date||'')?t.date:keyDay(),done:!!t.done,doneAt:String(t.doneAt||''),createdAt:t.createdAt||now,...(t.goal?{goal:'main',ms:String(t.ms||'')}:{})}));
   s.notificationsLog=s.notificationsLog.map(n=>n&&typeof n==='object'?n:{title:String(n||''),body:'',at:now}).map(n=>({...n,id:n.id||uid()}));
   let goals=(Array.isArray(s.goals)?s.goals:[]).filter(g=>g&&typeof g==='object').map(g=>({...g,id:String(g.id||uid()),title:String(g.title||'Новая цель'),description:String(g.description||''),icon:GOAL_ICONS.includes(g.icon)?g.icon:'target',color:GOAL_COLORS[g.color]?g.color:'blue',targetAmount:Math.max(0,Number(g.targetAmount)||0),targetDate:/^\d{4}-\d{2}-\d{2}$/.test(g.targetDate||'')?g.targetDate:'',manualSaved:Math.max(0,Number(g.manualSaved)||0),contributions:(Array.isArray(g.contributions)?g.contributions:[]).filter(c=>c&&typeof c==='object').map(normalizeContribution),createdAt:g.createdAt||now,completedAt:String(g.completedAt||''),main:!!g.main}));
   // V56 → V57: the existing single goal becomes the first, main entry of goals[].
@@ -3028,7 +3070,7 @@ function showWebNotification(title,body,taskId){
     const o={body,tag:taskId?'jl-task-'+taskId:'jl-'+Date.now(),icon:'icon-192.png',badge:'icon-192.png',silent:true,renotify:!!taskId};
     const plain=()=>{try{new Notification(title,o)}catch(e){}};
     // Buttons «Готово» / «Через 15 мин» work only through the service worker.
-    const withActions=taskId?{...o,data:{taskId},requireInteraction:true,actions:[{action:'done',title:'Готово'},{action:'snooze',title:'Через 15 мин'}]}:o;
+    const stage=String(taskId||'').startsWith('stage:'),withActions=taskId?{...o,data:{taskId},requireInteraction:true,actions:[{action:'done',title:stage?'Да':'Готово'},{action:'snooze',title:stage?'Перенести':'Через 15 мин'}]}:o;
     if(navigator.serviceWorker?.getRegistration)navigator.serviceWorker.getRegistration().then(r=>r?.showNotification?r.showNotification(title,withActions).catch(()=>r.showNotification(title,o)):plain()).catch(plain);else plain();
   }catch(e){}
 }
@@ -3053,6 +3095,10 @@ function notify(title,body,kind='tasks',opts={}){
 /* «Готово» / «Через 15 мин» from a reminder (Android notification, browser notification, link). */
 const SNOOZE_MIN=15;
 function applyReminderAction(a,taskId){
+  if(String(taskId).startsWith('stage:')){const sid=String(taskId).slice(6);if(!(state.day?.steps||[]).some(s=>s.id===sid))return false;
+    if(a==='done'){stageMainDone(sid,true);saveState();renderAll();toast('Главное этапа сделано ✅','Ещё шаг к цели');haptic(14);return true}
+    if(a==='snooze'){const when=moveStageMain(sid);saveState();scheduleNativeTasks();renderAll();toast('Перенёс главное',when);return true}
+    return false}
   const t=(state.tasks||[]).find(x=>x.id===taskId);if(!t)return false;
   if(a==='done'){
     if(!t.done){t.done=true;t.doneAt=new Date().toISOString()}
@@ -3091,22 +3137,23 @@ function scheduleNative(){
       window.AndroidBridge.cancelDaily?.(s.id);
       window.AndroidBridge.cancelDaily?.('pre_'+s.id);
       window.AndroidBridge.cancelDaily?.('end_'+s.id);
+      window.AndroidBridge.cancelDaily?.('stend_'+s.id);
     }
     if(!state.settings.notifications)return;
     const preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
     for(let i=0;i<state.day.steps.length;i++){
-      const s=state.day.steps[i],next=state.day.steps[i+1],previous=state.day.steps[i-1];
-      const startBody=previous?`Этап «${previous.title}» завершён. Сейчас переходи к: ${s.details?.[0]||s.text||s.title}`:(s.details?.[0]||s.text||'Начни текущий этап.');
-      if(!previous || previous.end!==s.time) window.AndroidBridge.scheduleDaily?.(s.id,s.time,`Пора: ${s.title}`,startBody);
-      if(preMinutes>0){
+      const s=state.day.steps[i],previous=state.day.steps[i-1],r=stageReminderTexts(i);
+      window.AndroidBridge.scheduleDaily?.(s.id,s.time,r.start.title,r.start.body);
+      if(preMinutes>0&&!(previous&&previous.end===s.time)){
         const pre=timeToMin(s.time)-preMinutes;
         if(pre>=0){
           const hh=String(Math.floor(pre/60)%24).padStart(2,'0'),mm=String(pre%60).padStart(2,'0');
-          window.AndroidBridge.scheduleDaily?.('pre_'+s.id,`${hh}:${mm}`,`Через ${preMinutes} минут`,`Следующий этап: ${s.title}. Закончи текущее и переходи.`);
+          window.AndroidBridge.scheduleDaily?.('pre_'+s.id,`${hh}:${mm}`,`Через ${preMinutes} мин: ${s.title}`,`Главное там: ${r.focus.main}. Закончи текущее и переходи.`);
         }
       }
-      const end=timeToMin(s.end);
-      window.AndroidBridge.scheduleDaily?.('end_'+s.id,s.end,`Этап завершён: ${s.title}`,next?`Галочка будет поставлена автоматически. Следующий этап: ${next.title}.`:'Галочка будет поставлена автоматически. Основные этапы дня завершены.');
+      // «stend_<id>» rings 10 minutes before the end with the buttons «Да» / «Перенести» (AlarmReceiver → stage:<id>)
+      const sp=stageSpan(i),endAt=sp.b-STAGE_END_LEAD;
+      if(endAt>sp.a)window.AndroidBridge.scheduleDaily?.('stend_'+s.id,fmtMin(endAt),r.end.title,r.end.body);
     }
   }catch(e){
     state.runtimeErrors=Array.isArray(state.runtimeErrors)?state.runtimeErrors:[];
@@ -3126,9 +3173,9 @@ function scheduleNativeTasks(){
       for(const t of state.tasks||[]){
         if(t.done||!t.time||!t.date)continue;
         const at=new Date(t.date+'T'+t.time+':00').getTime();if(!(at>now))continue;
-        once('task_'+t.id,at,'⏰ Пора: '+t.title,'Задача на '+t.time+' — отметь «Готово», когда сделаешь',at);ids.push('task_'+t.id);
+        const n=taskNotice(t,'at');once('task_'+t.id,at,n.title,n.body,at);ids.push('task_'+t.id);
         const lead=taskLead(t);
-        if(lead>0&&at-lead*60000>now){once('taskpre_'+t.id,at-lead*60000,'⏳ Через '+lead+' мин: '+t.title,'Задача в '+t.time+' · Jamal Life',at);ids.push('taskpre_'+t.id)}
+        if(lead>0&&at-lead*60000>now){const p=taskNotice(t,'pre');once('taskpre_'+t.id,at-lead*60000,p.title,p.body,at);ids.push('taskpre_'+t.id)}
       }
       const cd=nextCloseDayAt();if(cd){br.scheduleOnce('closeday',cd,'🌙 Закрой день','2 минуты: что сделал, что помешало и один шаг на завтра.');ids.push('closeday')}
       const wk=nextWeekReviewAt();if(wk){br.scheduleOnce('weekreview',wk,'✨ Разбор недели','Воскресенье: AI подведёт итог недели и даст один шаг.');ids.push('weekreview')}
@@ -3156,23 +3203,26 @@ let _actionsRetryAt=0;
 function runScheduler(){
   const day=keyDay();
   if(appReadyForSync&&Date.now()>_actionsRetryAt){_actionsRetryAt=Date.now()+30000;try{if(localStorage.getItem(ACTIONS_LEFT_KEY))pullNativeActions()}catch(e){}}
-  if(day!==lastDay){lastDay=day;renderAll()}
+  if(day!==lastDay){lastDay=day;renderAll();scheduleNative()} // a new day: new words in the stage alarms
   const autoDone=autoCompleteExpiredStages(),info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
   const once=(key,fn)=>{if(markSent(day,key))fn()};
   for(let i=0;i<state.day.steps.length;i++){
     const s=state.day.steps[i],next=state.day.steps[i+1],previous=state.day.steps[i-1],st=timeToMin(s.time),en=timeToMin(s.end),pre=st-preMinutes;
-    if(isDue(m,st))once('s|'+day+'|'+s.id,()=>notify('Пора: '+s.title,previous?'Этап «'+previous.title+'» завершён. Сейчас: '+(s.details?.[0]||s.text||s.title):(s.details?.[0]||s.text||s.title),'tasks',{native:true}));
-    if(preMinutes>0&&isDue(m,pre)&&m<st)once('p|'+day+'|'+s.id,()=>notify('Через '+preMinutes+' минут','Следующий этап: '+s.title+'. Закончи текущее и переходи.','tasks',{native:true}));
-    if(isDue(m,en))once('e|'+day+'|'+s.id,()=>notify('Этап завершён: '+s.title,next?'Галочка поставлена автоматически. Следующий этап: '+next.title:'Галочка поставлена автоматически. Основные этапы дня завершены.','tasks',{native:true}));
+    // start: «Сейчас: этап. Главное: … До цели: …»; 10 minutes before the end: «Сделал главное?» with Да / Перенести
+    if(isDue(m,st))once('s|'+day+'|'+s.id,()=>{const r=stageReminderTexts(i,day);notify(r.start.title,r.start.body,'tasks',{native:true})});
+    // the «through N minutes» warning is not needed when the previous stage ends right here (its end reminder already says what is next)
+    if(preMinutes>0&&isDue(m,pre)&&m<st&&!(previous&&previous.end===s.time))once('p|'+day+'|'+s.id,()=>notify('Через '+preMinutes+' мин: '+s.title,'Главное там: '+(stageFocus(i,day)?.main||s.title)+'. Закончи текущее и переходи.','tasks',{native:true}));
+    const sp=stageSpan(i),endAt=sp.b-STAGE_END_LEAD;
+    if(endAt>sp.a&&isDue(m,endAt)&&m<sp.b&&!dailyState().stageDone?.[s.id])once('e|'+day+'|'+s.id,()=>{const r=stageReminderTexts(i,day);notify(r.end.title,r.end.body,'tasks',{native:true,taskId:'stage:'+s.id})});
   }
   for(const t of state.tasks||[]){
     if(t.done)continue;
-    if(t.snoozeAt){const at=Date.parse(t.snoozeAt),ago=Date.now()-at;if(ago>=0&&ago<REMINDER_GRACE_MIN*60000)once('ts|'+t.snoozeAt+'|'+t.id,()=>notify('🔔 Напоминаю: '+t.title,'Отложено на '+SNOOZE_MIN+' минут','tasks',{taskId:t.id}))}
+    if(t.snoozeAt){const at=Date.parse(t.snoozeAt),ago=Date.now()-at;if(ago>=0&&ago<REMINDER_GRACE_MIN*60000)once('ts|'+t.snoozeAt+'|'+t.id,()=>{const n=taskNotice(t,'snooze');notify(n.title,n.body,'tasks',{taskId:t.id})})}
     if(t.date!==day||!t.time)continue;
     const tm=timeToMin(t.time),lead=taskLead(t);
     const due=new Date(t.date+'T'+t.time+':00').getTime();
-    if(lead>0&&isDue(m,tm-lead)&&m<tm)once('tp|'+day+'|'+t.id,()=>notify('⏳ Через '+lead+' мин: '+t.title,'Задача в '+t.time+' · Jamal Life','tasks',{native:true,taskId:t.id,due}));
-    if(isDue(m,tm))once('t|'+day+'|'+t.id,()=>{notify('⏰ Пора: '+t.title,'Задача на '+t.time+' — отметь «Готово», когда сделаешь','tasks',{native:true,taskId:t.id,due});if(currentView==='viewToday')renderTasks()});
+    if(lead>0&&isDue(m,tm-lead)&&m<tm)once('tp|'+day+'|'+t.id,()=>{const n=taskNotice(t,'pre');notify(n.title,n.body,'tasks',{native:true,taskId:t.id,due})});
+    if(isDue(m,tm))once('t|'+day+'|'+t.id,()=>{const n=taskNotice(t,'at');notify(n.title,n.body,'tasks',{native:true,taskId:t.id,due});if(currentView==='viewToday')renderTasks()});
   }
   for(const sl of twoHourSlots())if(isDue(m,sl.min))once('2h|'+day+'|'+sl.time,()=>notify(sl.title,sl.body,'tasks',{native:true}));
   if(m!==_lastMinute){_lastMinute=m;if(currentView==='viewToday'){updateTaskBars();renderRhythm(info);renderFreePlan();renderGoalDeadline()}}
@@ -3195,7 +3245,7 @@ function renderStagePercents(info=getStageInfo()){
     el.textContent=done?'100% завершено':(info.kind==='active'&&info.i===i?`${pct}% времени прошло`:now>=en?'100% завершено':'0% времени прошло');
   });
 }
-function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${state.day.steps.length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info)}
+function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${state.day.steps.length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info);renderNowFocus(info)}
 // the day of a record: its dateKey, or for old records without one, the local day of «at»
 function txDay(x){return x?.dateKey||(validDate(x?.at)?keyDay(validDate(x.at)):'')}
 function daySum(arr,key=keyDay()){return (arr||[]).filter(x=>x&&txDay(x)===key).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0)}
@@ -3400,14 +3450,28 @@ function stageEmoji(s,i){const t=String(s?.title||'').toLowerCase();
   if(/утр|подъём|подъем|завтрак/.test(t))return '🌅';if(/учёб|учеб|курс|англ|чтен/.test(t))return '📚';if(/спорт|трен|зал/.test(t))return '🏃';if(/намаз|молит/.test(t))return '🕌';
   return ['🌅','💼','🏡','🌙','⭐'][i%5]}
 function durText(min){min=Math.max(0,Math.round(min));const h=Math.floor(min/60),m=min%60;return h?(m?`${h} ч ${m} мин`:`${h} ч`):`${m} мин`}
+// «Главное сейчас» in the hero: the current stage (or the next one) — one action, tied to the goal
+function renderNowFocus(info=getStageInfo()){
+  const el=$('nowFocus');if(!el)return;const i=info.kind==='active'?info.i:info.kind==='between'?(state.day.steps||[]).indexOf(info.next):-1;
+  const f=i>=0?stageFocus(i):null,goal=state.goal?.title||mainGoal()?.title||'';
+  const html=!f?'':`<span class="jl-nf-ico" aria-hidden="true">🎯</span><div class="jl-nf-txt"><small>${info.kind==='active'?'Главное сейчас':'Главное в '+esc(f.s.time)}${goal?' · к цели «'+esc(goal.slice(0,40))+'»':''}</small><b>${esc(f.main)}</b><em>До цели: ${esc(goalLeftText())}</em></div>${f.src==='close'?'':`<button class="jl-nf-btn ${f.done?'on':''}" type="button" data-stage-main="${esc(f.s.id)}" aria-pressed="${f.done}">${f.done?'✅ Сделал':'Сделал'}</button>`}`;
+  if(el.dataset.sig===html)return;el.dataset.sig=html;el.innerHTML=html;
+  el.querySelectorAll('[data-stage-main]').forEach(b=>b.onclick=()=>toggleStageMain(b.dataset.stageMain));
+}
+function toggleStageMain(sid){const on=!dailyState().stageDone?.[sid];stageMainDone(sid,on);saveState();renderToday();if(on){haptic(16);toast('Главное этапа сделано ✅','Ещё шаг к цели «'+(state.goal?.title||'')+'»')}}
 function renderRhythm(info=getStageInfo()){
-  const box=$('timeline');if(!box)return;const steps=state.day.steps||[],rep=dayReport(),now=Math.floor(nowMin());
+  const box=$('timeline');if(!box)return;const steps=state.day.steps||[],rep=dayReport(),now=Math.floor(nowMin()),dd=dailyState();
   const rows=steps.map((s,i)=>{const a=timeToMin(s.time),b=timeToMin(s.end),expired=now>=b,done=!!rep.steps[s.id]||expired,current=!done&&info.kind==='active'&&info.i===i;
     const pct=done?100:current?clamp(Math.round(info.pct),0,100):0;const len=b-a;
     const p=done?1:current?pct/100:0;const cls=done?'done':current?'current':'todo';
     const meta=done?'✅ Пройден':current?`🔥 Сейчас · ещё ${durText(b-now)}`:(a>now?`⏳ через ${durText(a-now)}`:'⏳ Впереди');
-    return `<div class="jl-rstep ${cls}" style="--p:${p.toFixed(3)}"><span class="jl-rstep-dot" aria-hidden="true">${done?'✓':stageEmoji(s,i)}</span><div class="jl-rstep-body"><div class="jl-rstep-top"><b>${esc(s.title)}</b><span class="jl-rstep-time">${esc(s.time)}–${esc(s.end)}</span></div><small class="jl-rstep-meta">${meta}${current?'':' · '+durText(len)}</small>${current?`<div class="jl-rstep-bar"><i style="width:${pct}%"></i></div>`:''}<div class="jl-rstep-note">${esc(s.text)}</div></div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${done?'Этап завершён: '+esc(s.title):'Завершить этап: '+esc(s.title)}"></div>`});
-  box.innerHTML=rows.join('')||'<div class="v-empty">Этапов дня нет.</div>';
+    const f=stageFocus(i),mDone=!!dd.stageDone?.[s.id],moved=dd.stageMoved?.[s.id];
+    const focus=f?`<div class="jl-rstep-main ${mDone?'on':''}"><span aria-hidden="true">${mDone?'✅':moved?'↪️':'🎯'}</span><span><small>${mDone?'Главное сделано':moved?'Главное перенесено':current?'Главное сейчас':'Главное'}</small>${esc(f.main)}</span></div>${current&&f.src!=='close'?`<div class="jl-rstep-acts"><button class="jl-pill ${mDone?'on':''}" type="button" data-stage-main="${esc(s.id)}" aria-pressed="${mDone}">${mDone?'✅ Сделал':'Да, сделал'}</button>${mDone?'':`<button class="jl-pill" type="button" data-stage-move="${esc(s.id)}">↪️ Перенести</button>`}</div>`:''}`:'';
+    return `<div class="jl-rstep ${cls}" style="--p:${p.toFixed(3)}"><span class="jl-rstep-dot" aria-hidden="true">${done?'✓':stageEmoji(s,i)}</span><div class="jl-rstep-body"><div class="jl-rstep-top"><b>${esc(s.title)}</b><span class="jl-rstep-time">${esc(s.time)}–${esc(s.end)}</span></div><small class="jl-rstep-meta">${meta}${current?'':' · '+durText(len)}</small>${current?`<div class="jl-rstep-bar"><i style="width:${pct}%"></i></div>`:''}${focus}${s.text?`<div class="jl-rstep-note">${esc(s.text)}</div>`:''}</div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${done?'Этап завершён: '+esc(s.title):'Завершить этап: '+esc(s.title)}"></div>`});
+  const html=rows.join('')||'<div class="v-empty">Этапов дня нет.</div>';
+  if(box.dataset.sig!==html){box.dataset.sig=html;box.innerHTML=html}
+  box.querySelectorAll('[data-stage-main]').forEach(b=>b.onclick=()=>toggleStageMain(b.dataset.stageMain));
+  box.querySelectorAll('[data-stage-move]').forEach(b=>b.onclick=()=>{const when=moveStageMain(b.dataset.stageMove);saveState();scheduleNativeTasks();renderToday();toast('Перенёс главное',when)});
   $$('[data-day-step]').forEach(c=>{c.onchange=()=>{const r=dayReport();r.steps=r.steps||{};r.steps[c.dataset.dayStep]=c.checked;saveState();if(c.checked)haptic(16);renderToday()}});
   renderDayStrip(info);
 }
@@ -3605,6 +3669,13 @@ async function requestGoalAI(force=false){
    «резерв / капитал / доход» → goal capital collected · otherwise → its share of the goal's money (i+1)/n.
    Never re-opens a milestone the user closed; the user can still tick and untick by hand. */
 function milestoneAuto(m,i,n){
+  const r=milestoneAutoBase(m,i,n),tk=(state.tasks||[]).filter(x=>x.goal&&x.ms===m.id);if(!tk.length)return r;
+  const done=tk.filter(x=>x.done).length,share=done/tk.length,tl=`задачи ${done}/${tk.length}`;
+  // a stage without a number rule is closed by its tasks; with numbers, tasks add up to half of what is left
+  if(!r.hint&&!r.p)return {p:share,hint:tl,tasks:[done,tk.length]};
+  return {p:Math.min(1,r.p+(1-r.p)*share/2),hint:r.hint+' · '+tl,tasks:[done,tk.length]};
+}
+function milestoneAutoBase(m,i,n){
   const t=String(m.title||'').toLowerCase(),base=Number(state.debtBaseline)||0,now=debtTotal(),paid=Math.max(0,base-now),f=goalFinanceMetrics?.()||{},fin=Number(f.target)>0?Math.min(1,(Number(f.available)||0)/Number(f.target)):0;
   if(/рост.*долг|долг.*рост/.test(t)){const h=(state.debtHistory||[]).filter(x=>Date.parse(x.at||x.day)>=Date.now()-30*DAY_MS),grew=h.some((x,j)=>j&&Number(x.total)>Number(h[j-1].total)),pays=(state.expenses||[]).some(e=>e.debtPayment);return {p:pays&&!grew?1:pays?.6:h.length?.3:0,hint:pays?(grew?'долг рос за 30 дней':'долг не растёт, платежи идут'):'нужен первый платёж по долгу'}}
   if(/долг/.test(t)&&base>0){const p=Math.min(1,paid/(base*.5));return {p,hint:`выплачено ${Math.round(paid/base*100)}% из нужных 50%`}}
@@ -4195,7 +4266,11 @@ function dayLedger(key=keyDay()){
   const inc=sum(t=>t.kind==='income'),out=sum(t=>t.kind==='expense'&&!t.xfer),debt=sum(t=>t.kind==='debt'),goal=sum(t=>t.kind==='transfer'&&t.out)-sum(t=>t.kind==='transfer'&&!t.out);
   const cats={};for(const t of rows)if(t.kind==='expense'&&!t.xfer){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
   const tasks=todayTasks(),habits=(state.habits||[]).filter(h=>habitDue(h,new Date())),steps=state.day?.steps||[],rep=dayReport();
-  return {inc,out,debt,goal,net:inc-out-debt,cats:Object.entries(cats).sort((a,b)=>b[1].v-a[1].v),count:rows.length,
+  const dd=key===keyDay()?dailyState():(state.daily?.[key]||{}),gActs=[];
+  for(const st of steps)if(dd.stageDone?.[st.id]){const i=steps.indexOf(st),f=key===keyDay()?stageFocus(i,key):null;gActs.push((f?f.main:st.title))}
+  if(dd.goalDone)gActs.push(dd.goalDone.text||'главное по цели');
+  for(const t of tasks)if(t.goal&&t.done)gActs.push(t.title);
+  return {inc,out,debt,goal,net:inc-out-debt,cats:Object.entries(cats).sort((a,b)=>b[1].v-a[1].v),count:rows.length,gActs:[...new Set(gActs)],
     tasks:[tasks.filter(t=>t.done).length,tasks.length],habits:[habits.filter(h=>habitDoneOn(h,key)).length,habits.length],steps:[steps.filter(st=>!!rep.steps?.[st.id]).length,steps.length]};
 }
 function renderDayLedger(){
@@ -4212,6 +4287,7 @@ function renderDayLedger(){
    <div class="jl-lg-k net ${L.net<0?'neg':'pos'}"><small>Итог дня</small><b>${L.net<0?'−':'+'}${m(Math.abs(L.net))} <i>${cur}</i></b></div>
   </div>
   ${L.cats.length?`<div class="jl-lg-where"><small>Куда ушло</small>${L.cats.slice(0,5).map(([k,c],i)=>`<div class="jl-lg-bar" style="--i:${i}"><span>${esc(c.e)} ${esc(k)}</span><i style="--w:${Math.max(6,c.v/max*100)}%"></i><b>${m(c.v)}</b></div>`).join('')}</div>`:'<div class="jl-lg-empty">Сегодня трат нет — отличный день для цели 🌿</div>'}
+  <div class="jl-lg-goal ${L.gActs.length?'on':''}"><small>🎯 Для цели «${esc(String(state.goal?.title||'').slice(0,40))}» сегодня</small>${L.gActs.length?`<ul>${L.gActs.slice(0,6).map(t=>`<li>${esc(String(t).slice(0,120))}</li>`).join('')}</ul>`:'<span>Пока ничего — отметь «Сделал» у главного этапа или в свободном времени</span>'}</div>
   <div class="jl-lg-pills">${pill('✅','задачи',L.tasks)}${pill('🔥','привычки',L.habits)}${pill('🗓️','этапы',L.steps)}</div>`;
 }
 function closeDay(){
@@ -4465,24 +4541,24 @@ function freeWindows(){
   return out;
 }
 const fmtMin=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
-function successIdeas(n=3){
-  const k=keyDay(),list=[];
-  if(state.goal?.next)list.push(['🎯','Шаг к цели',String(state.goal.next).slice(0,90)]);
-  const doy=Math.floor((Date.now()-new Date(new Date().getFullYear(),0,0))/DAY_MS);
-  for(let i=0;i<SUCCESS_IDEAS.length&&list.length<n+3;i++)list.push(SUCCESS_IDEAS[(doy+i)%SUCCESS_IDEAS.length]);
-  return list.slice(0,n);
-}
+// the next «every 2 hours» reminder — the same list the scheduler and the Android alarms use
+function nextTwoHour(){const m=nowMin();return twoHourSlots().find(x=>!x.work&&x.min>m)||null}
 function renderFreePlan(){
   const box=$('freePlan');if(!box)return;const m=nowMin(),wins=freeWindows();
   const cur=wins.find(w=>m>=w.from&&m<w.to),next=wins.find(w=>w.from>m);
   const w=cur||next;
-  if(!w){box.innerHTML='';return}
-  const d=dailyState();d.freeDone=d.freeDone||{};
-  const ideas=successIdeas(3);
-  box.innerHTML=`<div class="jl-free-head"><span class="jl-emo" aria-hidden="true">🌙</span><div><b>${cur?'Свободное время — сейчас':'Свободное время в '+fmtMin(w.from)}</b><small>${esc(w.title)} · ${fmtMin(w.from)}–${fmtMin(w.to)} · что делать для успеха</small></div></div>`+
-    ideas.map(([e,t,why])=>{const done=!!d.freeDone[t];return `<button class="jl-free-item ${done?'done':''}" type="button" data-free="${esc(t)}" aria-pressed="${done}"><span class="jl-emo" aria-hidden="true">${e}</span><span><b>${esc(t)}</b><small>${esc(why)}</small></span><i class="jl-free-check">${svgIcon('i-check')}</i></button>`}).join('')+
-    (state.settings?.every2h!==false?'<div class="jl-free-note">🔔 Каждые 2 часа напомню, чем заняться</div>':'');
-  $$('[data-free]').forEach(b=>b.onclick=()=>{const dd=dailyState();dd.freeDone=dd.freeDone||{};const t=b.dataset.free;dd.freeDone[t]=!dd.freeDone[t];saveState();renderFreePlan();if(dd.freeDone[t]){haptic(14);toast('Отлично! '+t,'Ещё один шаг к успеху')}});
+  if(!w){if(box.innerHTML){box.innerHTML='';box.dataset.sig=''}return}
+  const d=dailyState(),fd=d.freeDone||{},g=goalFocusLine(),gDone=!!d.goalDone,nx=nextTwoHour();
+  const main=g.main||'шаг к цели';
+  const ideas=SUCCESS_IDEAS.length?[0,1].map(k=>SUCCESS_IDEAS[(dayIndex()+k)%SUCCESS_IDEAS.length]):[];
+  const remind=state.settings?.every2h===false?'🔕 Напоминания каждые 2 часа выключены (Настройки)':state.settings?.notifications===false?'🔕 Уведомления выключены':nx?`🔔 Следующее напоминание в <b data-next-2h>${esc(nx.time)}</b> — о главном по цели`:'🔔 Сегодня напоминаний о цели больше нет';
+  const html=`<div class="jl-free-head"><span class="jl-emo" aria-hidden="true">🌙</span><div><b>${cur?'Свободное время — сейчас':'Свободное время в '+fmtMin(w.from)}</b><small>${esc(w.title)} · ${fmtMin(w.from)}–${fmtMin(w.to)} · сначала главное по цели</small></div></div>`+
+    `<button class="jl-free-item jl-free-goal ${gDone?'done':''}" type="button" data-free-goal aria-pressed="${gDone}"><span class="jl-emo" aria-hidden="true">🎯</span><span><small class="jl-free-k">Главное по цели «${esc(String(g.title).slice(0,40))}» · ${g.pct}%</small><b>${esc(String(main).slice(0,120))}</b><small>До цели: ${esc(goalLeftText())}</small></span><i class="jl-free-do">${gDone?svgIcon('i-check')+' Сделал':'Сделал'}</i></button>`+
+    ideas.map(([e,t,why])=>{const done=!!fd[t];return `<button class="jl-free-item ${done?'done':''}" type="button" data-free="${esc(t)}" aria-pressed="${done}"><span class="jl-emo" aria-hidden="true">${e}</span><span><b>${esc(t)}</b><small>${esc(why)}</small></span><i class="jl-free-check">${svgIcon('i-check')}</i></button>`}).join('')+
+    `<div class="jl-free-note">${remind}</div>`;
+  if(box.dataset.sig===html)return;box.dataset.sig=html;box.innerHTML=html;
+  box.querySelectorAll('[data-free]').forEach(b=>b.onclick=()=>{const dd=dailyState();dd.freeDone=dd.freeDone||{};const t=b.dataset.free;dd.freeDone[t]=!dd.freeDone[t];saveState();renderFreePlan();if(dd.freeDone[t]){haptic(14);toast('Отлично! '+t,'Ещё один шаг к успеху')}});
+  box.querySelector('[data-free-goal]').onclick=()=>{const dd=dailyState();if(dd.goalDone)delete dd.goalDone;else dd.goalDone={at:new Date().toISOString(),text:String(main).slice(0,140)};saveState();renderFreePlan();renderDayLedger();if(dd.goalDone){haptic(16);toast('Главное по цели сделано 🎯','Это пойдёт в итог дня')}};
 }
 // «Главное сейчас» for a reminder: the goal (what is missing, days left), its next stage and the open tasks of the day
 function goalFocusLine(){
@@ -4497,20 +4573,97 @@ function twoHourSlots(){
   if(state.settings?.every2h===false||state.settings?.notifications===false)return [];
   const steps=state.day?.steps||[];if(!steps.length)return [];
   const edges=steps.flatMap(st=>[timeToMin(st.time),timeToMin(st.end)]);
-  const f=goalFocusLine(),out=[],seen=new Set();
+  const f=goalFocusLine(),out=[],seen=new Set(),facts=goalFacts(),d=dayIndex();
+  const stageEnd=st=>stageSpan(steps.indexOf(st)).b,stageMainOf=st=>{const x=stageFocus(steps.indexOf(st));return x?x.main:(st?.title||'')};
   const add=(mm,work,st)=>{
     if(seen.has(mm)||edges.some(e=>Math.abs(e-mm)<=10))return; // a stage reminder already rings at this time
     seen.add(mm);
     const focus=`🎯 ${f.title} — ${f.pct}%`+(f.parts.length?' · '+f.parts.join(' · '):'');
-    out.push({min:mm,time:fmtMin(mm),
-      title:work?'💼 2 часа работы — короткая пауза':`🌿 Свободное время — главное: ${f.main?String(f.main).slice(0,48):'шаг к цели'}`,
-      body:work?'Вода, 5 минут без экрана, потом снова главное: '+(st?.details?.[0]||st?.title||''):focus+(f.open?` · задач открыто: ${f.open}`:'')});
+    const k=out.length,fact=facts[(d+k)%facts.length],left=st?Math.max(0,stageEnd(st)-mm):0;
+    out.push({min:mm,time:fmtMin(mm),work:!!work,
+      title:work?'💼 2 часа работы — короткая пауза':`🌿 ${fmtMin(mm)} · главное: ${f.main?String(f.main).slice(0,48):'шаг к цели'}`,
+      body:work?`Вода, 5 минут без экрана, потом снова главное: ${stageMainOf(st)}`+(left?` · до конца работы ${durText(left)}`:''):focus+` · ${fact}`+(left?` · свободно ещё ${durText(left)}`:'')});
   };
   // every 2 hours inside each stage, counted from the stage's start; the morning counts from waking up
   const wake=timeToMin(state.settings?.wakeTime||'06:30');
   if(Number.isFinite(wake)&&wake<timeToMin(steps[0].time))for(let mm=wake+120;mm<timeToMin(steps[0].time);mm+=120)add(mm,false);
   for(const st of steps){const a=timeToMin(st.time),b=timeToMin(st.end),work=isWorkStage(st);if(/итог/i.test(st.title||''))continue;for(let mm=a+120;mm<b-10;mm+=120)add(mm,work,st)}
   return out.sort((x,y)=>x.min-y.min);
+}
+/* ===== V72: the rhythm of the day leads — one clear action per stage, tied to the goal =====
+   Everything here is built from the user's data (stage tasks, goal tasks, the next goal stage, the goal's numbers),
+   so the words change every day as the numbers change; a rotating fact (by day) keeps them from repeating. */
+function dayIndex(k=keyDay()){return Math.floor(Date.parse(k+'T12:00:00Z')/DAY_MS)||0}
+function stageSpan(i){const steps=state.day?.steps||[],st=steps[i];if(!st)return {a:0,b:0};const a=timeToMin(st.time);let b=timeToMin(st.end);if(b<=a)b=i<steps.length-1?timeToMin(steps[i+1].time):1440;return {a,b}}
+function isCloseStage(s){return /итог/i.test(s?.title||'')}
+// the next open goal stage and the share of it done (numbers + its tasks)
+function currentMilestone(){const ms=state.goal?.milestones||[],i=ms.findIndex(m=>!m.done);return i<0?null:{m:ms[i],i,n:ms.length}}
+// «до цели: 30,4 тыс. сомони, 229 дней» — or the share when no sum is set
+function goalLeftText(){
+  const mg=mainGoal(),p=mg?goalProgress(mg):null,cur=currencyLabel();
+  if(p&&p.target&&!p.done)return `${fmtShort(p.remaining)} ${cur}`+(p.daysLeft!==null?`, ${p.daysLeft} ${plural(p.daysLeft,'день','дня','дней')}`:'');
+  if(p&&p.done)return 'цель достигнута 🏆';
+  return `пройдено ${p?.pct??milestonePct()}%`;
+}
+// facts that change with the data; one of them per reminder, picked by the day and the slot
+function goalFacts(){
+  const mg=mainGoal(),p=mg?goalProgress(mg):null,cur=currencyLabel(),out=[];
+  if(p&&p.target&&!p.done){
+    const mo=monthlyNeed(p.remaining,p.targetDate);if(mo)out.push(`нужно ≈ ${fmtShort(mo)} ${cur} в месяц`);
+    if(p.daysLeft)out.push(`≈ ${fmtShort(Math.ceil(p.remaining/p.daysLeft))} ${cur} в день до срока`);
+    out.push(`собрано ${p.pct}% — ${fmtShort(p.collected)} из ${fmtShort(p.target)} ${cur}`);
+  }
+  const cm=currentMilestone();if(cm){const a=milestoneAuto(cm.m,cm.i,cm.n);out.push(`этап ${cm.i+1} из ${cm.n} «${String(cm.m.title).slice(0,60)}» — ${Math.round(a.p*100)}%`)}
+  const L=dayLedger();if(L.inc)out.push(`сегодня уже +${fmtShort(L.inc)} ${cur}`);if(L.out)out.push(`потрачено сегодня ${fmtShort(L.out)} ${cur}`);
+  const st=typeof streakInfo==='function'?streakInfo():null;if(st?.cur>1)out.push(`серия ${st.cur} ${plural(st.cur,'день','дня','дней')} подряд`);
+  const open=todayTasks().filter(t=>!t.done).length;if(open)out.push(`открыто задач: ${open}`);
+  return out.length?out:['каждый шаг сегодня — к цели'];
+}
+// «что делать сейчас» for stage i: a task of this stage › a goal task › the next goal stage › the user's own words for the stage
+function stageFocus(i,day=keyDay()){
+  const steps=state.day?.steps||[],s=steps[i];if(!s)return null;
+  const {a,b}=stageSpan(i),d=dayIndex(day),work=isWorkStage(s),done=dailyState().stageDone||{};
+  const tasks=(state.tasks||[]).filter(t=>t.date===day&&!t.done);
+  const inStage=tasks.filter(t=>t.time&&timeToMin(t.time)>=a&&timeToMin(t.time)<b).sort((x,y)=>(y.goal?1:0)-(x.goal?1:0)||x.time.localeCompare(y.time));
+  const goalT=tasks.filter(t=>t.goal&&(!t.time||(timeToMin(t.time)>=a&&timeToMin(t.time)<b)));
+  const cm=currentMilestone(),details=(Array.isArray(s.details)?s.details:[]).map(String).filter(Boolean);
+  let main='',src='',taskId='';
+  if(isCloseStage(s)){const L=dayLedger();main=`закрыть день: ${L.tasks[1]?`задачи ${L.tasks[0]} из ${L.tasks[1]}, `:''}${L.inc||L.out?`итог ${L.net<0?'−':'+'}${fmtShort(Math.abs(L.net))} ${currencyLabel()}, `:''}один шаг к цели на завтра`;src='close'}
+  else if(inStage[0]){main=inStage[0].title;src='task';taskId=inStage[0].id}
+  else if(goalT[0]&&!work){main=goalT[0].title;src='task';taskId=goalT[0].id}
+  else{
+    const goalWays=[];
+    if(cm){const h=milestoneAuto(cm.m,cm.i,cm.n).hint;goalWays.push(`шаг к этапу «${String(cm.m.title).slice(0,70)}»`+(h?` (${h})`:''))}
+    if(state.goal?.next&&state.goal.next!==cm?.m.title)goalWays.push(String(state.goal.next).slice(0,90));
+    const own=details.length?details:(s.text?[String(s.text)]:[]);
+    const pool=work?(own.length?own:goalWays):(goalWays.length?goalWays:own);
+    // free time: always the next goal stage first (the same line as «Свободное время»); work: the user's own words, rotating by day
+    main=pool.length?pool[work?(d+i)%pool.length:0]:'один шаг к цели';src=work?'stage':'goal';
+  }
+  main=String(main).replace(/\s+/g,' ').trim().replace(/[.。]+$/,'');main=main.charAt(0).toUpperCase()+main.slice(1);
+  return {i,s,a,b,main,src,taskId,done:!!done[s.id],work};
+}
+// texts of the reminders: start of the stage and 10 minutes before its end
+function stageReminderTexts(i,day=keyDay()){
+  const f=stageFocus(i,day);if(!f)return null;const steps=state.day.steps,next=steps[i+1],facts=goalFacts(),d=dayIndex(day);
+  const goal=(state.goal?.title||mainGoal()?.title||'Главная цель').slice(0,60),fact=facts[(d+i)%facts.length].replace(/\.+$/,'');
+  return {
+    start:{title:`Сейчас: ${stageEmoji(f.s,i)} ${f.s.title}`,body:`Главное: ${f.main}. До цели «${goal}»: ${goalLeftText()}. ${fact[0].toUpperCase()+fact.slice(1)}.`},
+    end:{title:`⏳ Этап заканчивается: ${f.s.title}`,body:`Сделал главное? ${f.main} — шаг к цели «${goal}».`+(next?` Дальше — ${next.title} в ${next.time}.`:' Дальше — отдых.')},
+    focus:f};
+}
+const STAGE_END_LEAD=10;
+function stageMainDone(sid,yes=true){const d=dailyState();d.stageDone=d.stageDone&&typeof d.stageDone==='object'?d.stageDone:{};if(yes)d.stageDone[sid]=new Date().toISOString();else delete d.stageDone[sid]}
+// «Перенести»: a stage task moves to the next stage (or tomorrow); otherwise the action becomes a goal task there
+function moveStageMain(sid){
+  const steps=state.day?.steps||[],i=steps.findIndex(s=>s.id===sid);if(i<0)return '';const f=stageFocus(i);if(!f)return '';
+  const next=steps.slice(i+1).find(s=>!isCloseStage(s)),tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+  const date=next?keyDay():keyDay(tomorrow),time=next?next.time:(steps[i].time||'09:00'); // no stage left today → the same stage tomorrow
+  const t=f.taskId&&(state.tasks||[]).find(x=>x.id===f.taskId);
+  if(t){t.date=date;t.time=time;delete t.snoozeAt}
+  else{state.tasks=Array.isArray(state.tasks)?state.tasks:[];const cm=currentMilestone();state.tasks.push({id:uid(),title:f.main.slice(0,140),time,date,remind:Math.max(0,Number(state.settings?.preMinutes)||0),done:false,doneAt:'',createdAt:new Date().toISOString(),goal:'main',ms:cm?.m.id||''})}
+  const d=dailyState();d.stageMoved=d.stageMoved&&typeof d.stageMoved==='object'?d.stageMoved:{};d.stageMoved[sid]=date+' '+time;
+  return (date===keyDay()?'сегодня':'завтра')+' в '+time;
 }
 const NATIVE_2H_KEY='JL_NATIVE_2H_V1';
 function scheduleNative2h(){
@@ -4690,7 +4843,7 @@ function renderAchievementsV71(){
   box.innerHTML=all.length?all.map((a,i)=>`<div class="jl-ach ${a.kind}" style="--i:${i}"><span class="jl-ach-ico" aria-hidden="true">${a.icon}</span><div><b>${esc(a.title)}</b><span>${esc(a.text)}</span><small>${esc(THANKS[(a.id.length+i)%THANKS.length])}${a.at?' · '+esc(new Date(a.at).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})):''}</small></div></div>`).join('')
    :'<div class="jl-ach-empty"><span aria-hidden="true">🏆</span><b>Первая победа уже близко</b><small>Закрой этап цели, 3 дня подряд или запиши результат — и он засияет здесь.</small></div>';
 }
-function celebrate(){if(!_motionOK())return;const box=document.createElement('div');box.className='jl-confetti';box.innerHTML=Array.from({length:18},(_,i)=>`<i style="--x:${Math.round(Math.random()*100)}vw;--d:${(Math.random()*.6).toFixed(2)}s;--r:${Math.round(Math.random()*360)}deg">${['🎉','✨','🏆','⭐','💛'][i%5]}</i>`).join('');document.body.appendChild(box);setTimeout(()=>box.remove(),2600)}
+function celebrate(){if(!_motionOK())return;document.querySelectorAll('.jl-confetti').forEach(x=>x.remove());const box=document.createElement('div');box.className='jl-confetti';box.innerHTML=Array.from({length:14},(_,i)=>`<i style="--x:${Math.round(Math.random()*100)}vw;--d:${(Math.random()*.25).toFixed(2)}s;--r:${Math.round(Math.random()*360)}deg">${['🎉','✨','🏆','⭐','💛'][i%5]}</i>`).join('');document.body.appendChild(box);setTimeout(()=>box.remove(),1500)}
 
 function renderAll(){setTheme();purgeExpiredTrash(state);syncMainGoalMirror();renderToday();renderGoal();renderGoals();renderMoney();renderNotes();updateBell();if(currentView==='viewProfile')renderProfile();if(currentView==='viewSettings')renderSettingsView();if(currentView==='viewNotifications')renderNotifications();checkBudgetAlerts()}
 function openMetricDetail(type){const wm=walletMetrics(),debt=debtTotal(),goal=goalFinanceMetrics(),p=daySum(state.profits),e=daySum(state.expenses);let title='Показатель',body='';if(type==='cash'){title='Баланс денег';body='<div class="kpi-row"><div class="kpi"><div class="label">Сегодня пришло</div><div class="value blue">'+esc(fmtMoney(p))+'</div></div><div class="kpi"><div class="label">Сегодня ушло</div><div class="value red-txt">'+esc(fmtMoney(e))+'</div></div><div class="kpi"><div class="label">Свободно</div><div class="value orange-txt">'+esc(fmtMoney(wm.cash))+'</div></div></div>'}else if(type==='debt'){title='Долг';body='<div class="kpi-row"><div class="kpi"><div class="label">Банк</div><div class="value">'+esc(fmtMoney(state.debts.bank))+'</div></div><div class="kpi"><div class="label">Фирмы</div><div class="value">'+esc(fmtMoney(state.debts.firms))+'</div></div><div class="kpi"><div class="kpi"><div class="label">Всего</div><div class="value red-txt">'+esc(fmtMoney(debt))+'</div></div></div><div class="sub" style="margin-top:10px">Платёж / месяц: '+esc(fmtMoney(state.debts.monthlyPayment||0))+'</div>'}else if(type==='goal'){title='Цель';body='<div class="kpi-row"><div class="kpi"><div class="label">Доступно</div><div class="value blue">'+esc(fmtMoney(goal.available))+'</div></div><div class="kpi"><div class="label">Цель</div><div class="value">'+esc(fmtMoney(goal.target))+'</div></div><div class="kpi"><div class="label">Осталось</div><div class="value orange-txt">'+esc(fmtMoney(goal.remaining))+'</div></div></div>'}else{title='Дисциплина';body='<div class="kpi"><div class="label">Этапов выполнено сегодня</div><div class="value">'+Object.values(dayReport().steps||{}).filter(Boolean).length+' / '+state.day.steps.length+'</div></div>'}openModal('<div class="close-row"><div><div class="eyebrow">Jamal Life · подробности</div><h2>'+title+'</h2></div><button class="btn small" id="closeModalBtn">Закрыть</button></div><div style="margin-top:12px">'+body+'</div>');$('closeModalBtn').onclick=closeModal}
@@ -4765,14 +4918,21 @@ function renderTodayMoney(){
   if(box.dataset.sig!==html.length+':'+max+':'+today){box.innerHTML=html;box.dataset.sig=html.length+':'+max+':'+today}
   setText('tmChartStart','1');setText('tmChartEnd',String(md.days));
 }
+// «Квартира · этап 2» — what a goal task works for
+function taskGoalLabel(t){const ms=state.goal?.milestones||[],i=ms.findIndex(m=>m.id===t.ms),g=String(state.goal?.title||'цель').slice(0,24);return i>=0?`${g} · этап ${i+1}`:g}
+// the reminder of a task: the task's own emoji in the title, and for a goal task — which goal it is for
+function taskNotice(t,kind){const e=taskEmoji(t.title),why=t.goal?` · ради цели «${String(state.goal?.title||'').slice(0,50)}» — до цели ${goalLeftText()}`:'';
+  if(kind==='pre')return {title:`${e} Через ${taskLead(t)} мин: ${t.title}`,body:`Задача в ${t.time}`+(why||' · Jamal Life')};
+  if(kind==='snooze')return {title:`${e} Напоминаю: ${t.title}`,body:`Отложено на ${SNOOZE_MIN} минут`+why};
+  return {title:`${e} Пора: ${t.title}`,body:`Задача на ${t.time} — отметь «Готово», когда сделаешь`+why}}
 function todayTasks(){const k=keyDay();return (state.tasks||[]).filter(t=>t.date===k).sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99')||Date.parse(a.createdAt||0)-Date.parse(b.createdAt||0))}
 function renderTasks(){if(appReadyForSync)carryOverTasks();pushWidget();
   const list=$('taskList');if(!list)return;const rep=dayReport(),m=nowMin();
-  const tasks=todayTasks().map(t=>{const late=!t.done&&t.time&&m>=timeToMin(t.time),lead=taskLead(t);return `<div class="v-task ${t.done?'done':''} ${late?'overdue':''} ${t.time&&!t.done?'timed':''}" data-task-row="${esc(t.id)}"><input class="v-check" type="checkbox" data-task-id="${esc(t.id)}" ${t.done?'checked':''} aria-label="${esc('Задача: '+t.title)}"><button class="jl-task-emo" type="button" data-task-emo="${esc(t.id)}" aria-label="${esc((t.done?'Вернуть: ':'Готово: ')+t.title)}">${t.done?'✅':taskEmoji(t.title)}</button><div><div class="v-task-title">${esc(t.title)}</div><div class="v-task-meta">${t.done&&t.doneAt?'Выполнено в '+esc(new Date(t.doneAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})):late?'Время прошло — отметь или перенеси':t.time?`<span class="v-remind">${svgIcon('i-bell')} <span data-task-left>в ${esc(t.time)}</span></span>`:(t.carriedFrom?'↪️ перенесено с '+esc(new Date(t.carriedFrom+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})):'Задача')}</div>${t.time&&!t.done?`<div class="jl-task-bar" data-task-bar="${esc(t.id)}"><i></i></div>`:''}</div><span class="v-task-time">${esc(t.time||'')}</span><button class="v-task-del" type="button" data-task-del="${esc(t.id)}" aria-label="Удалить задачу">${svgIcon('i-x')}</button></div>`});
+  const tasks=todayTasks().map(t=>{const late=!t.done&&t.time&&m>=timeToMin(t.time),lead=taskLead(t);return `<div class="v-task ${t.done?'done':''} ${late?'overdue':''} ${t.time&&!t.done?'timed':''}" data-task-row="${esc(t.id)}"><input class="v-check" type="checkbox" data-task-id="${esc(t.id)}" ${t.done?'checked':''} aria-label="${esc('Задача: '+t.title)}"><button class="jl-task-emo" type="button" data-task-emo="${esc(t.id)}" aria-label="${esc((t.done?'Вернуть: ':'Готово: ')+t.title)}">${t.done?'✅':taskEmoji(t.title)}</button><div><div class="v-task-title">${esc(t.title)}${t.goal?`<span class="jl-goal-tag" title="Задача к цели">🎯 ${esc(taskGoalLabel(t))}</span>`:''}</div><div class="v-task-meta">${t.done&&t.doneAt?'Выполнено в '+esc(new Date(t.doneAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})):late?'Время прошло — отметь или перенеси':t.time?`<span class="v-remind">${svgIcon('i-bell')} <span data-task-left>в ${esc(t.time)}</span></span>`:(t.carriedFrom?'↪️ перенесено с '+esc(new Date(t.carriedFrom+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})):'Задача')}</div>${t.time&&!t.done?`<div class="jl-task-bar" data-task-bar="${esc(t.id)}"><i></i></div>`:''}</div><span class="v-task-time">${esc(t.time||'')}</span><button class="v-task-del" type="button" data-task-del="${esc(t.id)}" aria-label="Удалить задачу">${svgIcon('i-x')}</button></div>`});
   list.innerHTML=tasks.join('')||'<div class="v-empty">Задач на сегодня нет — нажми «+», чтобы добавить.</div>';
   const all=todayTasks(),doneCount=all.filter(t=>t.done).length;setText('taskSummary',all.length?(doneCount===all.length?`Все ${all.length} готовы — отличный день 🎉`:`${doneCount} из ${all.length} задач выполнено`):'Добавь задачу кнопкой «+»');miniRing('taskRing',doneCount,all.length);
   $$('[data-task-emo]').forEach(b=>b.onclick=()=>{const c=document.querySelector(`[data-task-id="${CSS.escape(b.dataset.taskEmo)}"]`);if(c){c.checked=!c.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}});
-  $$('[data-task-id]').forEach(c=>c.onchange=()=>{const t=(state.tasks||[]).find(x=>x.id===c.dataset.taskId);if(!t)return;t.done=c.checked;t.doneAt=c.checked?new Date().toISOString():'';saveState();renderTasks();scheduleNativeTasks();if(c.checked){const row=document.querySelector(`[data-task-row="${CSS.escape(t.id)}"]`);row?.classList.add('just-done');const a=todayTasks();if(a.length>1&&a.every(x=>x.done)){celebrate();toast('Все задачи на сегодня готовы','Сильный день 💪')}else toast('Задача выполнена',t.title)}});
+  $$('[data-task-id]').forEach(c=>c.onchange=()=>{const t=(state.tasks||[]).find(x=>x.id===c.dataset.taskId);if(!t)return;t.done=c.checked;t.doneAt=c.checked?new Date().toISOString():'';saveState();renderTasks();scheduleNativeTasks();if(t.goal){renderGoal();renderDayLedger()}if(c.checked){const row=document.querySelector(`[data-task-row="${CSS.escape(t.id)}"]`);row?.classList.add('just-done');const a=todayTasks();if(a.length>1&&a.every(x=>x.done)){celebrate();toast('Все задачи на сегодня готовы','Сильный день 💪')}else if(t.goal){const m=(state.goal?.milestones||[]).find(x=>x.id===t.ms);toast('Шаг к цели сделан 🎯',m?'Этап «'+m.title+'» продвинулся':t.title)}else toast('Задача выполнена',t.title)}});
   $$('[data-task-del]').forEach(b=>b.onclick=()=>{state.tasks=(state.tasks||[]).filter(x=>x.id!==b.dataset.taskDel);saveState();renderTasks();scheduleNativeTasks();toast('Задача удалена')});
 updateTaskBars();}
 function openQuickAdd(){
@@ -4787,20 +4947,25 @@ function openQuickAdd(){
   $$('[data-quick]').forEach(b=>b.onclick=()=>{const k=b.dataset.quick;closeModal();if(k==='task')openTaskForm();else if(k==='note'){showView('viewNotes');openNoteEditor()}else openMoneyForm(k)});
 }
 function openTaskForm(){
+  const ms=(state.goal?.milestones||[]),cm=currentMilestone(),gt=String(state.goal?.title||'Главная цель').slice(0,28);
+  const goalOpts=[['Без цели','',''],[`🎯 ${gt}`+(cm?` · этап ${cm.i+1}`:''),'main',cm?.m.id||''],...ms.map((m,i)=>[m,i]).filter(([m,i])=>!m.done&&i!==cm?.i).slice(0,3).map(([m,i])=>[`🏁 Этап ${i+1}: ${String(m.title).slice(0,26)}`,'main',m.id])];
+  let goalPick=goalOpts[0];
   const quick=[['Без времени','',''],['Через 1 час','+60',''],['Через 3 часа','+180',''],['Сегодня 18:00','18:00',''],['Завтра 09:00','09:00','tomorrow']];
   openModal(`<div class="close-row"><div><div class="eyebrow">Задача</div><h2>Что нужно сделать?</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
   <div class="stack" style="margin-top:12px"><input id="taskTitle" class="jl-big-input" maxlength="140" placeholder="Например: позвонить в банк" enterkeyhint="done">
   <div class="jl-chips" id="taskWhen">${quick.map((q,i)=>`<button class="jl-chip ${i===0?'active':''}" type="button" data-when="${i}">${q[0]}</button>`).join('')}<button class="jl-chip" type="button" data-when="custom">🗓️ Своё время</button></div>
   <div class="grid g2" id="taskCustom" hidden><div class="field"><label for="taskTime">Время</label><input id="taskTime" type="time"></div><div class="field"><label for="taskDate">Дата</label><input id="taskDate" type="date" value="${esc(keyDay())}"></div></div>
   <div class="sub" id="taskHint">Без времени — просто в списке на сегодня.</div>
+  <div class="jl-task-goal"><div class="jl-task-goal-h">🎯 К цели <small>засчитается в этап цели</small></div><div class="jl-chips" id="taskGoal">${goalOpts.map((o,i)=>`<button class="jl-chip ${i===0?'active':''}" type="button" data-task-goal="${i}" aria-pressed="${i===0}">${esc(o[0])}</button>`).join('')}</div></div>
   <button class="btn primary jl-close-btn" id="saveTaskBtn" type="button">${svgIcon('i-check')} Добавить</button></div>`);
   $('closeModalBtn').onclick=closeModal;
   let when=quick[0];const lead=Math.max(0,Number(state.settings?.preMinutes)||10)||10;
   const resolve=()=>{if(when==='custom')return {time:$('taskTime').value||'',date:$('taskDate').value||keyDay()};const [,v,day]=when;const d=new Date();if(day==='tomorrow')d.setDate(d.getDate()+1);if(!v)return {time:'',date:keyDay(d)};if(v[0]==='+'){d.setMinutes(d.getMinutes()+Number(v.slice(1)));return {time:fmtMin(d.getHours()*60+d.getMinutes()),date:keyDay(d)}}return {time:v,date:keyDay(d)}};
   const hint=()=>{const r=resolve();setText('taskHint',r.time?`${r.date===keyDay()?'Сегодня':new Date(r.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'})} в ${r.time} · напомню за ${lead} мин со звуком`:'Без времени — просто в списке на сегодня.')};
+  $$('[data-task-goal]').forEach(b=>b.onclick=()=>{goalPick=goalOpts[Number(b.dataset.taskGoal)];$$('[data-task-goal]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b))});haptic(6)});
   $$('[data-when]').forEach(b=>b.onclick=()=>{$$('[data-when]').forEach(x=>x.classList.toggle('active',x===b));when=b.dataset.when==='custom'?'custom':quick[Number(b.dataset.when)];$('taskCustom').hidden=when!=='custom';if(when==='custom')$('taskTime').focus();hint()});
   ['taskTime','taskDate'].forEach(id=>$(id).addEventListener('input',hint));
-  const save=()=>{const title=$('taskTitle').value.trim();if(!title){toast('Напиши задачу');$('taskTitle').focus();return}const r=resolve();state.tasks=Array.isArray(state.tasks)?state.tasks:[];state.tasks.push({id:uid(),title,time:r.time,date:r.date,remind:r.time?lead:0,done:false,doneAt:'',createdAt:new Date().toISOString()});saveState();closeModal();renderTasks();scheduleNativeTasks();toast('Задача добавлена',r.time?'Напомню за '+lead+' мин и в '+r.time:'')};
+  const save=()=>{const title=$('taskTitle').value.trim();if(!title){toast('Напиши задачу');$('taskTitle').focus();return}const r=resolve();state.tasks=Array.isArray(state.tasks)?state.tasks:[];state.tasks.push({id:uid(),title,time:r.time,date:r.date,remind:r.time?lead:0,done:false,doneAt:'',createdAt:new Date().toISOString(),...(goalPick[1]?{goal:'main',ms:goalPick[2]}:{})});saveState();closeModal();renderTasks();scheduleNativeTasks();if(goalPick[1])renderGoal();toast(goalPick[1]?'Задача к цели добавлена 🎯':'Задача добавлена',r.time?'Напомню за '+lead+' мин и в '+r.time:(goalPick[1]?'Закроешь — этап цели продвинется':''))};
   $('saveTaskBtn').onclick=save;$('taskTitle').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}});
   focusSoon('taskTitle',50);
 }

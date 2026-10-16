@@ -1204,6 +1204,109 @@ await test("V71: пульс-шкала, отчёт дня, привычка-от
   await ctx.close();
 });
 
+
+// ---------- V72 ----------
+const V72_SEED = () => {
+  const k = keyDay(), td = new Date(); td.setMonth(td.getMonth() + 6);
+  state.goal.title = "Квартира"; state.goal.finance.targetAmount = 50000; state.goal.finance.targetDate = keyDay(td); state.goal.finance.manualSavedAmount = 5000;
+  state.goal.milestones = [{ id: "m1", title: "Первый взнос", done: false, autoOff: true }, { id: "m2", title: "Ремонт", done: false, autoOff: true }];
+  state.day.steps = [{ id: "w", time: "08:00", end: "12:00", title: "Работа", details: ["Отчёт клиенту", "Звонки поставщикам"], text: "" },
+    { id: "f", time: "12:00", end: "18:00", title: "Дом и отдых", details: [], text: "" }, { id: "c", time: "18:00", end: "18:30", title: "Итог дня", details: [], text: "" }];
+  state.settings.every2h = true; state.settings.notifications = true; state.settings.wakeTime = "07:00"; saveState(); renderAll(); };
+
+await test("V72 D8: ритм дня — «главное» этапа связано с целью; напоминания начала и конца этапа из данных, каждый день разные", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T07:30:00+05:00") });
+  await page.evaluate(V72_SEED);
+  const texts = () => page.evaluate(() => { const r = state.day.steps.map((s, i) => stageReminderTexts(i)); return { r, slots: twoHourSlots().map(x => x.title + " | " + x.body) }; });
+  const d1 = await texts();
+  for (const [i, x] of d1.r.entries()) {
+    for (const n of [x.start, x.end]) assert.ok((n.title + n.body).includes("Квартира"), `stage ${i}: the goal name is in the reminder: ${n.title} — ${n.body}`);
+    assert.ok(x.start.body.includes(x.focus.main), "the start reminder names the action of the stage");
+    assert.match(x.start.body, /До цели «Квартира»: 45 тыс\. сомони, \d+ д/, "the start reminder says what is left and the days");
+    assert.match(x.end.body, /^Сделал главное\?/);
+  }
+  assert.ok(["Отчёт клиенту", "Звонки поставщикам"].includes(d1.r[0].focus.main), "work: the user's own words for the stage, picked by the day: " + d1.r[0].focus.main);
+  assert.match(d1.r[1].focus.main, /Первый взнос/, "free time: the next goal stage");
+  assert.match(d1.r[2].focus.main, /Закрыть день/);
+  const all1 = [...d1.r.flatMap(x => [x.start.title + "|" + x.start.body, x.end.title + "|" + x.end.body]), ...d1.slots];
+  assert.equal(new Set(all1).size, all1.length, "no reminder repeats another one: " + all1.join("\n"));
+  // the next day the words are different (numbers and the rotating fact come from the data)
+  await page.clock.setSystemTime(new Date("2026-10-17T07:30:00+05:00"));
+  const d2 = await texts();
+  d1.r.forEach((x, i) => assert.notEqual(x.start.body, d2.r[i].start.body, "stage " + i + " says the same thing two days in a row"));
+  // the scheduler: start of a stage, then 10 minutes before its end — «Сделал главное?» with Да / Перенести
+  await page.clock.setSystemTime(new Date("2026-10-17T08:01:00+05:00")); await page.evaluate(() => { state.notificationsLog = []; runScheduler(); });
+  await page.clock.setSystemTime(new Date("2026-10-17T11:51:00+05:00")); await page.evaluate(() => runScheduler());
+  const n = await page.evaluate(() => state.notificationsLog.map(x => x.title + " | " + x.body));
+  assert.ok(n.some(x => /^Сейчас: .*Работа \| Главное: .+До цели «Квартира»/.test(x)), "start reminder: " + n.join(" || "));
+  assert.ok(n.some(x => /Этап заканчивается: Работа \| Сделал главное\?.*Квартира/.test(x)), "end reminder: " + n.join(" || "));
+  // the hero and the day strip are open at once, no tap needed
+  const ui = await page.evaluate(() => { showView("viewToday"); renderToday(); const v = id => { const e = document.getElementById(id); return !!e && e.offsetParent !== null && e.getBoundingClientRect().height > 10; }; return { focus: v("nowFocus"), strip: v("dayStrip"), text: document.getElementById("nowFocus").textContent, main: document.querySelector('#timeline .jl-rstep.current .jl-rstep-main')?.textContent || "" }; });
+  assert.ok(ui.focus && ui.strip, "focus and the day strip are visible");
+  assert.match(ui.text, /Главное сейчас.*Квартира/); assert.match(ui.main, /Главное сейчас/);
+  // «Да» from the reminder marks the main action done; «Перенести» moves it on as a goal task
+  const act = await page.evaluate(() => { applyReminderAction("done", "stage:w"); applyReminderAction("snooze", "stage:f"); const t = state.tasks.find(x => x.goal && x.title.includes("Первый взнос"));
+    return { done: !!dailyState().stageDone?.w, moved: dailyState().stageMoved?.f, task: t && { date: t.date, time: t.time, ms: t.ms }, report: dayLedger().gActs }; });
+  assert.ok(act.done, "«Да» marks the stage"); assert.ok(act.moved && act.task && act.task.ms === "m1" && act.task.time === "12:00" && act.task.date === "2026-10-18", "«Перенести» → a goal task in the same stage tomorrow (no other stage left today): " + JSON.stringify(act));
+  assert.ok(act.report.some(x => /Отчёт|Звонки/.test(x)), "the done stage goes to the day report: " + act.report);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D8: Android — у конца этапа кнопки «Да / Перенести», тексты будильников из данных", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T07:30:00+05:00"), init: () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 5 : undefined; } }); } });
+  await page.evaluate(V72_SEED);
+  const c = await page.evaluate(() => { __calls.length = 0; scheduleNative(); return __calls.filter(x => x[0] === "scheduleDaily").map(x => x.slice(1)); });
+  const byId = Object.fromEntries(c.map(x => [x[0], x]));
+  assert.ok(byId.w && /Сейчас: .*Работа/.test(byId.w[2]) && /Квартира/.test(byId.w[3]), "stage start alarm: " + JSON.stringify(byId.w));
+  assert.ok(byId.stend_w && byId.stend_w[1] === "11:50" && /Сделал главное/.test(byId.stend_w[3]), "10 minutes before the end: " + JSON.stringify(byId.stend_w));
+  const java = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java"), "utf8") + fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8");
+  assert.ok(java.includes('"stend_"') && java.includes('"Перенести"') && java.includes('"Да"'), "Android shows «Да / Перенести» on stage reminders");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D9: «Свободное время» — сначала главное по цели, время следующего напоминания из twoHourSlots, «Сделал» переживает перезагрузку", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T12:20:00+05:00") });
+  await page.evaluate(V72_SEED);
+  const r = await page.evaluate(() => { showView("viewToday"); renderFreePlan(); const box = document.getElementById("freePlan"), first = box.querySelector(".jl-free-item");
+    const next = twoHourSlots().find(x => !x.work && x.min > nowMin()); return { first: first?.textContent || "", isGoal: first?.hasAttribute("data-free-goal"), next: box.querySelector("[data-next-2h]")?.textContent, want: next?.time, main: goalFocusLine().main, items: box.querySelectorAll(".jl-free-item").length }; });
+  assert.ok(r.isGoal && r.first.includes(r.main) && r.first.includes("Сделал"), "the first line is the goal's main step: " + r.first);
+  assert.ok(r.want && r.next === r.want, `next reminder ${r.next} = twoHourSlots ${r.want}`);
+  assert.ok(r.items <= 3, "fewer generic ideas");
+  await page.click("[data-free-goal]"); await page.waitForTimeout(200);
+  await page.reload(); await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true);
+  const after = await page.evaluate(() => ({ pressed: document.querySelector("[data-free-goal]")?.getAttribute("aria-pressed"), led: document.getElementById("dayLedger").textContent, acts: dayLedger().gActs }));
+  assert.equal(after.pressed, "true", "the mark survives a reload");
+  assert.ok(after.acts.some(x => x.includes("Первый взнос")) && after.led.includes("Первый взнос"), "and goes to the day report");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("V72 D10: задача «к цели» — значок 🎯, закрытие двигает этап, в уведомлении — цель", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T09:00:00+05:00") });
+  await page.evaluate(V72_SEED);
+  await page.evaluate(() => openTaskForm());
+  await page.fill("#taskTitle", "Узнать цены на квартиры"); await page.click('[data-task-goal="1"]'); await page.click('[data-when="custom"]'); await page.fill("#taskTime", "09:05");
+  await page.click("#saveTaskBtn");
+  const t = await page.evaluate(() => state.tasks.find(x => x.title === "Узнать цены на квартиры"));
+  assert.ok(t && t.goal === "main" && t.ms === "m1", "the task is linked to the current goal stage: " + JSON.stringify(t));
+  const before = await page.evaluate(() => { showView("viewToday"); return { p: milestoneAuto(state.goal.milestones[0], 0, 2).p, tag: document.querySelector(`[data-task-row="${state.tasks.find(x => x.goal).id}"] .jl-goal-tag`)?.textContent }; });
+  assert.match(before.tag || "", /🎯/, "a goal task wears 🎯");
+  await page.clock.setSystemTime(new Date("2026-10-16T09:05:30+05:00"));
+  const n = await page.evaluate(() => { state.notificationsLog = []; runScheduler(); return state.notificationsLog.map(x => x.title + " | " + x.body); });
+  assert.ok(n.some(x => /^\S+ Пора: Узнать цены/.test(x) && !x.startsWith("⏰") && x.includes("Квартира")), "the reminder has the task emoji and the goal: " + n.join(" || "));
+  await page.click(`[data-task-emo="${t.id}"]`); await page.waitForTimeout(200);
+  const after = await page.evaluate(() => ({ p: milestoneAuto(state.goal.milestones[0], 0, 2).p, hint: milestoneAuto(state.goal.milestones[0], 0, 2).hint, done: state.goal.milestones[0].done }));
+  assert.ok(after.p > before.p, `closing a goal task moves the stage: ${before.p} → ${after.p}`);
+  assert.match(after.hint, /задачи 1\/1/, "the stage shows its tasks");
+  // old tasks without the new fields keep working
+  const old = await page.evaluate(() => normalize({ tasks: [{ id: "o", title: "Старая", date: keyDay() }] }).tasks[0]);
+  assert.ok(!("goal" in old));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 // Every window, every button: each one does something visible and nothing throws.
 const WINDOWS = [
   ["Быстрое добавление", "openQuickAdd()"], ["Расход", "openMoneyForm('expense')"], ["Доход", "openMoneyForm('profit')"], ["Изменить расход", "openMoneyEdit('expense','swE')"],
