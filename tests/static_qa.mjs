@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "69.0.0");
-assert.match(gradle, /versionCode 690\b/); assert.match(gradle, /versionName '69\.0'/);
-assert.match(csproj, /<Version>69\.0\.0<\/Version>/);
-assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V69') && html.includes('<span>V69</span>') && html.includes('v-row-val">69.0</span>'), "app version must be V69 everywhere on screen (state schema 58)");
-assert.ok(sw.includes("jamal-life-v69-0"), "service worker cache must be V69");
+assert.equal(pkg.version, "70.0.0");
+assert.match(gradle, /versionCode 700\b/); assert.match(gradle, /versionName '70\.0'/);
+assert.match(csproj, /<Version>70\.0\.0<\/Version>/);
+assert.ok(html.includes("s.version=58") && html.includes('brand-ver">V70') && html.includes('<span>V70</span>') && html.includes('v-row-val">70.0</span>'), "app version must be V70 everywhere on screen (state schema 58)");
+assert.ok(sw.includes("jamal-life-v70-0"), "service worker cache must be V70");
 
 // branding
 assert.equal(manifest.name, "Jamal Life");
@@ -98,4 +98,14 @@ assert.ok(html.includes("if(m.done||m.autoOff)return") && html.includes("data-ms
   const classes = [...new Set([...css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{[^{}]*\}/g, "{}").matchAll(/\.([A-Za-z_][\w-]*)/g)].map(m => m[1]))].filter(c => !/^\d/.test(c));
   const unused = classes.filter(c => !new RegExp("(?<![\\w-])" + esc(c) + "(?![\\w-])").test(rest) && !new RegExp(esc(c.replace(/-[^-]+$/, "-")) + "(?:'|\"|`|\\$\\{)").test(rest));
   assert.deepEqual(unused, [], "CSS for classes nobody uses: " + unused.join(", ")); }
-console.log("JAMAL_LIFE_V69_STATIC_QA_OK");
+// user text that ends up inside HTML without esc(): the currency and the bank sticker are cleaned at the source
+assert.ok(html.includes("function currencyLabel()") && !html.includes("state.profile.currency||'сомони'") && html.includes("function cleanEmoji(") && html.includes('<span class="ico">${esc(x.icon)}</span>'), "currency and bank stickers must never carry markup");
+// V70: clean code — no function nobody calls, no debug logging; the lock file carries the same version
+{ const lock = JSON.parse(read("package-lock.json")); assert.equal(lock.version, pkg.version, "package-lock.json version");
+  const unused = defs.filter(n => (html.match(new RegExp("(?<![\\w$])" + n.replace(/\$/g, "\\$") + "(?![\\w$])", "g")) || []).length < 2);
+  assert.deepEqual(unused, [], "functions nobody calls: " + unused.join(", "));
+  assert.ok(!/console\.(log|debug|info)\(/.test(js), "no debug console output in the app"); }
+assert.ok(html.includes("function linkLabels(") && !/user-scalable=no|maximum-scale=1/.test(html), "labels linked to fields; zoom allowed (axe)");
+assert.ok(html.includes("function cleanRecords(") && html.includes("function stableId(") && html.includes("if(!s||typeof s!=='object'||Array.isArray(s))s={};"), "normalize survives broken data and gives old records the same id on every device");
+assert.ok(html.includes("let modalHistory=false") && html.includes("const TAP_SLOP=16"), "«back» closes a window; a tap with finger drift opens a transaction");
+console.log("JAMAL_LIFE_V70_STATIC_QA_OK");

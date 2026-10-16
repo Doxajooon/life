@@ -87,8 +87,8 @@ function makeCloud() {
 }
 
 const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
-async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock } = {}) {
-  const ctx = await browser.newContext({ viewport, serviceWorkers: sw, locale: "ru-RU", timezoneId: "Asia/Dushanbe" });
+async function device(cloud, { viewport = { width: 390, height: 844 }, session, sw = "block", init, clock, touch = false } = {}) {
+  const ctx = await browser.newContext({ viewport, serviceWorkers: sw, locale: "ru-RU", timezoneId: "Asia/Dushanbe", hasTouch: touch, isMobile: touch });
   await ctx.route(/supabase\.co/, r => cloud.handle(r));
   if (session !== null) {
     const s = session || cloud.session();
@@ -427,6 +427,12 @@ await test("Нагрузка: 3000 операций и 500 заметок", asyn
   if (process.env.PERF_LOG) console.log("   load render/save ms:", t.all);
   assert.ok(t.render < 600 * slow, "render " + t.render.toFixed(0) + " ms (" + t.all + ")");
   assert.ok(t.save < 200 * slow, "save " + t.save.toFixed(0) + " ms (" + t.all + ")");
+  // every screen opens quickly with this much data (best of two)
+  const scr = await page.evaluate(() => { const out = {}; for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"]) { const ms = []; for (let i = 0; i < 2; i++) { showView("viewDisplay"); const a = performance.now(); showView(v); ms.push(performance.now() - a); } out[v] = Math.round(Math.min(...ms)); }
+    for (const t of ["tx", "cal", "overview"]) { const a = performance.now(); document.querySelector(`[data-money-tab="${t}"]`).click(); out["money/" + t] = Math.round(performance.now() - a); }
+    const a = performance.now(); openSearch(); const q = document.querySelector("#modal input"); q.value = "Еда"; q.dispatchEvent(new Event("input", { bubbles: true })); out.search = Math.round(performance.now() - a); closeModal(); return out; });
+  if (process.env.PERF_LOG) console.log("   screens ms:", JSON.stringify(scr));
+  for (const [k, v] of Object.entries(scr)) assert.ok(v < 400 * slow, `${k} opens in ${v} ms with 3000 operations`);
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -1053,6 +1059,446 @@ await test("Цель: автоэтапы — переключатель в «И�
   // 3) old data without the new fields works and is normalized
   const old = await page.evaluate(() => { const s = clone(state); s.goal.milestones = [{ id: "o1", title: "Старый этап", done: true }, { id: "o2", title: "Ещё", done: false, autoOff: "x" }]; const n = normalize(s); return n.goal.milestones; });
   assert.equal(old[0].done, true); assert.ok(!("autoOff" in old[1]));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Деньги: тап по строке операции открывает изменение (обзор, транзакции, календарь, поиск)", async () => {
+  const { ctx, page } = await device(makeCloud(), { touch: true });
+  await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "tapE", amount: 300, category: "Еда", at: now, dateKey: k }); state.profits.push({ id: "tapP", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k });
+    saveState(); showView("viewMoney"); renderAll(); });
+  const opened = async (where, sel) => {
+    await page.waitForSelector(sel, { state: "visible", timeout: 4000 });
+    await page.tap(sel);
+    await page.waitForTimeout(350);
+    const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), amount: document.getElementById("moneyAmount")?.value || "" }));
+    assert.ok(r.open && r.amount === "300", where + ": tap did not open the edit form " + JSON.stringify(r));
+    await page.evaluate(() => closeModal());
+  };
+  await opened("overview", '#mvRecent [data-tx-id="tapE"]');
+  await page.evaluate(() => document.querySelector('[data-money-tab="tx"]').click());
+  await opened("transactions", '#txList [data-tx-id="tapE"]');
+  await page.evaluate(() => document.querySelector('[data-money-tab="cal"]').click());
+  await opened("calendar", '#mcDayList [data-tx-id="tapE"]');
+  // a real finger drifts a little during a tap (Chrome on Android still counts up to ~15 px as a tap)
+  const cdp = await ctx.newCDPSession(page);
+  for (const [dx, dy] of [[11, 2], [-12, 3], [4, 9]]) {
+    const b = await page.locator('#mcDayList [data-tx-id="tapE"]').boundingBox(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + dx / 2, y: y + dy / 2 }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x + dx, y: y + dy }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), amount: document.getElementById("moneyAmount")?.value || "", rowOpen: !!document.querySelector(".jl-swipe.open") }));
+    assert.ok(r.open && r.amount === "300", `tap with ${dx},${dy} px drift did not open the edit form ` + JSON.stringify(r));
+    await page.evaluate(() => closeModal());
+  }
+  // a real swipe still opens the actions instead of the form
+  { const b = await page.locator('#mcDayList [data-tx-id="tapE"]').boundingBox(), x = b.x + b.width - 30, y = b.y + b.height / 2;
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] });
+    for (let i = 1; i <= 6; i++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: x - i * 25, y }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => ({ modal: document.getElementById("modalBack").classList.contains("open"), rowOpen: !!document.querySelector(".jl-swipe.open") }));
+    assert.deepEqual(r, { modal: false, rowOpen: true }, "swipe left must reveal the actions"); }
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Окна: «назад» (Android/браузер) и Esc закрывают окно, не уходя с экрана", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const st = () => page.evaluate(() => ({ modal: document.getElementById("modalBack").classList.contains("open"), view: currentView }));
+  // Android: the back key only works while the WebView has history; a fresh start has none
+  const len0 = await page.evaluate(() => history.length);
+  await page.evaluate(() => openMoneyForm("expense"));
+  assert.ok(await page.evaluate(() => history.length) > len0, "an open window must give «back» something to close");
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewToday" });
+  // closed by its button: the next «back» works as usual, no second press needed
+  await page.evaluate(() => showView("viewMoney"));
+  await page.evaluate(() => openTransferForm()); await page.waitForTimeout(150);
+  await page.click("#closeModalBtn"); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewMoney" });
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewToday" }, "one «back» after closing a window returns to the previous screen");
+  // one window replaced by another (closeModal(); openX()): «back» closes the new one
+  await page.evaluate(() => { openMoneyForm("profit"); closeModal(); openDebtHistory("all"); }); await page.waitForTimeout(300);
+  assert.equal((await st()).modal, true, "the second window must stay open");
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewToday" });
+  // a window that leads to another screen (search → goal editor): «back» returns to the screen it was opened from
+  await page.evaluate(() => { showView("viewMoney"); openMoneyForm("expense"); closeModal(); showView("viewGoalEdit"); }); await page.waitForTimeout(300);
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewMoney" });
+  // Esc on a PC
+  await page.evaluate(() => openBudget()); await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+  assert.equal((await st()).modal, false);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+// Every window, every button: each one does something visible and nothing throws.
+const WINDOWS = [
+  ["Быстрое добавление", "openQuickAdd()"], ["Расход", "openMoneyForm('expense')"], ["Доход", "openMoneyForm('profit')"], ["Изменить расход", "openMoneyEdit('expense','swE')"],
+  ["Перевод", "openTransferForm()"], ["Тип операции", "openTxTypePicker()"], ["Задача", "openTaskForm()"], ["Привычка", "openHabitEditor()"], ["Новый банк", "openBudget()"], ["Банк", "openBudget('swB')"],
+  ["Пополнить банк", "openBankTopup('swB')"], ["Долг", "openDebtEdit()"], ["История долга", "openDebtHistory('all')"], ["Главная цель", "openGoalEdit()"], ["Сумма цели", "openGoalFinanceEdit()"],
+  ["В цель", "openGoalSaving()"], ["Календарь", "openCalendar()"], ["Настройки", "openSettings()"], ["Безопасность", "openSecurity()"], ["Корзина", "openTrash()"], ["Переезд", "openMoveDevice()"],
+  ["AI-анализ", "openGeminiAnalysis()"], ["Полный разбор", "openLifeAnalysis()"], ["Поиск", "openSearch()"], ["Достижение", "openAchievement()"], ["Резервная копия", "openBackupDialog()"],
+  ["Копии", "openBackups()"], ["Профиль", "openProfileEdit()"], ["Отчёты", "openReportHistory()"], ["День", "openDayProgress()"], ["Касса", "openMetricDetail('cash')"],
+  // the calendar opens on «1 January → today»; start from another period so its quick buttons have something to change
+  ["Календарь, период", "openCalendar(); calendarRangeStart = '2026-03-01'; calendarRangeEnd = '2026-03-05'; renderCalendar(new Date().getFullYear(), new Date().getMonth(), keyDay())"],
+];
+await test("Все окна: каждая кнопка работает, ошибок нет", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "swE", amount: 300, category: "Еда", at: now, dateKey: k }); state.profits.push({ id: "swP", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k });
+    state.budgets = [{ id: "swB", name: "Поездки", planned: 1000, tops: [] }]; state.debts = { bank: 9000, firms: 1000, monthlyPayment: 500 }; ensureDebtHistory();
+    state.tasks.push({ id: "swT", title: "Позвонить", time: "23:00", date: k }); state.habits = [{ id: "swH", title: "Спорт", kind: "daily", target: 7 }];
+    state.goal.finance.targetAmount = 50000; saveState(); renderAll();
+    window.__snap = JSON.stringify(state);
+    window.confirm = () => false; window.prompt = () => null; window.alert = () => {}; window.open = () => null;
+  });
+  const dead = [], errs = [];
+  for (const [name, open] of WINDOWS) {
+    const ok = await page.evaluate(open => { try { closeModal(); state = normalize(JSON.parse(window.__snap)); renderAll(); showView("viewToday"); eval(open); return !!document.getElementById("modalBack").classList.contains("open"); } catch (e) { return "ERR " + e.message; } }, open);
+    if (ok !== true) { errs.push(name + ": does not open " + ok); continue; }
+    const n = await page.evaluate(() => [...document.querySelectorAll("#modal button, #modal [role=button]")].length);
+    for (let i = 0; i < n; i++) {
+      const before = await page.evaluate(([open, i]) => {
+        closeModal(); state = normalize(JSON.parse(window.__snap)); saveState(); renderAll(); showView("viewToday"); eval(open);
+        const b = [...document.querySelectorAll("#modal button, #modal [role=button]")][i];
+        if (!b || b.offsetParent === null || b.disabled) return null;
+        window.__dl = 0; document.querySelectorAll("a[download]").forEach(a => a.addEventListener("click", () => window.__dl++));
+        const snap = { label: (b.getAttribute("aria-label") || b.textContent || b.id || b.className).trim().replace(/\s+/g, " ").slice(0, 40), html: document.getElementById("modal").innerHTML, open: document.getElementById("modalBack").classList.contains("open"), view: currentView, st: JSON.stringify(state), toast: document.getElementById("toast").textContent, cls: b.className, aria: b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded") };
+        window.__before = snap; b.click(); return snap.label;
+      }, [open, i]);
+      if (before === null) continue;
+      await page.waitForTimeout(260);
+      const changed = await page.evaluate(i => { const s = window.__before, b = [...document.querySelectorAll("#modal button, #modal [role=button]")][i];
+        return document.getElementById("modal").innerHTML !== s.html || document.getElementById("modalBack").classList.contains("open") !== s.open || currentView !== s.view || JSON.stringify(state) !== s.st || document.getElementById("toast").textContent !== s.toast || window.__dl > 0 || (b && (b.className !== s.cls || (b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded")) !== s.aria)) || document.activeElement?.closest?.("#modal input, #modal textarea, #modal select"); }, i);
+      // not a bug: the period already is «1 January → today» (the same as tapping an already chosen chip)
+      const already = name === "Календарь" && /^(С 1 января|До сегодня)$/.test(before);
+      if (!changed && !already) dead.push(name + " → «" + before + "»");
+    }
+  }
+  if (process.env.SWEEP_LOG) console.log("   dead buttons:\n   " + dead.join("\n   "));
+  assert.deepEqual(errs, []);
+  assert.deepEqual(page.errors, []);
+  assert.deepEqual(dead, [], "buttons that do nothing: " + dead.join("; "));
+  await ctx.close();
+});
+
+await test("Все экраны: каждая кнопка работает, ошибок нет", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "swE", amount: 300, category: "Еда", at: now, dateKey: k }); state.profits.push({ id: "swP", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k });
+    state.budgets = [{ id: "swB", name: "Поездки", planned: 1000, tops: [] }]; state.debts = { bank: 9000, firms: 1000, monthlyPayment: 500 }; ensureDebtHistory();
+    state.tasks.push({ id: "swT", title: "Позвонить", time: "23:00", date: k }); state.habits = [{ id: "swH", title: "Спорт", kind: "daily", target: 7 }];
+    state.notes.push({ id: "swN", title: "Идея", body: "текст", at: now, category: "work" }); state.goal.finance.targetAmount = 50000; saveState(); renderAll();
+    window.__snap = JSON.stringify(state);
+    window.confirm = () => false; window.prompt = () => null; window.alert = () => {}; window.open = () => null;
+  });
+  const VIEWS = [["viewToday", ""], ["viewGoal", ""], ["viewMoney", "overview"], ["viewMoney", "tx"], ["viewMoney", "cal"], ["viewNotes", ""], ["viewSettings", ""], ["viewDisplay", ""], ["viewNotifications", ""], ["viewProfile", ""]];
+  const dead = [];
+  for (const [view, tab] of VIEWS) {
+    const prep = `closeModal(); state = normalize(JSON.parse(window.__snap)); saveState(); renderAll(); showView("${view}"); ${tab ? `document.querySelector('[data-money-tab="${tab}"]').click();` : ""}`;
+    const n = await page.evaluate(prep => { eval(prep); return document.querySelectorAll(`#${currentView} button, #${currentView} [role=button]`).length; }, prep);
+    for (let i = 0; i < n; i++) {
+      const label = await page.evaluate(([prep, i]) => {
+        eval(prep);
+        const b = [...document.querySelectorAll(`#${currentView} button, #${currentView} [role=button]`)][i];
+        if (!b || b.offsetParent === null || b.disabled) return null;
+        window.__before = { html: document.getElementById(currentView).innerHTML, open: document.getElementById("modalBack").classList.contains("open"), view: currentView, st: JSON.stringify(state), toast: document.getElementById("toast").textContent, cls: b.className, aria: b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded") + b.getAttribute("aria-selected") };
+        window.__btn = b; b.click(); return (b.getAttribute("aria-label") || b.textContent || b.id || b.className).trim().replace(/\s+/g, " ").slice(0, 40);
+      }, [prep, i]);
+      if (label === null) continue;
+      await page.waitForTimeout(260);
+      const changed = await page.evaluate(() => { const s = window.__before, b = window.__btn, v = document.getElementById(s.view);
+        return v.innerHTML !== s.html || document.getElementById("modalBack").classList.contains("open") !== s.open || currentView !== s.view || JSON.stringify(state) !== s.st || document.getElementById("toast").textContent !== s.toast || (b.isConnected && (b.className !== s.cls || (b.getAttribute("aria-pressed") + b.getAttribute("aria-expanded") + b.getAttribute("aria-selected")) !== s.aria)) || !!document.activeElement?.matches?.("input, textarea, select"); });
+      const active = await page.evaluate(() => /\bactive\b/.test(window.__before.cls) || /true/.test(window.__before.aria)); // already chosen tab or chip
+      if (!changed && !active) dead.push(view + (tab ? "/" + tab : "") + " → «" + label + "»");
+    }
+  }
+  if (process.env.SWEEP_LOG) console.log("   dead buttons:\n   " + dead.join("\n   "));
+  assert.deepEqual(page.errors, []);
+  assert.deepEqual(dead, [], "buttons that do nothing: " + dead.join("; "));
+  await ctx.close();
+});
+
+await test("Цифры: одни и те же операции дают одинаковые суммы на всех экранах", async () => {
+  // 3 October, 12:00 in Dushanbe: the week reaches back into September, the month has a midnight-crossing entry
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-03T12:00:00+05:00") });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const r = await page.evaluate(async () => {
+    const base = walletMetrics().cash;
+    state.profits.push({ id: "P1", amount: 9000, sourceGroup: "Зарплата", at: "2026-10-03T05:00:00Z", dateKey: "2026-10-03" },
+      { id: "P2", amount: 1000, sourceGroup: "Фриланс", at: "2026-09-20T05:00:00Z", dateKey: "2026-09-20" });
+    state.expenses.push(
+      { id: "E1", amount: 300, category: "Еда", at: "2026-10-03T05:00:00Z", dateKey: "2026-10-03" },
+      { id: "E2", amount: 200, category: "Кафе", at: "2026-09-30T19:30:00Z", dateKey: "2026-10-01" },      // 00:30 on 1 October in Dushanbe
+      { id: "E3", amount: 150, category: "Еда", at: "2026-10-02T07:00:00Z" },                               // old record without dateKey
+      { id: "D1", amount: 4000, category: "Платёж по долгу", debtPayment: "bank", transfer: true, at: "2026-10-03T06:00:00Z", dateKey: "2026-10-03" },
+      { id: "T1", amount: 500, category: "Перевод", transfer: true, at: "2026-10-02T06:00:00Z", dateKey: "2026-10-02" }, // old transfer stored as an expense
+      { id: "E4", amount: 700, category: "Такси", at: "2026-09-29T06:00:00Z", dateKey: "2026-09-29" },
+      { id: "E5", amount: 50, category: "Еда", at: "2025-12-31T18:30:00Z", dateKey: "2025-12-31" });       // last year
+    state.goal.finance.targetAmount = 50000; state.goal.finance.targetDate = "2027-04-03";
+    state.goal.finance.contributions.push({ id: "G1", amount: 1000, at: "2026-10-03T06:30:00Z" });
+    state.debts = { bank: 90000, firms: 0, monthlyPayment: 4000 };
+    state = normalize(state); saveState(); renderAll(); await new Promise(r => setTimeout(r, 50));
+    const num = id => { const el = document.getElementById(id); const t = (el?.title || el?.textContent || "").replace(/[^\d,−-]/g, "").replace(",", "."); return Number(t.replace("−", "-")); };
+    const out = {};
+    out.todayMonth = num("tmExpense");
+    showView("viewMoney"); mvPeriod = 30; renderMoneyOverview(); out.overview30 = num("mvExpense");
+    mvPeriod = 7; renderMoneyOverview(); out.overview7 = num("mvExpense");
+    mcYear = 2026; mcMonth = 9; mcSelected = "2026-10-03"; mcRange = null; renderMoneyCalendar(); out.calMonth = num("mcExpense"); out.calNet = num("mcNet");
+    out.calDaySum = document.getElementById("mcDaySum").textContent.replace(/\s/g, " ");
+    mcSetRange("2026-01-01", "2026-10-03"); out.calRange = document.getElementById("mcRangeBox").textContent.replace(/\s/g, " ");
+    mcSetRange(null); mcYear = 2025; mcMonth = 11; renderMoneyCalendar(); out.calDec2025 = num("mcExpense");
+    out.daySumOld = daySum(spendOnly(state.expenses), "2026-10-02"); out.dayOld = dayExpenses("2026-10-02"); out.rangeOld = calendarRangeMetrics("2026-01-01", "2026-10-03");
+    out.week = weekStats(); out.donut = document.getElementById("expenseDonutCenter")?.textContent.replace(/\s/g, " ");
+    out.facts = lifeFacts().spend; out.todayBalance = num("todayBalance"); out.cashDelta = walletMetrics().cash - base;
+    showView("viewGoal"); renderGoal(); out.goalNeed = document.getElementById("goalRequiredMonth").textContent.replace(/\s/g, " ");
+    openGoalEditor(mainGoal().id); await new Promise(r => setTimeout(r, 50)); renderGoalPreview(); out.goalFormNeed = (document.getElementById("geMonthly")?.textContent || "").replace(/\s/g, " ");
+    return out;
+  });
+  const ex = JSON.stringify(r, null, 1);
+  // «Расход» = spending only: no transfers, no debt payments
+  assert.equal(r.todayMonth, 650, "Сегодня, месяц " + ex);       // 300 + 200 + 150
+  assert.equal(r.calMonth, 650, "Календарь, месяц " + ex);
+  assert.equal(r.overview30, 1350, "Обзор, 30 дней " + ex);       // + 700 in September
+  assert.equal(r.overview7, 1350, "Обзор, 7 дней " + ex);
+  assert.equal(r.week.out, 1350, "Неделя " + ex); assert.equal(r.week.debt, 4000);
+  assert.equal(r.facts, 1350, "lifeFacts для AI, 30 дней " + ex);
+  assert.equal(r.daySumOld, 150, "daySum, запись без dateKey " + ex);
+  assert.match(r.calDaySum, /расход 300 .*долг 4 000/, "календарь, сумма дня " + ex);
+  assert.equal(r.dayOld, 150, "старый календарь, день без dateKey " + ex);
+  assert.equal(r.rangeOld.expense, 1350, "старый календарь, период " + ex); assert.equal(r.rangeOld.debt, 4000);
+  assert.match(r.calRange, /Расход1 350/, "календарь, период " + ex);
+  assert.equal(r.calDec2025, 50, "декабрь прошлого года " + ex);
+  assert.match(r.donut, /650/, "круговая диаграмма месяца " + ex);
+  // the remainder pays for everything
+  assert.equal(r.calNet, 9000 - 650 - 4000, "Баланс месяца " + ex);
+  assert.equal(r.todayBalance, 9000 - 300 - 4000, "Сегодня, остаток дня " + ex);
+  assert.equal(r.cashDelta, 10000 - (300 + 200 + 150 + 4000 + 500 + 700 + 50) - 1000, "касса " + ex);
+  // the goal form and the goal screen agree on «per month»
+  assert.ok(r.goalFormNeed.includes(r.goalNeed), "Нужно в месяц: экран цели «" + r.goalNeed + "», форма «" + r.goalFormNeed + "»");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Цифры: формат сумм — округление, минус, пустые и битые значения, валюта", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => { const sp = x => x.replace(/\s/g, " "), cur = state.profile.currency;
+    const rows = [0, 0.5, 12.345, 999.995, 1234.5, -1234.5, null, undefined, "", "abc", "12", NaN, Infinity, -Infinity, 1e7].map(v => [String(v), sp(fmtMoney(v)), sp(fmtNum(v)), sp(fmtShort(v))]);
+    state.profile.currency = "$"; const usd = sp(fmtMoney(5)); state.profile.currency = cur; return { rows, usd }; });
+  const m = Object.fromEntries(r.rows.map(x => [x[0], x.slice(1)]));
+  assert.deepEqual(m["1234.5"], ["1 235 сомони", "1 235", "1 234,5"]);
+  assert.deepEqual(m["-1234.5"].slice(0, 2), ["-1 235 сомони", "-1 235"], "negative amounts round the same way everywhere");
+  assert.deepEqual(m["12.345"], ["12,35 сомони", "12", "12,35"]);
+  for (const bad of ["null", "undefined", "", "abc", "NaN", "Infinity", "-Infinity"]) assert.deepEqual(m[bad], ["0 сомони", "0", "0"], "bad value " + bad);
+  assert.equal(r.usd, "5 $");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Данные: битые и старые данные — приложение не падает и ничего не теряет", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => {
+    const cases = {
+      nullState: null, string: "x", array: [],
+      nulls: { profits: null, expenses: null, tasks: null, notes: null, habits: null, budgets: null, goals: null, reports: null, debts: null, goal: null, settings: null, profile: null, ai: null, day: null, wallet: null, habitLog: null, achievements: null, debtHistory: null },
+      strings: { income: "9000", debts: { bank: "90000", firms: "abc", monthlyPayment: "4500" }, profits: [{ id: "a", amount: "100", at: "2026-10-01T00:00:00Z" }], expenses: [{ id: "b", amount: "x", at: "nonsense" }, { id: "c", amount: 20, at: "nonsense", dateKey: "2026-10-01" }] },
+      badItems: { expenses: [null, 5, "x", { id: "ok1", amount: 10, at: "2026-10-01T00:00:00Z" }], profits: [null, { id: "ok2", amount: 7, at: "2026-10-01T00:00:00Z" }], tasks: [null, { id: "t", title: "Задача", date: "2026-10-01" }], notes: [null, 7, { id: "n", title: "Заметка", body: null }],
+        habits: [null, { title: null }], budgets: [null, { id: "bb", name: "Еда", tops: "x" }], goals: [null], reports: { "2026-10-01": null, "x": 5 }, habitLog: { h: null }, achievements: [null, { id: "a1", text: "Есть" }], debtHistory: [null, { day: "2026-10-01", total: 5 }] },
+      goalBroken: { goal: { title: "Цель", milestones: [null, "x", { id: "m", title: "Этап" }], finance: { contributions: [null, { id: "c1", amount: "x", at: "2026-10-01T00:00:00Z" }, { id: "c2", amount: 300, at: "2026-10-01T00:00:00Z" }], targetAmount: "abc" } } },
+      unknown: { foo: 1, profits: [{ id: "u", amount: 50, at: "2026-10-01T00:00:00Z", extra: "keep" }] },
+      schema58: { version: 58, profits: [{ id: "o1", amount: 100, source: "Зарплата", at: "2026-09-01T00:00:00Z" }], expenses: [{ amount: 40, category: "Еда", at: "2026-09-02T00:00:00Z" }] },
+    };
+    const out = {};
+    for (const [k, v] of Object.entries(cases)) {
+      try {
+        const n = normalize(v == null || typeof v !== "object" ? v : JSON.parse(JSON.stringify(v)));
+        state = n; renderAll();
+        for (const id of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"]) showView(id);
+        for (const tab of ["tx", "cal"]) { showView("viewMoney"); document.querySelector(`[data-money-tab="${tab}"]`).click(); }
+        openLifeAnalysis(); closeModal(); openCalendar(); closeModal(); openDebtHistory("all"); closeModal(); lifeFacts();
+        out[k] = { ok: true, n: JSON.parse(JSON.stringify(n)) };
+      } catch (e) { out[k] = { ok: false, err: e.message + " " + (e.stack || "").split("\n")[1] }; }
+    }
+    return out;
+  });
+  for (const [k, v] of Object.entries(r)) assert.ok(v.ok, k + ": " + v.err);
+  const ids = (n, list) => (n[list] || []).map(x => x.id);
+  assert.equal(r.strings.n.income, 9000); assert.equal(r.strings.n.profits[0].amount, 100);
+  assert.deepEqual(ids(r.strings.n, "expenses"), ["b", "c"], "records with a broken date are kept");
+  assert.ok(ids(r.badItems.n, "expenses").includes("ok1") && ids(r.badItems.n, "profits").includes("ok2") && ids(r.badItems.n, "tasks").includes("t") && ids(r.badItems.n, "notes").includes("n") && ids(r.badItems.n, "achievements").includes("a1"), "valid records next to broken ones are kept");
+  assert.ok(r.badItems.n.expenses.every(x => x && typeof x === "object"), "no null inside lists");
+  assert.deepEqual(r.goalBroken.n.goal.finance.contributions.map(x => x.id), ["c1", "c2"]);
+  assert.ok(r.goalBroken.n.goal.milestones.some(m => m.title === "Этап"));
+  assert.equal(r.unknown.n.foo, 1); assert.equal(r.unknown.n.profits[0].extra, "keep");
+  assert.equal(r.schema58.n.profits[0].amount, 100); assert.equal(r.schema58.n.expenses[0].amount, 40);
+  // a record without id gets the same id on every device (so two devices never duplicate it)
+  const again = await page.evaluate(() => normalize({ expenses: [{ amount: 40, category: "Еда", at: "2026-09-02T00:00:00Z" }] }).expenses[0].id);
+  assert.ok(r.schema58.n.expenses[0].id && r.schema58.n.expenses[0].id === again, "stable id for old records: " + r.schema58.n.expenses[0].id + " vs " + again);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Синхронизация: старые записи без id + офлайн-правки на двух устройствах — ничего не теряется и не двоится", async () => {
+  const cloud = makeCloud();
+  const legacy = { version: 58, expenses: [{ amount: 40, category: "Еда", at: "2026-09-02T05:00:00Z" }, { amount: 60, category: "Такси", at: "2026-09-03T05:00:00Z" }], notes: [{ title: "Старая", body: "x", at: "2026-09-01T05:00:00Z" }] };
+  cloud.row = { user_id: UID, state: legacy, schema_version: 58, updated_at: cloud.nextStamp() };
+  const A = await device(cloud), B = await device(cloud);
+  await sync(A.page); await sync(B.page);
+  cloud.down = true;
+  await A.page.evaluate(() => { state.expenses.push({ id: "fromA", amount: 11, category: "Еда", at: new Date().toISOString() }); state.notes[0].body = "правка A"; saveState(); });
+  await B.page.evaluate(() => { state.expenses.push({ id: "fromB", amount: 22, category: "Еда", at: new Date().toISOString() }); saveState(); });
+  await A.page.evaluate(() => cloudAutoSync().catch(() => {})); await B.page.evaluate(() => cloudAutoSync().catch(() => {}));
+  cloud.down = false;
+  await sync(A.page); await sync(B.page); await sync(A.page);
+  const cl = cloud.row.state, a = await A.page.evaluate(() => state), b = await B.page.evaluate(() => state);
+  for (const [who, st] of [["cloud", cl], ["A", a], ["B", b]]) {
+    const am = st.expenses.map(x => x.amount).sort((x, y) => x - y);
+    assert.deepEqual(am, [11, 22, 40, 60], who + " expenses: " + JSON.stringify(st.expenses.map(x => [x.id, x.amount])));
+    assert.equal(st.notes.length, 1, who + " notes duplicated: " + st.notes.length); assert.equal(st.notes[0].body, "правка A", who);
+  }
+  assert.deepEqual(A.page.errors, []); assert.deepEqual(B.page.errors, []);
+  await A.ctx.close(); await B.ctx.close();
+});
+
+await test("Резервная копия: создать → изменить → восстановить → данные те же, и облако их получает", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await page.evaluate(() => { window.__strip = s => { const x = normalize(JSON.parse(JSON.stringify(s))); for (const k of [...SYNC_META_KEYS, "runtimeErrors", "notificationsLog", "lastReadAt", "drafts", "_sent", "dailyMotivations", "dayMode", "daily", "_limitAlerts"]) delete x[k]; return JSON.stringify(x); }; }); // dayMode, daily, _limitAlerts are worked out by the app itself
+  const snap = await page.evaluate(async () => {
+    const now = new Date().toISOString(), k = keyDay();
+    state.profits.push({ id: "bp", amount: 900, sourceGroup: "Фриланс", at: now, dateKey: k }); state.expenses.push({ id: "be", amount: 70, category: "Еда", at: now, dateKey: k });
+    state.notes.push({ id: "bn", title: "Мысль", body: "x", at: now, category: "work" }); state.goal.title = "Квартира"; state.budgets = [{ id: "bb", name: "Еда", planned: 500, tops: [] }];
+    saveState(); await cloudAutoSync();
+    openBackupDialog(); document.getElementById("bkCreate").click();
+    return __strip(state);
+  });
+  await page.evaluate(async () => {
+    state.expenses = state.expenses.filter(x => x.id !== "be"); state.notes.push({ id: "late", title: "после", body: "", at: new Date().toISOString(), category: "work" });
+    state.goal.title = "Машина"; state.budgets[0].planned = 900; saveState(); await cloudAutoSync();
+    window.confirm = () => true; openBackupDialog(); document.getElementById("bkRestore").click();
+  });
+  const restored = await page.evaluate(() => __strip(state));
+  assert.equal(restored, snap, "local data after restore differ from the backup");
+  await sync(page); await sync(page);
+  const after = await page.evaluate(() => ({ title: state.goal.title, be: state.expenses.some(x => x.id === "be"), planned: state.budgets[0]?.planned }));
+  const cl = cloud.row.state;
+  assert.deepEqual(after, { title: "Квартира", be: true, planned: 500 }, "the sync undid the restore on this device");
+  assert.deepEqual({ title: cl.goal.title, be: cl.expenses.some(x => x.id === "be"), planned: cl.budgets[0]?.planned }, { title: "Квартира", be: true, planned: 500 }, "the cloud did not get the restored data");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Безопасность: вредный текст, введённый через все формы, нигде не выполняется", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const X = '<img src=x onerror="window.__xss=(window.__xss||0)+1">"><script>window.__xss=7</script><svg onload="window.__xss=9">';
+  await page.evaluate(() => { window.confirm = () => true; window.prompt = () => null; window.alert = () => {}; const now = new Date().toISOString(), k = keyDay();
+    state.expenses.push({ id: "swE", amount: 300, category: "Еда", at: now, dateKey: k }); state.budgets = [{ id: "swB", name: "Поездки", planned: 1000, tops: [] }];
+    state.tasks.push({ id: "swT", title: "Позвонить", time: "23:00", date: k }); state.habits = [{ id: "swH", title: "Спорт", kind: "daily", target: 7 }]; saveState(); renderAll(); });
+  // every window: type the payload into every text field, then press its main button
+  for (const [name, open] of WINDOWS) {
+    await page.evaluate(([open, X]) => { closeModal(); showView("viewToday"); eval(open);
+      document.querySelectorAll("#modal input:not([type]), #modal input[type=text], #modal input[type=search], #modal textarea").forEach(el => { if (el.offsetParent === null) return; el.value = X; el.dispatchEvent(new Event("input", { bubbles: true })); el.dispatchEvent(new Event("change", { bubbles: true })); });
+      document.querySelectorAll("#modal input[type=number]").forEach(el => { if (el.offsetParent !== null && !el.value) { el.value = "5"; el.dispatchEvent(new Event("input", { bubbles: true })); } });
+      const main = [...document.querySelectorAll("#modal .btn.primary")].find(b => b.offsetParent !== null && !/Удалить|Восстановить|Запустить|AI/i.test(b.textContent)); main?.click(); }, [open, X]);
+    await page.waitForTimeout(150);
+  }
+  // the notes editor, the goal form and the report of the day are screens, not windows
+  await page.evaluate(X => { closeModal(); openNoteEditor(""); const t = document.getElementById("noteTitle"), b = document.getElementById("noteBody"); if (t) { t.value = X; t.dispatchEvent(new Event("input", { bubbles: true })); } if (b) { b.value = X + "\n**" + X + "**"; b.dispatchEvent(new Event("input", { bubbles: true })); }
+    showView("viewToday"); for (const id of ["rDone", "rBlock", "rTomorrow"]) { const el = document.getElementById(id); if (el) { el.value = X; el.dispatchEvent(new Event("input", { bubbles: true })); } }
+    openGoalEditor(""); const g = document.getElementById("geName"); if (g) { g.value = X; g.dispatchEvent(new Event("input", { bubbles: true })); document.getElementById("geSave")?.click(); } }, X);
+  await page.waitForTimeout(300);
+  const stored = await page.evaluate(X => JSON.stringify(state).split(JSON.stringify(X).slice(1, -1)).length - 1, X);
+  assert.ok(stored >= 8, "the payload should have reached many fields, got " + stored);
+  // show everything: every screen, every window, the search
+  await page.evaluate(async X => { saveState(); renderAll();
+    for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewDisplay", "viewProfile", "viewNotifications"]) { showView(v); for (const tab of ["overview", "tx", "cal"]) document.querySelector(`#${v} [data-money-tab="${tab}"]`)?.click(); }
+    openSearch(); const q = document.querySelector("#modal input"); if (q) { q.value = "img"; q.dispatchEvent(new Event("input", { bubbles: true })); } await new Promise(r => setTimeout(r, 200)); }, X);
+  for (const [, open] of WINDOWS) await page.evaluate(open => { try { closeModal(); eval(open); } catch (e) {} }, open);
+  await page.waitForTimeout(500);
+  const r = await page.evaluate(() => ({ xss: window.__xss, injected: document.querySelectorAll("img[src='x'], [onerror], [onload], body script:not([src])").length - document.querySelectorAll("script[data-app]").length }));
+  assert.equal(r.xss, undefined, "script ran from user text: " + r.xss);
+  assert.ok(r.injected <= 1, "user text became HTML elements: " + r.injected); // the app's own inline <script> is the only one
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Вид: axe 0 нарушений на всех экранах и в окнах (тёмная и светлая тема)", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const AXE = fs.readFileSync(path.join(ROOT, "node_modules/axe-core/axe.min.js"), "utf8");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addStyleTag({ content: "#toast{display:none!important}" });
+  await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay(); state.profile.name = "Джамал"; state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
+    state.profits.push({ id: "p1", amount: 8000, sourceGroup: "Зарплата", at: now, dateKey: k }); state.expenses.push({ id: "e1", amount: 300, category: "Еда", at: now, dateKey: k }, { id: "d1", amount: 4000, category: "Платёж по долгу", debtPayment: "bank", transfer: true, at: now, dateKey: k });
+    state.tasks.push({ id: "t1", title: "Позвонить", time: "23:00", date: k }); state.notes.push({ id: "n1", title: "Идея", body: "текст", at: now, category: "work" });
+    state.habits = [{ id: "h1", title: "Спорт", kind: "weekly", target: 3 }]; state.budgets = [{ id: "b1", name: "Поездки", planned: 1000, tops: [] }]; state.goal.finance.targetAmount = 50000; ensureDebtHistory(); saveState(); renderAll(); });
+  await page.addScriptTag({ content: AXE });
+  const places = [...["viewToday", "viewGoal", "viewGoalEdit", "viewMoney", "viewNotes", "viewNoteEdit", "viewSettings", "viewDisplay", "viewNotifications", "viewProfile"].map(v => [v, `closeModal(); showView("${v}")`]),
+    ...["tx", "cal"].map(t => ["viewMoney/" + t, `closeModal(); showView("viewMoney"); document.querySelector('[data-money-tab="${t}"]').click()`]),
+    ...WINDOWS.map(([n, o]) => [n, `closeModal(); showView("viewToday"); ${o}`])];
+  const bad = [];
+  for (const theme of ["dark", "light"]) {
+    await page.evaluate(t => { state.settings.theme = t; setTheme(); }, theme);
+    for (const [name, js] of places) {
+      await page.evaluate(js => { eval(js); window.scrollTo(0, 0); }, js); await page.waitForTimeout(80);
+      const v = await page.evaluate(() => axe.run(document, { runOnly: ["wcag2a", "wcag2aa"], resultTypes: ["violations"] }).then(r => r.violations.map(x => x.id + ": " + x.nodes.slice(0, 3).map(n => n.target.join(" ") + (n.any[0]?.data?.contrastRatio ? " " + n.any[0].data.contrastRatio : "")).join(", "))));
+      for (const x of v) bad.push(`${theme} ${name} — ${x}`);
+    }
+  }
+  assert.deepEqual(bad, [], bad.slice(0, 12).join("\n"));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("Вид: 6 ширин × 2 темы — нет горизонтальной прокрутки и вылезания; «уменьшить движение» выключает анимации", async () => {
+  const bad = [];
+  for (const width of [360, 390, 412, 768, 1024, 1440]) {
+    const { ctx, page } = await device(makeCloud(), { viewport: { width, height: 844 } });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.evaluate(() => { const now = new Date().toISOString(), k = keyDay(); state.profile.name = "Джамал Абдуджамолов"; state.debts = { bank: 90000, firms: 10000, monthlyPayment: 4500 };
+      state.expenses.push({ id: "e1", amount: 123456, category: "Очень длинная категория расходов", at: now, dateKey: k }); state.tasks.push({ id: "t1", title: "Позвонить в банк и уточнить график платежей по кредиту на следующий месяц", time: "23:00", date: k });
+      state.notes.push({ id: "n1", title: "Очень длинный заголовок заметки, который не должен вылезать за край экрана", body: "текст", at: now, category: "work" }); state.budgets = [{ id: "b1", name: "Поездки и отдых за городом с семьёй", planned: 1000, tops: [] }]; ensureDebtHistory(); saveState(); renderAll(); });
+    for (const theme of ["dark", "light"]) {
+      await page.evaluate(t => { state.settings.theme = t; setTheme(); }, theme);
+      for (const [name, js] of [...["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile"].map(v => [v, `closeModal(); showView("${v}")`]), ...WINDOWS.slice(0, 12).map(([n, o]) => [n, `closeModal(); ${o}`])]) {
+        await page.evaluate(js => eval(js), js); await page.waitForTimeout(60);
+        const r = await page.evaluate(() => { const W = document.documentElement.clientWidth, out = []; if (document.documentElement.scrollWidth > W + 1) out.push("scrolls sideways " + document.documentElement.scrollWidth);
+          const root = document.getElementById("modalBack").classList.contains("open") ? document.getElementById("modal") : document.querySelector(".view.active");
+          for (const el of root.querySelectorAll("*")) { const rc = el.getBoundingClientRect(); if (!rc.width || !el.getClientRects().length) continue; let p = el.parentElement, clipped = false; while (p && p !== document.body) { if (/(auto|scroll|hidden)/.test(getComputedStyle(p).overflowX)) { clipped = true; break; } p = p.parentElement; }
+            if (!clipped && (rc.right > W + 1 || rc.left < -1)) { out.push("sticks out: " + (el.id || String(el.className.baseVal ?? el.className).slice(0, 30))); break; } }
+          for (const el of document.querySelectorAll("body *")) { if (!el.getClientRects().length) continue; const cs = getComputedStyle(el); if (cs.animationName !== "none" && parseFloat(cs.animationDuration) > 0.02) { out.push("animates with reduced motion: " + (el.id || el.className)); break; } }
+          return out; });
+        for (const x of r) bad.push(`${width} ${theme} ${name}: ${x}`);
+      }
+    }
+    assert.deepEqual(page.errors, [], width + "");
+    await ctx.close();
+  }
+  assert.deepEqual(bad, [], bad.slice(0, 12).join("\n"));
+});
+
+await test("Окна: закрыл окно, пока идёт запрос (AI, облако) — ошибок нет", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  // slow answers, so every request is still running when the window closes
+  await ctx.route(/supabase\.co\/functions/, async r => { await new Promise(res => setTimeout(res, 300)); return cloud.handle(r); });
+  await page.evaluate(() => { window.confirm = () => true; window.prompt = () => null; window.alert = () => {}; window.open = () => null; window.__snap = JSON.stringify(state); });
+  for (const [, open] of WINDOWS) {
+    const n = await page.evaluate(open => { closeModal(); eval(open); return document.querySelectorAll("#modal button").length; }, open);
+    for (let i = 0; i < n; i++) {
+      await page.evaluate(([open, i]) => { closeModal(); state = normalize(JSON.parse(window.__snap)); eval(open); const b = [...document.querySelectorAll("#modal button")][i];
+        if (b && b.offsetParent !== null && !/Удалить|Восстановить|Выйти|Сбросить|Очистить/i.test(b.textContent)) { b.click(); closeModal(); } }, [open, i]);
+    }
+  }
+  await page.waitForTimeout(1200);
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
