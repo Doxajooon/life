@@ -3920,7 +3920,7 @@ function showView(id){
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===navId));
   document.body.dataset.view=id;
   if(id==='viewGoal')setTimeout(maybeAutoGoalAI,1500);
-  if(opts.push!==false&&prev!==id){try{history.pushState({lcView:id},'');navDepth++}catch(e){}}
+  if(opts.push!==false&&prev!==id){histPush({lcView:id});navDepth++}
   onViewShown(id);
   requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:'auto'}));
 }
@@ -3933,8 +3933,12 @@ function showView(id){
 })();
 (()=>{const d=Object.getOwnPropertyDescriptor(Element.prototype,'innerHTML');if(!d?.set)return;Object.defineProperty(Element.prototype,'innerHTML',{configurable:true,enumerable:d.enumerable,get(){return d.get.call(this)},set(v){v=String(v);if(this._jlh===v&&this.isConnected&&this.childNodes.length&&this.closest&&this.closest('.view'))return;this._jlh=v;d.set.call(this,v)}})})();
 function focusSoon(id,ms=50){setTimeout(()=>{const a=document.activeElement;if(a&&a!==document.body&&a.matches?.('input,textarea,select,[contenteditable]'))return;$(id)?.focus()},ms)}
-function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open');document.body.classList.add('modal-open')}
-function closeModal(){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open');document.body.classList.remove('modal-open')}
+// An open window owns one history entry, so «back» (Android key, browser button) closes it instead of leaving the app.
+// history.back() is asynchronous: anything pushed right after a window closed (another window, a new screen) waits for that step back.
+let modalHistory=false,skipPops=0,pendingPushes=[];
+function histPush(st){if(skipPops>0)pendingPushes.push(st);else try{history.pushState(st,'')}catch(e){}}
+function openModal(html){$('modal').innerHTML=`<div class="grab"></div>${html}`;$('modalBack').classList.add('open');document.body.classList.add('modal-open');if(!modalHistory){modalHistory=true;histPush({lcView:currentView,lcModal:1})}}
+function closeModal(fromHistory=false){clearInterval(dayProgressTimer);dayProgressTimer=null;$('modalBack').classList.remove('open');document.body.classList.remove('modal-open');if(modalHistory){modalHistory=false;const q=pendingPushes.findIndex(x=>x.lcModal);if(q>=0)pendingPushes.splice(q,1);else if(fromHistory!==true){skipPops++;try{history.back()}catch(e){skipPops--}}}}
 initLayoutMode();
 
 function fmtNum(n){return Math.round(Number(n)||0).toLocaleString('ru-RU')}
@@ -4851,7 +4855,7 @@ function bindV57(){
   $('pfLogout').onclick=()=>{if(confirm('Выйти из Jamal Life? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};
   $$('[data-layout-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный'),0)));
   // Android «Назад» walks this history: first closes an open sheet, then returns to the previous screen.
-  window.addEventListener('popstate',e=>{if($('modalBack').classList.contains('open')){closeModal();try{history.pushState({lcView:currentView},'')}catch(err){}return}navDepth=Math.max(0,navDepth-1);showView(e.state?.lcView||'viewToday',{push:false})});
+  window.addEventListener('popstate',e=>{if(skipPops>0){skipPops--;if(!skipPops)pendingPushes.splice(0).forEach(st=>{try{history.pushState(st,'')}catch(err){}});return}if($('modalBack').classList.contains('open')){closeModal(true);return}navDepth=Math.max(0,navDepth-1);showView(e.state?.lcView||'viewToday',{push:false})});
   try{history.replaceState({lcView:currentView},'')}catch(e){}
 }
 function bind(){

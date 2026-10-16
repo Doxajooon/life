@@ -1100,6 +1100,38 @@ await test("Деньги: тап по строке операции открыв
   await ctx.close();
 });
 
+await test("Окна: «назад» (Android/браузер) и Esc закрывают окно, не уходя с экрана", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const st = () => page.evaluate(() => ({ modal: document.getElementById("modalBack").classList.contains("open"), view: currentView }));
+  // Android: the back key only works while the WebView has history; a fresh start has none
+  const len0 = await page.evaluate(() => history.length);
+  await page.evaluate(() => openMoneyForm("expense"));
+  assert.ok(await page.evaluate(() => history.length) > len0, "an open window must give «back» something to close");
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewToday" });
+  // closed by its button: the next «back» works as usual, no second press needed
+  await page.evaluate(() => showView("viewMoney"));
+  await page.evaluate(() => openTransferForm()); await page.waitForTimeout(150);
+  await page.click("#closeModalBtn"); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewMoney" });
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewToday" }, "one «back» after closing a window returns to the previous screen");
+  // one window replaced by another (closeModal(); openX()): «back» closes the new one
+  await page.evaluate(() => { openMoneyForm("profit"); closeModal(); openDebtHistory("all"); }); await page.waitForTimeout(300);
+  assert.equal((await st()).modal, true, "the second window must stay open");
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewToday" });
+  // a window that leads to another screen (search → goal editor): «back» returns to the screen it was opened from
+  await page.evaluate(() => { showView("viewMoney"); openMoneyForm("expense"); closeModal(); showView("viewGoalEdit"); }); await page.waitForTimeout(300);
+  await page.goBack(); await page.waitForTimeout(300);
+  assert.deepEqual(await st(), { modal: false, view: "viewMoney" });
+  // Esc on a PC
+  await page.evaluate(() => openBudget()); await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+  assert.equal((await st()).modal, false);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
