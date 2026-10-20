@@ -1847,22 +1847,24 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
 /* ===== 74 · живой «Сегодня»: чёткое окно «Сейчас», светлее небо с картинкой раздела, живые иконки, пульс с графиком ===== */
 html[data-theme="dark"]{--bg:#132848;--panel:#1b3156;--soft:#172b4d;--line:#2f4a75}
 html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 93%,transparent)}
-/* the background: quiet «live wallpaper» about money — a faint grid, market lines that drift slowly and a few gold coins rising; low contrast so it never competes with the cards */
+/* the background: the photo of the Kaaba; its light follows the real sun (setSky → --dawn, --dusk, --night, --sun, --sun-x, --sun-y) */
 body{background:transparent!important} /* the sky behind the page was hidden under the body's own fill */
-.jl-sky{background:radial-gradient(120% 70% at 50% 0%,#1d3a6a 0%,#132a4f 55%,#0f2242 100%)}
-.jl-sky i{opacity:.28;filter:blur(64px)}
-.jl-sky .s1{background:radial-gradient(circle,#3f72d6 0%,transparent 65%)}
-.jl-sky .s2{background:radial-gradient(circle,#2b5fae 0%,transparent 65%)}
-.jl-sky .s3{background:radial-gradient(circle,#e3b04b 0%,transparent 65%)}
-.jl-sky::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M64 0H0V64' fill='none' stroke='%239cc4ff' stroke-width='1'/%3E%3C/svg%3E");opacity:.05}
-.jl-sky::after{content:"";position:absolute;left:0;bottom:6vh;width:200%;height:44vh;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400' preserveAspectRatio='none'%3E %3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffbf3f' stop-opacity='.28'/%3E%3Cstop offset='1' stop-color='%23e3b04b' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E %3Cpath d='M0 250 L60 232 L110 246 L170 205 L220 218 L290 170 L340 190 L400 150 L450 172 L520 128 L570 150 L630 176 L690 160 L740 214 L800 250 V400 H0Z' fill='url%28%23g%29'/%3E %3Cpath d='M0 250 L60 232 L110 246 L170 205 L220 218 L290 170 L340 190 L400 150 L450 172 L520 128 L570 150 L630 176 L690 160 L740 214 L800 250' fill='none' stroke='%23ffbf3f' stroke-width='2.8' stroke-linejoin='round'/%3E %3Cpath d='M0 300 L70 290 L130 305 L200 276 L260 284 L330 250 L390 262 L460 236 L520 252 L590 226 L650 248 L720 270 L800 300' fill='none' stroke='%235b9cff' stroke-width='1.6' stroke-linejoin='round' opacity='.8'/%3E %3C/svg%3E") repeat-x 0 0/50% 100%;opacity:.34;animation:jlTicker 60s linear infinite}
-@keyframes jlTicker{to{transform:translateX(-50%)}}
-/* coins: the six small lights of the old sky now rise slowly from the bottom */
-.jl-sky b{top:auto;bottom:-24px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff1c4,#e3b04b 60%,#b7841f);box-shadow:0 0 10px rgba(246,213,138,.35);opacity:0;animation:jlCoinUp 16s linear infinite}
-.jl-sky b:nth-of-type(2){animation-duration:19s}.jl-sky b:nth-of-type(4){animation-duration:22s;width:10px;height:10px}.jl-sky b:nth-of-type(6){animation-duration:18s;width:11px;height:11px}
-.jl-sky b:nth-of-type(n){top:auto}
-@keyframes jlCoinUp{0%{transform:translateY(0) rotate(0);opacity:0}12%{opacity:.45}85%{opacity:.3}100%{transform:translateY(-92vh) rotate(200deg);opacity:0}}
-html[data-theme="light"] .jl-sky::after{opacity:.14}
+.jl-sky{background:#0f2242 url("images/bg-kaaba.jpg") no-repeat 50% 40%/cover}
+html .jl-sky i[class]{inset:0;left:0;top:0;right:0;bottom:0;width:auto;height:auto;border-radius:0;filter:none;animation:none!important;transform:none;transition:opacity 3s ease}
+html .jl-sky i.s1{background:linear-gradient(180deg,rgba(70,60,140,.55) 0%,rgba(255,150,120,.45) 55%,rgba(255,196,140,.35) 100%);opacity:var(--dawn,0)}
+html .jl-sky i.s2{background:linear-gradient(180deg,rgba(60,40,110,.5) 0%,rgba(255,110,60,.5) 50%,rgba(255,170,80,.4) 100%);opacity:var(--dusk,0)}
+html .jl-sky i.s3{background:linear-gradient(180deg,rgba(6,12,32,.86) 0%,rgba(10,22,52,.8) 60%,rgba(14,28,60,.72) 100%);opacity:var(--night,0)}
+/* the sun: rises on the left in the morning, goes over the sky, sets on the right; the moon at night */
+.jl-sky::before{content:"";position:absolute;z-index:1;width:170px;height:170px;margin:-85px 0 0 -85px;left:var(--sun-x,70%);top:var(--sun-y,20%);border-radius:50%;background:radial-gradient(circle,#fff7dc 0%,#ffd98a 18%,rgba(255,190,110,.45) 38%,transparent 70%);opacity:var(--sun,0);transition:left 60s linear,top 60s linear,opacity 3s ease;animation:jlSunGlow 7s ease-in-out infinite}
+html[data-daypart="night"] .jl-sky::before{width:90px;height:90px;margin:-45px 0 0 -45px;left:78%;top:12%;background:radial-gradient(circle,#f6f3e8 0%,#e6ebf7 34%,rgba(220,230,255,.25) 50%,transparent 72%);opacity:.9}
+/* a soft shade so the cards and titles stay easy to read on the photo */
+.jl-sky::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(10,22,46,.62) 0%,rgba(10,22,46,.28) 34%,rgba(10,22,46,.38) 70%,rgba(10,22,46,.7) 100%)}
+.v-empty{background:color-mix(in srgb,var(--panel) 82%,transparent)}
+@keyframes jlSunGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+/* stars at night */
+.jl-sky b{z-index:1;opacity:0;animation:none}
+html[data-daypart="night"] .jl-sky b{animation:firefly 6s ease-in-out infinite}
+html[data-theme="light"] .jl-sky::after{background:linear-gradient(180deg,rgba(238,243,250,.55) 0%,rgba(238,243,250,.15) 40%,rgba(238,243,250,.5) 100%)}
 /* the «Сейчас» window: clear and sharp instead of a milky glass */
 .jl-hero{background:linear-gradient(155deg,#244c86 0%,#173563 55%,#122a50 100%);border:1px solid rgba(155,196,255,.28);box-shadow:0 18px 40px rgba(6,14,30,.35),inset 0 1px 0 rgba(255,255,255,.08)}
 .jl-now{background:#0f2546;border:1px solid rgba(155,196,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
@@ -3674,8 +3676,16 @@ const REMINDER_GRACE_MIN=10; // a reminder missed while the phone/PC was asleep 
 const isDue=(m,t)=>t>=0&&m>=t&&m<t+REMINDER_GRACE_MIN;
 function taskLead(t){const v=t?.remind;if(v===0||v==='0')return 0;const n=Number(v);return Number.isFinite(n)&&n>0?n:Math.max(0,Number(state.settings?.preMinutes)||0)}
 let _actionsRetryAt=0;
+// 74: the light of the background photo follows the real sun: sunrise and sunset by month (≈40° N, local clock)
+const SUN_TIMES=[[7.9,17.6],[7.5,18.2],[6.8,18.7],[6.0,19.2],[5.3,19.8],[5.0,20.1],[5.2,20.0],[5.7,19.4],[6.2,18.6],[6.7,17.8],[7.3,17.2],[7.8,17.2]];
+function setSky(){const d=new Date(),h=d.getHours()+d.getMinutes()/60,[up,down]=SUN_TIMES[d.getMonth()],r=document.documentElement,near=(x,c,w)=>Math.max(0,1-Math.abs(x-c)/w);
+  const day=h>=up&&h<=down,k=Math.min(1,Math.max(0,(h-up)/(down-up))),v={dawn:near(h,up+.3,1.4),dusk:near(h,down-.2,1.4),night:h<up-.6||h>down+.9?1:h<up?(up-h)/.6:h>down?(h-down)/.9:0};
+  const part=v.night>=.8?'night':v.dawn>.35?'dawn':v.dusk>.35?'evening':'day';
+  const css={'--dawn':v.dawn.toFixed(2),'--dusk':v.dusk.toFixed(2),'--night':Math.min(1,v.night).toFixed(2),'--sun':(day||h>up-.4&&h<down+.4)?'1':'0','--sun-x':(8+k*84).toFixed(1)+'%','--sun-y':(62-Math.sin(Math.PI*k)*50).toFixed(1)+'%'};
+  for(const n in css)if(r.style.getPropertyValue(n)!==css[n])r.style.setProperty(n,css[n]);if(r.dataset.daypart!==part)r.dataset.daypart=part}
 function runScheduler(){
   const day=keyDay();
+  if(!runScheduler._sky||Date.now()-runScheduler._sky>60000){runScheduler._sky=Date.now();setSky()}
   if(appReadyForSync&&Date.now()>_actionsRetryAt){_actionsRetryAt=Date.now()+30000;try{if(localStorage.getItem(ACTIONS_LEFT_KEY))pullNativeActions()}catch(e){}}
   if(day!==lastDay){lastDay=day;renderAll();scheduleNative()} // a new day: new words in the stage alarms
   const autoDone=autoCompleteExpiredStages(),info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);

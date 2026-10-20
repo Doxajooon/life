@@ -23,7 +23,8 @@ assert.match(csproj, /<Version>74\.0\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
 assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.0'") && html.includes('id="appVersion">74.0</span>'), "app version 74.0 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v73-0'"), "service worker cache must be life-v73-0");
+assert.ok(sw.includes("'life-v74-0'"), "service worker cache must be life-v74-0");
+assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
 assert.equal(manifest.name, "Life"); assert.equal(manifest.short_name, "Life");
