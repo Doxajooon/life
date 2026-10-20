@@ -1846,10 +1846,14 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
 
 /* ===== 74 · живой «Сегодня»: чёткое окно «Сейчас», светлее небо с картинкой раздела, живые иконки, пульс с графиком ===== */
 html[data-theme="dark"]{--bg:#132848;--panel:#1b3156;--soft:#172b4d;--line:#2f4a75}
-html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 93%,transparent)}
+html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 78%,transparent)}
+/* a little see-through: the photo shows behind the cards, a light blur keeps the text easy to read */
+.card,.jl-hero{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.jl-hero{background:linear-gradient(155deg,rgba(36,76,134,.82) 0%,rgba(23,53,99,.8) 55%,rgba(18,42,80,.82) 100%)!important}
+html[data-theme="light"] .card{background:color-mix(in srgb,var(--panel) 84%,transparent)}
 /* the background: the photo of the Kaaba; its light follows the real sun (setSky → --dawn, --dusk, --night, --sun, --sun-x, --sun-y) */
 body{background:transparent!important} /* the sky behind the page was hidden under the body's own fill */
-.jl-sky{background:#0f2242 url("images/bg-kaaba.jpg") no-repeat 50% 40%/cover}
+.jl-sky{background:linear-gradient(180deg,#003f8f 0%,#0055b5 calc(100% - max(64vh,100vw)),rgba(0,85,181,0) calc(100% - max(64vh,100vw) + 160px)),url("images/bg-kaaba.jpg") no-repeat 50% 100%/auto max(64vh,100vw),#0055b5}
 html .jl-sky i[class]{inset:0;left:0;top:0;right:0;bottom:0;width:auto;height:auto;border-radius:0;filter:none;animation:none!important;transform:none;transition:opacity 3s ease}
 html .jl-sky i.s1{background:linear-gradient(180deg,rgba(70,60,140,.55) 0%,rgba(255,150,120,.45) 55%,rgba(255,196,140,.35) 100%);opacity:var(--dawn,0)}
 html .jl-sky i.s2{background:linear-gradient(180deg,rgba(60,40,110,.5) 0%,rgba(255,110,60,.5) 50%,rgba(255,170,80,.4) 100%);opacity:var(--dusk,0)}
