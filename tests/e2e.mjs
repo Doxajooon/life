@@ -1271,7 +1271,7 @@ await test("V72 D8: ритм дня — «главное» этапа связа
   // the hero and the day strip are open at once, no tap needed
   const ui = await page.evaluate(() => { showView("viewToday"); renderToday(); const v = id => { const e = document.getElementById(id); return !!e && e.offsetParent !== null && e.getBoundingClientRect().height > 10; }; return { focus: v("nowFocus"), strip: v("dayStrip"), text: document.getElementById("nowFocus").textContent, main: document.querySelector('#timeline .jl-rstep.current .jl-rstep-main')?.textContent || "" }; });
   assert.ok(ui.focus && ui.strip, "focus and the day strip are visible");
-  assert.match(ui.text, /Главное сейчас · до цели 45 тыс. сомони/); assert.match(ui.main, /Главное сейчас/);
+  assert.match(ui.text, /Главное сейчас · до цели 45 тыс. сомони/); assert.equal(ui.main, "", "74: «Главное сейчас» once — in the «Сейчас» window, not again in the rhythm");
   // «Да» from the reminder marks the main action done; «Перенести» moves it on as a goal task
   const act = await page.evaluate(() => { applyReminderAction("done", "stage:w"); applyReminderAction("snooze", "stage:f"); const t = state.tasks.find(x => x.goal && x.title.includes("Первый взнос"));
     return { done: !!dailyState().stageDone?.w, moved: dailyState().stageMoved?.f, task: t && { date: t.date, time: t.time, ms: t.ms }, report: dayLedger().gActs }; });
@@ -1930,12 +1930,12 @@ await test("73: строка владельца из облака на ново�
   await ctx.close();
 });
 
-await test("73: новый пустой аккаунт — чистый лист, цитаты «Мотивация», первая настройка из 3 шагов уходит в облако", async () => {
+await test("73: новый пустой аккаунт — чистый лист, хадис дня, первая настройка из 3 шагов уходит в облако", async () => {
   const cloud = makeCloud();
   const { ctx, page } = await device(cloud, { onboarding: true });
   await page.waitForSelector("#obNext", { timeout: 8000 });
   const clean = await page.evaluate(() => ({ income: state.income, debts: [state.debts.bank, state.debts.firms, state.debts.monthlyPayment], goal: state.goal.title, ms: state.goal.milestones.length, labels: [debtLabel("bank"), debtLabel("firms")], q: quoteSet(), src: profitSources(), title: document.title, brand: document.querySelector(".brand-name").textContent.trim() }));
-  assert.deepEqual(clean, { income: 0, debts: [0, 0, 0], goal: "", ms: 0, labels: ["Долг 1", "Долг 2"], q: "general", src: ["Зарплата", "Фриланс", "Бизнес", "Другое"], title: "Life — цели, деньги, день", brand: "Life" });
+  assert.deepEqual(clean, { income: 0, debts: [0, 0, 0], goal: "", ms: 0, labels: ["Долг 1", "Долг 2"], q: "hadith", src: ["Зарплата", "Фриланс", "Бизнес", "Другое"], title: "Life — цели, деньги, день", brand: "Life" });
   // step 1 — name and currency
   await page.fill("#obName", "Алия"); await page.selectOption("#obCur", "тенге"); await page.click("#obNext");
   // step 2 — the goal with two stages
@@ -1946,15 +1946,15 @@ await test("73: новый пустой аккаунт — чистый лист
   const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), on: state.settings.onboarded, name: state.profile.name, cur: currencyLabel(), goal: [state.goal.title, state.goal.finance.targetAmount, state.goal.finance.targetDate, state.goal.next], ms: state.goal.milestones.map(m => m.title), steps: state.day.steps.map(x => x.title + " " + x.time), debt: [state.debts.bank, state.debts.monthlyPayment] }));
   assert.deepEqual(r, { open: false, on: true, name: "Алия", cur: "тенге", goal: ["Накопить на машину", 30000, "2027-09-01", "Отложить 10 000"], ms: ["Отложить 10 000", "Выбрать машину"], steps: ["Учёба 08:30", "Домашние задания и дела 15:00", "Итог дня 21:00"], debt: [5000, 500] });
   const c = cloud.row.state;
-  assert.deepEqual([c.goal.title, c.goal.milestones.length, c.day.steps[0].time, c.settings.onboarded, c.settings.quoteSet], ["Накопить на машину", 2, "08:30", true, "general"], "the setup went to the cloud");
+  assert.deepEqual([c.goal.title, c.goal.milestones.length, c.day.steps[0].time, c.settings.onboarded, c.settings.quoteSet], ["Накопить на машину", 2, "08:30", true, "hadith"], "the setup went to the cloud");
   // never again — not after a reload, not on another device
   await page.reload(); await page.waitForFunction(() => appReadyForSync === true); await sync(page); await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), false);
   const B = await device(cloud, { onboarding: true }); await sync(B.page); await B.page.waitForTimeout(300);
   assert.equal(await B.page.evaluate(() => document.getElementById("modalBack").classList.contains("open") || state.goal.title), "Накопить на машину");
-  // the quote of the day: neutral thought, no religious text; «Выключить» hides it
+  // 74: the quote of the day is a hadith for everybody; «Мотивация» is a choice in the settings; «Выключить» hides it
   const q = await page.evaluate(() => { showView("viewToday"); renderToday(); const m = motivation(); return { a: m.author, t: m.text, set: m.set }; });
-  assert.equal(q.a, "Мысль дня"); assert.ok(!/Аллах|Пророк|ﷺ/.test(q.t)); assert.equal(q.set, "general");
+  assert.match(q.a, /Пророк/); assert.equal(q.set, "hadith");
   const off = await page.evaluate(() => { showView("viewSettings"); const sel = document.getElementById("setQuoteSet"); sel.value = "off"; sel.dispatchEvent(new Event("change")); showView("viewToday"); return document.querySelector(".jl-quote").hidden; });
   assert.equal(off, true, "«Выключить» hides the quote");
   assert.deepEqual(page.errors, []); assert.deepEqual(B.page.errors, []);
@@ -1978,7 +1978,7 @@ await test("73: настройку можно пропустить целико�
   await ctx.close(); await C.ctx.close();
 });
 
-await test("73: цитаты дня — у пользователя с данными хадисы, у нового — мотивация (миграция quoteSet)", async () => {
+await test("74: хадис дня у всех; «Мотивация» остаётся, только если человек выбрал её сам (миграция quoteSet)", async () => {
   const { ctx, page } = await device(makeCloud());
   const r = await page.evaluate(() => {
     const withData = normalize({ version: 58, profits: [{ id: "x", amount: 1, at: "2026-01-01T00:00:00Z" }] }).settings.quoteSet;
@@ -1987,9 +1987,11 @@ await test("73: цитаты дня — у пользователя с данн�
     const onlyClock = normalize({ version: 58, reports: { "2026-01-01": { steps: { s1: true } } } }).settings.quoteSet; // stage marks set by the clock are not user data
     const empty = normalize({ version: 58 }).settings.quoteSet;
     const chosen = normalize({ version: 58, settings: { quoteSet: "off" }, profits: [{ id: "x", amount: 1 }] }).settings.quoteSet;
-    return { withData, withTasks, withReport, onlyClock, empty, chosen, n: GENERAL_QUOTES.length, uniq: new Set(GENERAL_QUOTES).size };
+    const auto73 = normalize({ version: 58, settings: { quoteSet: "general" } }).settings.quoteSet; // put there by 73, not by the person
+    const picked = normalize({ version: 58, settings: { quoteSet: "general", quoteSetChosen: true } }).settings.quoteSet;
+    return { withData, withTasks, withReport, onlyClock, empty, chosen, auto73, picked, n: GENERAL_QUOTES.length, uniq: new Set(GENERAL_QUOTES).size };
   });
-  assert.deepEqual(r, { withData: "hadith", withTasks: "hadith", withReport: "hadith", onlyClock: "general", empty: "general", chosen: "off", n: 60, uniq: 60 });
+  assert.deepEqual(r, { withData: "hadith", withTasks: "hadith", withReport: "hadith", onlyClock: "hadith", empty: "hadith", chosen: "off", auto73: "hadith", picked: "general", n: 60, uniq: 60 });
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -2108,6 +2110,28 @@ await test("73: правка во время самой первой выгру�
   assert.equal(await B.page.evaluate(() => state.goal.title), "Из облака");
   assert.deepEqual(page.errors, []); assert.deepEqual(B.page.errors, []);
   await ctx.close(); await B.ctx.close();
+});
+
+await test("74: живой «Сегодня» — задачи сразу после «Сейчас», итог дня в конце, линия «Сейчас» в задачах, пульс по дням за 14 дней", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T13:30:00+05:00") });
+  const r = await page.evaluate(() => {
+    const k = keyDay(), y = new Date(); y.setDate(y.getDate() - 1); const ky = keyDay(y);
+    state.habits = [{ id: "h1", title: "Зарядка" }]; state.habitLog = { h1: { [ky]: true } };
+    state.tasks = [{ id: "a", title: "Утро", time: "08:00", date: k, done: true }, { id: "b", title: "Звонок", time: "18:00", date: k, done: false }, { id: "c", title: "Вчера", time: "09:00", date: ky, done: true }];
+    state.reports[ky] = { done: "x", savedAt: y.toISOString(), steps: Object.fromEntries(state.day.steps.map(x => [x.id, true])) }; saveState(); showView("viewToday"); renderAll();
+    const kids = [...document.querySelectorAll("#viewToday > .card, #viewToday > .jl-hero")];
+    const pos = sel => kids.findIndex(e => e.matches(sel));
+    const rows = [...document.querySelectorAll("#taskList > *")].map(e => e.classList.contains("jl-now-line") ? "|" : e.dataset.taskRow);
+    const box = document.getElementById("pulseChart");
+    return { tasksAfterHero: pos(".jl-hero") === 0 && kids[1].contains(document.getElementById("taskList")), rhythmNext: kids[2].classList.contains("jl-rhythm"), reportLast: pos(".jl-report") === kids.length - 1,
+      rows: rows.join(""), dots: box.querySelectorAll(".jl-pc-dot").length, yesterday: pulseOn(ky), view: document.documentElement.dataset.view, sum: box.querySelector(".jl-pc-sum")?.textContent || "" };
+  });
+  assert.ok(r.tasksAfterHero && r.rhythmNext && r.reportLast, "order: «Сейчас» → задачи → ритм … итог дня в конце " + JSON.stringify(r));
+  assert.equal(r.rows, "a|b", "the «Сейчас» line sits between the done morning task and the evening one");
+  assert.equal(r.dots, 14, "14 days on the pulse chart"); assert.equal(r.yesterday, 100, "yesterday: task, habit, stages and the closed day all done");
+  assert.equal(r.view, "viewToday", "the sky knows which section is open"); assert.match(r.sum, /сегодня/);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
 });
 
 await browser.close(); server.close();

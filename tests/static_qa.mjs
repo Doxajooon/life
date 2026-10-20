@@ -17,11 +17,11 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "73.0.0");
-assert.match(gradle, /versionCode 730\b/); assert.match(gradle, /versionName '73\.0'/);
-assert.match(csproj, /<Version>73\.0\.0<\/Version>/);
+assert.equal(pkg.version, "74.0.0");
+assert.match(gradle, /versionCode 740\b/); assert.match(gradle, /versionName '74\.0'/);
+assert.match(csproj, /<Version>74\.0\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='73.0'") && html.includes('id="appVersion">73.0</span>'), "app version 73.0 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.0'") && html.includes('id="appVersion">74.0</span>'), "app version 74.0 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
 assert.ok(sw.includes("'life-v73-0'"), "service worker cache must be life-v73-0");
 
@@ -148,7 +148,7 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   for (const bad of ["100000", "120000", "5200", "4500", "финансово независим", "комнат", "семь", "раскро", "Английский"]) assert.ok(!def.includes(bad) && !(bad.length > 6 && html.includes(bad)), "personal default value left: " + bad);
   assert.ok(/income:0,/.test(def) && /debts:\{bank:0,firms:0,monthlyPayment:0\}/.test(def) && /goal:\{title:'',why:'',next:''/.test(def) && /milestones:\[\]\}/.test(def), "neutral defaults: no income, no debts, an empty goal");
   for (const f of ["hasUserData", "clearLegacyDemo", "applyV73", "debtLabel", "goalName", "quoteSet", "openOnboarding", "needsOnboarding", "profitSources"]) assert.ok(defs.includes(f), "73: missing " + f);
-  assert.ok(html.includes("s.settings.quoteSet=old?'hadith':'general'") && html.includes("old?'Банк':'Долг 1'") && html.includes("s.settings.onboarded=old"), "a user with data keeps the hadiths, «Банк / Фирмы» and never sees the first-start setup");
+  assert.ok(html.includes("s.settings.quoteSet='hadith'") && html.includes("old?'Банк':'Долг 1'") && html.includes("s.settings.onboarded=old"), "a user with data keeps the hadiths, «Банк / Фирмы» and never sees the first-start setup");
   assert.ok(/const GENERAL_QUOTES=\[([\s\S]*?)\];/.test(html) && html.match(/const GENERAL_QUOTES=\[([\s\S]*?)\];/)[1].split("\n").filter(l => l.trim().startsWith("'")).length === 60, "60 neutral thoughts of the day");
   assert.ok(!/Аллах|Пророк|намаз|ﷺ/.test(html.match(/const GENERAL_QUOTES=\[([\s\S]*?)\];/)[1]), "the neutral quotes carry no religious text");
   assert.ok(html.includes("const o=clone(b);for(const k of Object.keys(a||{}))o[k]=merge(a[k],b[k])"), "merge() copies the defaults — an edit can never change DEFAULT itself");
