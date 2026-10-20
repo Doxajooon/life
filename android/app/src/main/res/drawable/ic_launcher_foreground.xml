@@ -1,13 +1,36 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <!-- Life mark: progress ring + a sprout, inside the 66dp adaptive-icon safe zone. -->
-    <path android:pathData="M54,26.31 A27.69,27.69 0 1,1 53.99,26.31 Z" android:fillColor="#00000000"
-        android:strokeColor="#14FFFFFF" android:strokeWidth="3.63"/>
-    <path android:pathData="M54.0,26.31 A27.69,27.69 0 1,1 28.46,43.29" android:fillColor="#00000000"
-        android:strokeColor="#38B6E0" android:strokeWidth="3.63" android:strokeLineCap="round"/>
-    <path android:pathData="M28.46,43.29 m-2.8,0 a2.8,2.8 0 1,0 5.6,0 a2.8,2.8 0 1,0 -5.6,0" android:fillColor="#3FD0C9"/>
-    <path android:pathData="M54,69.82 L54,52.02" android:fillColor="#00000000"
-        android:strokeColor="#EEAC45" android:strokeWidth="4.94" android:strokeLineCap="round"/>
-    <path android:pathData="M52.68,56.31 C43.12,56.64 37.52,51.36 36.86,42.46 C46.75,42.13 52.35,47.08 52.68,56.31 Z" android:fillColor="#F2B451"/>
-    <path android:pathData="M55.32,51.03 C55.65,40.81 61.91,35.87 71.47,35.87 C71.47,45.76 65.54,51.03 55.32,51.03 Z" android:fillColor="#F2B451"/>
+    <!-- Life mark (icon.svg): a green leaf whose vein is a chart going up, and a gold coin.
+         The 512-unit artwork (leaf + coin, centre 280,278, farthest point 214 units away) is scaled to 0.15 and centred,
+         so every point stays inside the 66dp adaptive-icon safe circle (≤ 32dp from the centre). -->
+    <group android:scaleX="0.15" android:scaleY="0.15" android:translateX="12" android:translateY="12.3">
+        <path android:pathData="M120,396 C108,236 214,112 404,104 C414,290 306,400 140,404 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="108" android:startY="104" android:endX="414" android:endY="404">
+                    <item android:offset="0" android:color="#FF6EE7A8"/>
+                    <item android:offset="0.55" android:color="#FF22C55E"/>
+                    <item android:offset="1" android:color="#FF15803D"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M140,392 L214,318 L250,340 L322,236 L376,150" android:fillColor="#00000000"
+            android:strokeColor="#0B3B2A" android:strokeAlpha="0.55" android:strokeWidth="16"
+            android:strokeLineCap="round" android:strokeLineJoin="round"/>
+        <path android:pathData="M376,150 l-40,6 M376,150 l-4,40" android:fillColor="#00000000"
+            android:strokeColor="#0B3B2A" android:strokeAlpha="0.55" android:strokeWidth="16" android:strokeLineCap="round"/>
+        <path android:pathData="M300,374 A74,74 0 1,1 448,374 A74,74 0 1,1 300,374 Z"
+            android:strokeColor="#FFF1C4" android:strokeWidth="8">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="374" android:startY="300" android:endX="374" android:endY="448">
+                    <item android:offset="0" android:color="#FFFFE08A"/>
+                    <item android:offset="1" android:color="#FFE09A2C"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M324,374 A50,50 0 1,1 424,374 A50,50 0 1,1 324,374 Z" android:fillColor="#00000000"
+            android:strokeColor="#B7741C" android:strokeAlpha="0.5" android:strokeWidth="7"/>
+        <path android:pathData="M352,356 Q374,336 396,356" android:fillColor="#00000000"
+            android:strokeColor="#FFF6DC" android:strokeAlpha="0.7" android:strokeWidth="8" android:strokeLineCap="round"/>
+    </group>
 </vector>

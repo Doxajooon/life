@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.0.0");
-assert.match(gradle, /versionCode 740\b/); assert.match(gradle, /versionName '74\.0'/);
-assert.match(csproj, /<Version>74\.0\.0<\/Version>/);
+assert.equal(pkg.version, "74.1.0");
+assert.match(gradle, /versionCode 741\b/); assert.match(gradle, /versionName '74\.1'/);
+assert.match(csproj, /<Version>74\.1\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.0'") && html.includes('id="appVersion">74.0</span>'), "app version 74.0 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.1'") && html.includes('id="appVersion">74.1</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-0'"), "service worker cache must be life-v74-0");
+assert.ok(sw.includes("'life-v74-1'"), "service worker cache must be life-v74-1");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -32,7 +32,7 @@ assert.ok(!/Life Control/.test(html), "old name left in the app");
 for (const f of ["icon.svg", "icon-192.png", "icon-512.png", "desktop/app.ico", "android/app/src/main/res/raw/jamal_dawn.wav"]) assert.ok(existsSync(new URL(f, root)), "missing " + f);
 assert.ok(read("android/app/src/main/res/values/strings.xml").includes('<string name="app_name">Life</string>') && csproj.includes("<Product>Life</Product>") && csproj.includes("<AssemblyName>Life</AssemblyName>"), "the name «Life» on Android and Windows (Life.exe)");
 assert.ok((html.match(/\bAPP_NAME=/g) || []).length === 1 && html.includes("const APP_NAME='Life'"), "the visible name comes from one APP_NAME constant");
-assert.ok(read("android/app/build.gradle").includes("com.doxajooon.lifecontrol") && html.includes("const KEY='LIFE_CONTROL_V52'") && html.includes("LifeControlDB") && notif.includes('"jamal_life_dawn"'), "internal ids stay (package, storage keys, IndexedDB, notification channel) — the APK installs over 71/72 and nothing is lost");
+assert.ok(read("android/app/build.gradle").includes("com.doxajooon.lifecontrol") && html.includes("const KEY='LIFE_CONTROL_V52'") && html.includes("LifeControlDB") && notif.includes('"jamal_life_dawn2"'), "internal ids stay (package, storage keys, IndexedDB; notification channel jamal_life_dawn2 since 74.1) — the APK installs over 71/72 and nothing is lost");
 
 // single source of truth: no checked-in copies of the web app
 let tracked = [];
@@ -83,7 +83,7 @@ assert.ok(html.includes("if(synced)await wipeLocalData()"), "logout must clear p
 assert.ok(html.includes("function renderRhythm") && html.includes("function renderDayStrip") && html.includes("function renderHabitWeek"), "living rhythm, day strip and habit week chart");
 assert.ok(existsSync(new URL("../fonts/inter-cyrillic.woff2", import.meta.url)) && html.includes('url("fonts/inter-cyrillic.woff2")') && sw.includes("inter-cyrillic.woff2"), "Inter font must ship with the app (offline)");
 assert.ok(!html.includes("data-more=") && !html.includes('class="jl-more"'), "Money and Goal show everything — no hidden «Подробнее» blocks");
-assert.ok(existsSync(new URL("../sounds/jamal-dawn.wav", import.meta.url)) && html.includes("sounds/jamal-dawn.wav") && sw.includes("jamal-dawn.wav") && notif.includes('"jamal_life_dawn"'), "the Jamal Glass tone ships to web and Android (new channel so phones pick it up)");
+assert.ok(existsSync(new URL("../sounds/jamal-dawn.wav", import.meta.url)) && html.includes("sounds/jamal-dawn.wav") && sw.includes("jamal-dawn.wav") && notif.includes('"jamal_life_dawn2"'), "the Jamal Glass tone ships to web and Android (new channel so phones pick it up)");
 for (const f of ["manrope", "nunito", "inter"]) assert.ok(existsSync(new URL(`../fonts/${f}-cyrillic.woff2`, import.meta.url)) && sw.includes(`${f}-cyrillic.woff2`), "font missing: " + f);
 assert.ok(html.includes('id="setFont"') && html.includes("function applyFont"), "font choice in settings");
 assert.ok(html.includes("rememberBaseStamp(state[CLOUD_BASE_KEY])") && html.includes("const st=baseStamp()"), "the cloud base stamp survives a quick restart (an edit made during the first upload is merged, not lost)");
@@ -155,4 +155,37 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(html.includes("const o=clone(b);for(const k of Object.keys(a||{}))o[k]=merge(a[k],b[k])"), "merge() copies the defaults — an edit can never change DEFAULT itself");
   assert.ok(fn.includes('const APP_NAME = "Life"') && !fn.includes("Душанбе"), "AI: neutral name");
   assert.ok(html.includes("FIRST_PUSH_KEY='JL_FIRST_PUSH_V73'") && html.includes("row.device_id===getDeviceId()") && html.includes("const merged=own?mergeStates(remote,state,remote):mergeFirstContact(state,remote)"), "an edit made during the very first upload survives a restart"); }
+
+// 74.1: the leaf-and-coin icon everywhere, glass cards, louder reminders
+{ const svg = read("icon.svg");
+  for (const k of ['id="lfleaf"', 'id="lfgold"', "M120 396 C108 236 214 112 404 104", 'cx="374" cy="374" r="74"', "#0f3a2f"]) assert.ok(svg.includes(k), "icon.svg is the green leaf with the coin: " + k);
+  assert.ok(!svg.includes("M256 88 A168 168") && !html.includes("M256 88 A168 168"), "the old ring-and-sprout mark is gone");
+  const png = f => { const b = readFileSync(new URL(f, root)); assert.equal(b.toString("hex", 0, 8), "89504e470d0a1a0a", f + " is a PNG"); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+  assert.deepEqual(png("icon-192.png"), [192, 192]); assert.deepEqual(png("icon-512.png"), [512, 512]); assert.deepEqual(png("icon-maskable.png"), [512, 512]);
+  for (const f of ["icon-192.png", "icon-512.png"]) { const b = readFileSync(new URL(f, root)); assert.ok(b.length > 20000, f + " was regenerated from the new icon (tools/make-icons.mjs)"); }
+  const ico = readFileSync(new URL("desktop/app.ico", root)); assert.equal(ico.readUInt16LE(2), 1); const n = ico.readUInt16LE(4);
+  const icoSizes = [...Array(n)].map((_, i) => ico.readUInt8(6 + 16 * i) || 256).sort((a, b) => a - b); assert.deepEqual(icoSizes, [16, 32, 48, 256], "app.ico has 16, 32, 48 and 256 px");
+  assert.ok(manifest.icons.some(i => i.src === "icon-maskable.png" && i.purpose === "maskable") && sw.includes("./icon-maskable.png") && read("tools/sync-platforms.mjs").includes("icon-maskable.png"), "the maskable icon ships to web, Android and Windows");
+  const fg = read("android/app/src/main/res/drawable/ic_launcher_foreground.xml");
+  assert.ok(fg.includes("M120,396 C108,236 214,112 404,104") && fg.includes('android:scaleX="0.15"') && fg.includes('android:translateX="12"') && fg.includes("#FFE09A2C"), "Android launcher: the leaf and the coin inside the 66dp safe zone");
+  assert.ok(read("android/app/src/main/res/values/colors.xml").includes('<color name="ic_launcher_background">#0F3A2F</color>'), "Android launcher background #0F3A2F");
+  const ni = read("android/app/src/main/res/drawable/ic_notification.xml");
+  assert.ok(/leaf/.test(ni) && !/crown/i.test(ni) && ni.includes('android:fillType="evenOdd"') && !/fillColor="#(?!FFFFFFFF)/.test(ni), "notification icon: a white leaf silhouette, no crown");
+  assert.ok(read("android/app/src/main/res/layout/widget_jamal.xml").includes("@drawable/ic_widget_leaf") && !existsSync(new URL("android/app/src/main/res/drawable/ic_widget_crown.xml", root)), "the widget shows the leaf");
+  assert.ok(html.includes('<path class="jl-leaf" d="M120 396 C108 236 214 112 404 104') && html.includes(".jl-logo{background:linear-gradient(145deg,#0f3a2f,#061a15)"), "the logo next to «Life» is the same leaf");
+  // glass
+  assert.ok(html.includes('html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 62%,transparent)}') && html.includes(".card,.jl-hero{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}") && html.includes("rgba(36,76,134,.66)"), "dark cards 62 %, blur 12px, «Сейчас» .66");
+  assert.ok(html.includes("html[data-theme=\"dark\"] .jl-goalhero{background:linear-gradient(160deg,rgba(20,48,78,.66)") && html.includes(".jl-now,.jl-quote{background:rgba(15,37,70,.85)}") && html.includes(".jl-sky::after{content:\"\""), "goal cards are glass, inner blocks stay dense, the shade on the photo stays");
+  // louder reminders
+  const wav = readFileSync(new URL("sounds/jamal-dawn.wav", root)), raw = readFileSync(new URL("android/app/src/main/res/raw/jamal_dawn.wav", root));
+  assert.ok(wav.equals(raw), "web and Android play the same wav");
+  const fmt = wav.indexOf("fmt "), data = wav.indexOf("data"), rate = wav.readUInt32LE(fmt + 12), ch = wav.readUInt16LE(fmt + 10), bits = wav.readUInt16LE(fmt + 22), len = wav.readUInt32LE(data + 4);
+  assert.equal(bits, 16); let peak = 0; for (let i = data + 8; i < data + 8 + len; i += 2) peak = Math.max(peak, Math.abs(wav.readInt16LE(i)));
+  const secs = len / (rate * ch * 2);
+  assert.ok(peak / 32768 >= 0.9 && secs >= 3, `the reminder sound is louder and longer (peak ${(peak / 32768).toFixed(2)} ≥ 0.9, ${secs.toFixed(2)} s ≥ 3 s)`);
+  assert.ok(notif.includes('CHANNEL = "jamal_life_dawn2"') && notif.includes("AudioAttributes.USAGE_ALARM") && notif.includes("AudioAttributes.USAGE_NOTIFICATION_EVENT") && notif.includes('CHANNEL_SOFT = "jamal_life_dawn2_soft"'), "loud channel on the alarm stream, quiet channel on the notification stream");
+  assert.ok(/OLD_CHANNELS = \{"jamal_life_dawn",/.test(notif), "the 74.0 channel jamal_life_dawn is deleted (new sound = new channel)");
+  assert.ok(notif.includes("enableVibration(true)") && notif.includes('getBoolean("loud", true)') && notif.includes("setOnlyAlertOnce(false)"), "reminders vibrate, loud is the default, a snoozed reminder rings again");
+  assert.ok(activity.includes("public void setLoudReminders(boolean on)") && html.includes("window.AndroidBridge?.setLoudReminders?.(state.settings?.loudReminders!==false)") && html.includes("if(typeof s.settings.loudReminders!=='boolean')s.settings.loudReminders=true;"), "the switch «Громкие напоминания» reaches Android and is on by default");
+  assert.ok(html.includes("g.gain.value=1;") && desktop.includes("new SoundPlayer(wav)") && desktop.includes('window.__jlHostSound=1'), "web plays at full gain; Windows plays the sound itself, also from the tray"); }
 console.log("LIFE_V73_STATIC_QA_OK");

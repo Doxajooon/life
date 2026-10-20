@@ -2,7 +2,9 @@
 
 Soft and natural, like a quiet morning outside: a single water drop, two warm kalimba notes
 (a calm major-pentatonic step, D6 → A5), a light breath of wind under them and a tiny distant
-bird call at the end. No sharp attack, nothing shrill, about 2.2 s. Run:  python3 tools/make-dawn.py
+bird call at the end. No sharp attack, nothing shrill.
+74.1 — louder, because reminders were sometimes missed: the phrase plays twice (about 3.5 s), a gentle compressor
+lifts the average loudness by about 7 dB and the peak goes to 0.95. Run:  python3 tools/make-dawn.py
 Writes android/app/src/main/res/raw/jamal_dawn.wav and sounds/jamal-dawn.wav.
 """
 import numpy as np
@@ -10,7 +12,9 @@ from scipy.io import wavfile
 from scipy.signal import butter, sosfilt
 
 SR = 44100
-DUR = 2.2
+PHRASE = 2.2   # one «drop + two kalimba notes + bird»
+AGAIN = 1.3    # the phrase starts again here, so the whole sound is about 3.5 s
+DUR = AGAIN + PHRASE
 t = np.arange(int(SR * DUR)) / SR
 out = np.zeros_like(t)
 rng = np.random.default_rng(71)  # fixed seed: the same sound on every build
@@ -50,11 +54,12 @@ def bird(start, amp):
         out[n0:n0 + len(tt)] += amp * (0.8 if k else 1.0) * env * np.sin(phase)
 
 
-drop(0.00, 0.30)
-kalimba(1174.66, 0.06, 0.55)      # D6
-kalimba(880.00, 0.30, 0.50, 2.2)  # A5 — a step down, calm
-kalimba(587.33, 0.30, 0.20, 2.0)  # D5 under it, warmth
-bird(1.15, 0.035)
+for start, amp in ((0.0, 1.0), (AGAIN, 1.0)):   # the melody twice, the second time just as loud
+    drop(start + 0.00, 0.30 * amp)
+    kalimba(1174.66, start + 0.06, 0.55 * amp)      # D6
+    kalimba(880.00, start + 0.30, 0.50 * amp, 2.2)  # A5 — a step down, calm
+    kalimba(587.33, start + 0.30, 0.20 * amp, 2.0)  # D5 under it, warmth
+bird(AGAIN + 1.15, 0.035)
 
 # wind: filtered noise that swells and fades, far below the notes
 wind = rng.standard_normal(len(t))
@@ -73,9 +78,32 @@ for delay, gain in ((0.11, 0.18), (0.23, 0.08)):
 
 fade = int(0.35 * SR)
 out[-fade:] *= np.linspace(1, 0, fade) ** 2
-out = out / np.max(np.abs(out)) * 0.68  # about -3.3 dB peak: soft on the ear
+out = out / np.max(np.abs(out))
+
+
+def compress(x, threshold_db=-32.0, ratio=4.0, attack=0.0015, release=0.15):
+    """A gentle feed-forward compressor (RMS detector, soft knee): the quiet tails of the notes come up,
+    the attacks stay round. Returns the signal before make-up gain."""
+    p = x * x
+    env = np.empty_like(p)
+    a_att, a_rel, e = np.exp(-1 / (attack * SR)), np.exp(-1 / (release * SR)), 0.0
+    for i, v in enumerate(p):
+        k = a_att if v > e else a_rel
+        e = k * e + (1 - k) * v
+        env[i] = e
+    level = 10 * np.log10(env + 1e-12)
+    over = np.maximum(0.0, level - threshold_db)
+    knee = 6.0
+    soft = np.where(over < knee, over * over / (2 * knee), over - knee / 2)
+    gain_db = -soft * (1 - 1 / ratio)
+    return x * 10 ** (gain_db / 20)
+
+
+out = compress(out)
+out = out / np.max(np.abs(out)) * 0.95  # -0.45 dB peak: clearly audible, no clipping
 pcm = (out * 32767).astype(np.int16)
 
 for path in ("android/app/src/main/res/raw/jamal_dawn.wav", "sounds/jamal-dawn.wav"):
     wavfile.write(path, SR, pcm)
-    print("wrote", path, f"{len(pcm) / SR:.2f}s")
+    rms = np.sqrt(np.mean(out ** 2))
+    print("wrote", path, f"{len(pcm) / SR:.2f}s, peak {np.max(np.abs(out)):.2f}, RMS {20 * np.log10(rms):.1f} dBFS")

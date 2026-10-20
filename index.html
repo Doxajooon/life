@@ -868,9 +868,10 @@ html[data-theme="light"] .auth-stars{display:block}
 .modal-back.open .modal{animation:lcSheetIn .28s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 .jl-logo{display:grid;place-items:center;box-shadow:0 6px 18px rgba(8,18,30,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
-.jl-logo .jl-ring{animation:jlDraw 1.4s cubic-bezier(.65,0,.35,1) .15s backwards}
-.jl-logo .jl-dot{transform-origin:101px 191px;animation:jlPulse 2.6s ease-in-out 1.5s infinite}
-.jl-logo svg{width:76%;height:76%;color:#fff;overflow:visible;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.jl-logo .jl-vein{animation:jlDraw 1.4s cubic-bezier(.65,0,.35,1) .15s backwards}
+.jl-logo .jl-coin{transform-origin:374px 374px;animation:jlCoin 3.2s ease-in-out 1.5s infinite}
+@keyframes jlCoin{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.jl-logo svg{width:94%;height:94%;color:#fff;overflow:visible;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
 .brand:hover .jl-logo svg,#homeBrand:hover .jl-logo svg{transform:rotate(-12deg) scale(1.06)}
 @keyframes jlDraw{from{opacity:0}to{opacity:1}}
 @keyframes jlPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.65}}
@@ -921,8 +922,8 @@ body[data-sync=offline] #cloudSyncState::before,body[data-sync=auth] #cloudSyncS
 .bottom{z-index:300!important;pointer-events:auto!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;transition:transform .25s ease,opacity .2s ease}
 body.modal-open .bottom{opacity:0!important;pointer-events:none!important;transform:translate3d(0,120%,0)!important}
 body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!important}
-@media (prefers-reduced-motion:reduce){.jl-logo .jl-ring{animation:none;stroke-dashoffset:0}
-.jl-logo .jl-dot,#notifyBtn.has-unread .ui-icon,.v-remind .ui-icon,.v-task,.bottom button.active .ui-icon{animation:none}
+@media (prefers-reduced-motion:reduce){.jl-logo .jl-vein{animation:none}
+.jl-logo .jl-coin,#notifyBtn.has-unread .ui-icon,.v-remind .ui-icon,.v-task,.bottom button.active .ui-icon{animation:none}
 .ui-icon,.bottom{transition:none}}
 
 :root,html[data-theme="dark"]{--gold:#e3b04b;--gold-2:#f6d58a}
@@ -995,7 +996,7 @@ body[data-layout="desktop"] .jl-fab{bottom:28px;right:28px}
 .jl-quick-grid b{font-size:1rem}
 .jl-quick-grid small{font-size:0.7812rem;color:var(--muted)}
 #viewToday{padding-bottom:84px}
-.jl-logo{background:linear-gradient(145deg,#14304d,#08121e)!important;flex:none;width:40px!important;height:40px!important;min-width:40px;border-radius:12px!important}
+.jl-logo{background:linear-gradient(145deg,#0f3a2f,#061a15)!important;flex:none;width:40px!important;height:40px!important;min-width:40px;border-radius:12px!important}
 .jl-crown{width:21px;height:21px}
 .jl-now-status{display:none}
 body[data-layout="mobile"] #topChips{display:none}
@@ -1845,12 +1846,12 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
 .jl-app-ver{font-size:.75rem}
 
 /* ===== 74 · живой «Сегодня»: чёткое окно «Сейчас», светлее небо с картинкой раздела, живые иконки, пульс с графиком ===== */
-html[data-theme="dark"]{--bg:#132848;--panel:#1b3156;--soft:#172b4d;--line:#2f4a75}
-html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 78%,transparent)}
-/* a little see-through: the photo shows behind the cards, a light blur keeps the text easy to read */
-.card,.jl-hero{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-.jl-hero{background:linear-gradient(155deg,rgba(36,76,134,.82) 0%,rgba(23,53,99,.8) 55%,rgba(18,42,80,.82) 100%)!important}
-html[data-theme="light"] .card{background:color-mix(in srgb,var(--panel) 84%,transparent)}
+html[data-theme="dark"]{--bg:#132848;--panel:#1b3156;--soft:#172b4d;--line:#2f4a75;--muted:#c6d2e3} /* 74.1: lighter muted text for the glass cards */
+html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 62%,transparent)}
+/* 74.1: see-through glass — the photo shows behind the cards, a stronger blur keeps the text sharp and easy to read */
+.card,.jl-hero{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.jl-hero{background:linear-gradient(155deg,rgba(36,76,134,.66) 0%,rgba(23,53,99,.66) 55%,rgba(18,42,80,.66) 100%)!important}
+html[data-theme="light"] .card{background:color-mix(in srgb,var(--panel) 92%,transparent)}
 /* the background: the photo of the Kaaba; its light follows the real sun (setSky → --dawn, --dusk, --night, --sun, --sun-x, --sun-y) */
 body{background:transparent!important} /* the sky behind the page was hidden under the body's own fill */
 .jl-sky{background:linear-gradient(180deg,#003f8f 0%,#0055b5 calc(100% - max(64vh,100vw)),rgba(0,85,181,0) calc(100% - max(64vh,100vw) + 160px)),url("images/bg-kaaba.jpg") no-repeat 50% 100%/auto max(64vh,100vw),#0055b5}
@@ -1877,6 +1878,37 @@ html[data-theme="light"] .jl-sky::after{background:linear-gradient(180deg,rgba(2
 .jl-nf-txt small{color:#f6d58a}
 .jl-quote{background:#0f2546;box-shadow:inset 0 0 0 1px rgba(246,213,138,.35)}
 html[data-theme="light"] .jl-hero{background:linear-gradient(155deg,#2c5aa0 0%,#1e4580 60%,#183a6e 100%)}
+/* 74.1: the main goal card and the cards of «Цель» are glass too; the blocks inside stay dense (≈85 %) so numbers read well */
+html[data-theme="dark"] .jl-goalhero{background:linear-gradient(160deg,rgba(20,48,78,.66) 0%,rgba(11,26,44,.66) 72%)!important}
+html[data-theme="dark"] .v-goal-card .v-cover{background:linear-gradient(115deg,rgba(10,24,48,.62) 0%,rgba(22,52,99,.6) 55%,rgba(180,97,42,.55) 100%)}
+html[data-theme="dark"] .v-goal-card .v-cover::after{background:linear-gradient(90deg,rgba(5,11,22,.62) 0%,rgba(5,11,22,.42) 55%,rgba(5,11,22,.12) 100%)}
+.jl-now,.jl-quote{background:rgba(15,37,70,.85)}
+.jl-nf{background:rgba(23,58,53,.85)}
+html[data-theme="dark"] .v-kpi{background:color-mix(in srgb,var(--soft) 85%,transparent)}
+html[data-theme="dark"] .jl-rstep.current{background:linear-gradient(135deg,rgba(60,58,52,.85),rgba(30,48,82,.85))}
+html[data-theme="dark"] .jl-goalhero-next{background:rgba(15,37,70,.85)}
+html[data-theme="dark"] .jl-gh-tiles>div{background:rgba(15,37,70,.85)}
+html[data-theme="dark"] .jl-free{background:linear-gradient(160deg,rgba(124,92,255,.22),rgba(91,156,255,.10)),rgba(15,37,70,.85)}
+html[data-theme="dark"] .btn.primary{background:linear-gradient(135deg,#2f6fdc,#1559b0)}
+html[data-theme="dark"] .v-link{color:#bcd6ff}
+html[data-theme="dark"] .ring-state{--blue:#9cc4ff;--cyan:#7ee6f5;--orange:#fdba74;--green:#6ee7b7}
+html[data-theme="dark"] .bell-dot{background:#d42a2a}
+/* the light theme keeps its dense «Сейчас» window and goal tiles: the bright sky behind them would wash the text out */
+html[data-theme="light"] .jl-hero{background:linear-gradient(155deg,rgba(44,90,160,.94) 0%,rgba(30,69,128,.94) 60%,rgba(24,58,110,.94) 100%)!important}
+html[data-theme="light"] .jl-gh-tiles>div{background:rgba(255,255,255,.96)}
+html[data-theme="light"] .v-group-title{display:inline-block;color:#2f3f55;padding:.15rem .55rem;border-radius:99px;background:rgba(255,255,255,.82)}
+html[data-theme="light"] .jl-hero #todayDate{color:#d6e3f4}
+html[data-theme="light"] .jl-hero .ck-s,html[data-theme="light"] .jl-hero .clock-state,html[data-theme="light"] .jl-now-label{color:#ffe9b5}
+html[data-theme="light"] .jl-now-line{color:#7a4f00}
+html[data-theme="light"] .jl-quote figcaption{color:#f6d58a!important;opacity:1}
+html[data-theme="light"] .jl-rstep.current .jl-rstep-time,html[data-theme="light"] .jl-ms-eyebrow,html[data-theme="light"] .jl-step.current .jl-step-dot{color:#7a4f00}
+html[data-theme="light"] .jl-ledger small,html[data-theme="light"] .jl-rstep-main small{color:#26354b}
+.v-goal-card .v-pct{color:#93c5fd}
+html[data-theme="light"] .v-head .v-sub{display:inline-block;color:#2f3f55;padding:.1rem .5rem;border-radius:99px;background:rgba(255,255,255,.82)}
+html[data-theme="dark"] .v-head .v-sub{display:inline-block;padding:.1rem .5rem;border-radius:99px;background:rgba(10,22,46,.6)}
+.v-head .v-sub:empty{display:none}
+/* section titles sit right on the photo: a small dark plate keeps them readable at noon */
+html[data-theme="dark"] .v-group-title{display:inline-block;color:#dbe6f5;padding:.15rem .55rem;border-radius:99px;background:rgba(10,22,46,.72)}
 /* the day's tasks: a «Сейчас» line runs through the list */
 .jl-now-line{position:relative;display:flex;align-items:center;gap:8px;margin:6px 0;height:22px;color:var(--gold-2);font-size:.75rem;font-weight:800;letter-spacing:.04em}
 .jl-now-line::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--gold-2);box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 25%,transparent);animation:jlPulse 1.8s ease-in-out infinite}
@@ -1908,7 +1940,7 @@ html[data-theme="light"] .jl-hero{background:linear-gradient(155deg,#2c5aa0 0%,#
 .jl-bell.swing{animation:jlBellSwing 3.6s ease-in-out infinite}
 @keyframes jlBellSwing{0%,70%,100%{transform:none}74%{transform:rotate(16deg)}78%{transform:rotate(-14deg)}82%{transform:rotate(10deg)}86%{transform:rotate(-6deg)}90%{transform:rotate(2deg)}}
 /* the pulse: a chart by day */
-.jl-pchart{margin-top:14px;padding:12px 12px 10px;border-radius:16px;background:#0f2546;border:1px solid rgba(155,196,255,.2)}
+.jl-pchart{margin-top:14px;padding:12px 12px 10px;border-radius:16px;background:rgba(15,37,70,.85);border:1px solid rgba(155,196,255,.2)}
 .jl-pc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .jl-pc-top b{font-size:.9rem}
 .jl-pc-trend{font-size:.75rem;font-weight:700;color:var(--muted)}
@@ -2028,7 +2060,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M256 352 V244" fill="none" stroke="#f2b451" stroke-width="34" stroke-linecap="round"/><path d="M248 270 C190 272 156 240 152 186 C212 184 246 214 248 270 Z M264 238 C266 176 304 146 362 146 C362 206 326 238 264 238 Z" fill="#f2b451"/></svg></div><div><div class="brand-name"><span data-app-name>Life</span> <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="jlLeaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ee7a8"/><stop offset=".55" stop-color="#22c55e"/><stop offset="1" stop-color="#15803d"/></linearGradient><linearGradient id="jlCoin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#e09a2c"/></linearGradient></defs><path class="jl-leaf" d="M120 396 C108 236 214 112 404 104 C414 290 306 400 140 404 Z" fill="url(#jlLeaf)"/><path class="jl-vein" d="M140 392 L214 318 L250 340 L322 236 L376 150 M376 150 l-40 6 M376 150 l-4 40" fill="none" stroke="#0b3b2a" stroke-opacity=".55" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><g class="jl-coin"><circle cx="374" cy="374" r="74" fill="url(#jlCoin)" stroke="#fff1c4" stroke-width="8"/><circle cx="374" cy="374" r="50" fill="none" stroke="#b7741c" stroke-opacity=".5" stroke-width="7"/><path d="M352 356 Q374 336 396 356" fill="none" stroke="#fff6dc" stroke-opacity=".7" stroke-width="8" stroke-linecap="round"/></g></svg></div><div><div class="brand-name"><span data-app-name>Life</span> <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -2333,6 +2365,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
     <label class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg></span><span class="v-row-main"><b>Цели</b><small>Пополнения и достижение целей</small></span><span class="v-switch"><input type="checkbox" id="setNotifyGoals"><i></i></span></label>
     <label class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg></span><span class="v-row-main"><b>Каждые 2 часа</b><small>Совет, чем заняться для успеха, и пауза в работе</small></span><span class="v-switch"><input type="checkbox" id="setEvery2h"><i></i></span></label>
     <label class="v-row"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Звук</b><small>Короткий сигнал при уведомлении</small></span><span class="v-switch"><input type="checkbox" id="setNotifySound"><i></i></span></label>
+    <label class="v-row" id="loudRow"><span class="v-row-ico" style="--c:var(--red)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Громкие напоминания (как будильник)</b><small>Задачи и этапы звучат громкостью будильника — слышно даже при тихом звонке</small></span><span class="v-switch"><input type="checkbox" id="setLoudReminders"><i></i></span></label>
     <button class="v-row" type="button" id="setNotifyPermission"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"></use></svg></span><span class="v-row-main"><b>Разрешить системные уведомления</b><small>Запросить доступ у устройства</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
   </div>
   <div class="v-group-title">Ещё</div>
@@ -2340,7 +2373,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.1</span></div>
   </div>
 </section>
 
@@ -2391,7 +2424,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.0';
+const APP_NAME='Life',APP_VERSION='74.1';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -2835,6 +2868,8 @@ function applyV73(s){
   const L=s.debts.labels&&typeof s.debts.labels==='object'&&!Array.isArray(s.debts.labels)?s.debts.labels:{};
   s.debts.labels={bank:cleanLabel(L.bank)||(old?'Банк':'Долг 1'),firms:cleanLabel(L.firms)||(old?'Фирмы':'Долг 2')};
   if(typeof s.settings.onboarded!=='boolean')s.settings.onboarded=old;
+  // 74.1: loud reminders (alarm volume) — on by default for everyone, the owner asked for it because reminders were missed
+  if(typeof s.settings.loudReminders!=='boolean')s.settings.loudReminders=true;
 }
 function cleanLabel(v){return String(v??'').replace(/[<>&"'`=\\]/g,'').replace(/\s+/g,' ').trim().slice(0,24)}
 function debtLabel(k){return state?.debts?.labels?.[k]||(k==='bank'?'Долг 1':'Долг 2')}
@@ -3524,8 +3559,8 @@ function playNotificationSound(force=false){
   const now=Date.now();if(now-_lastChimeAt<1200)return;_lastChimeAt=now;
   try{
     const ctx=audioCtx();if(!ctx)return;
-    // «Dawn» — the same soft nature tone as on Android (sounds/jamal-dawn.wav: a water drop, kalimba, a breath of wind)
-    if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
+    // «Dawn» — the same nature tone as on Android (sounds/jamal-dawn.wav: a water drop, kalimba, a breath of wind; 74.1: twice, louder)
+    if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=1;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
     loadGlass();
     const t0=ctx.currentTime+.03,out=ctx.createGain(),echo=ctx.createDelay(),fb=ctx.createGain();
     out.gain.value=.5;echo.delayTime.value=.13;fb.gain.value=.2;
@@ -3566,12 +3601,15 @@ function notify(title,body,kind='tasks',opts={}){
   const allowed=state.settings?.notifications!==false&&noticeAllowed(kind);
   const android=!!window.AndroidBridge?.notify;
   if(allowed&&opts.native&&hasNativeAlarms())return;          // the alarm already rang with the chime
-  if(!(allowed&&android))playNotificationSound();               // Android channel plays the same chime itself
+  const host=allowed&&!android&&hostPlaysSound();
+  if(!(allowed&&android)&&!host)playNotificationSound();       // Android channel / the Windows host play the same chime themselves
   if(!allowed)return;
   try{if(android){const br=window.AndroidBridge;if(opts.taskId&&opts.due&&br.notifyTaskAt)br.notifyTaskAt(title,body,opts.taskId,opts.due);else if(opts.taskId&&br.notifyTask)br.notifyTask(title,body,opts.taskId);else br.notify(title,body);return}}catch(e){}
-  try{if(window.chrome?.webview?.postMessage){window.chrome.webview.postMessage({type:'notify',title,body});return}}catch(e){}
+  try{if(window.chrome?.webview?.postMessage){window.chrome.webview.postMessage({type:'notify',title,body,sound:host&&state.settings?.sound!==false});return}}catch(e){}
   showWebNotification(title,body,opts.taskId);
 }
+/* 74.1: the Windows app (desktop host sets window.__jlHostSound) plays the chime itself, so it is heard with the window in the tray */
+function hostPlaysSound(){try{return !!(window.__jlHostSound&&window.chrome?.webview?.postMessage)}catch(e){return false}}
 /* «Готово» / «Через 15 мин» from a reminder (Android notification, browser notification, link). */
 const SNOOZE_MIN=15;
 function applyReminderAction(a,taskId){
@@ -3609,7 +3647,10 @@ function handleActionLink(){
 }
 if(navigator.serviceWorker){navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='jl-action'&&appReadyForSync)applyReminderAction(d.a,String(d.task||''))});try{navigator.serviceWorker.startMessages?.()}catch(e){}}
 function requestNotifications(){try{if(window.AndroidBridge?.requestNotifications){state.settings.notifications=true;saveState();window.AndroidBridge.requestNotifications();scheduleNative();toast('Запрос уведомлений отправлен');return}}catch(e){}if(!('Notification'in window)){toast('Системные уведомления недоступны','История уведомлений всё равно работает внутри приложения.');return}if(Notification.permission==='denied'){toast('Уведомления запрещены','Разреши их в настройках браузера для этого сайта.');return}if(Notification.permission==='granted'){state.settings.notifications=true;saveState();scheduleNative();toast('Уведомления уже разрешены');return}toast('Запрашиваю разрешение…');Notification.requestPermission().then(p=>{if(p==='granted'){state.settings.notifications=true;saveState();scheduleNative();toast('Уведомления разрешены')}else toast('Уведомления не разрешены')}).catch(()=>toast('Не удалось запросить разрешение'))}
+/* 74.1: «Громкие напоминания» live on the device too (Android alarms ring with the app closed): alarm volume or notification volume */
+function syncLoudReminders(){try{window.AndroidBridge?.setLoudReminders?.(state.settings?.loudReminders!==false)}catch(e){}}
 function scheduleNative(){
+  syncLoudReminders();
   scheduleNativeTasks();
   try{
     if(!window.AndroidBridge?.scheduleDaily)return;
@@ -5799,7 +5840,7 @@ function renderSettingsView(){
   if(!$('viewSettings'))return;const a=cloudAuth();
   setText('setProfileSub',[state.profile.name,a?.user?.email].filter(Boolean).join(' · ')||'Имя не указано');
   const set=(id,v)=>{const el=$(id);if(el)el.checked=!!v};
-  set('setDarkTheme',state.settings.theme==='dark');set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setEvery2h',state.settings.every2h!==false);
+  set('setDarkTheme',state.settings.theme==='dark');set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setLoudReminders',state.settings.loudReminders!==false);{const lr=$('loudRow');if(lr)lr.style.display=window.AndroidBridge?.setLoudReminders?'':'none'}set('setEvery2h',state.settings.every2h!==false);
   const sf=$('setFont');if(sf)sf.value=state.settings.font||'manrope';const qs=$('setQuoteSet');if(qs)qs.value=quoteSet();
   const fs=$('setFontScale');if(fs){const v=Number(state.settings.fontScale)||1.1;fs.value=v<1.05?'1':v>1.15?'1.2':'1.1'}
   setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный');renderBiometricRow();refreshCloudUI();
@@ -5886,13 +5927,14 @@ function bindV57(){
   $$('[data-fmt]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>noteFormat(b.dataset.fmt)});
   ['neTitle','neBody'].forEach(id=>$(id).addEventListener('input',noteEditorSync));$('nePinned').addEventListener('change',noteEditorSync);$('neSave').onclick=noteEditorSave;
   $('neTrash').onclick=()=>{if(noteEditId){const id=noteEditId;noteEditId='';showView('viewNotes');moveToTrash(id)}else{clearDraft('note');showView('viewNotes');toast('Черновик удалён')}};
-  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify)playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 '+APP_NAME,'Так звучат напоминания 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:APP_NAME,body:'Так звучат напоминания.'});return}}catch(e){}showWebNotification(APP_NAME,'Так звучат напоминания.');toast(APP_NAME,'Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
+  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify&&!(hostPlaysSound()&&state.settings?.notifications!==false))playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 '+APP_NAME,'Так звучат напоминания 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:APP_NAME,body:'Так звучат напоминания.',sound:hostPlaysSound()});return}}catch(e){}showWebNotification(APP_NAME,'Так звучат напоминания.');toast(APP_NAME,'Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
   $('setDarkTheme').onchange=e=>{state.settings.theme=e.target.checked?'dark':'light';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');
   $('setQuoteSet')&&($('setQuoteSet').onchange=e=>{state.settings.quoteSet=QUOTE_SETS[e.target.value]?e.target.value:'hadith';state.settings.quoteSetChosen=true;saveState();renderAll();toast('Цитаты дня',QUOTE_SETS[state.settings.quoteSet])});
   $('setFont')&&($('setFont').onchange=e=>{state.settings.font=['manrope','nunito','inter'].includes(e.target.value)?e.target.value:'manrope';saveState();applyFont();toast('Шрифт изменён',e.target.selectedOptions[0]?.textContent||'')});$('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
   [['setNotifyAll','notifications'],['setNotifyTasks','notifyTasks'],['setNotifyFinance','notifyFinance'],['setNotifyGoals','notifyGoals'],['setNotifySound','sound']].forEach(([id,key])=>$(id).onchange=e=>{state.settings[key]=e.target.checked;saveState();if(key==='notifications'||key==='notifyTasks')scheduleNative()});
+  $('setLoudReminders').onchange=e=>{state.settings.loudReminders=e.target.checked;saveState();syncLoudReminders();toast(e.target.checked?'Громкие напоминания включены':'Обычная громкость напоминаний',e.target.checked?'Звучат громкостью будильника.':'Звучат громкостью уведомлений.')};
   $('setNotifyPermission').onclick=requestNotifications;$('setAdvancedRow').onclick=openSettings;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;
   $('pfLogout').onclick=()=>{if(confirm('Выйти из '+APP_NAME+'? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};

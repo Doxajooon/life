@@ -19,11 +19,16 @@ import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-/** Reminders with the Dawn sound (res/raw/jamal_dawn.wav, made by tools/make-dawn.py) on a high-importance channel. */
+/**
+ * Reminders with the Dawn sound (res/raw/jamal_dawn.wav, made by tools/make-dawn.py) on a high-importance channel.
+ * 74.1: «Громкие напоминания» (on by default) put the sound on the alarm stream (USAGE_ALARM), so it is heard even when
+ * the ringer is quiet; switched off, the reminders use the notification stream as before (USAGE_NOTIFICATION_EVENT).
+ * A channel's sound and usage can't be changed after creation, so each mode has its own channel id.
+ */
 public final class NotificationUtil {
-    // A channel's sound can't be changed after creation, so the chime gets its own channel id.
-    private static final String CHANNEL = "jamal_life_dawn";
-    private static final String[] OLD_CHANNELS = {"jamal_life_glass", "jamal_life_glow", "jamal_life_reminders", "life_control_v2", "life_control"};
+    static final String CHANNEL = "jamal_life_dawn2";        // loud: alarm volume
+    static final String CHANNEL_SOFT = "jamal_life_dawn2_soft"; // quiet: notification volume
+    private static final String[] OLD_CHANNELS = {"jamal_life_dawn", "jamal_life_glass", "jamal_life_glow", "jamal_life_reminders", "life_control_v2", "life_control"};
     private static final long[] VIBRATION = {0, 180, 120, 180};
     private NotificationUtil() {}
 
@@ -31,26 +36,42 @@ public final class NotificationUtil {
         return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + ctx.getPackageName() + "/" + R.raw.jamal_dawn);
     }
 
+    /** «Громкие напоминания (как будильник)» — kept on the device, so alarms that ring with the app closed know it. */
+    static boolean isLoud(Context ctx) {
+        return ctx.getSharedPreferences("lc_ui", Context.MODE_PRIVATE).getBoolean("loud", true);
+    }
+
+    static void setLoud(Context ctx, boolean on) {
+        ctx.getSharedPreferences("lc_ui", Context.MODE_PRIVATE).edit().putBoolean("loud", on).apply();
+    }
+
+    static String channel(Context ctx) { return isLoud(ctx) ? CHANNEL : CHANNEL_SOFT; }
+
     static void ensureChannel(Context ctx) {
         if (Build.VERSION.SDK_INT < 26) return;
         NotificationManager nm = ctx.getSystemService(NotificationManager.class);
         if (nm == null) return;
         for (String old : OLD_CHANNELS) { try { nm.deleteNotificationChannel(old); } catch (Exception ignored) {} }
         String about = "Задачи и этапы дня · " + ctx.getString(R.string.app_name);
-        NotificationChannel had = nm.getNotificationChannel(CHANNEL);
+        make(ctx, nm, CHANNEL, "Напоминания (громко, как будильник)", about, AudioAttributes.USAGE_ALARM);
+        make(ctx, nm, CHANNEL_SOFT, "Напоминания (обычная громкость)", about, AudioAttributes.USAGE_NOTIFICATION_EVENT);
+    }
+
+    private static void make(Context ctx, NotificationManager nm, String id, String name, String about, int usage) {
+        NotificationChannel had = nm.getNotificationChannel(id);
         if (had != null) {
             // same id, so the sound and the user's settings stay; only the visible description follows the app name
             if (!about.equals(had.getDescription())) { had.setDescription(about); nm.createNotificationChannel(had); }
             return;
         }
-        NotificationChannel ch = new NotificationChannel(CHANNEL, "Напоминания", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel ch = new NotificationChannel(id, name, NotificationManager.IMPORTANCE_HIGH);
         ch.setDescription(about);
         ch.enableVibration(true);
         ch.setVibrationPattern(VIBRATION);
         ch.enableLights(true);
-        ch.setLightColor(0xFF3FD0C9);
+        ch.setLightColor(0xFF22C55E);
         ch.setSound(chimeUri(ctx), new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
+                .setUsage(usage)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build());
         nm.createNotificationChannel(ch);
@@ -106,9 +127,9 @@ public final class NotificationUtil {
         Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pi = PendingIntent.getActivity(ctx, 999, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         String text = body == null ? "" : body;
-        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, CHANNEL)
+        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, channel(ctx))
                 .setSmallIcon(R.drawable.ic_notification)
-                .setColor(0xFFE3B04B)
+                .setColor(0xFF22C55E)
                 .setLargeIcon(appIcon(ctx))
                 .setSubText(taskId != null && !taskId.startsWith("stage:") ? "Задача" : "Ритм дня")
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -121,6 +142,7 @@ public final class NotificationUtil {
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setOnlyAlertOnce(false) // a repeated reminder («Через 15 мин») rings again
                 .setSound(chimeUri(ctx))
                 .setVibrate(VIBRATION);
         if (dueAt > System.currentTimeMillis()) {

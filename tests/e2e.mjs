@@ -2134,6 +2134,58 @@ await test("74: живой «Сегодня» — задачи сразу пос
   await ctx.close();
 });
 
+await test("74.1: «Громкие напоминания» — по умолчанию ВКЛ (канал jamal_life_dawn2, USAGE_ALARM), выключение доходит до Android и переживает перезапуск", async () => {
+  const cloud = makeCloud();
+  const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 6 : k === "takeActions" ? "[]" : undefined; } }); };
+  const { ctx, page } = await device(cloud, { init });
+  const loudCalls = () => page.evaluate(() => __calls.filter(x => x[0] === "setLoudReminders").map(x => x[1]));
+  const sw = () => page.evaluate(() => { showView("viewSettings"); const el = document.getElementById("setLoudReminders"), row = document.getElementById("loudRow"); return { checked: el.checked, shown: getComputedStyle(row).display !== "none", label: row.textContent.replace(/\s+/g, " ").trim(), setting: state.settings.loudReminders }; });
+  let r = await sw();
+  assert.ok(r.shown && r.checked && r.setting === true, "on by default and visible on Android: " + JSON.stringify(r));
+  assert.match(r.label, /Громкие напоминания \(как будильник\)/);
+  await page.evaluate(() => scheduleNative());
+  assert.equal((await loudCalls()).at(-1), true, "the app tells Android: alarm volume");
+  await page.click("#loudRow .v-switch");
+  r = await sw();
+  assert.ok(!r.checked && r.setting === false, "switched off: " + JSON.stringify(r));
+  assert.equal((await loudCalls()).at(-1), false, "Android hears «off» right away (notification volume channel)");
+  await sync(page);
+  await page.reload(); await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true, null, { timeout: 10000 });
+  await page.evaluate(() => scheduleNative());
+  r = await sw();
+  assert.ok(!r.checked && r.setting === false, "after a restart the switch stays off: " + JSON.stringify(r));
+  assert.equal((await loudCalls()).at(-1), false, "and Android gets «off» again on start");
+  // an account from before 74.1 (no value yet) gets loud reminders; a saved choice is kept
+  const mig = await page.evaluate(() => [normalize({ version: 58, settings: {} }).settings.loudReminders, normalize({ version: 58, settings: { loudReminders: false } }).settings.loudReminders]);
+  assert.deepEqual(mig, [true, false]);
+  // the Android side: loud = channel jamal_life_dawn2 on the alarm stream, quiet = its own channel on the notification stream, both vibrate
+  const java = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8");
+  assert.ok(/make\(ctx, nm, CHANNEL, "[^"]+", about, AudioAttributes\.USAGE_ALARM\)/.test(java) && java.includes('CHANNEL = "jamal_life_dawn2"'), "loud channel jamal_life_dawn2 uses USAGE_ALARM");
+  assert.ok(/make\(ctx, nm, CHANNEL_SOFT, "[^"]+", about, AudioAttributes\.USAGE_NOTIFICATION_EVENT\)/.test(java) && java.includes("isLoud(ctx) ? CHANNEL : CHANNEL_SOFT"), "quiet channel keeps the old notification stream");
+  assert.ok(java.includes("ch.enableVibration(true)") && /OLD_CHANNELS = \{"jamal_life_dawn",/.test(java), "vibration on; the old 74.0 channel is removed");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.1: «Через 15 мин» — напоминание повторяется со звуком (веб), на Windows звук играет сама программа (и из трея)", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T10:00:00+05:00") });
+  await page.evaluate(() => { state.tasks.push({ id: "s1", title: "Позвонить маме", date: keyDay(new Date()), time: "10:00", createdAt: new Date().toISOString() }); saveState();
+    window.__snd = 0; const orig = playNotificationSound; window.playNotificationSound = f => { window.__snd++; return orig(f); }; });
+  const ok = await page.evaluate(() => applyReminderAction("snooze", "s1"));
+  assert.ok(ok, "snooze applied");
+  await page.clock.runFor(15 * 60 * 1000 + 30 * 1000);
+  const r = await page.evaluate(() => { runScheduler(); return { snd: __snd, log: state.notificationsLog.filter(n => /Позвонить маме/.test(n.title + n.body)).length }; });
+  assert.ok(r.log >= 1 && r.snd >= 1, "the reminder came back after 15 minutes with the sound: " + JSON.stringify(r));
+  // Windows: with the desktop host the page does not play the sound itself, it asks the host (works with the window hidden)
+  const w = await page.evaluate(() => { window.__jlHostSound = 1; const sent = []; window.chrome = { webview: { postMessage: m => sent.push(m) } }; const before = __snd; _lastChimeAt = 0;
+    notify("Тест", "текст", "tasks"); return { sent, played: __snd - before }; });
+  assert.equal(w.sent.length, 1); assert.equal(w.sent[0].sound, true, "the host is asked to play the sound"); assert.equal(w.played, 0, "no double sound from the page");
+  const cs = fs.readFileSync(path.join(ROOT, "desktop/MainWindow.xaml.cs"), "utf8");
+  assert.ok(cs.includes("PlayChime()") && cs.includes('"sounds", "jamal-dawn.wav"'), "Windows plays Web/sounds/jamal-dawn.wav");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);
