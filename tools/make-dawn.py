@@ -4,7 +4,7 @@ Soft and natural, like a quiet morning outside: a single water drop, two warm ka
 (a calm major-pentatonic step, D6 → A5), a light breath of wind under them and a tiny distant
 bird call at the end. No sharp attack, nothing shrill.
 74.1 — louder, because reminders were sometimes missed: the phrase plays twice (about 3.5 s), a gentle compressor
-lifts the average loudness by about 7 dB and the peak goes to 0.95. Run:  python3 tools/make-dawn.py
+and a soft limiter lift the average loudness by about 10 dB (−18.7 → −8.6 dBFS) and the peak goes to 0.95. Run:  python3 tools/make-dawn.py
 Writes android/app/src/main/res/raw/jamal_dawn.wav and sounds/jamal-dawn.wav.
 """
 import numpy as np
@@ -100,7 +100,12 @@ def compress(x, threshold_db=-32.0, ratio=4.0, attack=0.0015, release=0.15):
 
 
 out = compress(out)
-out = out / np.max(np.abs(out)) * 0.95  # -0.45 dB peak: clearly audible, no clipping
+out = out / np.max(np.abs(out))
+# 74.1: a soft saturating limiter (tanh): loud parts are rounded smoothly, quiet ones come up — about +3 dB more
+# average loudness than plain peak normalisation, no hard clipping (the owner: reminders were still too quiet)
+LIMIT_DRIVE = 1.5
+out = np.tanh(LIMIT_DRIVE * out) / np.tanh(LIMIT_DRIVE)
+out = out * 0.95  # -0.45 dB peak: clearly audible, no clipping
 pcm = (out * 32767).astype(np.int16)
 
 for path in ("android/app/src/main/res/raw/jamal_dawn.wav", "sounds/jamal-dawn.wav"):

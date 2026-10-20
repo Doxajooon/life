@@ -1,4 +1,4 @@
-// Renders the app icon (icon.svg — the green leaf with a chart vein and a gold coin) into every raster the platforms need:
+// Renders the app icon (icon.svg — the green sprout in a turquoise→gold ring) into every raster the platforms need:
 //   icon-192.png, icon-512.png (purpose "any"), icon-maskable.png (full-bleed, artwork inside the 80 % safe circle),
 //   desktop/app.ico (16, 32, 48, 256 px, PNG-compressed entries). Run:  node tools/make-icons.mjs
 import { chromium } from "playwright";
@@ -8,7 +8,8 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const svg = readFileSync(root + "icon.svg", "utf8");
 // maskable: the same artwork on a square full-bleed background, scaled to 80 % so launchers can crop it to any shape
-const maskable = svg.replace('<rect width="512" height="512" rx="112" fill="url(#lfbg)"/>', '<rect width="512" height="512" fill="url(#lfbg)"/><g transform="translate(51.2 51.2) scale(.8)">').replace(/<\/svg>\s*$/, "</g></svg>");
+if (!svg.includes('fill="url(#spbg)"')) throw new Error("icon.svg: background rect #spbg not found");
+const maskable = svg.replace('<rect width="512" height="512" rx="112" fill="url(#spbg)"/>', '<rect width="512" height="512" fill="url(#spbg)"/><g transform="translate(51.2 51.2) scale(.8)">').replace(/<\/svg>\s*$/, "</g></svg>");
 
 const browser = await chromium.launch(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {});
 const page = await browser.newPage();

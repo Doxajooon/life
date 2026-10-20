@@ -85,6 +85,8 @@ function makeCloud() {
         const r = { updated_at: cloud.row.updated_at };
         if (sel.includes("state")) Object.assign(r, { state: cloud.row.state, schema_version: cloud.row.schema_version });
         if (sel.includes("device_id")) r.device_id = cloud.row.device_id ?? null;
+        // 74.1: a slow download of the full state (the user keeps typing meanwhile)
+        if (sel.includes("state") && cloud.stateDelay) { await new Promise(res => setTimeout(res, cloud.stateDelay)); return send(200, [r]).catch(() => {}); }
         return send(200, [r]);
       }
       const body = JSON.parse(req.postData() || "{}");
@@ -312,6 +314,52 @@ await test("Правка во время идущей синхронизации
   const ids = cloud.row.state.notes.map(n => n.id);
   assert.ok(ids.includes("f1") && ids.includes("f2"), "lost: " + ids.join(","));
   await ctx.close();
+});
+
+// 74.1: the dirty flag was read before the download; an edit made while the other device's copy was downloading was overwritten by it
+await test("Правка во время скачивания чужих изменений не теряется", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud), B = await device(cloud);
+  await sync(A.page); await sync(B.page); await sync(A.page);
+  await B.page.evaluate(() => { state.notes.push({ id: "b1", title: "с телефона", body: "", at: new Date().toISOString() }); saveState(); });
+  await sync(B.page);
+  cloud.stateDelay = 600;
+  await A.page.evaluate(async () => {
+    while (cloudSyncInFlight) await cloudSyncInFlight.catch(() => {});
+    const p = cloudAutoSync();                         // A sees B's change and downloads it…
+    await new Promise(r => setTimeout(r, 200));
+    state.expenses.push({ id: "a1", amount: 10, category: "Еда", at: new Date().toISOString() }); saveState();
+    state.notes.push({ id: "a2", title: "с ПК", body: "", at: new Date().toISOString() }); saveState();
+    await p;
+  });
+  cloud.stateDelay = 0;
+  await sync(A.page); await sync(B.page);
+  for (const [name, d] of [["A", A], ["B", B]]) {
+    const s = await d.page.evaluate(() => ({ e: state.expenses.map(x => x.id), n: state.notes.map(x => x.id) }));
+    assert.ok(s.e.includes("a1") && s.n.includes("a2") && s.n.includes("b1"), name + " lost data: " + JSON.stringify(s));
+  }
+  assert.ok(cloud.row.state.notes.some(n => n.id === "a2") && cloud.row.state.expenses.some(x => x.id === "a1"), "edit not uploaded");
+  await A.ctx.close(); await B.ctx.close();
+});
+
+// 74.1: right after a restart (before the first sync) edits were not marked as unsent and the cloud copy replaced them
+await test("Правка сразу после перезапуска, до первой синхронизации, не теряется", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud), B = await device(cloud);
+  await sync(A.page); await sync(B.page); await sync(A.page);
+  await B.page.evaluate(() => { state.notes.push({ id: "b1", title: "с телефона", body: "", at: new Date().toISOString() }); saveState(); });
+  await sync(B.page);
+  cloud.stateDelay = 800;
+  await A.page.reload(); await A.page.waitForFunction(() => appReadyForSync === true);
+  await A.page.evaluate(() => { state.notes.push({ id: "a9", title: "сразу после запуска", body: "", at: new Date().toISOString() }); saveState(); });
+  await A.page.evaluate(async () => { while (cloudSyncInFlight) await cloudSyncInFlight.catch(() => {}); });
+  cloud.stateDelay = 0;
+  await sync(A.page); await sync(B.page);
+  for (const [name, d] of [["A", A], ["B", B]]) {
+    const n = await d.page.evaluate(() => state.notes.map(x => x.id));
+    assert.ok(n.includes("a9") && n.includes("b1"), name + " lost data: " + JSON.stringify(n));
+  }
+  await A.ctx.close(); await B.ctx.close();
 });
 
 await test("Истёкший токен обновляется сам, без запроса пароля", async () => {
@@ -2130,6 +2178,52 @@ await test("74: живой «Сегодня» — задачи сразу пос
   assert.equal(r.rows, "a|b", "the «Сейчас» line sits between the done morning task and the evening one");
   assert.equal(r.dots, 14, "14 days on the pulse chart"); assert.equal(r.yesterday, 100, "yesterday: task, habit, stages and the closed day all done");
   assert.equal(r.view, "viewToday", "the sky knows which section is open"); assert.match(r.sum, /сегодня/);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.1: без повторов — ритм не дублирует «Твой вечер» и «Главное», деньги и цель без лишних строк, версия только в «О приложении»", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T13:30:00+05:00") });
+  await page.evaluate(seedGoal);
+  const r = await page.evaluate(() => {
+    state.goal.finance.targetAmount = 50000; state.goal.finance.savedAmount = 0; state.goal.next = ""; state.goal.milestones[0].done = true;
+    state.profits.push({ id: "p1", amount: 8000, sourceGroup: "Зарплата", at: new Date().toISOString(), dateKey: keyDay() });
+    state.debts = { ...state.debts, bank: 90000, firms: 10000, monthlyPayment: 4500 }; ensureDebtHistory();
+    saveState(); renderAll(); showView("viewToday"); renderToday();
+    const steps = state.day.steps, rows = [...document.querySelectorAll("#timeline .jl-rstep")];
+    const free = steps.findIndex(s => !isWorkStage(s) && !isCloseStage(s)), close = steps.findIndex(isCloseStage);
+    const freeRow = rows[free], closeRow = rows[close];
+    const out = {
+      freeMainInRhythm: !!freeRow.querySelector(".jl-rstep-main, [data-stage-main]"),
+      evening: !!document.querySelector("#freePlan [data-free-goal]"),
+      closeMain: closeRow.querySelector(".jl-rstep-main")?.textContent || "", closeNote: closeRow.querySelector(".jl-rstep-note")?.textContent || "",
+      workNote: rows[steps.findIndex(isWorkStage)].querySelector(".jl-rstep-note")?.textContent || "",
+      cashLine: document.getElementById("todayCashState").hidden, cashText: document.getElementById("todayCashState").textContent,
+    };
+    document.querySelector("#freePlan [data-free-goal]").click();
+    const sid = steps[free].id; out.markBoth = !!dailyState().goalDone && !!dailyState().stageDone?.[sid];
+    document.querySelector("#freePlan [data-free-goal]").click();
+    out.unmarkBoth = !dailyState().goalDone && !dailyState().stageDone?.[sid];
+    stageMainDone(sid, true); renderFreePlan(); out.androidYesShows = document.querySelector("#freePlan [data-free-goal]").getAttribute("aria-pressed") === "true";
+    showView("viewGoal"); renderGoal();
+    out.next = document.getElementById("goalNext").textContent; out.globalBalance = !!document.getElementById("goalGlobalBalance");
+    showView("viewMoney"); renderMoney();
+    out.debtCells = [...document.querySelectorAll("#debtSummary [data-debt-open]")].map(b => b.dataset.debtOpen);
+    // the version: only in «Настройки → О приложении»
+    out.versionPlaces = ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings"].filter(v => { showView(v); return document.getElementById(v).innerText.includes(APP_VERSION) && !document.getElementById(v).contains(document.getElementById("appVersion")); });
+    out.authHasVersion = document.getElementById("authLock").innerText.includes(APP_VERSION);
+    out.topHasVersion = (document.querySelector(".topbar, header")?.innerText || "").includes(APP_VERSION);
+    return out;
+  });
+  assert.ok(r.evening && !r.freeMainInRhythm, "the goal step of the free stage is shown once — in «Твой вечер»: " + JSON.stringify(r));
+  assert.match(r.closeMain, /Закрыть день/); assert.equal(r.closeNote, "", "«Итог дня»: the note «Закрыть день: …» repeated «Главное»");
+  assert.equal(r.workNote, "Главный рабочий блок дня.", "a note that says something new stays");
+  assert.ok(r.cashLine && r.cashText === "", "«Касса» repeated the «Баланс» tile: " + r.cashText);
+  assert.ok(r.markBoth && r.unmarkBoth && r.androidYesShows, "«Сделал» in the evening and «Да» of the stage are one mark");
+  assert.equal(r.next, "Этап 2 из 4: Закрыть кредит за машину", "the next step is the stage in progress");
+  assert.ok(!r.globalBalance, "«Касса · Общий капитал» repeated the tiles");
+  assert.deepEqual(r.debtCells, ["bank", "firms", "pay", "paid"], "«Всего» repeated «Долг осталось»");
+  assert.deepEqual(r.versionPlaces, [], "the version is shown outside «О приложении»"); assert.ok(!r.authHasVersion && !r.topHasVersion);
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

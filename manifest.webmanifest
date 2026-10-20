@@ -5,7 +5,7 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0f3a2f",
+  "background_color": "#0f2236",
   "theme_color": "#08121e",
   "lang": "ru",
   "description": "Личная система: день, задачи, цели, деньги · работает офлайн",
