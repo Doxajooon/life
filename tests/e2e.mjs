@@ -364,6 +364,28 @@ await test("Правка сразу после перезапуска, до пе
   await A.ctx.close(); await B.ctx.close();
 });
 
+await test("74.3: данные, сохранённые на устройстве без отметки «не отправлено», всё равно уходят в облако при запуске", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await sync(page);
+  assert.ok(cloud.row, "first upload");
+  // the 20.10 phone: a record lands in the local copy (an old build, a save before the sync was ready) and the «unsent» mark is missing
+  await page.evaluate(() => { const s = JSON.parse(localStorage.getItem("LIFE_CONTROL_V52")); s.notes.push({ id: "lost1", title: "только на телефоне", body: "", at: new Date().toISOString() });
+    s.reports = { ...(s.reports || {}), "2026-10-19": { done: "итог с телефона", block: "", future: "", tomorrow: "", savedAt: new Date().toISOString(), steps: {} } };
+    s._lastSavedAt = new Date(Date.now() + 60000).toISOString(); localStorage.setItem("LIFE_CONTROL_V52", JSON.stringify(s)); localStorage.removeItem("LIFE_CONTROL_CLOUD_DIRTY_V1"); });
+  await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
+  assert.ok(await page.evaluate(() => state.notes.some(n => n.id === "lost1")), "the local copy was not loaded");
+  await page.evaluate(async () => { while (cloudSyncInFlight) await cloudSyncInFlight.catch(() => {}); });
+  await sync(page);
+  assert.ok(cloud.row.state.notes.some(n => n.id === "lost1"), "the record stayed on the device: " + JSON.stringify(cloud.row.state.notes.map(n => n.id)));
+  assert.equal(cloud.row.state.reports["2026-10-19"]?.done, "итог с телефона");
+  // nothing changed after that: the next syncs only ask for the version, no more uploads
+  const pushes = () => cloud.hits.filter(h => /^(POST|PATCH) \/rest\/v1\/life_state$/.test(h)).length, before = pushes();
+  await sync(page); await sync(page); await page.reload(); await page.waitForFunction(() => appReadyForSync === true); await sync(page);
+  assert.equal(pushes(), before, "uploads with no change: " + (pushes() - before));
+  await ctx.close();
+});
+
 await test("Истёкший токен обновляется сам, без запроса пароля", async () => {
   const cloud = makeCloud();
   const { ctx, page } = await device(cloud, { session: { ...cloud.session(), access_token: cloud.token(-60) } });

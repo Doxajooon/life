@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.2.0");
-assert.match(gradle, /versionCode 742\b/); assert.match(gradle, /versionName '74\.2'/);
-assert.match(csproj, /<Version>74\.2\.0<\/Version>/);
+assert.equal(pkg.version, "74.3.0");
+assert.match(gradle, /versionCode 743\b/); assert.match(gradle, /versionName '74\.3'/);
+assert.match(csproj, /<Version>74\.3\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.2'") && html.includes('id="appVersion">74.2</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.3'") && html.includes('id="appVersion">74.3</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-2'"), "service worker cache must be life-v74-2");
+assert.ok(sw.includes("'life-v74-3'"), "service worker cache must be life-v74-3");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
