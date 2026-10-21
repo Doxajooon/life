@@ -158,14 +158,24 @@ async function getUser(req: Request) {
 }
 
 // Rate limit stored in the database (public.ai_usage), so it survives cold starts of the function.
+// 74.5: a row is written only AFTER Google answered — Google's own 503/timeouts no longer eat the limit.
+// Failed attempts are still counted (no new table, no migration): their row is stored with `at` moved back
+// exactly ATTEMPT_SHIFT_MS, so it never counts as an answer, and «attempts in the last hour» reads that shifted window.
+const MAX_ATTEMPTS_PER_HOUR = 30;
+const ATTEMPT_SHIFT_MS = 3650 * 86400_000;
 // deno-lint-ignore no-explicit-any
-async function allowRequest(sb: any, userId: string) {
-  const since = new Date(Date.now() - 3600_000).toISOString();
-  const { count, error } = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", since);
-  if (error) return true; // never block the user because of the counter itself
-  if ((count ?? 0) >= MAX_REQUESTS_PER_HOUR) return false;
-  await sb.from("ai_usage").insert({ user_id: userId });
-  return true;
+async function allowRequest(sb: any, userId: string): Promise<"" | "answers" | "attempts"> {
+  const now = Date.now(), iso = (t: number) => new Date(t).toISOString();
+  const ok = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - 3600_000));
+  if (ok.error) return ""; // never block the user because of the counter itself
+  if ((ok.count ?? 0) >= MAX_REQUESTS_PER_HOUR) return "answers";
+  const bad = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - ATTEMPT_SHIFT_MS - 3600_000)).lt("at", iso(now - ATTEMPT_SHIFT_MS + 60_000));
+  if (!bad.error && (ok.count ?? 0) + (bad.count ?? 0) >= MAX_ATTEMPTS_PER_HOUR) return "attempts";
+  return "";
+}
+// deno-lint-ignore no-explicit-any
+async function countUse(sb: any, userId: string, answered: boolean) {
+  try { await sb.from("ai_usage").insert(answered ? { user_id: userId } : { user_id: userId, at: new Date(Date.now() - ATTEMPT_SHIFT_MS).toISOString() }); } catch { /* the counter never breaks an answer */ }
 }
 
 const API = "https://generativelanguage.googleapis.com/v1beta";
@@ -271,9 +281,12 @@ Deno.serve(async (req) => {
     if (req.method !== "POST") return fail("method", 405, "Неверный запрос к AI. Обнови приложение.", { method: req.method });
     const body = await req.json().catch(() => ({}));
     if (!configured()) return fail("no_key", 503, "AI ещё не настроен: на сервере нет ключа Gemini (GEMINI_API_KEY в Supabase → Edge Functions → Secrets). Пока работает «Полный разбор» без AI.");
-    if (!(await allowRequest(a.sb, a.user.id))) return fail("app_limit", 429, "Слишком много запросов AI за час (лимит 10). Попробуй через час — пока работает «Полный разбор» без AI.");
+    const limit = await allowRequest(a.sb, a.user.id);
+    if (limit === "answers") return fail("app_limit", 429, "Слишком много запросов AI за час (лимит 10). Попробуй через час — пока работает «Полный разбор» без AI.");
+    if (limit === "attempts") return fail("app_limit", 429, "Слишком много попыток AI за час (лимит 30). Попробуй через час — пока работает «Полный разбор» без AI.", { attempts: true });
     if (body?.ping === true) {
       const t = await gemini("Ответь ровно двумя словами: «AI работает».", false, "Ты отвечаешь коротко по-русски.");
+      await countUse(a.sb, a.user.id, !("error" in t));
       return "error" in t ? fail(t.reason, t.status, t.error, { mode: "ping", tried: t.tried ?? 0, ms: t.ms ?? 0 }) : json({ ok: true, model: t.model, output_text: "Подключение работает · модель " + t.model, sources: [] });
     }
     const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
@@ -289,6 +302,7 @@ Deno.serve(async (req) => {
       ? promptRules() + "\n\nРЕЖИМ: GOAL. Проанализируй именно главную цель пользователя. Ответь в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — 2–3 подтверждённых факта.\n2) ЧТО УЖЕ ДОСТИГНУТО — только закрытые этапы и реальные результаты из данных.\n3) ЧТО УЖЕ ЕСТЬ — капитал в цели, свободная касса, доходы/расходы и другие подтверждённые ресурсы.\n4) ГЛАВНАЯ ПРОБЛЕМА — один главный ограничитель.\n5) ГЛАВНЫЙ ФОКУС — один приоритет на ближайшие 7 дней.\n6) ПЛАН ДЕЙСТВИЙ — 3–5 строк в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n7) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — ровно одно действие.\n\nНе выдумывай отсутствующие данные. Если цель не имеет суммы или срока, прямо укажи это и дай ближайшее измеримое действие без выдуманной цифры.\n\nДанные:\n" + JSON.stringify(ctx)
       : promptRules() + "\n\nРЕЖИМ: LIFE. Сделай самый полезный честный разбор жизни пользователя. Ответь ровно восемью блоками, каждый с новой строки, название ЗАГЛАВНЫМИ буквами и тире:\nГДЕ Я СЕЙЧАС — 3 главных факта с цифрами (деньги, долг, цель, дисциплина).\nПЛЮСЫ — 2–4 реальные сильные стороны, каждая с цифрой из данных.\nМИНУСЫ — 2–4 слабых места и утечки: где теряются деньги (категории, мелкие траты, перерасход банков), что проседает в дисциплине (незакрытые дни, привычки, задачи). С цифрами.\nКУДА Я ИДУ — прогноз при текущем темпе, с арифметикой: когда будет достигнута цель, когда закроется долг (используй app_numbers.debtFreeLine, если есть), что будет через 3 месяца, если ничего не менять, и что изменится, если исправить главный минус.\nГЛАВНЫЙ РИСК — одна вещь, которая сильнее всего угрожает цели.\nПЛАН НА 7 ДНЕЙ — 3–5 строк: P1/P2/P3 | действие | срок | измеримый результат.\nШАГ НА СЕГОДНЯ — ровно одно действие на сегодня.\nКАК ЛУЧШЕ ИСПОЛЬЗОВАТЬ ПРИЛОЖЕНИЕ — 1–2 конкретных совета, если из данных видно, что чего-то не хватает (не записываются расходы, нет банков, нет привычек, дни не закрываются). Если всего хватает — напиши это одной строкой.\nБез markdown, без звёздочек и решёток. app_numbers — точные расчёты приложения, используй их: dayReport — отчёт сегодняшнего дня (заработал, потратил, куда ушло, что сделано для цели), avoidHabits — привычки-отказы и их серии, wins — победы, goalStage — текущий этап цели и что нужно, чтобы его закрыть. Не выдумывай данные; если чего-то нет, так и скажи.\n\nДанные:\n" + JSON.stringify(ctx);
     const r = mode === "week" ? await gemini(p, false, weekRules()) : mode === "deep" ? await gemini(p, false, deepRules()) : await gemini(p, sc.webSearch);
+    await countUse(a.sb, a.user.id, !("error" in r));
     if ("error" in r) return fail(r.reason, r.status, r.error, { mode, tried: r.tried ?? 0, ms: r.ms ?? 0 });
     return json({ ok: true, model: r.model || MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
   } catch (e) {

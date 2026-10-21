@@ -1442,6 +1442,28 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 @media (min-width:560px){.jl-stickers{grid-template-columns:repeat(6,minmax(0,1fr))}}
 /* goal form */
 .ge-preview{display:grid;justify-items:center;gap:12px;text-align:center;margin:4px 0 16px}
+/* 74.5: data not in the cloud — a clear line under the header */
+.toast.tappable.show{pointer-events:auto;cursor:pointer}
+.jl-syncwarn{display:flex;align-items:center;gap:10px;margin:8px 16px 0;padding:10px 14px;border-radius:14px;font-size:.88rem;font-weight:700;color:#3b2300;background:#fde68a;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.jl-syncwarn span:nth-child(2){flex:1;min-width:0}
+.jl-syncwarn .btn{background:#fff;color:#3b2300}
+/* 74.5: the way out of debt is seen every day */
+.jl-freeline{display:flex;align-items:center;gap:8px;width:100%;margin:0 0 12px;padding:11px 14px;border:0;border-radius:14px;text-align:left;font:inherit;font-size:.92rem;font-weight:700;color:var(--text);background:color-mix(in srgb,var(--panel) 90%,transparent);box-shadow:0 6px 18px rgba(0,0,0,.12);cursor:pointer}
+.jl-freeline b{color:var(--green)}
+.jl-free-delta{margin-left:auto;font-style:normal;font-weight:800;color:var(--green);opacity:0;transform:translateY(4px);transition:opacity .25s ease,transform .25s ease}
+.jl-free-delta.show{opacity:1;transform:none}
+.jl-salary{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:11px 14px;border-radius:14px;font-size:.9rem;font-weight:600;background:color-mix(in srgb,var(--panel) 90%,transparent);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.jl-salary span{flex:1;min-width:0}
+.jl-monthsum{margin:0 0 12px;padding:13px 15px;border-radius:14px;font-size:.92rem;line-height:1.45;background:color-mix(in srgb,var(--panel) 92%,transparent);box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.jl-monthsum b{display:block;margin-bottom:3px}
+@media (prefers-reduced-motion:reduce){.jl-free-delta{transition:none}}
+/* 74.5: a photo of the goal — what you are walking towards */
+.ge-photo{display:grid;gap:8px}
+.ge-photo img,.jl-goal-photo{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.22)}
+.jl-goal-photo{margin:6px 0 10px}
+.ge-photo small{color:var(--muted);font-size:.8rem;line-height:1.4}
+.v-goal-ico.has-photo{padding:0;overflow:hidden;background:none}
+.v-goal-ico.has-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .ge-preview .v-cover.round{transition:box-shadow .4s ease,background .4s ease}
 .ge-preview .v-cover-ico{animation:jlFloatY 3s ease-in-out infinite}
 .ge-pv-text{display:grid;gap:6px;justify-items:center}
@@ -2150,6 +2172,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <button class="iconbtn" id="settingsBtn" type="button" aria-label="Настройки" title="Настройки"><svg class="ui-icon" aria-hidden="true"><use href="#i-settings"></use></svg></button>
   </div>
 </header>
+<div class="jl-syncwarn" id="syncWarn" role="status" hidden><span class="jl-emo" aria-hidden="true">☁️</span><span id="syncWarnText">Данные не в облаке</span><button class="btn small" type="button" id="syncWarnBtn">Отправить сейчас</button></div>
 <nav class="v-chips" id="topChips" aria-label="Разделы"><button type="button" data-tab="viewToday" class="active"><svg class="ui-icon" aria-hidden="true"><use href="#i-home"></use></svg>Сегодня</button><button type="button" data-tab="viewGoal"><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg>Цели</button><button type="button" data-tab="viewMoney"><svg class="ui-icon" aria-hidden="true"><use href="#i-wallet"></use></svg>Деньги</button><button type="button" data-tab="viewNotes"><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg>Заметки</button></nav>
 <main class="shell">
 <section id="viewToday" class="view active">
@@ -2180,6 +2203,8 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">✅</span>Задачи на сегодня</h2><div class="v-sub" id="taskSummary">—</div></div><div class="jl-head-act"><span class="jl-miniring" id="taskRing" aria-hidden="true"></span><button class="v-add sm" type="button" id="addTaskBtn" aria-label="Добавить задачу" title="Добавить задачу"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div></div>
     <div class="v-tasks" id="taskList"></div>
   </div>
+  <button class="jl-freeline" type="button" id="todayFreedom" hidden><span class="jl-emo" aria-hidden="true">🕊️</span><span id="todayFreedomText">—</span><em class="jl-free-delta" id="todayFreedomDelta" aria-live="polite"></em></button>
+  <div class="jl-salary" id="todaySalary" hidden><span id="todaySalaryText">—</span><button class="btn primary small" type="button" id="todaySalaryBtn">Отложил</button></div>
 
   <div class="card jl-rhythm">
     <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🗓️</span>Ритм дня</h2><div class="v-sub" id="rhythmSub">Твой день по этапам · напомню в начале и в конце</div></div><span class="jl-count" id="dayCompletion">0 / 3</span></div>
@@ -2277,6 +2302,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
 
   <div class="card jl-goalhero">
     <div class="jl-goalhero-top"><span class="jl-goalhero-label"><span class="jl-emo" aria-hidden="true">👑</span>Главная цель</span><button class="jl-icon-btn" type="button" id="editGoalBtn" aria-label="Изменить главную цель" title="Изменить"><svg class="ui-icon" aria-hidden="true"><use href="#i-pencil"></use></svg></button></div>
+    <img class="jl-goal-photo" id="goalPhoto" alt="Фото главной цели" hidden>
     <div class="goal-title" id="goalTitle">—</div>
     <div class="goal-why" id="goalWhy">—</div>
     <div class="jl-goalring-row"><div class="jl-goalring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="gr-bg" cx="60" cy="60" r="50"/><circle class="gr-fill" id="goalRing" cx="60" cy="60" r="50"/></svg><span class="jl-goalring-ico" id="goalHeroIco"></span><b id="goalFinancePct">—</b></div>
@@ -2339,6 +2365,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <section class="jl-fsec field"><div class="jl-fsec-h"><span>4</span>Зачем тебе это <em>необязательно</em></div><textarea id="geDesc" maxlength="900" rows="3" placeholder="Как изменится жизнь, когда дойдёшь"></textarea></section>
     <section class="jl-fsec field"><div class="jl-fsec-h"><span>5</span>Иконка</div><div class="v-icon-picker ge-icons" id="geIcons"></div></section>
     <section class="jl-fsec field"><div class="jl-fsec-h"><span>6</span>Цвет</div><div class="v-color-picker ge-colors" id="geColors"></div></section>
+    <section class="jl-fsec field"><div class="jl-fsec-h"><span>7</span>Фото цели <em>необязательно</em></div><div class="ge-photo" id="gePhotoBox"><img id="gePhotoImg" alt="Фото цели" hidden><small id="gePhotoHint">Фото того, к чему идёшь: дом, машина, место. Видно каждый день на «Цели».</small><div class="jl-chips"><button type="button" class="btn small" id="gePhotoPick"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg> <span id="gePhotoPickLabel">Добавить фото</span></button><button type="button" class="btn small" id="gePhotoDrop" hidden>Убрать фото</button></div><input type="file" id="gePhotoFile" accept="image/*" hidden aria-label="Выбрать фото цели"></div></section>
     <div class="v-note-main" id="geInfo">—</div>
   </div>
   <button class="btn primary v-wide" type="button" id="geSave"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg> Сохранить</button>
@@ -2372,6 +2399,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
         <div class="donut-layout" style="margin-top:12px"><div class="donut" id="expenseDonut"><div class="donut-center" id="expenseDonutCenter">Нет данных</div></div><div class="chart-legend" id="expenseLegend"></div></div><div class="sub" id="expenseChartNote" style="margin-top:9px">Добавь расходы — распределение появится автоматически.</div>
         <h2 class="v-title" style="margin-top:18px"><span class="jl-emo" aria-hidden="true">💼</span>Откуда приходят</h2><div class="source-list" id="profitSourceList"></div><div class="sub" id="profitSourceNote" style="margin-top:9px">Источники появятся после первой записи дохода.</div>
       </div>
+    <div class="jl-monthsum" id="debtMonthSum" hidden></div>
     <div class="jl-debt-block"><div class="row jl-section-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📉</span>Долг</h2><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div><div class="jl-debtplan" id="debtPlan"></div><div class="jl-fpath" id="freedomPath" aria-label="Путь к свободе от долга"></div></div>
     <div class="card"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📋</span>История долга</h2><div id="debtSummary" style="margin-top:10px"></div><div class="debt-chart" id="debtChart" role="group" aria-label="Динамика долга по последним записям"></div><div class="debt-chart-note" id="debtChartNote"></div></div>
 
@@ -2433,11 +2461,11 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <button class="v-row" type="button" id="setProfileRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-user"></use></svg></span><span class="v-row-main"><b>Профиль</b><small id="setProfileSub">—</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setSecurityRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"></use></svg></span><span class="v-row-main"><b>Безопасность</b><small>Смена пароля аккаунта</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <label class="v-row" id="setBioRow" hidden><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-finger"></use></svg></span><span class="v-row-main"><b>Вход по отпечатку</b><small id="setBioSub">Открывать приложение отпечатком или PIN телефона — без пароля</small></span><span class="v-switch"><input type="checkbox" id="setBiometric"><i></i></span></label>
-    <button class="v-row" type="button" id="setSyncRow" title="Синхронизировать сейчас"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sync"></use></svg></span><span class="v-row-main"><b>Синхронизация</b><small><span id="cloudSyncState">Автоматически</span> · <span id="cloudNetworkState">—</span></small><small><span id="cloudState">—</span> · <span id="cloudUserState">—</span></small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
+    <button class="v-row" type="button" id="setSyncRow" title="Синхронизировать сейчас"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sync"></use></svg></span><span class="v-row-main"><b>Синхронизация</b><small><span id="cloudSyncState">Автоматически</span> · <span id="cloudNetworkState">—</span></small><small><span id="cloudState">—</span> · <span id="cloudUserState">—</span></small><small>Последняя отправка в облако: <span id="cloudPushAt">—</span></small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
   </div>
   <div class="v-group-title">Внешний вид</div>
   <div class="v-group">
-    <label class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-moon"></use></svg></span><span class="v-row-main"><b>Тёмная тема</b><small>Тёмно-синий интерфейс</small></span><span class="v-switch"><input type="checkbox" id="setDarkTheme"><i></i></span></label>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-moon"></use></svg></span><span class="v-row-main"><b>Тема</b><small>«Авто» — светлая днём, тёмная вечером</small></span><select id="setTheme" aria-label="Тема"><option value="light">Светлая</option><option value="dark">Тёмная</option><option value="auto">Авто</option></select></div>
     <button class="v-row" type="button" id="setLangRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-globe"></use></svg></span><span class="v-row-main"><b>Язык</b><small>Язык интерфейса</small></span><span class="v-row-val">Русский</span></button>
     <button class="v-row" type="button" id="setModeRow"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-layout"></use></svg></span><span class="v-row-main"><b>Режим</b><small>Мобильный или ПК</small></span><span class="v-row-val"><span id="setModeVal">—</span><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <div class="v-row"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-text"></use></svg></span><span class="v-row-main"><b>Размер текста</b><small>Масштаб нового интерфейса</small></span><select id="setFontScale" aria-label="Размер текста"><option value="1">Мелкий</option><option value="1.1">Обычный</option><option value="1.2">Крупный</option></select></div>
@@ -2464,7 +2492,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, копия в файл</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.4</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.5</span></div>
   </div>
 </section>
 
@@ -2515,7 +2543,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.4';
+const APP_NAME='Life',APP_VERSION='74.5';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -2713,7 +2741,7 @@ async function cloudPushNow(user,baseStamp){
   }
   const row=Array.isArray(rows)?rows[0]:rows;
   state[CLOUD_BASE_KEY]=row?.updated_at||'';rememberBaseStamp(state[CLOUD_BASE_KEY]);if(state[CLOUD_BASE_KEY])try{localStorage.removeItem(FIRST_PUSH_KEY)}catch(e){}
-  _cloudBaseFingerprint=sentFingerprint;storeCloudBase(sentState);
+  _cloudBaseFingerprint=sentFingerprint;storeCloudBase(sentState);lsSet(CLOUD_PUSH_KEY,Date.now());
   if(stateFingerprint()===sentFingerprint)clearCloudDirty();else{markCloudDirty();queueCloudSync()}
   return row;
 }
@@ -2801,7 +2829,7 @@ async function cloudAutoSync(){
   cloudSyncInFlight=(async()=>{
     try{
       const r=await cloudSync();
-      if(r?.ok){_lastSyncOkAt=Date.now();if(r.user)cloudDailySnapshot(r.user).catch(()=>{});setTimeout(maybeOnboarding,0);setSyncStatus('Синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));if(r.merged)toast('Данные объединены','Изменения с другого устройства добавлены без потерь.')}
+      if(r?.ok){_lastSyncOkAt=Date.now();if(!isCloudDirty())lsSet(CLOUD_OK_KEY,Date.now());setTimeout(renderSyncWarn,0);if(r.user)cloudDailySnapshot(r.user).catch(()=>{});setTimeout(maybeOnboarding,0);setSyncStatus('Синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));if(r.merged)toast('Данные объединены','Изменения с другого устройства добавлены без потерь.')}
       else if(!cloudAuth())setSyncStatus('Нужен вход');
       return !!r?.ok;
     }catch(e){
@@ -2927,7 +2955,7 @@ function migrateV57(s,fromVersion){
   // V56 → V57: the existing single goal becomes the first, main entry of goals[].
   if(!goals.length)goals=[{id:'goal-main',title:s.goal.title,description:s.goal.why||'',icon:'target',color:'blue',targetAmount:0,targetDate:'',manualSaved:0,contributions:[],createdAt:s.goal.finance?.startedAt||s.profile.createdAt||now,completedAt:'',main:true}];
   const mains=goals.filter(g=>g.main);if(mains.length!==1){const keep=mains[0]||goals[0];goals.forEach(g=>{g.main=g===keep})}
-  s.goals=goals;syncMainGoalMirror(s);
+  goals.forEach(g=>{if('photo' in g&&!goalPhotoOk(g.photo))delete g.photo});s.goals=goals;syncMainGoalMirror(s);
   if(fromVersion&&fromVersion<57)s._migratedToV57At=s._migratedToV57At||now;
 }
 // The main entry mirrors state.goal; its money lives only in state.goal.finance so nothing is counted twice.
@@ -3057,6 +3085,10 @@ function normalize(s){
   if(!Array.isArray(s.habits))s.habits=[];s.habits=s.habits.filter(h=>h&&typeof h==='object'&&h.title).map(h=>({...h,id:String(h.id||uid()),title:String(h.title).slice(0,60),kind:['daily','weekdays','weekly'].includes(h.kind)?h.kind:'daily',target:Math.max(1,Math.min(7,Number(h.target)||7)),avoid:h.avoid===true}));if(!s.habitLog||typeof s.habitLog!=='object'||Array.isArray(s.habitLog))s.habitLog={};if(!Array.isArray(s.budgets))s.budgets=[];s.budgets=s.budgets.map(b=>({id:b.id||uid(),name:String(b.name||'Без названия'),planned:Math.max(0,Number(b.planned)||0),emoji:typeof b.emoji==='string'?b.emoji.slice(0,8):'',tops:(Array.isArray(b.tops)?b.tops:[]).filter(x=>x&&Number(x.amount)>0).map(x=>({id:String(x.id||uid()),month:String(x.month||''),amount:Number(x.amount),at:x.at||''}))})).filter(b=>b.name);if(!Array.isArray(s.profits))s.profits=[];s.profits=s.profits.map(x=>{const y={...x};const g=normalizeProfitSource(y.sourceGroup||y.source);y.amount=Math.max(0,Number(y.amount)||0);y.source=g;y.sourceGroup=g;return y});if(!Array.isArray(s.expenses))s.expenses=[];s.expenses=s.expenses.map(x=>{const y={...x};y.amount=Math.max(0,Number(y.amount)||0);y.category=String(y.category||'Другое');y.categoryIcon=y.categoryIcon||'🧾';return y});if(!Array.isArray(s.notes))s.notes=[];s.notes=s.notes.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',category:NOTE_CATS[n.category]?n.category:'personal'}));if(!Array.isArray(s.notesTrash))s.notesTrash=[];s.notesTrash=s.notesTrash.map(n=>({...n,id:n.id||uid(),title:String(n.title||'Без заголовка'),body:String(n.body||''),at:n.at||n.createdAt||new Date().toISOString(),pinned:!!n.pinned,updatedAt:n.updatedAt||'',deletedAt:n.deletedAt||new Date().toISOString()}));if(!Array.isArray(s.achievements))s.achievements=[];if(!Array.isArray(s.notificationsLog))s.notificationsLog=[];
   if(!s.reports||typeof s.reports!=='object')s.reports={};if(!s.dailyMotivations||typeof s.dailyMotivations!=='object')s.dailyMotivations={};if(!s._sent||typeof s._sent!=='object')s._sent={};if(!s.daily||typeof s.daily!=='object')s.daily={};if(!['normal','heavy','rest'].includes(s.dayMode))s.dayMode='normal';if(!Array.isArray(s.debtHistory))s.debtHistory=[];s.drafts=s.drafts&&typeof s.drafts==='object'?s.drafts:clone(DEFAULT.drafts);for(const k of Object.keys(DEFAULT.drafts))if(!(k in s.drafts))s.drafts[k]=clone(DEFAULT.drafts[k]);if(!(Number(s.debtBaseline)>0)){const base=Number(s.debts?.bank||0)+Number(s.debts?.firms||0);if(base>0)s.debtBaseline=base;}
   s.income=Math.max(0,Number(s.income)||0);s.debts=s.debts&&typeof s.debts==='object'?s.debts:{};for(const k of ['bank','firms','monthlyPayment'])s.debts[k]=Math.max(0,Number(s.debts[k])||0);
+  // 74.5: day of salary (1..31), the monthly «Отложил» marks and the month summary — absent = not set
+  if('payday' in s.debts){const pd=Math.round(Number(s.debts.payday));if(pd>=1&&pd<=31)s.debts.payday=pd;else delete s.debts.payday}
+  for(const k of ['salaryAsk','salaryDone'])if(k in s.debts&&!/^\d{4}-\d{2}$/.test(String(s.debts[k])))delete s.debts[k];
+  if('monthSum' in s.debts&&!(s.debts.monthSum&&typeof s.debts.monthSum==='object'&&/^\d{4}-\d{2}$/.test(String(s.debts.monthSum.month))&&typeof s.debts.monthSum.text==='string'))delete s.debts.monthSum;
   s.day=s.day&&Array.isArray(s.day.steps)?s.day:clone(DEFAULT.day);s.day.steps=s.day.steps.slice(0,3);while(s.day.steps.length<3)s.day.steps.push(clone(DEFAULT.day.steps[s.day.steps.length]));
   for(let i=0;i<s.day.steps.length;i++){const d=DEFAULT.day.steps[i];s.day.steps[i]=merge(s.day.steps[i],d);if(!Array.isArray(s.day.steps[i].details))s.day.steps[i].details=[]}
   // 74.2: the schedule by weekday — {"0".."6": {off:true} | {t:[[start,end]×3]}}; a day that is missing or wrong follows the usual times
@@ -3081,6 +3113,9 @@ function load(){
   }
   return normalize(clone(DEFAULT));
 }
+// 74.5: read by normalize()/save during load() — defined before the first load
+const DIRTY_SINCE_KEY='JL_CLOUD_DIRTY_SINCE_V745',CLOUD_OK_KEY='JL_CLOUD_OK_AT_V745',CLOUD_PUSH_KEY='JL_CLOUD_PUSH_AT_V745';
+const GOAL_PHOTO_MAX=350000;
 let state=load(),toastTimer=null,lastDay='',autosaveTimer=null; let moneyViewDate=keyDay();
 
 
@@ -3094,8 +3129,27 @@ let cloudSyncTimer=null, cloudSyncInFlight=null, _localDirtySinceCloud=false, _c
 try{_localDirtySinceCloud=localStorage.getItem(CLOUD_DIRTY_KEY)==='1'}catch(e){}
 function fingerprintOf(s){try{const x=clone(s);delete x._lastSavedAt;delete x._persistentStorageRequestedAt;delete x._persistentStorageGranted;delete x[CLOUD_BASE_KEY];return JSON.stringify(x)}catch(e){return ''}}
 function stateFingerprint(){return fingerprintOf(state)}
-function markCloudDirty(){_localDirtySinceCloud=true;try{localStorage.setItem(CLOUD_DIRTY_KEY,'1')}catch(e){}}
-function clearCloudDirty(){_localDirtySinceCloud=false;try{localStorage.removeItem(CLOUD_DIRTY_KEY)}catch(e){}}
+function markCloudDirty(){_localDirtySinceCloud=true;try{localStorage.setItem(CLOUD_DIRTY_KEY,'1');if(!localStorage.getItem(DIRTY_SINCE_KEY))localStorage.setItem(DIRTY_SINCE_KEY,String(Date.now()))}catch(e){}}
+function clearCloudDirty(){_localDirtySinceCloud=false;try{localStorage.removeItem(CLOUD_DIRTY_KEY);localStorage.removeItem(DIRTY_SINCE_KEY)}catch(e){}}
+/* 74.5: the data must not stay off the cloud unnoticed. A line under the header when, with the internet on,
+   the device has not agreed with the cloud for 24 h, or an edit has waited to be sent for over an hour. */
+function lsNum(k){try{return Number(localStorage.getItem(k))||0}catch(e){return 0}}
+function lsSet(k,v){try{localStorage.setItem(k,String(v))}catch(e){}}
+function syncWarnSince(now=Date.now()){
+  if(!cloudAuth()||('onLine' in navigator&&navigator.onLine===false))return 0;
+  let ok=lsNum(CLOUD_OK_KEY);if(!ok){lsSet(CLOUD_OK_KEY,now);ok=now} // the first start of 74.5 counts from now
+  const since=isCloudDirty()?lsNum(DIRTY_SINCE_KEY):0;
+  if(since&&now-since>3600e3)return since;
+  if(now-ok>24*3600e3)return ok;
+  return 0;
+}
+function fmtWhen(t){const d=new Date(t),today=keyDay(),day=keyDay(d),hm=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});return day===today?'сегодня '+hm:d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' '+hm}
+function renderSyncWarn(){
+  const el=$('syncWarn');if(!el)return;const since=syncWarnSince(),show=since>0&&!document.body.classList.contains('auth-locked');
+  if(el.hidden!==!show)el.hidden=!show;if(show)textOf($('syncWarnText')).v='Данные не в облаке с '+fmtWhen(since);
+  const p=$('cloudPushAt');if(p){const t=lsNum(CLOUD_PUSH_KEY);textOf(p).v=t?fmtWhen(t):'ещё не было на этом устройстве'}
+}
+async function syncWarnSend(){const b=$('syncWarnBtn');if(b)b.disabled=true;try{const ok=await cloudAutoSync();renderSyncWarn();toast(ok?'Данные в облаке ☁️':'Пока не отправилось',ok?'Всё сохранено':'Проверь интернет — попробую ещё раз сам')}finally{if(b)b.disabled=false}}
 function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(appReadyForSync&&cloudAuth()&&_persistFingerprint)cloudAutoSync().catch(()=>{})},2500)}
 function saveState(){if(_wipingDevice)return;
   try{
@@ -3656,9 +3710,10 @@ const MOTIVATIONS=[
 const PRAYER_CITIES={dushanbe:['Душанбе',38.56,68.79],khujand:['Худжанд',40.28,69.62],bokhtar:['Бохтар',37.84,68.78],kulob:['Куляб',37.91,69.78],khorog:['Хорог',37.49,71.55],istaravshan:['Истаравшан',39.91,69.0],tashkent:['Ташкент',41.3,69.24],samarkand:['Самарканд',39.65,66.96],bishkek:['Бишкек',42.87,74.59],almaty:['Алматы',43.24,76.89],moscow:['Москва',55.76,37.62],spb:['Санкт-Петербург',59.94,30.31],istanbul:['Стамбул',41.01,28.98],dubai:['Дубай',25.2,55.27],makkah:['Мекка',21.42,39.83]};
 const PRAYER_NAMES=[['fajr','Фаджр'],['dhuhr','Зухр'],['asr','Аср'],['maghrib','Магриб'],['isha','Иша']];
 function prayerOn(){const v=state?.settings?.prayerOn;return typeof v==='boolean'?v:quoteSet()==='hadith'}
-function prayerCity(){const c=state?.settings?.prayerCity;return PRAYER_CITIES[c]?c:'dushanbe'}
+// 74.5: a city not chosen yet → Khujand (the owner's city); a chosen one is never touched
+function prayerCity(){const c=state?.settings?.prayerCity;return PRAYER_CITIES[c]?c:'khujand'}
 function prayerTimes(date=new Date(),city=prayerCity(),asr=state?.settings?.prayerAsr==='shafii'?1:2){
-  const [,lat,lng]=PRAYER_CITIES[city]||PRAYER_CITIES.dushanbe,R=Math.PI/180,sin=d=>Math.sin(d*R),cos=d=>Math.cos(d*R),tan=d=>Math.tan(d*R),fix=(a,b)=>{a-=b*Math.floor(a/b);return a<0?a+b:a};
+  const [,lat,lng]=PRAYER_CITIES[city]||PRAYER_CITIES.khujand,R=Math.PI/180,sin=d=>Math.sin(d*R),cos=d=>Math.cos(d*R),tan=d=>Math.tan(d*R),fix=(a,b)=>{a-=b*Math.floor(a/b);return a<0?a+b:a};
   const d0=new Date(date.getFullYear(),date.getMonth(),date.getDate(),12),tz=-d0.getTimezoneOffset()/60;
   const jd=Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())/864e5+2440587.5-lng/360;
   const sun=t=>{const D=jd+t-2451545,g=fix(357.529+.98560028*D,360),q=fix(280.459+.98564736*D,360),L=fix(q+1.915*sin(g)+.02*sin(2*g),360),e=23.439-.00000036*D;
@@ -3689,7 +3744,7 @@ function applyLayoutMode(mode,persist=true){
   document.body.dataset.layout=eff;
   document.querySelectorAll('[data-layout-mode]').forEach(b=>b.classList.toggle('active',b.dataset.layoutMode===choice));
   const meta=document.querySelector('meta[name="theme-color"]');
-  if(meta)meta.setAttribute('content',state.settings?.theme==='dark'?'#081120':'#f3f6fb');
+  if(meta)meta.setAttribute('content',document.documentElement.dataset.theme==='dark'?'#081120':'#f3f6fb');
 }
 function autoLayout(){return window.matchMedia('(min-width:1100px)').matches?'desktop':'mobile'}
 function layoutChoice(){try{const v=localStorage.getItem('LIFE_CONTROL_LAYOUT_V1');return v==='mobile'||v==='desktop'?v:'auto'}catch(e){return 'auto'}}
@@ -3702,8 +3757,12 @@ function initLayoutMode(){
   window.addEventListener('resize',re);window.addEventListener('orientationchange',re);
 }
 function applyFont(){const f=['manrope','nunito','inter'].includes(state.settings?.font)?state.settings.font:'manrope';if(document.documentElement.dataset.font!==f)document.documentElement.dataset.font=f}
-function setTheme(){applyFont();try{if(localStorage.getItem('LIFE_CONTROL_DESIGN_V56')!=='1'){state.settings=state.settings||{};state.settings.theme='dark';localStorage.setItem('LIFE_CONTROL_DESIGN_V56','1')}}catch(e){}const fontScale=clamp(Number(state.settings?.fontScale)||1.1,1,1.22);document.documentElement.style.setProperty('--font-scale',String(fontScale));document.documentElement.style.fontSize=(16*fontScale).toFixed(2)+'px';const darkSwitch=$('setDarkTheme');if(darkSwitch)darkSwitch.checked=state.settings.theme==='dark';const dark=state.settings.theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#081120':'#f3f6fb');try{if(window.AndroidBridge&&AndroidBridge.setTheme)AndroidBridge.setTheme(!!dark)}catch(e){}}
-function toast(title,body=''){clearTimeout(toastTimer);$('toast').innerHTML=`<strong>${esc(title)}</strong>${body?`<div>${esc(body)}</div>`:''}`;$('toast').classList.add('show');toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3600)}
+/* 74.5: theme «light» / «dark» / «auto» — auto is light from sunrise to sunset of the prayer city, dark in the evening and at night */
+function themeChoice(){const t=state.settings?.theme;return t==='light'||t==='auto'?t:'dark'}
+function themeIsDark(d=new Date()){const c=themeChoice();if(c!=='auto')return c==='dark';const t=prayerTimes(d),m=d.getHours()*60+d.getMinutes();return !(Number.isFinite(t.sunrise)&&Number.isFinite(t.maghrib)&&m>=t.sunrise&&m<t.maghrib)}
+function setTheme(){applyFont();try{if(localStorage.getItem('LIFE_CONTROL_DESIGN_V56')!=='1'){state.settings=state.settings||{};state.settings.theme='dark';localStorage.setItem('LIFE_CONTROL_DESIGN_V56','1')}}catch(e){}const fontScale=clamp(Number(state.settings?.fontScale)||1.1,1,1.22);document.documentElement.style.setProperty('--font-scale',String(fontScale));document.documentElement.style.fontSize=(16*fontScale).toFixed(2)+'px';const pick=$('setTheme');if(pick&&pick.value!==themeChoice())pick.value=themeChoice();const dark=themeIsDark(),want=dark?'dark':'light';document.documentElement.dataset.theme=want;document.querySelector('meta[name="theme-color"]').setAttribute('content',dark?'#081120':'#f3f6fb');try{if(window.AndroidBridge&&AndroidBridge.setTheme)AndroidBridge.setTheme(!!dark)}catch(e){}}
+let _toastAct=null;
+function toast(title,body='',act=null){_toastAct=act;$('toast').classList.toggle('tappable',!!act);clearTimeout(toastTimer);$('toast').innerHTML=`<strong>${esc(title)}</strong>${body?`<div>${esc(body)}</div>`:''}`;$('toast').classList.add('show');toastTimer=setTimeout(()=>$('toast').classList.remove('show'),3600)}
 function logNotice(title,body,kind='tasks',read=false){state.notificationsLog.unshift({id:uid(),title,body,kind,read:!!read,at:new Date().toISOString()});state.notificationsLog=state.notificationsLog.slice(0,80);saveState();updateBell();if(currentView==='viewNotifications')renderNotifications()}
 let notificationAudioCtx=null;function audioCtx(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;notificationAudioCtx=notificationAudioCtx||new AC();if(notificationAudioCtx.state==='suspended')notificationAudioCtx.resume().catch(()=>{});return notificationAudioCtx}
 let _lastChimeAt=0,_glassBuf=null,_glassLoading=null;
@@ -3740,7 +3799,7 @@ function showWebNotification(title,body,taskId){
     const o={body,tag:taskId?'jl-task-'+taskId:'jl-'+Date.now(),icon:'icon-192.png',badge:'icon-192.png',silent:true,renotify:!!taskId};
     const plain=()=>{try{new Notification(title,o)}catch(e){}};
     // Buttons «Готово» / «Через 15 мин» work only through the service worker.
-    const stage=String(taskId||'').startsWith('stage:'),withActions=taskId?{...o,data:{taskId},requireInteraction:true,actions:[{action:'done',title:stage?'Да':'Готово'},{action:'snooze',title:stage?'Перенести':'Через 15 мин'}]}:o;
+    const stage=String(taskId||'').startsWith('stage:'),pay=String(taskId||'').startsWith('debtpay:'),withActions=taskId?{...o,data:{taskId},requireInteraction:true,actions:pay?[{action:'done',title:'Отложил'}]:[{action:'done',title:stage?'Да':'Готово'},{action:'snooze',title:stage?'Перенести':'Через 15 мин'}]}:o;
     if(navigator.serviceWorker?.getRegistration)navigator.serviceWorker.getRegistration().then(r=>r?.showNotification?r.showNotification(title,withActions).catch(()=>r.showNotification(title,o)):plain()).catch(plain);else plain();
   }catch(e){}
 }
@@ -3768,6 +3827,7 @@ function hostPlaysSound(){try{return !!(window.__jlHostSound&&window.chrome?.web
 /* «Готово» / «Через 15 мин» from a reminder (Android notification, browser notification, link). */
 const SNOOZE_MIN=15;
 function applyReminderAction(a,taskId){
+  if(String(taskId).startsWith('debtpay:')){if(a!=='done')return true;return salaryPaid(String(taskId).slice(8))||true}
   if(String(taskId).startsWith('stage:')){const sid=String(taskId).slice(6);if(!daySteps().some(s=>s.id===sid))return false;
     if(a==='done'){stageMainDone(sid,true);saveState();renderAll();toast('Главное этапа сделано ✅','Ещё шаг к цели');haptic(14);return true}
     if(a==='snooze'){const when=moveStageMain(sid);saveState();scheduleNativeTasks();renderAll();toast('Перенёс главное',when);return true}
@@ -3882,7 +3942,9 @@ function setSky(){const d=new Date(),h=d.getHours()+d.getMinutes()/60,[up,down]=
   for(const n in css)if(r.style.getPropertyValue(n)!==css[n])r.style.setProperty(n,css[n]);if(r.dataset.daypart!==part)r.dataset.daypart=part}
 function runScheduler(){
   const day=keyDay();
-  if(!runScheduler._sky||Date.now()-runScheduler._sky>60000){runScheduler._sky=Date.now();setSky()}
+  if(appReadyForSync)aiRetryTick();
+  if(appReadyForSync&&(!runScheduler._debt||Date.now()-runScheduler._debt>60000)){runScheduler._debt=Date.now();try{checkSalaryDay();checkDebtMonth()}catch(e){}renderSyncWarn()}
+  if(!runScheduler._sky||Date.now()-runScheduler._sky>60000){runScheduler._sky=Date.now();setSky();if(themeChoice()==='auto'&&document.documentElement.dataset.theme!==(themeIsDark()?'dark':'light'))setTheme()}
   if(appReadyForSync&&Date.now()>_actionsRetryAt){_actionsRetryAt=Date.now()+30000;try{if(localStorage.getItem(ACTIONS_LEFT_KEY))pullNativeActions()}catch(e){}}
   if(day!==lastDay){lastDay=day;renderAll();scheduleNative()} // a new day: new words in the stage alarms
   const autoDone=autoCompleteExpiredStages(),info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
@@ -4133,7 +4195,7 @@ function renderToday(){
   for(const k of ['done','block','tomorrow']){const el=$('r'+k[0].toUpperCase()+k.slice(1));if(el&&document.activeElement!==el)el.value=rep[k]||''}
   textOf($('reportSaved')).v=rep.closedAt?`Закрыт в ${new Date(rep.closedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`:(rep.done||rep.block||rep.tomorrow)?'Черновик сохранён':'';
   renderStreak();renderDayLedger();renderWeek();renderTodayLimit();renderHabits();renderFreePlan();pushWidget();
-  renderPulseRings();renderTodayGoal();renderTodayMoney();renderTasks();setText('brandSub',greeting()+(state.profile.name?', '+state.profile.name:''));
+  renderPulseRings();renderTodayGoal();renderTodayMoney();renderTasks();renderTodayFreedom();setText('brandSub',greeting()+(state.profile.name?', '+state.profile.name:''));
 }
 
 function stageEmoji(s,i){const t=String(s?.title||'').toLowerCase();
@@ -4347,18 +4409,19 @@ function parseGoalAI(text){
   const summary=raw.split(/\n/).filter(x=>/ТЕКУЩЕЕ СОСТОЯНИЕ|ГЛАВНАЯ ПРОБЛЕМА|ЧТО УЖЕ ДОСТИГНУТО|ЧТО УЖЕ ЕСТЬ|ГЛАВНЫЙ ФОКУС/i.test(x)).slice(0,6).join('\n');
   return {summary:summary||raw.slice(0,1200),actions:actions.slice(0,5),raw};
 }
-async function requestGoalAI(force=false){
+async function requestGoalAI(force=false,manual=false){
   if(goalAiBusy||state.ai?.enabled===false||!cloudAuth()?.access_token)return;
   const key=goalAIKey();if(!force&&state.goal.aiPlan?.goalKey===key)return;
+  // 74.5: one request at a time — while Google is busy the app waits and retries itself
+  {const j=aiJob('goal');if(j){if(manual){if(j.silent){j.silent=false;aiJobsSave()}const t=aiWaitText('goal');setText('goalAiState','⏳ '+t);toast(t)}return}}
   goalAiBusy=true;const stateEl=$('goalAiState'),summary=$('goalAiSummary');
   if(stateEl)stateEl.textContent='AI строит план по текущей цели…';
   if(summary)summary.textContent='Собираю факты: прогресс, капитал, деньги, долги, результаты и ближайший шаг.';
   try{
     const data=await callAI({mode:'goal',scope:{goal:true,money:true,reports:true,notes:false,webSearch:false},onSlow:()=>{if(stateEl)stateEl.textContent=AI_SLOW_TEXT}});
-    const parsed=parseGoalAI(data.output_text||'');
-    state.goal.aiPlan={goalKey:key,at:new Date().toISOString(),summary:parsed.summary,actions:parsed.actions,raw:parsed.raw};
-    state.goal.aiPlanAt=state.goal.aiPlan.at;state.goal.aiPlanGoalKey=key;saveState();if(cloudAuth())cloudPush().catch(()=>{});renderGoalAI();toast('AI-план цели готов','Система показала, что уже есть и что делать дальше.');
-  }catch(e){if(stateEl)stateEl.textContent='AI сейчас недоступен';if(summary)summary.textContent=String(e?.message||e||'Неизвестная ошибка AI.')}
+    aiSaveGoal(data,key);if(manual)toast('AI-план цели готов','Система показала, что уже есть и что делать дальше.');
+  }catch(e){if(aiBusy(e)){aiQueue('goal',{},!manual);if(stateEl)stateEl.textContent=manual?'⏳ '+AI_BUSY_TEXT:'⏳ Google сейчас занят — AI-план построится сам чуть позже.';if(summary)summary.textContent='';return}
+    if(stateEl)stateEl.textContent='AI сейчас недоступен';if(summary)summary.textContent=String(e?.message||e||'Неизвестная ошибка AI.')}
   finally{goalAiBusy=false}
 }
 /* A milestone closes itself when the numbers say so. Rules by its words:
@@ -4398,6 +4461,7 @@ function maybeAutoGoalAI(){
 function renderGoal(){autoMilestones();
   syncGoalFinanceCompletion();
   const total=state.goal.milestones.length,done=state.goal.milestones.filter(m=>m.done).length,p=total?Math.round(done/total*100):0;
+  {const ph=$('goalPhoto'),src=goalPhoto((state.goals||[]).find(g=>g.main));if(ph){ph.hidden=!src;if(src&&ph.getAttribute('src')!==src)ph.src=src;if(!src&&ph.hasAttribute('src'))ph.removeAttribute('src')}}
   setText('goalTitle',goalName());setText('goalWhy',state.goal.why||(hasGoal()?'Добавь, зачем тебе эта цель — так легче держать курс.':'Назови цель, сумму и срок — приложение покажет путь и следующий шаг.'));setText('goalPct',p+'%');setWidth('goalBar',p+'%');{const cm=currentMilestone(),ms=state.goal.milestones||[];/* 74.1: the stage in progress, not «Добавь первый этап» when stages exist */setText('goalNext',state.goal.next||(cm?`Этап ${cm.i+1} из ${cm.n}: ${cm.m.title}`:ms.length?'Все этапы пройдены — добавь следующий':hasGoal()?'Добавь первый этап':'Задай цель в «Изменить цель»'))}setText('goalCount',`${done} / ${total}`);
   const f=goalFinanceMetrics();
   {const noT=!(Number(f.target)>0),em=$('goalMoneyEmpty'),bd=$('goalMoneyBody');if(em)em.hidden=!noT;if(bd)bd.hidden=noT;const gc=$('goalChartCard');if(gc)gc.hidden=noT;const sb=$('goalMoneySetBtn');if(sb)sb.onclick=()=>openGoalFinanceEdit()}
@@ -4650,7 +4714,7 @@ function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
   if(!isProfit){$$('[data-expense-quick]').forEach(btn=>btn.onclick=()=>{const v=btn.dataset.expenseQuick;$('moneyType').value=v;$$('[data-expense-quick]').forEach(x=>x.classList.toggle('active',x===btn));syncCustomVisibility();autosave();if(v==='Другое')setTimeout(()=>$('moneyCustomCategory')?.focus(),30)})}
   if($('moneyDebtPay')){$('moneyDebtPay').checked=!!draft.debtPay;$('moneyDebtWrap').style.display=draft.debtPay?'block':'none';if($('moneyDebtType'))$('moneyDebtType').value=draft.debtType||'bank'}
   syncCustomVisibility();
-  $('saveMoneyBtn').onclick=()=>{const amount=Number($('moneyAmount').value),dateKey=$('moneyDate').value||moneyViewDate||keyDay();if(!(amount>0)){toast('Укажи сумму');return}const at=moneyDateIso(dateKey,editItem?editItem.at:''),common={amount,at,dateKey,note:$('moneyNote').value.trim()};if(editing){const old=Number(editItem.amount)||0;if(!isProfit&&editItem.debtPayment)state.debts[editItem.debtPayment]=Math.max(0,Number(state.debts[editItem.debtPayment]||0)+old);Object.assign(editItem,common);if(isProfit){const g=normalizeProfitSource($('moneyType').value);editItem.source=g;editItem.sourceGroup=g}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';Object.assign(editItem,{category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;saveState();closeModal();renderAll();toast('Операция изменена','Все показатели и графики пересчитаны.');return}if(isProfit){const g=normalizeProfitSource($('moneyType').value);state.profits.push({...common,id:uid(),source:g,sourceGroup:g})}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';state.expenses.push({...common,id:uid(),category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;if(noticeAllowed('finance'))logNotice(isProfit?'Доход добавлен':'Расход добавлен',`${isProfit?'+':'−'}${fmtMoney(amount)} · ${isProfit?normalizeProfitSource($('moneyType').value):($('moneyType').value==='Другое'?(String($('moneyCustomCategory')?.value||'').trim()||'Другое'):$('moneyType').value)}`,'finance',true);saveState();closeModal();renderAll();toast(isProfit?'Прибыль добавлена':'Расход добавлен','Цель, капитал, графики и шкалы обновлены.');if(isProfit&&splitTargets().length)setTimeout(()=>openIncomeSplit(amount,dateKey),0)};focusSoon('moneyAmount',50)
+  $('saveMoneyBtn').onclick=()=>{const amount=Number($('moneyAmount').value),dateKey=$('moneyDate').value||moneyViewDate||keyDay();if(!(amount>0)){toast('Укажи сумму');return}const at=moneyDateIso(dateKey,editItem?editItem.at:''),common={amount,at,dateKey,note:$('moneyNote').value.trim()};if(editing){const old=Number(editItem.amount)||0;if(!isProfit&&editItem.debtPayment)state.debts[editItem.debtPayment]=Math.max(0,Number(state.debts[editItem.debtPayment]||0)+old);Object.assign(editItem,common);if(isProfit){const g=normalizeProfitSource($('moneyType').value);editItem.source=g;editItem.sourceGroup=g}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';Object.assign(editItem,{category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;saveState();closeModal();renderAll();toast('Операция изменена','Все показатели и графики пересчитаны.');return}if(isProfit){const g=normalizeProfitSource($('moneyType').value);state.profits.push({...common,id:uid(),source:g,sourceGroup:g})}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';state.expenses.push({...common,id:uid(),category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;if(noticeAllowed('finance'))logNotice(isProfit?'Доход добавлен':'Расход добавлен',`${isProfit?'+':'−'}${fmtMoney(amount)} · ${isProfit?normalizeProfitSource($('moneyType').value):($('moneyType').value==='Другое'?(String($('moneyCustomCategory')?.value||'').trim()||'Другое'):$('moneyType').value)}`,'finance',true);saveState();closeModal();renderAll();toast(isProfit?'Прибыль добавлена':'Расход добавлен','Цель, капитал, графики и шкалы обновлены.');if(isProfit&&normalizeProfitSource($('moneyType').value)==='Зарплата'&&dateKey.slice(0,7)===keyDay().slice(0,7))askSalary('income');if(isProfit&&splitTargets().length)setTimeout(()=>openIncomeSplit(amount,dateKey),0)};focusSoon('moneyAmount',50)
 }
 
 // a live goal preview inside the goal forms: the ring, «было → станет», what is left and what to put aside each month
@@ -4718,7 +4782,7 @@ function openDebtHistory(focus='all'){
   $('dhEdit').onclick=()=>{closeModal();openDebtEdit()};
 }
 function openDebtEdit(){
-  const d=state.drafts?.debt||{};openModal(`<div class="close-row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Обязательства</div><h2>Долги</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="grid g2"><div class="field"><label for="dnb">Кому должен</label><input id="dnb" maxlength="24" value="${esc(d.bankName??(debtNamed('bank')?debtLabel('bank'):''))}" placeholder="Банк, человек, магазин…"></div><div class="field"><label for="db">Сумма</label><input id="db" type="number" min="0" value="${esc(d.bank??state.debts.bank)}"></div></div><div class="grid g2"><div class="field"><label for="dnf">Второй долг — кому</label><input id="dnf" maxlength="24" value="${esc(d.firmsName??(debtNamed('firms')?debtLabel('firms'):''))}" placeholder="Банк, человек, магазин…"></div><div class="field"><label for="df">Сумма</label><input id="df" type="number" min="0" value="${esc(d.firms??state.debts.firms)}"></div></div><div class="field"><label>Обязательный платёж / месяц</label><input id="dp" type="number" min="0" value="${esc(d.payment??state.debts.monthlyPayment)}"></div><div class="sub">Изменения долгов сохраняются автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveDebtBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;const autosave=()=>{state.debts.bank=Math.max(0,Number($('db').value)||0);state.debts.firms=Math.max(0,Number($('df').value)||0);state.debts.monthlyPayment=Math.max(0,Number($('dp').value)||0);state.debts.labels={bank:cleanLabel($('dnb').value)||(debtNamed('bank')?debtLabel('bank'):'Долг 1'),firms:cleanLabel($('dnf').value)||(debtNamed('firms')?debtLabel('firms'):'Долг 2')};saveDraft('debt',{bank:$('db').value,firms:$('df').value,payment:$('dp').value,bankName:$('dnb').value,firmsName:$('dnf').value});renderMoney();renderTodayLight()};['db','df','dp','dnb','dnf'].forEach(id=>$(id).addEventListener('input',autosave));$('saveDebtBtn').onclick=()=>{autosave();clearDraft('debt');closeModal();renderMoney();toast('Долги обновлены')}
+  const d=state.drafts?.debt||{};openModal(`<div class="close-row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Обязательства</div><h2>Долги</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="grid g2"><div class="field"><label for="dnb">Кому должен</label><input id="dnb" maxlength="24" value="${esc(d.bankName??(debtNamed('bank')?debtLabel('bank'):''))}" placeholder="Банк, человек, магазин…"></div><div class="field"><label for="db">Сумма</label><input id="db" type="number" min="0" value="${esc(d.bank??state.debts.bank)}"></div></div><div class="grid g2"><div class="field"><label for="dnf">Второй долг — кому</label><input id="dnf" maxlength="24" value="${esc(d.firmsName??(debtNamed('firms')?debtLabel('firms'):''))}" placeholder="Банк, человек, магазин…"></div><div class="field"><label for="df">Сумма</label><input id="df" type="number" min="0" value="${esc(d.firms??state.debts.firms)}"></div></div><div class="grid g2"><div class="field"><label for="dp">Обязательный платёж / месяц</label><input id="dp" type="number" min="0" value="${esc(d.payment??state.debts.monthlyPayment)}"></div><div class="field"><label for="dpd">День зарплаты</label><input id="dpd" type="number" min="1" max="31" inputmode="numeric" placeholder="число, напр. 5" value="${esc(d.payday??(state.debts.payday||''))}"></div></div><div class="sub">Изменения долгов сохраняются автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveDebtBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;const autosave=()=>{state.debts.bank=Math.max(0,Number($('db').value)||0);state.debts.firms=Math.max(0,Number($('df').value)||0);state.debts.monthlyPayment=Math.max(0,Number($('dp').value)||0);{const pd=Math.round(Number($('dpd').value)||0);if(pd>=1&&pd<=31)state.debts.payday=pd;else delete state.debts.payday}state.debts.labels={bank:cleanLabel($('dnb').value)||(debtNamed('bank')?debtLabel('bank'):'Долг 1'),firms:cleanLabel($('dnf').value)||(debtNamed('firms')?debtLabel('firms'):'Долг 2')};saveDraft('debt',{bank:$('db').value,firms:$('df').value,payment:$('dp').value,payday:$('dpd').value,bankName:$('dnb').value,firmsName:$('dnf').value});renderMoney();renderTodayLight()};['db','df','dp','dpd','dnb','dnf'].forEach(id=>$(id).addEventListener('input',autosave));$('saveDebtBtn').onclick=()=>{autosave();clearDraft('debt');closeModal();renderMoney();toast('Долги обновлены')}
 }
 function openNotifications(){closeModal();showView('viewNotifications')}
 
@@ -4748,6 +4812,7 @@ async function getAISessionToken(){
 }
 // after this long without an answer Google is usually overloaded (503) and the function is already trying the next model
 const AI_SLOW_MS=7000,AI_SLOW_TEXT='⏳ Google перегружен, пробую другую модель…';
+function aiError(data,status){return Object.assign(new Error(normalizeAIError(data,status)),{reason:String(data?.reason||''),status})}
 async function callAI(options={}){
   if(state.ai?.enabled===false)throw new Error('AI-анализ выключен. Включи его в «Настройки → AI».');
   if('onLine' in navigator&&navigator.onLine===false)throw new Error('Нет интернета, поэтому AI не ответит. Подключись к сети и повтори — '+APP_NAME+' пока работает офлайн.'+AI_FALLBACK);
@@ -4765,9 +4830,9 @@ async function callAI(options={}){
   if(!res.ok){
     if((res.status===401||res.status===403)&&cloudAuth()?.refresh_token){
       try{await cloudRefresh()}catch(e){}const rt=cloudAuth()?.access_token;
-      if(rt){let retry;try{retry=await fetch(AI_FUNCTION_URL,{method:'POST',headers:{...headers,Authorization:'Bearer '+rt},body:JSON.stringify(body),cache:'no-store'})}catch(e){throw new Error('Нет связи с сервером AI. Проверь интернет и попробуй ещё раз.'+AI_FALLBACK)}const rr=await retry.text();let rd={};try{rd=JSON.parse(rr||'{}')}catch(e){};if(!retry.ok)throw new Error(normalizeAIError(rd,retry.status));data=rd}
-      else throw new Error(normalizeAIError(data,res.status));
-    }else throw new Error(normalizeAIError(data,res.status));
+      if(rt){let retry;try{retry=await fetch(AI_FUNCTION_URL,{method:'POST',headers:{...headers,Authorization:'Bearer '+rt},body:JSON.stringify(body),cache:'no-store'})}catch(e){throw new Error('Нет связи с сервером AI. Проверь интернет и попробуй ещё раз.'+AI_FALLBACK)}const rr=await retry.text();let rd={};try{rd=JSON.parse(rr||'{}')}catch(e){};if(!retry.ok)throw aiError(rd,retry.status);data=rd}
+      else throw aiError(data,res.status);
+    }else throw aiError(data,res.status);
   }
   if(!options.ping&&!String(data?.output_text||'').trim())throw new Error('Google прислал пустой ответ. Нажми ещё раз — обычно со второго раза приходит.'+AI_FALLBACK);
   return data;
@@ -4776,12 +4841,79 @@ function sourcesHtml(sources){
   if(!Array.isArray(sources)||!sources.length)return '';
   return '<div class="notice-time" style="margin-top:9px">Источники: '+sources.slice(0,8).map(x=>'<a href="'+esc(x.url||'#')+'" target="_blank" rel="noopener noreferrer">'+esc(x.title||x.url||'источник')+'</a>').join(' · ')+'</div>';
 }
+/* ===== 74.5: AI retries by itself when Google is busy =====
+   Only «gemini_overloaded» / «gemini_timeout»: the answer is not an error, the app waits and asks again in 2, 5 and 15 minutes
+   (one job per kind: life / week / goal). The job lives on this device (localStorage) and survives a restart for an hour
+   since the first tap. A ready answer is saved like a normal one, «AI-анализ готов» comes as a notification, a tap opens it.
+   The automatic goal plan retries silently. Other errors (limit, key, login, no internet) are shown at once, as before. */
+const AI_RETRY_KEY='JL_AI_RETRY_V745',AI_READY_KEY='JL_AI_READY_V745',AI_RETRY_MIN=[2,5,15],AI_RETRY_TTL=3600e3;
+const AI_BUSY_TEXT='Google сейчас занят. Повторю сам через 2 минуты — пришлю уведомление, когда ответ будет готов.';
+let _aiJobs=null;const _aiRun={};
+function aiBusy(e){return ['gemini_overloaded','gemini_timeout'].includes(e?.reason)}
+function aiJobs(){if(!_aiJobs){try{_aiJobs=JSON.parse(localStorage.getItem(AI_RETRY_KEY)||'{}')}catch(e){_aiJobs={}}if(!_aiJobs||typeof _aiJobs!=='object'||Array.isArray(_aiJobs))_aiJobs={}}return _aiJobs}
+function aiJobsSave(){try{const m=aiJobs();if(Object.keys(m).length)localStorage.setItem(AI_RETRY_KEY,JSON.stringify(m));else localStorage.removeItem(AI_RETRY_KEY)}catch(e){}}
+function aiJob(kind){const m=aiJobs(),j=m[kind];if(!j)return null;if(!(Date.now()-Number(j.first)<AI_RETRY_TTL)){delete m[kind];aiJobsSave();return null}return j}
+function aiQueue(kind,opts={},silent=false){const now=Date.now(),m=aiJobs();m[kind]={kind,silent:!!silent,first:now,tries:1,next:now+AI_RETRY_MIN[0]*60e3,opts};aiJobsSave();return m[kind]}
+function hm(t){return new Date(t).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}
+function aiWaitText(kind){const j=aiJob(kind);return j?'Уже жду ответ, повтор в '+hm(j.next):''}
+function aiWaitBox(box,text){if(!box)return;box.innerHTML='<div class="analysis-item jl-ai-wait"><b>⏳ '+esc(text)+'</b><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}
+function aiWaitingShown(kind,box){const t=aiWaitText(kind);if(!t)return false;aiWaitBox(box,t);toast(t);return true}
+function aiSaveLife(data,scope){const entry={id:uid(),at:new Date().toISOString(),scope:scope||aiSourceConsent(),result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[],model:String(data.model||'')};state.ai.lastAnalysisAt=entry.at;state.ai.history=Array.isArray(state.ai.history)?state.ai.history:[];state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});return entry}
+function showLifeAnswer(box){const e=(state.ai?.history||[]).find(x=>!x.scope?.mode);if(!box||!e)return;box.innerHTML='<div class="analysis-item jl-ai-result"><b>Разбор твоей жизни · '+esc(e.model||'Gemini')+'</b>'+aiTextHtml(e.result)+sourcesHtml(e.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(e.at)))+'</div></div>'}
+function aiSaveWeek(data){const text=String(data.output_text||'').trim();if(!text)throw new Error('AI вернул пустой ответ.');
+  state.ai.weekly=state.ai.weekly&&typeof state.ai.weekly==='object'?state.ai.weekly:{};state.ai.weekly[weekKey()]={at:new Date().toISOString(),text};
+  const keys=Object.keys(state.ai.weekly).sort();for(const k of keys.slice(0,Math.max(0,keys.length-12)))delete state.ai.weekly[k];
+  saveState();scheduleNativeTasks();const box=$('wkText');if(box)box.dataset.sig='';renderWeek()}
+function aiSaveGoal(data,key=goalAIKey()){const parsed=parseGoalAI(data.output_text||'');
+  state.goal.aiPlan={goalKey:key,at:new Date().toISOString(),summary:parsed.summary,actions:parsed.actions,raw:parsed.raw};
+  state.goal.aiPlanAt=state.goal.aiPlan.at;state.goal.aiPlanGoalKey=key;saveState();if(cloudAuth())cloudPush().catch(()=>{});renderGoalAI()}
+function openAIAnswer(kind){
+  try{localStorage.removeItem(AI_READY_KEY)}catch(e){}
+  if(kind==='goal'){showView('viewGoal');setTimeout(()=>$('goalAiState')?.scrollIntoView({block:'center'}),60);return}
+  const week=kind==='week',w=state.ai?.weekly?.[weekKey()],e=(state.ai?.history||[]).find(x=>!x.scope?.mode);if(week?!w:!e)return;
+  openModal('<div class="close-row"><div><div class="eyebrow">'+APP_NAME+' AI</div><h2>'+(week?'Разбор недели':'AI-анализ готов')+'</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="ai-result" id="aiResult" style="margin-top:12px">'+(week?'<div class="analysis-item jl-ai-result">'+weekTextHtml(w.text)+'</div>':'')+'</div>');
+  $('closeModalBtn').onclick=closeModal;if(!week)showLifeAnswer($('aiResult'));
+}
+function aiDelivered(kind,j){
+  if(j.silent)return;
+  const title=kind==='week'?'Разбор недели готов':kind==='goal'?'AI-план цели готов':'AI-анализ готов';
+  notify(title,'Google ответил. Нажми, чтобы открыть.','goals');_toastAct=()=>openAIAnswer(kind);$('toast').classList.add('tappable');
+  if(document.visibilityState!=='visible')try{localStorage.setItem(AI_READY_KEY,JSON.stringify({kind,at:Date.now()}))}catch(e){}
+  if(kind==='life'&&$('aiResult')&&$('modalBack')?.classList.contains('open'))showLifeAnswer($('aiResult'));
+}
+function aiOpenReady(){let r=null;try{r=JSON.parse(localStorage.getItem(AI_READY_KEY)||'null')}catch(e){}if(!r)return;if(Date.now()-Number(r.at)>AI_RETRY_TTL){try{localStorage.removeItem(AI_READY_KEY)}catch(e){}return}openAIAnswer(r.kind)}
+async function aiRetryRun(kind){
+  const j=aiJob(kind);if(!j||_aiRun[kind])return;_aiRun[kind]=true;
+  try{
+    const o=j.opts||{},data=kind==='week'?await callAI({mode:'week',scope:{goal:true,money:true,reports:true,notes:false}})
+      :kind==='goal'?await callAI({mode:'goal',scope:{goal:true,money:true,reports:true,notes:false,webSearch:false}})
+      :await callAI({scope:o.scope||aiSourceConsent(),facts:lifeFacts()});
+    if(kind==='week')aiSaveWeek(data);else if(kind==='goal')aiSaveGoal(data);else aiSaveLife(data,o.scope);
+    delete aiJobs()[kind];aiJobsSave();aiDelivered(kind,j);
+  }catch(e){
+    const m=aiJobs();if(!m[kind])return;
+    if(aiBusy(e)&&j.tries<=AI_RETRY_MIN.length){
+      if(j.tries<AI_RETRY_MIN.length){j.tries++;j.next=Date.now()+AI_RETRY_MIN[j.tries-1]*60e3;aiJobsSave();if(kind==='goal'&&!j.silent)setText('goalAiState','⏳ '+aiWaitText('goal'));return}
+    }
+    // the last retry failed (or another error came): one calm notice, no more tries
+    delete m[kind];aiJobsSave();
+    if(!j.silent){if(aiBusy(e))notify('AI сегодня перегружен','Попробуй вечером. Полный разбор работает без AI.','goals');else notify('AI не ответил',String(e?.message||e).slice(0,160),'goals')}
+    if(kind==='goal')renderGoalAI();
+  }finally{_aiRun[kind]=false}
+}
+function aiRetryTick(now=Date.now()){
+  const m=aiJobs();if(!Object.keys(m).length||('onLine' in navigator&&navigator.onLine===false)||!cloudAuth())return;
+  for(const k of Object.keys(m)){const j=aiJob(k);if(j&&now>=Number(j.next))aiRetryRun(k)}
+}
 function openGeminiAnalysis(){
   const consent=aiSourceConsent();
   openModal('<div class="close-row"><div><div class="eyebrow">'+APP_NAME+' AI</div><h2>Анализ моей жизни</h2><div class="sub">AI получает только выбранные данные из твоего аккаунта. Запрос запускается только вручную.</div></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="card" style="margin-top:12px;padding:13px;background:var(--soft)"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Что использовать</div><div class="stack" style="margin-top:8px"><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span><input id="aiGoal" type="checkbox" '+(consent.goal?'checked':'')+'> Цель и её прогресс</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span><input id="aiMoney" type="checkbox" '+(consent.money?'checked':'')+'> Деньги, доходы, расходы и долги</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span><input id="aiReports" type="checkbox" '+(consent.reports?'checked':'')+'> Итоги и этапы дня</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-note"></use></svg></span><input id="aiNotes" type="checkbox" '+(consent.notes?'checked':'')+'> Заметки (последние 15)</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg></span><input id="aiWeb" type="checkbox" '+(state.ai?.webSearch?'checked':'')+'> Проверять актуальные внешние факты через Google</label></div><div class="sub" style="margin-top:8px">Основные данные сервер читает из твоей строки life_state в Supabase. Полный JSON состояния из браузера не отправляется.</div></div><div style="margin-top:10px"><button class="btn primary" id="aiRunBtn" style="width:100%"><svg class="ui-icon"><use href="#i-spark"></use></svg> Запустить AI-анализ</button></div><div class="ai-result" id="aiResult" style="margin-top:12px"></div>');
   $('closeModalBtn').onclick=closeModal;
   $('aiWeb').onchange=()=>{state.ai.webSearch=$('aiWeb').checked;saveState()};
- $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult'),runBtn=$('aiRunBtn');runBtn.disabled=true;box.innerHTML='<div class="empty">AI читает твои данные: деньги, долг, цель, дни, привычки и задачи…</div>';try{if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}const data=await callAI({scope:c,facts:lifeFacts(),onSlow:()=>{if($('aiResult')===box)box.innerHTML='<div class="empty" data-ai-slow>'+AI_SLOW_TEXT+'</div>'}}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item jl-ai-result"><b>Разбор твоей жизни · '+esc(data.model||'Gemini')+'</b>'+aiTextHtml(entry.result)+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Ответ AI не пришёл</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{runBtn.disabled=false}};
+ $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult'),runBtn=$('aiRunBtn');
+   if(aiWaitingShown('life',box))return;
+   runBtn.disabled=true;box.innerHTML='<div class="empty">AI читает твои данные: деньги, долг, цель, дни, привычки и задачи…</div>';try{if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}const data=await callAI({scope:c,facts:lifeFacts(),onSlow:()=>{if($('aiResult')===box)box.innerHTML='<div class="empty" data-ai-slow>'+AI_SLOW_TEXT+'</div>'}});aiSaveLife(data,c);showLifeAnswer(box);toast('AI-анализ сохранён')}catch(e){if(aiBusy(e)){aiQueue('life',{scope:c});aiWaitBox(box,AI_BUSY_TEXT)}else{box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Ответ AI не пришёл</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}}finally{runBtn.disabled=false}};
+  if(aiJob('life'))aiWaitBox($('aiResult'),aiWaitText('life'));
 }
 function validateDaySteps(){
   const steps=state.day.steps;
@@ -5087,22 +5219,20 @@ function renderWeek(){
   setText('wkRunLabel',cur?'Обновить разбор':sunday?'Получить разбор недели':'Получить разбор сейчас');
 }
 async function runWeekReview(){
-  const btn=$('wkRun'),box=$('wkText');if(!btn||btn.disabled)return;btn.disabled=true;setText('wkRunLabel','AI разбирает неделю…');
+  const btn=$('wkRun'),box=$('wkText');if(!btn||btn.disabled)return;
+  if(aiJob('week')){if(box){box.dataset.sig='wait';box.textContent=localWeekText()+'\n\n⏳ '+aiWaitText('week')}toast(aiWaitText('week'));return}
+  btn.disabled=true;setText('wkRunLabel','AI разбирает неделю…');
   try{
     if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}
     const data=await callAI({mode:'week',scope:{goal:true,money:true,reports:true,notes:false},onSlow:()=>setText('wkRunLabel',AI_SLOW_TEXT)});
-    const text=String(data.output_text||'').trim();if(!text)throw new Error('AI вернул пустой ответ.');
-    state.ai.weekly=state.ai.weekly&&typeof state.ai.weekly==='object'?state.ai.weekly:{};
-    state.ai.weekly[weekKey()]={at:new Date().toISOString(),text};
-    const keys=Object.keys(state.ai.weekly).sort();for(const k of keys.slice(0,Math.max(0,keys.length-12)))delete state.ai.weekly[k];
-    saveState();scheduleNativeTasks();if(box)box.dataset.sig='';renderWeek();toast('Разбор недели готов');
-  }catch(e){const msg=String(e?.message||e);if(box){box.dataset.sig='err';box.textContent=localWeekText()+'\n\n⏳ '+msg}toast('AI не ответил — показал разбор без AI',msg.slice(0,90))}
-  finally{btn.disabled=false;if(box?.dataset.sig!=='err')renderWeek()}
+    aiSaveWeek(data);toast('Разбор недели готов');
+  }catch(e){if(aiBusy(e)){aiQueue('week',{});if(box){box.dataset.sig='wait';box.textContent=localWeekText()+'\n\n⏳ '+AI_BUSY_TEXT}toast('Google сейчас занят','Повторю сам через 2 минуты');return}
+    const msg=String(e?.message||e);if(box){box.dataset.sig='err';box.textContent=localWeekText()+'\n\n⏳ '+msg}toast('AI не ответил — показал разбор без AI',msg.slice(0,90))}
+  finally{btn.disabled=false;setText('wkRunLabel',state.ai?.weekly?.[weekKey()]?'Обновить разбор':'Получить разбор сейчас');if(box?.dataset.sig!=='err'&&box?.dataset.sig!=='wait')renderWeek()}
 }
 
 /* ===== V59: план выплаты долга ===== */
 function payoffMonths(debt,pay){if(!(debt>0))return 0;if(!(pay>0))return Infinity;return Math.ceil(debt/pay)}
-function monthsLater(n){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()+n);return d.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}).replace(/\s*г\.?$/,'')}
 function monthsText(n){if(n<12)return n+' '+plural(n,'месяц','месяца','месяцев');const y=Math.floor(n/12),m=n%12;return y+' '+plural(y,'год','года','лет')+(m?' '+m+' мес.':'')}
 function debtPlanStep(pay){return pay>=2000?100:50}
 function renderDebtPlan(){
@@ -5115,12 +5245,12 @@ function renderDebtPlan(){
   const m0=payoffMonths(debt,pay);
   el.innerHTML=`<div class="dp-label">Долг осталось</div><div class="dp-sum"><span id="dpDebt">${esc(fmtNum(debt))}</span><small>${esc(currencyLabel())}</small></div>
   <div class="dp-track"><i style="width:${pct}%"></i></div><div class="dp-foot"><span>Выплачено ${pct}%</span><span>Цель: свободен от долга</span></div>
-  <div class="dp-grid"><div class="dp-cell"><span>Платишь ${esc(fmtNum(pay))} / мес</span><b>${esc(monthsLater(m0))}</b><small>через ${esc(monthsText(m0))}</small></div>
+  <div class="dp-grid"><div class="dp-cell"><span>Платишь ${esc(fmtNum(pay))} / мес</span><b>${esc(freedomMonthText(freedomDays(debt,pay)))}</b><small>через ${esc(monthsText(m0))}</small></div>
   <div class="dp-cell gold"><span>Если <span id="dpAltPay">${esc(fmtNum(alt))}</span> / мес</span><b id="dpAltDate">—</b><small id="dpAltGain">—</small></div></div>
   <label class="dp-slider"><span>А если платить больше — подвигай</span><input type="range" id="dpRange" min="${min}" max="${max}" step="${step}" value="${alt}" aria-label="Платёж по долгу в месяц"></label>
   <div class="dp-inputs"><label><span>💵 Заработаю в этом месяце</span><input id="dpIncome" type="number" min="0" inputmode="decimal" value="${esc(state.income||'')}" placeholder="сколько планируешь"></label><label><span>🏦 Плачу по долгу в месяц</span><input id="dpPay" type="number" min="0" inputmode="decimal" value="${esc(pay)}"></label></div>
   <div class="dp-left" id="dpLeft"></div>`;
-  const upd=v=>{const m1=payoffMonths(debt,v),gain=m0-m1;setText('dpAltPay',fmtNum(v));setText('dpAltDate',monthsLater(m1));setText('dpAltGain',gain>0?'на '+monthsText(gain)+' раньше':'так же, как сейчас')};
+  const upd=v=>{const m1=payoffMonths(debt,v),gain=m0-m1;setText('dpAltPay',fmtNum(v));setText('dpAltDate',freedomMonthText(freedomDays(debt,v)));setText('dpAltGain',gain>0?'на '+monthsText(gain)+' раньше':'так же, как сейчас')};
   upd(alt);
   const left=()=>{const inc=Math.max(0,Number(state.income)||0),p=Math.max(0,Number(state.debts.monthlyPayment)||0),avg=Math.round(monthSum(spendOnly(state.expenses)));setText('dpLeft',inc?`После платежа останется ${fmtMoney(inc-p)} на жизнь${avg?` · обычно тратишь ${fmtMoney(avg)} в месяц`:''}`:'Укажи, сколько планируешь заработать — посчитаю, сколько останется после платежа')};left();
   let tmr=0;const commit=(fn)=>{clearTimeout(tmr);tmr=setTimeout(()=>{fn();saveState();el.dataset.sig='';renderDebtPlan();setText('dashDebtMeta',debtFreeLine());haptic(10)},120)};
@@ -5151,7 +5281,66 @@ function checkFreedomPath(){
   if(noticeAllowed('finance'))logNotice(title,body,'finance',true);saveState();renderFreedomPath();
   setTimeout(()=>{toast(title,body);haptic(24);celebrate()},900); // after the toast of the payment itself
 }
-function debtFreeLine(){const debt=debtTotal(),pay=Math.max(0,Number(state.debts?.monthlyPayment)||0);if(!(debt>0))return 'Долгов нет';if(!(pay>0))return 'Платёж не задан';return 'Свободен от долга: '+monthsLater(payoffMonths(debt,pay))}
+/* 74.5: one calculation of the day of freedom for «Сегодня», «Путь к свободе» and the plan:
+   the debt left at the monthly payment, in days (a month = 30.44 days), so every payment moves it at once */
+const MONTH_DAYS=30.4375;
+function freedomDays(debt=debtTotal(),pay=Math.max(0,Number(state.debts?.monthlyPayment)||0)){if(!(debt>0))return 0;if(!(pay>0))return Infinity;return Math.ceil(debt/pay*MONTH_DAYS)}
+function freedomMonthText(days){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+days);return d.toLocaleDateString('ru-RU',{month:'long',year:'numeric'}).replace(/\s*г\.?$/,'')}
+function debtFreeLine(){const debt=debtTotal(),pay=Math.max(0,Number(state.debts?.monthlyPayment)||0);if(!(debt>0))return 'Долгов нет';if(!(pay>0))return 'Платёж не задан';return 'Свободен от долга: '+freedomMonthText(freedomDays(debt,pay))}
+let _freeShown=null,_freeDeltaT=0;
+function renderTodayFreedom(){
+  const el=$('todayFreedom');if(!el)return;const debt=debtTotal(),pay=Math.max(0,Number(state.debts?.monthlyPayment)||0),days=freedomDays(debt,pay);
+  const show=debt>0;if(el.hidden!==!show)el.hidden=!show;
+  if(show){textOf($('todayFreedomText')).v=Number.isFinite(days)?`До свободы от долгов: ${days} ${plural(days,'день','дня','дней')} (${freedomMonthText(days)})`:'До свободы от долгов: укажи платёж в месяц';
+    if(Number.isFinite(days)&&Number.isFinite(_freeShown)&&days<_freeShown){const dl=$('todayFreedomDelta'),n=_freeShown-days;dl.textContent='−'+n+' '+plural(n,'день','дня','дней');dl.classList.add('show');clearTimeout(_freeDeltaT);_freeDeltaT=setTimeout(()=>dl.classList.remove('show'),1400)}}
+  if(currentView==='viewToday'||!show)_freeShown=show?days:null; // the «−N дней» waits until «Сегодня» is seen
+  renderSalaryAsk();
+}
+function openFreedomPath(){showView('viewMoney');setMoneyTab('overview');setTimeout(()=>{const f=$('freedomPath')||$('debtPlan');f?.scrollIntoView({block:'center',behavior:_motionOK()?'smooth':'auto'})},60)}
+/* 74.5: salary day — «Пришла зарплата? Отложи … на … сейчас» once a month, «Отложил» writes an ordinary debt payment */
+function salaryDebt(){const pay=Math.max(0,Number(state.debts?.monthlyPayment)||0);if(!(pay>0))return null;const k=['bank','firms'].find(x=>Number(state.debts?.[x])>0);if(!k)return null;return {key:k,name:debtLabel(k),amount:Math.min(pay,Number(state.debts[k])||0)}}
+function salaryAskText(t){return `Отложи ${fmtMoney(t.amount)} на «${t.name}» сейчас`}
+function askSalary(why){
+  const month=keyDay().slice(0,7),t=salaryDebt();if(!t||state.debts.salaryAsk===month)return false;
+  state.debts.salaryAsk=month;saveState();
+  notify('💵 Пришла зарплата?',salaryAskText(t),'finance',{taskId:'debtpay:'+month});renderSalaryAsk();return true;
+}
+function salaryPaid(month){
+  if(state.debts.salaryDone===month)return true;const t=salaryDebt();if(!t)return false;
+  const day=keyDay(),before=freedomDays();
+  state.expenses.push({id:uid(),amount:t.amount,at:moneyDateIso(day),dateKey:day,note:'с зарплаты',category:'Платёж по долгу',categoryIcon:'🏦',personal:false,customCategory:'',debtPayment:t.key,transfer:true});
+  state.debts[t.key]=Math.max(0,(Number(state.debts[t.key])||0)-t.amount);state.debts.salaryDone=month;
+  ensureDebtHistory();saveState();renderAll();checkFreedomPath();const n=Number.isFinite(before)?before-freedomDays():0;
+  toast('Отложено на «'+t.name+'» — '+fmtMoney(t.amount),n>0?'Свобода ближе на '+n+' '+plural(n,'день','дня','дней'):'Платёж записан');haptic(16);return true;
+}
+function renderSalaryAsk(){
+  const el=$('todaySalary');if(!el)return;const month=keyDay().slice(0,7),t=salaryDebt(),show=!!t&&state.debts?.salaryAsk===month&&state.debts?.salaryDone!==month;
+  if(el.hidden!==!show)el.hidden=!show;if(show)textOf($('todaySalaryText')).v='💵 Пришла зарплата? '+salaryAskText(t);
+}
+function checkSalaryDay(now=new Date()){
+  const pd=Number(state.debts?.payday);if(!(pd>=1&&pd<=31)||now.getHours()<9)return;
+  const last=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();if(now.getDate()===Math.min(pd,last))askSalary('payday');
+}
+/* 74.5: the 1st of a month — what the past month did for the freedom (one notice, a card on «Деньги» for 3 days) */
+function debtMonthSummary(month){
+  const pay=Math.max(0,Number(state.debts?.monthlyPayment)||0),paid=(state.expenses||[]).filter(e=>e.debtPayment&&String(e.dateKey||keyDay(validDate(e.at)||new Date())).slice(0,7)===month).reduce((a,e)=>a+Math.max(0,Number(e.amount)||0),0);
+  const [y,m]=month.split('-').map(Number),mdays=new Date(y,m,0).getDate(),name=new Date(y,m-1,15).toLocaleDateString('ru-RU',{month:'long'}),left=debtTotal();
+  const prep={'январь':'январе','февраль':'феврале','март':'марте','апрель':'апреле','май':'мае','июнь':'июне','июль':'июле','август':'августе','сентябрь':'сентябре','октябрь':'октябре','ноябрь':'ноябре','декабрь':'декабре'}[name]||name;
+  if(paid>0){const days=pay>0?Math.round(paid/pay*MONTH_DAYS):0;return {month,paid,days,left,text:`В ${prep} погашено ${fmtMoney(paid)}. Свобода ближе на ${days} ${plural(days,'день','дня','дней')}. Осталось ${fmtMoney(left)}`}}
+  return {month,paid:0,days:mdays,left,text:`В ${prep} платежей по долгу не было — дата свободы сдвинулась на ${mdays} ${plural(mdays,'день','дня','дней')}`};
+}
+function checkDebtMonth(now=new Date()){
+  if(now.getDate()>3||!state.debts)return;const prev=new Date(now.getFullYear(),now.getMonth()-1,15),month=keyDay(prev).slice(0,7);
+  if(state.debts.monthSum?.month===month)return;
+  // only a debt that already lived in that month (a debt added today gets no «no payments» summary)
+  const hadDebt=(state.expenses||[]).some(e=>e.debtPayment&&String(e.dateKey||'').slice(0,7)===month)||debtTotal()>0&&(state.debtHistory||[]).some(h=>String(h.day||h.at||'').slice(0,7)&&String(h.day||h.at||'').slice(0,7)<=month);if(!hadDebt)return;
+  const r=debtMonthSummary(month);state.debts.monthSum={...r,at:new Date().toISOString()};saveState();
+  notify('📉 Итог месяца по долгу',r.text,'finance');renderDebtMonthSum();
+}
+function renderDebtMonthSum(){
+  const el=$('debtMonthSum');if(!el)return;const r=state.debts?.monthSum,show=!!(r&&r.text&&Date.now()-(Date.parse(r.at)||0)<3*DAY_MS);
+  if(el.hidden!==!show)el.hidden=!show;if(show){const h=`<b>📉 Итог месяца по долгу</b>${esc(r.text)}`;if(el.innerHTML!==h)painter(el).html=h}
+}
 
 /* ===== V59: лимиты на месяц ===== */
 function monthDaysLeft(){const d=new Date(),last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();return last-d.getDate()+1}
@@ -5265,6 +5454,8 @@ function pushWidget(){
 }
 function handleLaunch(){try{const a=window.AndroidBridge?.takeLaunch?.();if(a==='quickadd')setTimeout(()=>{showView('viewToday');openQuickAdd()},150)}catch(e){}}
 window.__jlLaunch=()=>{if(appReadyForSync)handleLaunch()};
+// 74.5: after the fingerprint the app opens on the main screen (an open window or form is left as it was)
+window.__jlUnlocked=()=>{try{if(!document.body.classList.contains('modal-open')&&currentView!=='viewToday'&&!/Edit$/.test(currentView||''))showView('viewToday')}catch(e){}};
 
 /* ===== V60: резервные копии на устройстве ===== */
 async function listDailyBackups(){
@@ -5784,12 +5975,12 @@ function renderGoals(){
   const list=$('goalList');if(!list)return;
   const all=[...(state.goals||[])],goals=all.filter(g=>!g.main).sort((a,b)=>Date.parse(a.createdAt||0)-Date.parse(b.createdAt||0));
   let doneCount=all.filter(g=>g.main&&goalProgress(g).done).length;
-  painter(list).html=goals.map(g=>{const p=goalProgress(g);if(p.done)doneCount++;const title=g.main?goalName():g.title;return `<button class="card v-goal-item" type="button" data-goal-open="${esc(g.id)}" style="--gc:${goalColor(g)}"><span class="v-goal-ico">${svgIcon(ICON_IDS[g.icon]||'i-target')}</span><span style="min-width:0"><span class="v-goal-top"><span class="v-goal-name">${esc(title)}${g.main?'<span class="v-badge">Главная</span>':''}${p.done?'<span class="v-badge ok">Готово</span>':''}</span></span><span class="v-goal-sum" style="display:block">${p.target?`<b>${esc(fmtMoney(p.target))}</b> · собрано ${esc(fmtMoney(p.collected))}`:'Сумма не задана'}</span><span class="v-bar-row"><span class="v-bar" style="display:block"><i style="width:${p.pct}%"></i></span><span class="v-goal-pct">${p.pct}%</span></span><span class="v-goal-foot"><span>${esc(lagText(goalLag(g))||daysLeftText(p))}</span><span>${p.target&&!p.done?'Ещё '+esc(fmtMoney(p.remaining)):''}</span></span></span></button>`}).join('')||'<div class="v-empty">Других целей нет. Добавь кнопкой «+» вверху.</div>';
+  painter(list).html=goals.map(g=>{const p=goalProgress(g);if(p.done)doneCount++;const title=g.main?goalName():g.title;return `<button class="card v-goal-item" type="button" data-goal-open="${esc(g.id)}" style="--gc:${goalColor(g)}">${goalPhoto(g)?`<span class="v-goal-ico has-photo"><img src="${esc(goalPhoto(g))}" alt=""></span>`:`<span class="v-goal-ico">${svgIcon(ICON_IDS[g.icon]||'i-target')}</span>`}<span style="min-width:0"><span class="v-goal-top"><span class="v-goal-name">${esc(title)}${g.main?'<span class="v-badge">Главная</span>':''}${p.done?'<span class="v-badge ok">Готово</span>':''}</span></span><span class="v-goal-sum" style="display:block">${p.target?`<b>${esc(fmtMoney(p.target))}</b> · собрано ${esc(fmtMoney(p.collected))}`:'Сумма не задана'}</span><span class="v-bar-row"><span class="v-bar" style="display:block"><i style="width:${p.pct}%"></i></span><span class="v-goal-pct">${p.pct}%</span></span><span class="v-goal-foot"><span>${esc(lagText(goalLag(g))||daysLeftText(p))}</span><span>${p.target&&!p.done?'Ещё '+esc(fmtMoney(p.remaining)):''}</span></span></span></button>`}).join('')||'<div class="v-empty">Других целей нет. Добавь кнопкой «+» вверху.</div>';
   setText('goalsSummary',`${all.length} ${plural(all.length,'цель','цели','целей')} · достигнуто ${doneCount}`);
   $$('[data-goal-open]').forEach(b=>b.onclick=()=>openGoalEditor(b.dataset.goalOpen));
 }
-let geState={id:'',icon:'target',color:'blue'};
-function renderGoalEditorCover(){renderGoalPreview();const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=coverHTML({icon:geState.icon},'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
+let geState={id:'',icon:'target',color:'blue',photo:''};
+function renderGoalEditorCover(){renderGoalPreview();const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=geState.photo?`<img src="${esc(geState.photo)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:coverHTML({icon:geState.icon},'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
 const GOAL_IDEAS=[['🏠','Своя квартира','home2'],['🚗','Машина','car'],['🛡️','Финансовая подушка','bank'],['💳','Закрыть долги','briefcase'],['🎓','Учёба','graduation'],['💍','Свадьба','heart'],['✈️','Путешествие','plane'],['💻','Ноутбук','laptop']];
 function renderGoalPreview(){
   const name=$('geName')?.value.trim(),amount=Number($('geAmount')?.value)||0,date=$('geDate')?.value||'',cur=currencyLabel();
@@ -5804,7 +5995,7 @@ function renderGoalPreview(){
 }
 function openGoalEditor(id=''){
   const g=id?goalById(id):null,isMain=!!g?.main,f=state.goal.finance||{};
-  geState={id:g?g.id:'',icon:g?.icon||'target',color:g?.color||'blue'};
+  geState={id:g?g.id:'',icon:g?.icon||'target',color:g?.color||'blue',photo:goalPhoto(g)};renderGoalPhotoEdit();
   setText('geHeading',g?'Цель':'Новая цель');setText('geCurrency',currencyLabel());
   $('geName').value=g?(isMain?state.goal.title:g.title):'';
   $('geAmount').value=g?(isMain?(f.targetAmount||''):(g.targetAmount||'')):'';
@@ -5827,15 +6018,24 @@ function openGoalEditor(id=''){
   $('geMakeMain').hidden=!g||isMain;$('geDelete').hidden=!g||isMain;$('geTopUp').hidden=!g;
   showView('viewGoalEdit');
 }
+/* 74.5: a photo of the goal. Made small on the device (≤ 900 px, JPEG) so it travels with the goal through the cloud;
+   it lives on the goal's entry in goals[] (the main goal too), the AI never gets it. */
+function goalPhotoOk(v){return typeof v==='string'&&v.length<=GOAL_PHOTO_MAX&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v)}
+function goalPhoto(g){return g&&goalPhotoOk(g.photo)?g.photo:''}
+function setGoalPhoto(g,v){if(!g)return;if(goalPhotoOk(v))g.photo=v;else delete g.photo}
+function renderGoalPhotoEdit(){const img=$('gePhotoImg'),has=!!geState.photo;if(!img)return;img.hidden=!has;if(has&&img.getAttribute('src')!==geState.photo)img.src=geState.photo;if(!has)img.removeAttribute('src');$('gePhotoDrop').hidden=!has;setText('gePhotoPickLabel',has?'Заменить фото':'Добавить фото')}
+function shrinkPhoto(file){return new Promise((ok,bad)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{try{let out='';for(const [side,q] of [[900,.74],[720,.62],[560,.55]]){const k=Math.min(1,side/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<=GOAL_PHOTO_MAX)break}URL.revokeObjectURL(url);goalPhotoOk(out)?ok(out):bad(new Error('big'))}catch(e){URL.revokeObjectURL(url);bad(e)}};im.onerror=()=>{URL.revokeObjectURL(url);bad(new Error('read'))};im.src=url})}
+async function pickGoalPhoto(file){if(!file)return;if(!/^image\//.test(file.type||'')){toast('Это не фото','Выбери картинку');return}
+  try{geState.photo=await shrinkPhoto(file);renderGoalPhotoEdit();renderGoalEditorCover();haptic(8);toast('Фото добавлено','Сохрани цель — фото останется с ней')}catch(e){toast('Фото не получилось открыть','Попробуй другое')}}
 function saveGoalEditor(){
   const title=$('geName').value.trim(),amount=Math.max(0,Number($('geAmount').value)||0),date=$('geDate').value||'',desc=$('geDesc').value.trim();
   if(!title){toast('Укажи название цели');$('geName').focus();return}
   const g=geState.id?goalById(geState.id):null;
   if(g?.main){
-    state.goal.title=title;state.goal.why=desc;state.goal.finance.targetAmount=amount;state.goal.finance.targetDate=date;g.icon=geState.icon;g.color=geState.color;
+    state.goal.title=title;state.goal.why=desc;state.goal.finance.targetAmount=amount;state.goal.finance.targetDate=date;g.icon=geState.icon;g.color=geState.color;setGoalPhoto(g,geState.photo);
     syncGoalFinanceCompletion();syncMainGoalMirror();saveState();renderAll();toast('Главная цель сохранена');setTimeout(()=>requestGoalAI(false),80);
-  }else if(g){Object.assign(g,{title,description:desc,targetAmount:amount,targetDate:date,icon:geState.icon,color:geState.color});syncOtherGoalCompletion(g);saveState();renderAll();toast('Цель сохранена')}
-  else{state.goals.push({id:uid(),title,description:desc,icon:geState.icon,color:geState.color,targetAmount:amount,targetDate:date,manualSaved:0,contributions:[],createdAt:new Date().toISOString(),completedAt:'',main:false});saveState();renderAll();toast('Цель создана','Пополняй её переводом из кошелька.')}
+  }else if(g){Object.assign(g,{title,description:desc,targetAmount:amount,targetDate:date,icon:geState.icon,color:geState.color});setGoalPhoto(g,geState.photo);syncOtherGoalCompletion(g);saveState();renderAll();toast('Цель сохранена')}
+  else{const ng={id:uid(),title,description:desc,icon:geState.icon,color:geState.color,targetAmount:amount,targetDate:date,manualSaved:0,contributions:[],createdAt:new Date().toISOString(),completedAt:'',main:false};setGoalPhoto(ng,geState.photo);state.goals.push(ng);saveState();renderAll();toast('Цель создана','Пополняй её переводом из кошелька.')}
   showView('viewGoal');
 }
 function syncOtherGoalCompletion(g){const p=goalProgress(g);if(p.done&&!g.completedAt){g.completedAt=new Date().toISOString();notify('Цель достигнута',g.title,'goals')}else if(!p.done)g.completedAt=''}
@@ -5932,6 +6132,7 @@ function openIncomeSplit(amount,dateKey=keyDay()){
       if(kind==='debt'){const debt=Math.max(0,Number(state.debts[id])||0),p=Math.min(v,debt);if(!(p>0))continue;state.expenses.push({id:uid(),amount:p,at,dateKey,note:'из дохода',category:'Платёж по долгу',categoryIcon:'🏦',personal:false,customCategory:'',debtPayment:id,transfer:true});state.debts[id]=Math.max(0,debt-p);done.push(debtLabel(id)+' −'+fmtMoney(p))}
       else{const b=(state.budgets||[]).find(x=>x.id===id);if(!b)continue;b.tops=Array.isArray(b.tops)?b.tops:[];b.tops.push({id:uid(),month:dateKey.slice(0,7),amount:v,at:new Date().toISOString()});done.push(b.name+' +'+fmtMoney(v))}}
     if(!done.length){closeModal();return}
+    if(done.some(x=>/−/.test(x))&&dateKey.slice(0,7)===keyDay().slice(0,7)&&state.debts.salaryAsk===dateKey.slice(0,7))state.debts.salaryDone=dateKey.slice(0,7);
     saveState();closeModal();renderAll();toast('Деньги разложены',done.join(' · ').slice(0,120));haptic(16)};
   focusSoon('spl0',60);
 }
@@ -5975,7 +6176,7 @@ function barLineChartSVG(b){
   b.forEach((x,i)=>{if(n<=31)svg+=`<circle class="vc-dot" cx="${cx(i).toFixed(1)}" cy="${yb(x.balance).toFixed(1)}" r="2.8"><title>${esc(x.label)} · баланс ${esc(fmtMoney(x.balance))}</title></circle>`});
   return svg+'</svg>';
 }
-function renderMoneyOverview(){
+function renderMoneyOverview(){renderDebtMonthSum();
   const b=moneyBuckets(mvPeriod),inc=b.reduce((s,x)=>s+x.income,0),out=b.reduce((s,x)=>s+x.expense,0);debtPayLine('mvDebtPay',b.reduce((s,x)=>s+x.debt,0));
   setMoneyKpi('mvBalance',walletMetrics().cash);setMoneyKpi('mvIncome',inc);setMoneyKpi('mvExpense',out);setMoneyKpi('mvDebt',debtTotal());
   setText('mvRange',b.length?shortDateLabel(b[0].start)+' — '+shortDateLabel(b[b.length-1].end):'—');
@@ -6056,12 +6257,12 @@ function renderNotifications(){
 function markAllNoticesRead(){(state.notificationsLog||[]).forEach(n=>n.read=true);state.lastReadAt=new Date().toISOString();saveState();updateBell();renderNotifications();toast('Все уведомления прочитаны')}
 
 /* ---- Settings / display / profile ---- */
-function renderSettingsView(){
+function renderSettingsView(){renderSyncWarn();
   textOf($('setWeekSub')).v=weekSummary();
   if(!$('viewSettings'))return;const a=cloudAuth();
   setText('setProfileSub',[state.profile.name,a?.user?.email].filter(Boolean).join(' · ')||'Имя не указано');
   const set=(id,v)=>{const el=$(id);if(el)el.checked=!!v};
-  set('setDarkTheme',state.settings.theme==='dark');set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setLoudReminders',state.settings.loudReminders!==false);{const lr=$('loudRow');if(lr)lr.style.display=window.AndroidBridge?.setLoudReminders?'':'none'}set('setEvery2h',state.settings.every2h!==false);
+  {const tp=$('setTheme');if(tp)tp.value=themeChoice()}set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setLoudReminders',state.settings.loudReminders!==false);{const lr=$('loudRow');if(lr)lr.style.display=window.AndroidBridge?.setLoudReminders?'':'none'}set('setEvery2h',state.settings.every2h!==false);
   const sf=$('setFont');if(sf)sf.value=state.settings.font||'manrope';const qs=$('setQuoteSet');if(qs)qs.value=quoteSet();
   {const pc=$('setPrayerCity');if(pc&&!pc.options.length)pc.innerHTML=Object.entries(PRAYER_CITIES).map(([k,c])=>`<option value="${k}">${esc(c[0])}</option>`).join('');if(pc)pc.value=prayerCity();
    const po=$('setPrayerOn');if(po)po.checked=prayerOn();if($('setPrayerAsr'))$('setPrayerAsr').value=state.settings.prayerAsr==='shafii'?'shafii':'hanafi';
@@ -6131,7 +6332,7 @@ function openSearch(){
 /* ---- Navigation ---- */
 const VIEW_PARENT={viewGoalEdit:'viewGoal',viewNoteEdit:'viewNotes',viewSettings:'viewToday',viewDisplay:'viewSettings',viewNotifications:'viewToday',viewProfile:'viewSettings'};
 let currentView='viewToday';
-function onViewShown(id){try{if(id==='viewNotifications')renderNotifications();else if(id==='viewSettings')renderSettingsView();else if(id==='viewProfile')renderProfile();else if(id==='viewGoal')renderGoals();else if(id==='viewDisplay')setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный');else if(id==='viewMoney')renderMoneyV57()}catch(e){}}
+function onViewShown(id){try{if(id==='viewToday')renderTodayFreedom();else if(id==='viewMoney')renderDebtMonthSum();if(id==='viewNotifications')renderNotifications();else if(id==='viewSettings')renderSettingsView();else if(id==='viewProfile')renderProfile();else if(id==='viewGoal')renderGoals();else if(id==='viewDisplay')setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный');else if(id==='viewMoney')renderMoneyV57()}catch(e){}}
 let navDepth=0;
 function goBack(){if(navDepth>0){try{history.back();return}catch(e){}}showView(VIEW_PARENT[currentView]||'viewToday',{push:false})}
 function bindV57(){
@@ -6140,8 +6341,8 @@ function bindV57(){
   $('searchBtn').onclick=openSearch;
   $$('[data-ring]').forEach(b=>b.onclick=()=>{const r=b.dataset.ring;if(r==='goal')showView('viewGoal');else if(r==='finance')showView('viewMoney');else openMetricDetail(r)});
   const tg=$('tgCard');tg.onclick=()=>{const g=mainGoal();if(g)openGoalEditor(g.id)};tg.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg.click()}};
-  $('tmOpenMoney').onclick=()=>showView('viewMoney');$('addTaskBtn').onclick=openTaskForm;
-  $('addGoalBtn').onclick=()=>openGoalEditor('');$('geSave').onclick=saveGoalEditor;$('geSaveTop').onclick=saveGoalEditor;$('geDelete').onclick=()=>deleteGoal(geState.id);$('geMakeMain').onclick=()=>makeGoalMain(geState.id);$('geTopUp').onclick=()=>openTransferForm({goalId:geState.id,dir:'to-goal'});
+  $('tmOpenMoney').onclick=()=>showView('viewMoney');$('addTaskBtn').onclick=openTaskForm;$('todayFreedom').onclick=openFreedomPath;$('toast').onclick=()=>{const f=_toastAct;if(!f)return;_toastAct=null;$('toast').classList.remove('show','tappable');f()};$('syncWarnBtn').onclick=syncWarnSend;$('todaySalaryBtn').onclick=()=>salaryPaid(keyDay().slice(0,7));
+  $('addGoalBtn').onclick=()=>openGoalEditor('');$('gePhotoPick').onclick=()=>$('gePhotoFile').click();$('gePhotoFile').onchange=e=>{const f=e.target.files?.[0];e.target.value='';pickGoalPhoto(f)};$('gePhotoDrop').onclick=()=>{geState.photo='';renderGoalPhotoEdit();renderGoalEditorCover()};$('geSave').onclick=saveGoalEditor;$('geSaveTop').onclick=saveGoalEditor;$('geDelete').onclick=()=>deleteGoal(geState.id);$('geMakeMain').onclick=()=>makeGoalMain(geState.id);$('geTopUp').onclick=()=>openTransferForm({goalId:geState.id,dir:'to-goal'});
   $$('[data-money-tab]').forEach(b=>b.onclick=()=>setMoneyTab(b.dataset.moneyTab));$$('[data-money-tab-go]').forEach(b=>b.onclick=()=>setMoneyTab(b.dataset.moneyTabGo));
   $$('[data-mv-period]').forEach(b=>b.onclick=()=>{mvPeriod=Number(b.dataset.mvPeriod)||7;renderMoneyOverview()});
   $('qIncome').onclick=()=>openMoneyForm('profit','',null,keyDay());$('qExpense').onclick=()=>openMoneyForm('expense','',null,keyDay());$('qTransfer').onclick=()=>openTransferForm({});$('moneyAddBtn').onclick=()=>openTxTypePicker(moneyTab==='cal'?mcSelected:keyDay());
@@ -6154,10 +6355,10 @@ function bindV57(){
   $('neTrash').onclick=()=>{if(noteEditId){const id=noteEditId;noteEditId='';showView('viewNotes');moveToTrash(id)}else{clearDraft('note');showView('viewNotes');toast('Черновик удалён')}};
   $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify&&!(hostPlaysSound()&&state.settings?.notifications!==false))playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 '+APP_NAME,'Так звучат напоминания 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:APP_NAME,body:'Так звучат напоминания.',sound:hostPlaysSound()});return}}catch(e){}showWebNotification(APP_NAME,'Так звучат напоминания.');toast(APP_NAME,'Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
-  $('setDarkTheme').onchange=e=>{state.settings.theme=e.target.checked?'dark':'light';saveState();setTheme()};
+  $('setTheme').onchange=e=>{state.settings.theme=['light','dark','auto'].includes(e.target.value)?e.target.value:'dark';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');
   $('setPrayerOn').onchange=e=>{state.settings.prayerOn=e.target.checked;saveState();scheduleNativeTasks();renderSettingsView();renderToday();toast(e.target.checked?'Время намаза включено':'Время намаза выключено',e.target.checked?'Пять намазов на «Сегодня» и напоминание в каждое время.':'')};
-  $('setPrayerCity').onchange=e=>{state.settings.prayerCity=PRAYER_CITIES[e.target.value]?e.target.value:'dushanbe';saveState();scheduleNativeTasks();renderSettingsView();renderToday()};
+  $('setPrayerCity').onchange=e=>{state.settings.prayerCity=PRAYER_CITIES[e.target.value]?e.target.value:'khujand';saveState();scheduleNativeTasks();renderSettingsView();renderToday()};
   $('setPrayerAsr').onchange=e=>{state.settings.prayerAsr=e.target.value==='shafii'?'shafii':'hanafi';saveState();scheduleNativeTasks();renderSettingsView();renderToday()};
   $('setQuoteSet')&&($('setQuoteSet').onchange=e=>{state.settings.quoteSet=QUOTE_SETS[e.target.value]?e.target.value:'hadith';state.settings.quoteSetChosen=true;saveState();renderAll();toast('Цитаты дня',QUOTE_SETS[state.settings.quoteSet])});
   $('setFont')&&($('setFont').onchange=e=>{state.settings.font=['manrope','nunito','inter'].includes(e.target.value)?e.target.value:'manrope';saveState();applyFont();toast('Шрифт изменён',e.target.selectedOptions[0]?.textContent||'')});$('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
@@ -6185,7 +6386,7 @@ function bind(){
   $('historyBtn').onclick=openReportHistory;$('lifeAnalysisBtn').onclick=openLifeAnalysis;$('aiAnalysisBtn').onclick=openGeminiAnalysis;
   $('dayMode').onchange=()=>{const d=dailyState();d.mode=$('dayMode').value;state.dayMode=d.mode;saveState();renderToday()};
   $('addNoteBtn').onclick=()=>openNote();$('trashBtn').onclick=openTrash;$('noteSearch').oninput=renderNotes;
-  $('addBudgetBtn').onclick=openBudget;$('todayAddProfitBtn').onclick=()=>openMoneyForm('profit');$('todayAddExpenseBtn').onclick=()=>openMoneyForm('expense');$('editGoalBtn').onclick=openGoalEdit;$('goalAiBtn').onclick=()=>requestGoalAI(true);$('editGoalFinanceBtn').onclick=openGoalFinanceEdit;;$('addGoalSavingBtn').onclick=openGoalSaving;$('addAchBtn').onclick=openAchievement;;$('editDebtBtn2').onclick=openDebtEdit;
+  $('addBudgetBtn').onclick=openBudget;$('todayAddProfitBtn').onclick=()=>openMoneyForm('profit');$('todayAddExpenseBtn').onclick=()=>openMoneyForm('expense');$('editGoalBtn').onclick=openGoalEdit;$('goalAiBtn').onclick=()=>requestGoalAI(true,true);$('editGoalFinanceBtn').onclick=openGoalFinanceEdit;;$('addGoalSavingBtn').onclick=openGoalSaving;$('addAchBtn').onclick=openAchievement;;$('editDebtBtn2').onclick=openDebtEdit;
   $('modalBack').onclick=e=>{if(e.target===$('modalBack'))closeModal()};
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('modalBack').classList.contains('open'))closeModal()});
 }
@@ -6234,14 +6435,14 @@ async function init(){
   if(!cloudAuth()&&!recovery)return;
   // Came from the «reset password» e-mail: ask for the new password right away.
   if(_recoveryPending)setTimeout(()=>{try{openPasswordRecovery()}catch(e){}},700);
-  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();appReadyForSync=true;handleActionLink();pullNativeActions();handleLaunch();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}});
+  bind();lastDay=keyDay();restoreFromIndexedDB().finally(async()=>{initPersistence();renderAll();scheduleNative();runScheduler();appReadyForSync=true;handleActionLink();setTimeout(aiOpenReady,400);pullNativeActions();handleLaunch();queueAutosave();refreshCloudUI();if(cloudAuth()){cloudAutoSync().catch(()=>{});refreshAIHealth(true).catch(()=>{})}});
   setInterval(runScheduler,1000);
   setInterval(()=>{const removed=purgeExpiredTrash(state);if(removed)saveState()},60*60*1000);
   let syncHeartbeatTimer=null;
   const runCloudHeartbeat=()=>{if(appReadyForSync&&document.visibilityState==='visible'&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})};
   syncHeartbeatTimer=setInterval(runCloudHeartbeat,15000);
   runCloudHeartbeat();
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();if(appReadyForSync)pullNativeActions();restoreFromIndexedDB().finally(()=>{if(appReadyForSync&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})})}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();if(appReadyForSync)aiOpenReady();scheduleNative();if(appReadyForSync)pullNativeActions();restoreFromIndexedDB().finally(()=>{if(appReadyForSync&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})})}});
   window.addEventListener('pagehide',saveState);window.addEventListener('beforeunload',saveState);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
   // 74.4: while the page moves, the living background stands still — every frame goes to the scroll

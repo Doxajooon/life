@@ -74,6 +74,9 @@ function makeCloud() {
       const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b]; cloud.rowAtAI = cloud.row ? JSON.parse(JSON.stringify(cloud.row.state)) : null;
       if (cloud.aiDelay) await new Promise(r => setTimeout(r, cloud.aiDelay));
       if (cloud.aiReply === "abort") return route.abort("connectionreset");
+      // 74.5: Google busy for a few calls in a row (503 «high demand» or the 19-second time limit)
+      if (cloud.aiSeq?.length) { const x = cloud.aiSeq.shift(); return send(503, { error: "Google сейчас перегружен — все модели Gemini заняты. Попробуй через минуту.", reason: x === "timeout" ? "gemini_timeout" : "gemini_overloaded" }); }
+      if (!cloud.aiReply && !cloud.aiFail) cloud.aiOk = (cloud.aiOk || 0) + 1; // the server counts only real answers (ai_usage)
       if (cloud.aiReply) return route.fulfill({ status: cloud.aiReply.status, headers: cors, contentType: cloud.aiReply.type || "application/json", body: cloud.aiReply.body });
       if (cloud.aiFail) return send(429, { error: "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей." });
       if (b.mode === "week") return send(200, { ok: true, model: "mock", output_text: "СИЛЬНАЯ СТОРОНА — закрыл 5 дней.\nСЛАБОЕ МЕСТО — **телефон** <img src=x onerror=window.__xss=1>\nШАГ НА НЕДЕЛЮ — после 21:00 телефон на зарядку.", sources: [] });
@@ -2396,7 +2399,7 @@ await test("74.2: график по дням недели — свои часы 
 await test("74.2: время намаза — пять намазов на «Сегодня» с хадисами, напоминание в каждое время, город и мазхаб в настройках", async () => {
   const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 7 : k === "takeActions" ? "[]" : undefined; } }); };
   const { ctx, page } = await device(makeCloud(), { init, clock: new Date("2026-10-21T15:00:00+05:00") });
-  const r = await page.evaluate(() => { showView("viewToday"); renderToday(); const t = prayerTimes(); const f = m => fmtMin(m);
+  const r = await page.evaluate(() => { state.settings.prayerCity = "dushanbe"; showView("viewToday"); renderToday(); const t = prayerTimes(); const f = m => fmtMin(m);
     return { on: prayerOn(), shown: !document.getElementById("prayerBox").hidden, cells: [...document.querySelectorAll("#prayerTimes > div")].map(d => d.textContent), next: document.getElementById("prayerNext").textContent, t: { fajr: f(t.fajr), dhuhr: f(t.dhuhr), asr: f(t.asr), maghrib: f(t.maghrib), isha: f(t.isha) } }; });
   assert.ok(r.on && r.shown, "on with the hadiths");
   assert.equal(r.cells.length, 5); assert.match(r.cells.join(" "), /Фаджр.*Зухр.*Аср.*Магриб.*Иша/);
@@ -2473,6 +2476,272 @@ await test("74.2: «Путь к свободе» и праздник за поб
   await page.click('[data-qblock="Телефон и соцсети"]'); await page.click("#quickCloseBtn");
   const rep = await page.evaluate(() => state.reports[keyDay()]);
   assert.ok(rep.closedAt, "the day is closed"); assert.match(rep.done, /задачи 1\/2/); assert.equal(rep.block, "Телефон и соцсети"); assert.equal(rep.tomorrow, "Позвонить в банк");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+// ================= 74.5 =================
+const until = async (fn, what, ms = 10000) => { const t = Date.now(); while (!(await fn())) { if (Date.now() - t > ms) throw new Error("timeout: " + what); await new Promise(r => setTimeout(r, 60)); } };
+const aiCalls = cloud => (cloud.aiBodies || []).filter(b => !b.ping).length;
+const logTitles = page => page.evaluate(() => state.notificationsLog.map(n => n.title));
+
+await test("74.5: Google занят (503) два раза, потом ответ — «повторю через 2 минуты», повторы через 2 и 5 мин, ответ сохранён, уведомление «AI-анализ готов», лимит потрачен 1 раз; повторное нажатие не создаёт второй запрос", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { clock: new Date("2026-10-21T10:00:00+05:00") });
+  await sync(page);
+  cloud.aiSeq = ["busy", "timeout"];
+  await page.evaluate(() => openGeminiAnalysis()); await page.click("#aiRunBtn");
+  await page.waitForSelector("#aiResult .jl-ai-wait", { timeout: 8000 });
+  assert.match(await page.textContent("#aiResult"), /Google сейчас занят\. Повторю сам через 2 минуты — пришлю уведомление, когда ответ будет готов/);
+  assert.ok(await page.isVisible("#localFallbackBtn"), "the full review without AI stays one tap away");
+  assert.ok(!(await page.textContent("#aiResult")).includes("не пришёл"), "no error shown");
+  assert.equal(aiCalls(cloud), 1);
+  // a second tap while waiting: no second request, «already waiting, retry at HH:MM»
+  await page.click("#aiRunBtn"); await page.waitForTimeout(300);
+  assert.match(await page.textContent("#aiResult"), /Уже жду ответ, повтор в 10:02/);
+  assert.equal(aiCalls(cloud), 1, "a second tap must not send a second request");
+  await page.evaluate(() => closeModal());
+  await page.clock.fastForward("02:05"); await until(() => aiCalls(cloud) === 2, "retry after 2 min");
+  await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => (state.ai.history || []).length), 0);
+  assert.ok(await page.evaluate(() => /повтор в 10:07/.test(aiWaitText("life"))), await page.evaluate(() => aiWaitText("life")));
+  await page.clock.fastForward("05:05"); await until(() => aiCalls(cloud) === 3, "retry after 5 more min");
+  await until(() => page.evaluate(() => (state.ai.history || []).length === 1), "answer saved");
+  const titles = await logTitles(page);
+  assert.equal(titles.filter(t => t === "AI-анализ готов").length, 1, titles.join(" | "));
+  assert.equal(cloud.aiOk, 1, "the limit is spent once — only by the real answer");
+  assert.equal(await page.evaluate(() => localStorage.getItem("JL_AI_RETRY_V745")), null, "the queue is empty");
+  // a tap on the notice opens the window with the answer
+  await page.click("#toast"); await page.waitForSelector("#aiResult .jl-ai-result");
+  assert.match(await page.textContent("#modal"), /AI-анализ готов[\s\S]*Ответ/);
+  assert.equal(await page.evaluate(() => window.__xss), undefined);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: три неудачи повтора → одно спокойное итоговое уведомление, без спама; неделя и цель тоже ждут, авто-AI цели — тихо", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { clock: new Date("2026-10-21T10:00:00+05:00") });
+  await sync(page);
+  cloud.aiSeq = ["busy", "busy", "timeout", "busy"];
+  await page.evaluate(() => { state.notificationsLog = []; openGeminiAnalysis(); }); await page.click("#aiRunBtn");
+  await page.waitForSelector("#aiResult .jl-ai-wait"); await page.evaluate(() => closeModal());
+  for (const [mm, n] of [["02:05", 2], ["05:05", 3], ["15:05", 4]]) { await page.clock.fastForward(mm); await until(() => aiCalls(cloud) === n, "retry " + n); await page.waitForTimeout(250); }
+  await page.clock.fastForward("20:00"); await page.waitForTimeout(400);
+  assert.equal(aiCalls(cloud), 4, "1 tap + 3 retries, nothing more");
+  const titles = await logTitles(page);
+  assert.equal(titles.filter(t => t === "AI сегодня перегружен").length, 1, titles.join(" | "));
+  assert.ok(!titles.some(t => /AI-анализ готов|AI не ответил/.test(t)), titles.join(" | "));
+  assert.match(await page.evaluate(() => state.notificationsLog.find(n => n.title === "AI сегодня перегружен").body), /Попробуй вечером\. Полный разбор работает без AI/);
+  // the week review: the same waiting, the review without AI stays on the card
+  cloud.aiSeq = ["busy"];
+  await page.evaluate(() => { showView("viewToday"); return runWeekReview(); });
+  assert.match(await page.textContent("#wkText"), /СИЛЬНАЯ СТОРОНА[\s\S]*Google сейчас занят\. Повторю сам/);
+  await page.evaluate(() => runWeekReview()); assert.match(await page.textContent("#wkText"), /Уже жду ответ, повтор в/);
+  const before = aiCalls(cloud); await page.clock.fastForward("02:05"); await until(() => aiCalls(cloud) === before + 1, "week retry");
+  await until(() => page.evaluate(() => !!state.ai.weekly?.[weekKey()]), "week saved");
+  assert.ok((await logTitles(page)).includes("Разбор недели готов"));
+  // the automatic goal plan: a silent retry, no notices at all
+  await page.evaluate(() => { state.goal.title = "Квартира"; saveState(); state.notificationsLog = []; });
+  cloud.aiSeq = ["busy"];
+  await page.evaluate(() => requestGoalAI(true));
+  assert.ok(await page.evaluate(() => aiJob("goal")?.silent === true));
+  const b2 = aiCalls(cloud); await page.clock.fastForward("02:05"); await until(() => aiCalls(cloud) === b2 + 1, "goal retry");
+  await until(() => page.evaluate(() => !!state.goal.aiPlan), "goal plan saved");
+  assert.deepEqual(await logTitles(page), [], "the automatic goal plan never notifies");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: закрыл и открыл приложение во время ожидания — повтор продолжается; через час после нажатия — уже нет; другие ошибки — без повтора", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { clock: new Date("2026-10-21T10:00:00+05:00") });
+  await sync(page);
+  cloud.aiSeq = ["busy"];
+  await page.evaluate(() => openGeminiAnalysis()); await page.click("#aiRunBtn"); await page.waitForSelector("#aiResult .jl-ai-wait");
+  await page.close();
+  const p2 = await ctx.newPage(); p2.errors = []; p2.on("pageerror", e => p2.errors.push(e.message));
+  await p2.goto(APP); await p2.waitForFunction(() => appReadyForSync === true);
+  assert.ok(await p2.evaluate(() => !!aiJob("life")), "the job survived the restart");
+  await p2.clock.fastForward("02:05"); await until(() => aiCalls(cloud) === 2, "retry after restart");
+  await until(() => p2.evaluate(() => (state.ai.history || []).length === 1), "answer saved after restart");
+  assert.ok((await logTitles(p2)).includes("AI-анализ готов"));
+  // more than an hour since the first tap: the job is dropped on start
+  await p2.evaluate(() => { localStorage.setItem("JL_AI_RETRY_V745", JSON.stringify({ life: { kind: "life", first: Date.now() - 3700e3, tries: 1, next: Date.now() - 1000, opts: {} } })); _aiJobs = null; });
+  const b = aiCalls(cloud); await p2.clock.fastForward("00:05"); await p2.waitForTimeout(300);
+  assert.equal(aiCalls(cloud), b, "an hour-old job is not retried"); assert.equal(await p2.evaluate(() => aiJob("life")), null);
+  // the limit, a dead key, no internet: shown at once, no retry
+  cloud.aiFail = true;
+  await p2.evaluate(() => openGeminiAnalysis()); await p2.click("#aiRunBtn"); await p2.waitForSelector("#aiResult .jl-ai-fail");
+  assert.match(await p2.textContent("#aiResult"), /лимит/i); assert.equal(await p2.evaluate(() => aiJob("life")), null);
+  assert.deepEqual(p2.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: «До свободы от долгов» на «Сегодня» под задачами — тот же расчёт, что «Путь к свободе»; после платежа число меньше и видно «−N дней»; нет долгов — нет строки", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-21T10:00:00+05:00") });
+  await page.evaluate(() => { state.debts.bank = 10000; state.debts.firms = 0; state.debts.monthlyPayment = 1000; ensureDebtHistory(); saveState(); showView("viewToday"); renderAll(); });
+  let r = await page.evaluate(() => ({ hidden: document.getElementById("todayFreedom").hidden, text: document.getElementById("todayFreedomText").textContent, path: debtFreeLine(),
+    afterTasks: document.getElementById("taskList").closest(".card").nextElementSibling?.id }));
+  assert.equal(r.hidden, false); assert.equal(r.afterTasks, "todayFreedom", "right under the tasks");
+  assert.match(r.text, /^До свободы от долгов: 305 дней \((.+)\)$/, r.text);
+  assert.ok(r.path.endsWith(r.text.match(/\((.+)\)/)[1]), "the same date as «Путь к свободе»: " + r.path + " / " + r.text);
+  await page.evaluate(() => openTransferForm({ dir: "to-debt", debt: "bank" })); await page.fill("#trAmount", "1000"); await page.click("#trSave");
+  await page.evaluate(() => showView("viewToday"));
+  r = await page.evaluate(() => ({ text: document.getElementById("todayFreedomText").textContent, delta: document.getElementById("todayFreedomDelta").textContent, on: document.getElementById("todayFreedomDelta").classList.contains("show") }));
+  assert.match(r.text, /До свободы от долгов: 274 дня/); assert.equal(r.delta, "−31 день"); assert.ok(r.on, "the «−N дней» is seen");
+  await page.clock.runFor(1600); assert.ok(!(await page.evaluate(() => document.getElementById("todayFreedomDelta").classList.contains("show"))), "only for a moment");
+  await page.click("#todayFreedom"); assert.equal(await page.evaluate(() => currentView), "viewMoney");
+  await page.evaluate(() => { state.debts.bank = 0; saveState(); showView("viewToday"); renderAll(); });
+  assert.equal(await page.evaluate(() => document.getElementById("todayFreedom").hidden), true, "no debts — no line");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: зарплата → одно уведомление с именем долга и «Отложил»; «Отложил» пишет обычный платёж; второй раз в месяце — нет; день зарплаты из долгов", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-21T10:00:00+05:00") });
+  await page.evaluate(() => { state.debts.bank = 10000; state.debts.monthlyPayment = 1500; state.debts.labels = { bank: "Алиф", firms: "Долг 2" }; ensureDebtHistory(); state.notificationsLog = []; saveState(); renderAll(); });
+  const addSalary = async sum => { await page.evaluate(() => openMoneyForm("profit")); await page.selectOption("#moneyType", "Зарплата"); await page.fill("#moneyAmount", String(sum)); await page.click("#saveMoneyBtn");
+    await page.waitForSelector("#splSave"); await page.evaluate(() => closeModal()); await page.waitForFunction(() => !document.getElementById("modalBack").classList.contains("open")); }; // the «куда разложить» window comes after a salary
+  await addSalary(5000);
+  let log = await page.evaluate(() => state.notificationsLog.filter(n => /зарплата/i.test(n.title)));
+  assert.equal(log.length, 1); assert.match(log[0].body, /Отложи 1\s500.*на «Алиф» сейчас/);
+  await page.evaluate(() => { showView("viewToday"); renderToday(); });
+  assert.ok(await page.isVisible("#todaySalary")); assert.match(await page.textContent("#todaySalary"), /Пришла зарплата\? Отложи 1\s500.*«Алиф»/);
+  await page.evaluate(() => document.getElementById("todaySalaryBtn").click()); // the fake clock holds animation frames: a direct tap
+  const pay = await page.evaluate(() => ({ e: state.expenses.filter(x => x.debtPayment === "bank").map(x => [x.amount, x.category, x.transfer]), left: state.debts.bank, bar: document.getElementById("todaySalary").hidden }));
+  assert.deepEqual(pay.e, [[1500, "Платёж по долгу", true]]); assert.equal(pay.left, 8500); assert.equal(pay.bar, true);
+  // the button of the notification itself (Android / browser) — once only
+  assert.equal(await page.evaluate(() => { applyReminderAction("done", "debtpay:2026-10"); return state.expenses.filter(x => x.debtPayment).length; }), 1, "no double payment");
+  await addSalary(3000);
+  log = await page.evaluate(() => state.notificationsLog.filter(n => /зарплата/i.test(n.title)));
+  assert.equal(log.length, 1, "not twice a month");
+  // the day of salary set in «Долги»
+  await page.evaluate(() => openDebtEdit()); await page.fill("#dpd", "5"); await page.evaluate(() => document.getElementById("saveDebtBtn").click());
+  assert.equal(await page.evaluate(() => state.debts.payday), 5);
+  await page.clock.setSystemTime(new Date("2026-11-05T09:30:00+05:00"));
+  await page.evaluate(() => { state.notificationsLog = []; checkSalaryDay(); checkSalaryDay(); });
+  log = await page.evaluate(() => state.notificationsLog.filter(n => /зарплата/i.test(n.title)));
+  assert.equal(log.length, 1, "salary day → one notice"); assert.match(log[0].body, /Алиф/);
+  // Android: one «Отложил» button, the web app gets it
+  const nu = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8"), ar = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/ActionReceiver.java"), "utf8");
+  assert.ok(nu.includes('"Отложил"') && ar.includes('task.startsWith("debtpay:")'), "Android «Отложил»");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: 1-е число — итог месяца по долгу (с платежами и без): одно уведомление и карточка на «Деньгах» на 3 дня", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-11-01T10:00:00+05:00") });
+  let r = await page.evaluate(() => { state.debts.bank = 9000; state.debts.monthlyPayment = 1000; state.debtHistory = [{ day: "2026-10-01", total: 10000, at: "2026-10-01T10:00:00Z" }];
+    state.expenses.push({ id: "dp1", amount: 1000, at: "2026-10-10T08:00:00Z", dateKey: "2026-10-10", category: "Платёж по долгу", debtPayment: "bank", transfer: true });
+    state.notificationsLog = []; delete state.debts.monthSum; saveState(); checkDebtMonth(); checkDebtMonth(); showView("viewMoney"); renderMoney();
+    return { log: state.notificationsLog.filter(n => /Итог месяца/.test(n.title)).map(n => n.body), card: document.getElementById("debtMonthSum").textContent, hidden: document.getElementById("debtMonthSum").hidden }; });
+  assert.equal(r.log.length, 1, "one notice"); assert.match(r.log[0], /^В октябре погашено 1\s000.*\. Свобода ближе на 30 дней\. Осталось 9\s000/);
+  assert.equal(r.hidden, false); assert.match(r.card, /В октябре погашено/);
+  await page.clock.setSystemTime(new Date("2026-11-04T12:00:00+05:00"));
+  assert.equal(await page.evaluate(() => { renderMoney(); return document.getElementById("debtMonthSum").hidden; }), true, "the card is shown 3 days");
+  // no payments in the month: honest
+  r = await page.evaluate(() => { state.expenses = []; delete state.debts.monthSum; state.notificationsLog = []; const n = new Date(2026, 10, 2, 10); checkDebtMonth(n); return state.notificationsLog.map(n => n.body); });
+  assert.deepEqual(r, ["В октябре платежей по долгу не было — дата свободы сдвинулась на 31 день"]);
+  // no debt in that month — no summary
+  r = await page.evaluate(() => { state.debts.bank = 0; delete state.debts.monthSum; state.notificationsLog = []; checkDebtMonth(new Date(2026, 10, 1, 10)); return state.notificationsLog.length; });
+  assert.equal(r, 0);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: нет отправки в облако 24 ч или правка ждёт больше часа → строка «Данные не в облаке с …» в шапке; «Отправить сейчас» → строка исчезает; в настройках время отправки", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud, { clock: new Date("2026-10-21T10:00:00+05:00") });
+  await sync(page);
+  assert.equal(await page.evaluate(() => { renderSyncWarn(); return document.getElementById("syncWarn").hidden; }), true, "all in the cloud — no line");
+  await page.evaluate(() => { localStorage.setItem("JL_CLOUD_OK_AT_V745", String(Date.now() - 25 * 3600e3)); renderSyncWarn(); });
+  assert.ok(await page.isVisible("#syncWarn")); assert.match(await page.textContent("#syncWarnText"), /^Данные не в облаке с 20 октября 09:00$/);
+  await page.click("#syncWarnBtn"); await until(() => page.evaluate(() => document.getElementById("syncWarn").hidden), "line hides after sending");
+  // an edit waiting over an hour (the cloud cannot be reached)
+  cloud.down = true;
+  await page.evaluate(() => { state.notes.push({ id: "w1", title: "ждёт", body: "", at: new Date().toISOString() }); saveState(); markCloudDirty(); localStorage.setItem("JL_CLOUD_DIRTY_SINCE_V745", String(Date.now() - 2 * 3600e3)); renderSyncWarn(); });
+  assert.match(await page.textContent("#syncWarnText"), /Данные не в облаке с сегодня 08:00/);
+  await page.click("#syncWarnBtn"); await page.waitForTimeout(500); assert.ok(await page.isVisible("#syncWarn"), "still not in the cloud");
+  cloud.down = false;
+  await page.click("#syncWarnBtn"); await until(() => page.evaluate(() => document.getElementById("syncWarn").hidden), "sent");
+  assert.ok(cloud.row.state.notes.some(n => n.id === "w1"));
+  await page.evaluate(() => showView("viewSettings")); assert.match(await page.textContent("#cloudPushAt"), /^сегодня \d\d:\d\d$/);
+  page.errors = page.errors.filter(e => !/internet|disconnected|Failed to fetch/i.test(e));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: намаз — новый пользователь по Худжанду, выбранный город не меняется", async () => {
+  // no fake clock here: it restarts at the same moment on reload, and the newest save would look older than the last one
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  const r = await page.evaluate(() => { showView("viewToday"); renderToday(); return { city: prayerCity(), saved: state.settings.prayerCity, next: document.getElementById("prayerNext").textContent }; });
+  assert.equal(r.city, "khujand"); assert.equal(r.saved, undefined, "nothing written for the person"); assert.match(r.next, /Худжанд$/);
+  assert.deepEqual(await page.evaluate(() => [PRAYER_CITIES.khujand[1], PRAYER_CITIES.khujand[2]]), [40.28, 69.62]);
+  const kept = await page.evaluate(() => { const s = normalize({ version: 58, settings: { prayerCity: "dushanbe", onboarded: true } }); return s.settings.prayerCity; });
+  assert.equal(kept, "dushanbe");
+  await page.evaluate(() => { state.settings.prayerCity = "dushanbe"; saveState(); });
+  await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
+  assert.equal(await page.evaluate(() => prayerCity()), "dushanbe");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: тема «Авто» — днём светлая, вечером тёмная (по солнцу города); сохранённая «тёмная» остаётся тёмной", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-21T13:00:00+05:00") });
+  assert.equal(await page.evaluate(() => { showView("viewSettings"); return [...document.querySelectorAll("#setTheme option")].map(o => o.textContent).join("/"); }), "Светлая/Тёмная/Авто");
+  assert.equal(await page.evaluate(() => [state.settings.theme, document.documentElement.dataset.theme, document.getElementById("setTheme").value].join()), "dark,dark,dark", "the saved dark theme stays dark");
+  await page.selectOption("#setTheme", "auto");
+  assert.equal(await page.evaluate(() => [state.settings.theme, document.documentElement.dataset.theme].join()), "auto,light", "auto at 13:00 — light");
+  await page.clock.setSystemTime(new Date("2026-10-21T21:30:00+05:00")); await page.clock.fastForward("01:05");
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "dark", "auto at 21:30 — dark");
+  await page.clock.setSystemTime(new Date("2026-10-22T06:00:00+05:00")); await page.clock.fastForward("01:05");
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "dark", "before sunrise — dark");
+  await page.clock.setSystemTime(new Date("2026-10-22T08:00:00+05:00")); await page.clock.fastForward("01:05");
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "light", "after sunrise — light");
+  await page.selectOption("#setTheme", "light"); assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "light");
+  assert.equal(await page.evaluate(() => normalize({ version: 58, settings: { theme: "dark", onboarded: true } }).settings.theme), "dark");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: фото цели — при добавлении и изменении цели можно загрузить фото; уменьшается на устройстве, видно на «Цели» и в списке; битое фото отбрасывается", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await page.evaluate(() => openGoalEditor(""));
+  await page.fill("#geName", "Дом у моря");
+  await page.setInputFiles("#gePhotoFile", path.join(ROOT, "icon-512.png"));
+  await until(() => page.evaluate(() => /^data:image\/jpeg;base64,/.test(geState.photo)), "photo read");
+  assert.ok(await page.isVisible("#gePhotoImg")); assert.equal(await page.textContent("#gePhotoPickLabel"), "Заменить фото");
+  await page.click("#geSave");
+  const g = await page.evaluate(() => { const g = state.goals.find(x => x.title === "Дом у моря"); return { len: (g.photo || "").length, ok: goalPhotoOk(g.photo), img: !!document.querySelector(`[data-goal-open="${g.id}"] .v-goal-ico.has-photo img`) }; });
+  assert.ok(g.ok && g.len < 350000, "a small JPEG: " + g.len); assert.ok(g.img, "seen in the list");
+  // the main goal: photo in the hero
+  await page.evaluate(() => { state.goal.title = "Квартира"; syncMainGoalMirror(); saveState(); openGoalEditor(state.goals.find(x => x.main).id); });
+  await page.setInputFiles("#gePhotoFile", path.join(ROOT, "icon-192.png"));
+  await until(() => page.evaluate(() => !!geState.photo), "main photo read");
+  await page.click("#geSave");
+  assert.ok(await page.evaluate(() => { showView("viewGoal"); renderGoal(); const i = document.getElementById("goalPhoto"); return !i.hidden && i.src.startsWith("data:image/jpeg"); }), "main goal photo on «Цели»");
+  // remove
+  await page.evaluate(() => openGoalEditor(state.goals.find(x => x.main).id)); await page.click("#gePhotoDrop"); await page.click("#geSave");
+  assert.ok(await page.evaluate(() => !("photo" in state.goals.find(x => x.main)) && document.getElementById("goalPhoto").hidden));
+  // it travels through the cloud; a broken one is dropped by normalize
+  await sync(page); assert.ok(cloud.row.state.goals.some(x => x.title === "Дом у моря" && /^data:image\/jpeg/.test(x.photo)));
+  await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
+  assert.ok(await page.evaluate(() => goalPhotoOk(state.goals.find(x => x.title === "Дом у моря")?.photo)), "the photo is kept after a restart");
+  assert.deepEqual(await page.evaluate(() => normalize({ version: 58, goals: [{ id: "a", title: "x", photo: "javascript:alert(1)" }, { id: "b", title: "y", photo: "data:image/png;base64,AAAA" }] }).goals.map(g => "photo" in g)), [false, true]);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.5: отпечаток — после пальца сразу главный экран, без «Открыто / Подтвердить»", async () => {
+  const m = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java"), "utf8");
+  assert.ok(m.includes(".setConfirmationRequired(false)"), "no confirmation step after the finger");
+  assert.ok(m.includes('window.__jlUnlocked&&window.__jlUnlocked()'), "the app is told it was unlocked");
+  const { ctx, page } = await device(makeCloud());
+  assert.equal(await page.evaluate(() => { showView("viewMoney"); window.__jlUnlocked(); return currentView; }), "viewToday");
+  assert.equal(await page.evaluate(() => { showView("viewMoney"); openTaskForm(); window.__jlUnlocked(); const v = currentView; closeModal(); return v; }), "viewMoney", "an open window is left as it was");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.4.0");
-assert.match(gradle, /versionCode 744\b/); assert.match(gradle, /versionName '74\.4'/);
-assert.match(csproj, /<Version>74\.4\.0<\/Version>/);
+assert.equal(pkg.version, "74.5.0");
+assert.match(gradle, /versionCode 745\b/); assert.match(gradle, /versionName '74\.5'/);
+assert.match(csproj, /<Version>74\.5\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.4'") && html.includes('id="appVersion">74.4</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.5'") && html.includes('id="appVersion">74.5</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-4'"), "service worker cache must be life-v74-4");
+assert.ok(sw.includes("'life-v74-5'"), "service worker cache must be life-v74-5");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -214,4 +214,13 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(html.includes("const FREEDOM_STOPS=[25,50,75,100];") && html.indexOf("const FREEDOM_STOPS") < html.indexOf("let state=load()"), "FREEDOM_STOPS is defined before the first normalize()");
   assert.ok(html.includes("if(!Array.isArray(s.debts.freedomWon))") && html.includes("if('week' in s.day)"), "74.2 data is migrated in normalize()");
   assert.ok(html.includes("<span data-free-left></span>"), "«Твой вечер» updates only its countdown every minute (a tap is never lost)"); }
+// 74.5: AI retries by itself, the limit counts only answers, the way out of debt, sync warning, Khujand, theme «Авто», goal photo, fingerprint
+{ const ts = read("supabase/functions/life-control-ai/index.ts"), act = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java");
+  const serve = ts.slice(ts.indexOf("Deno.serve("));
+  assert.ok(serve.indexOf("countUse(a.sb, a.user.id, !(\"error\" in r))") > serve.indexOf("await gemini(p,") && !/\.from\("ai_usage"\)\.insert\(\{ user_id: userId \}\);\s*return true/.test(ts), "ai_usage is written only after Google answered");
+  assert.ok(ts.includes("MAX_ATTEMPTS_PER_HOUR = 30") && ts.includes("MAX_REQUESTS_PER_HOUR = 10") && ts.includes("ctx.all_data = allData("), "10 answers and 30 attempts an hour; all_data stays");
+  for (const f of ["function aiRetryTick(", "function aiQueue(", "function aiBusy(", "function renderTodayFreedom(", "function askSalary(", "function checkDebtMonth(", "function renderSyncWarn(", "function themeIsDark(", "function shrinkPhoto(", "function goalPhotoOk("]) assert.ok(html.includes(f), "74.5 function: " + f);
+  assert.ok(html.indexOf("const GOAL_PHOTO_MAX") < html.indexOf("let state=load()") && html.indexOf("const DIRTY_SINCE_KEY") < html.indexOf("let state=load()"), "74.5 constants exist before the first load()");
+  assert.ok(html.includes("return PRAYER_CITIES[c]?c:'khujand'"), "Khujand by default");
+  assert.ok(act.includes(".setConfirmationRequired(false)"), "the finger opens the app at once"); }
 console.log("LIFE_V73_STATIC_QA_OK");
