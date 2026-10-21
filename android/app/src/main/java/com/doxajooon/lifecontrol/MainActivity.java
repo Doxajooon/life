@@ -503,6 +503,11 @@ public class MainActivity extends AppCompatActivity {
             String a = activity.launchAction; activity.launchAction = null; return a == null ? "" : a;
         }
 
-        @JavascriptInterface public int bridgeVersion() { return 5; }
+        /** «Громкие напоминания (как будильник)»: true → alarm volume (channel jamal_life_dawn2), false → notification volume. */
+        @JavascriptInterface public void setLoudReminders(boolean on) { NotificationUtil.setLoud(ctx, on); }
+
+        @JavascriptInterface public boolean isLoudReminders() { return NotificationUtil.isLoud(ctx); }
+
+        @JavascriptInterface public int bridgeVersion() { return 6; }
     }
 }

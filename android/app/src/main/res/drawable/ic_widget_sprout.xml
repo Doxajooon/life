@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- widget mark: the Life sprout in its turquoise → gold ring (icon.svg scaled to 24/512 ≈ 0.047) -->
+    <group android:scaleX="0.047" android:scaleY="0.047" android:translateX="-0.03" android:translateY="-0.03">
+        <path android:pathData="M88,256 A168,168 0 1,1 424,256 A168,168 0 1,1 88,256 Z" android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF" android:strokeAlpha="0.12" android:strokeWidth="30"/>
+        <path android:pathData="M256,88 A168,168 0 1,1 101,191" android:fillColor="#00000000"
+            android:strokeWidth="30" android:strokeLineCap="round">
+            <aapt:attr name="android:strokeColor">
+                <gradient android:type="linear" android:startX="88" android:startY="88" android:endX="424" android:endY="424">
+                    <item android:offset="0" android:color="#FF6EE7B7"/>
+                    <item android:offset="0.55" android:color="#FF22C3A0"/>
+                    <item android:offset="1" android:color="#FFE3B04B"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M258,356 C254,320 252,290 256,252" android:fillColor="#00000000"
+            android:strokeColor="#FF22A55A" android:strokeWidth="30" android:strokeLineCap="round"/>
+        <path android:pathData="M252,262 C214,270 168,252 150,200 C146,188 146,180 148,174 C196,168 240,192 252,262 Z" android:fillColor="#FF22C55E"/>
+        <path android:pathData="M262,240 C262,182 300,142 366,138 C372,138 376,140 378,142 C376,210 330,246 262,240 Z" android:fillColor="#FF16A34A"/>
+    </group>
+</vector>

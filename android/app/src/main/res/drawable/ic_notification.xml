@@ -1,13 +1,12 @@
-<!-- Life notification icon: a solid crown (the brand mark), filled so it reads clearly in the status bar -->
+<!-- Life notification icon: a solid white sprout (stem + two leaves, the brand mark without the ring) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
-    <!-- crown body: three peaks and a slightly curved base -->
-    <path android:fillColor="#FFFFFFFF"
-        android:pathData="M3.2,9.2 L7.6,12.4 L12,5.8 L16.4,12.4 L20.8,9.2 L19.1,17.2 Q12,18.6 4.9,17.2 Z"/>
-    <!-- jewels on the peaks -->
-    <path android:fillColor="#FFFFFFFF" android:pathData="M3.2,9.2 m-1.7,0 a1.7,1.7 0 1,0 3.4,0 a1.7,1.7 0 1,0 -3.4,0"/>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M12,4.6 m-1.9,0 a1.9,1.9 0 1,0 3.8,0 a1.9,1.9 0 1,0 -3.8,0"/>
-    <path android:fillColor="#FFFFFFFF" android:pathData="M20.8,9.2 m-1.7,0 a1.7,1.7 0 1,0 3.4,0 a1.7,1.7 0 1,0 -3.4,0"/>
-    <!-- base band -->
-    <path android:fillColor="#FFFFFFFF" android:pathData="M5.4,19.3 L18.6,19.3 Q19.4,19.3 19.4,20.1 L19.4,20.4 Q19.4,21.2 18.6,21.2 L5.4,21.2 Q4.6,21.2 4.6,20.4 L4.6,20.1 Q4.6,19.3 5.4,19.3 Z"/>
+    <!-- the icon.svg sprout (x 146…378, y 138…369 of 512) scaled to 0.094 and centred -->
+    <group android:scaleX="0.094" android:scaleY="0.094" android:translateX="-12.63" android:translateY="-11.83">
+        <path android:pathData="M258,356 C254,320 252,290 256,252" android:fillColor="#00000000"
+            android:strokeColor="#FFFFFFFF" android:strokeWidth="28" android:strokeLineCap="round"/>
+        <path android:fillColor="#FFFFFFFF"
+            android:pathData="M252,262 C214,270 168,252 150,200 C146,188 146,180 148,174 C196,168 240,192 252,262 Z
+                              M262,240 C262,182 300,142 366,138 C372,138 376,140 378,142 C376,210 330,246 262,240 Z"/>
+    </group>
 </vector>

@@ -17,13 +17,14 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "73.0.0");
-assert.match(gradle, /versionCode 730\b/); assert.match(gradle, /versionName '73\.0'/);
-assert.match(csproj, /<Version>73\.0\.0<\/Version>/);
+assert.equal(pkg.version, "74.1.0");
+assert.match(gradle, /versionCode 741\b/); assert.match(gradle, /versionName '74\.1'/);
+assert.match(csproj, /<Version>74\.1\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='73.0'") && html.includes('id="appVersion">73.0</span>'), "app version 73.0 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.1'") && html.includes('id="appVersion">74.1</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v73-0'"), "service worker cache must be life-v73-0");
+assert.ok(sw.includes("'life-v74-1'"), "service worker cache must be life-v74-1");
+assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
 assert.equal(manifest.name, "Life"); assert.equal(manifest.short_name, "Life");
@@ -31,7 +32,7 @@ assert.ok(!/Life Control/.test(html), "old name left in the app");
 for (const f of ["icon.svg", "icon-192.png", "icon-512.png", "desktop/app.ico", "android/app/src/main/res/raw/jamal_dawn.wav"]) assert.ok(existsSync(new URL(f, root)), "missing " + f);
 assert.ok(read("android/app/src/main/res/values/strings.xml").includes('<string name="app_name">Life</string>') && csproj.includes("<Product>Life</Product>") && csproj.includes("<AssemblyName>Life</AssemblyName>"), "the name «Life» on Android and Windows (Life.exe)");
 assert.ok((html.match(/\bAPP_NAME=/g) || []).length === 1 && html.includes("const APP_NAME='Life'"), "the visible name comes from one APP_NAME constant");
-assert.ok(read("android/app/build.gradle").includes("com.doxajooon.lifecontrol") && html.includes("const KEY='LIFE_CONTROL_V52'") && html.includes("LifeControlDB") && notif.includes('"jamal_life_dawn"'), "internal ids stay (package, storage keys, IndexedDB, notification channel) — the APK installs over 71/72 and nothing is lost");
+assert.ok(read("android/app/build.gradle").includes("com.doxajooon.lifecontrol") && html.includes("const KEY='LIFE_CONTROL_V52'") && html.includes("LifeControlDB") && notif.includes('"jamal_life_dawn2"'), "internal ids stay (package, storage keys, IndexedDB; notification channel jamal_life_dawn2 since 74.1) — the APK installs over 71/72 and nothing is lost");
 
 // single source of truth: no checked-in copies of the web app
 let tracked = [];
@@ -82,7 +83,7 @@ assert.ok(html.includes("if(synced)await wipeLocalData()"), "logout must clear p
 assert.ok(html.includes("function renderRhythm") && html.includes("function renderDayStrip") && html.includes("function renderHabitWeek"), "living rhythm, day strip and habit week chart");
 assert.ok(existsSync(new URL("../fonts/inter-cyrillic.woff2", import.meta.url)) && html.includes('url("fonts/inter-cyrillic.woff2")') && sw.includes("inter-cyrillic.woff2"), "Inter font must ship with the app (offline)");
 assert.ok(!html.includes("data-more=") && !html.includes('class="jl-more"'), "Money and Goal show everything — no hidden «Подробнее» blocks");
-assert.ok(existsSync(new URL("../sounds/jamal-dawn.wav", import.meta.url)) && html.includes("sounds/jamal-dawn.wav") && sw.includes("jamal-dawn.wav") && notif.includes('"jamal_life_dawn"'), "the Jamal Glass tone ships to web and Android (new channel so phones pick it up)");
+assert.ok(existsSync(new URL("../sounds/jamal-dawn.wav", import.meta.url)) && html.includes("sounds/jamal-dawn.wav") && sw.includes("jamal-dawn.wav") && notif.includes('"jamal_life_dawn2"'), "the Jamal Glass tone ships to web and Android (new channel so phones pick it up)");
 for (const f of ["manrope", "nunito", "inter"]) assert.ok(existsSync(new URL(`../fonts/${f}-cyrillic.woff2`, import.meta.url)) && sw.includes(`${f}-cyrillic.woff2`), "font missing: " + f);
 assert.ok(html.includes('id="setFont"') && html.includes("function applyFont"), "font choice in settings");
 assert.ok(html.includes("rememberBaseStamp(state[CLOUD_BASE_KEY])") && html.includes("const st=baseStamp()"), "the cloud base stamp survives a quick restart (an edit made during the first upload is merged, not lost)");
@@ -148,10 +149,54 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   for (const bad of ["100000", "120000", "5200", "4500", "финансово независим", "комнат", "семь", "раскро", "Английский"]) assert.ok(!def.includes(bad) && !(bad.length > 6 && html.includes(bad)), "personal default value left: " + bad);
   assert.ok(/income:0,/.test(def) && /debts:\{bank:0,firms:0,monthlyPayment:0\}/.test(def) && /goal:\{title:'',why:'',next:''/.test(def) && /milestones:\[\]\}/.test(def), "neutral defaults: no income, no debts, an empty goal");
   for (const f of ["hasUserData", "clearLegacyDemo", "applyV73", "debtLabel", "goalName", "quoteSet", "openOnboarding", "needsOnboarding", "profitSources"]) assert.ok(defs.includes(f), "73: missing " + f);
-  assert.ok(html.includes("s.settings.quoteSet=old?'hadith':'general'") && html.includes("old?'Банк':'Долг 1'") && html.includes("s.settings.onboarded=old"), "a user with data keeps the hadiths, «Банк / Фирмы» and never sees the first-start setup");
+  assert.ok(html.includes("s.settings.quoteSet='hadith'") && html.includes("old?'Банк':'Долг 1'") && html.includes("s.settings.onboarded=old"), "a user with data keeps the hadiths, «Банк / Фирмы» and never sees the first-start setup");
   assert.ok(/const GENERAL_QUOTES=\[([\s\S]*?)\];/.test(html) && html.match(/const GENERAL_QUOTES=\[([\s\S]*?)\];/)[1].split("\n").filter(l => l.trim().startsWith("'")).length === 60, "60 neutral thoughts of the day");
   assert.ok(!/Аллах|Пророк|намаз|ﷺ/.test(html.match(/const GENERAL_QUOTES=\[([\s\S]*?)\];/)[1]), "the neutral quotes carry no religious text");
   assert.ok(html.includes("const o=clone(b);for(const k of Object.keys(a||{}))o[k]=merge(a[k],b[k])"), "merge() copies the defaults — an edit can never change DEFAULT itself");
   assert.ok(fn.includes('const APP_NAME = "Life"') && !fn.includes("Душанбе"), "AI: neutral name");
   assert.ok(html.includes("FIRST_PUSH_KEY='JL_FIRST_PUSH_V73'") && html.includes("row.device_id===getDeviceId()") && html.includes("const merged=own?mergeStates(remote,state,remote):mergeFirstContact(state,remote)"), "an edit made during the very first upload survives a restart"); }
+
+// 74.1: the green live sprout in the ring everywhere, glass cards, louder reminders
+{ const svg = read("icon.svg");
+  for (const k of ['id="spbg"', 'id="spring"', 'id="spleafL"', 'id="spleafR"', 'id="spstem"', 'id="spdrop"', "M256 88 A168 168 0 1 1 101 191", "M262 240 C262 182 300 142 366 138", "#15324f", "#e3b04b"]) assert.ok(svg.includes(k), "icon.svg is the green sprout in the ring: " + k);
+  assert.ok(!/lfleaf|lfgold|M120 396 C108 236/.test(svg + html), "the leaf-and-coin mark is gone");
+  const png = f => { const b = readFileSync(new URL(f, root)); assert.equal(b.toString("hex", 0, 8), "89504e470d0a1a0a", f + " is a PNG"); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+  assert.deepEqual(png("icon-192.png"), [192, 192]); assert.deepEqual(png("icon-512.png"), [512, 512]); assert.deepEqual(png("icon-maskable.png"), [512, 512]);
+  for (const f of ["icon-192.png", "icon-512.png"]) { const b = readFileSync(new URL(f, root)); assert.ok(b.length > 20000, f + " was regenerated from the new icon (tools/make-icons.mjs)"); }
+  const ico = readFileSync(new URL("desktop/app.ico", root)); assert.equal(ico.readUInt16LE(2), 1); const n = ico.readUInt16LE(4);
+  const icoSizes = [...Array(n)].map((_, i) => ico.readUInt8(6 + 16 * i) || 256).sort((a, b) => a - b); assert.deepEqual(icoSizes, [16, 32, 48, 256], "app.ico has 16, 32, 48 and 256 px");
+  assert.ok(manifest.icons.some(i => i.src === "icon-maskable.png" && i.purpose === "maskable") && sw.includes("./icon-maskable.png") && read("tools/sync-platforms.mjs").includes("icon-maskable.png"), "the maskable icon ships to web, Android and Windows");
+  const fg = read("android/app/src/main/res/drawable/ic_launcher_foreground.xml");
+  assert.ok(fg.includes("M256,88 A168,168 0 1,1 101,191") && fg.includes("M262,240 C262,182 300,142 366,138") && fg.includes('android:scaleX="0.175"') && fg.includes('android:translateX="9.2"') && fg.includes("#FFE3B04B") && fg.includes("#FF22C55E"), "Android launcher: the sprout and the ring inside the 66dp safe zone");
+  assert.ok((168 + 11) * 0.175 <= 33 && Math.abs(256 * 0.175 + 9.2 - 54) < 0.01, "the ring fits the 66dp safe circle and is centred");
+  assert.ok(read("android/app/src/main/res/values/colors.xml").includes('<color name="ic_launcher_background">#0F2236</color>'), "Android launcher background #0F2236");
+  const ni = read("android/app/src/main/res/drawable/ic_notification.xml");
+  assert.ok(/sprout/.test(ni) && !/crown|leaf whose|coin/i.test(ni) && ni.includes("M262,240 C262,182 300,142 366,138") && !/(fill|stroke)Color="#(?!FFFFFFFF|00000000)/.test(ni), "notification icon: a white sprout silhouette");
+  assert.ok(read("android/app/src/main/res/layout/widget_jamal.xml").includes("@drawable/ic_widget_sprout") && !existsSync(new URL("android/app/src/main/res/drawable/ic_widget_leaf.xml", root)) && !existsSync(new URL("android/app/src/main/res/drawable/ic_widget_crown.xml", root)), "the widget shows the sprout");
+  assert.equal(manifest.background_color, "#0f2236", "PWA splash background matches the icon");
+  assert.ok(html.includes('<g class="jl-sprout">') && html.includes('id="jlRing"') && html.includes('stop-color="#e3b04b"') && html.includes(".jl-logo{background:linear-gradient(145deg,#15324f,#07111d)"), "the logo next to «Life» is the same green sprout, ring turquoise → gold");
+  assert.ok(html.includes(".jl-logo .jl-sprout{transform-origin:258px 356px;animation:jlSway") && html.includes(".jl-logo .jl-sprout,.jl-logo .jl-dew,"), "the logo is alive and calms down with reduced motion");
+  // glass
+  assert.ok(html.includes('html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 62%,transparent)}') && html.includes(".card,.jl-hero{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}") && html.includes("rgba(36,76,134,.66)"), "dark cards 62 %, blur 12px, «Сейчас» .66");
+  assert.ok(html.includes("html[data-theme=\"dark\"] .jl-goalhero{background:linear-gradient(160deg,rgba(20,48,78,.66)") && html.includes(".jl-now,.jl-quote{background:rgba(15,37,70,.85)}") && html.includes(".jl-sky::after{content:\"\""), "goal cards are glass, inner blocks stay dense, the shade on the photo stays");
+  // louder reminders
+  const wav = readFileSync(new URL("sounds/jamal-dawn.wav", root)), raw = readFileSync(new URL("android/app/src/main/res/raw/jamal_dawn.wav", root));
+  assert.ok(wav.equals(raw), "web and Android play the same wav");
+  const fmt = wav.indexOf("fmt "), data = wav.indexOf("data"), rate = wav.readUInt32LE(fmt + 12), ch = wav.readUInt16LE(fmt + 10), bits = wav.readUInt16LE(fmt + 22), len = wav.readUInt32LE(data + 4);
+  assert.equal(bits, 16); let peak = 0; for (let i = data + 8; i < data + 8 + len; i += 2) peak = Math.max(peak, Math.abs(wav.readInt16LE(i)));
+  const secs = len / (rate * ch * 2);
+  let sq = 0; for (let i = data + 8; i < data + 8 + len; i += 2) sq += (wav.readInt16LE(i) / 32768) ** 2;
+  const rmsDb = 10 * Math.log10(sq / (len / 2));
+  assert.ok(rmsDb >= -10, `the reminder sound is loud on average (${rmsDb.toFixed(1)} dBFS ≥ −10; 74.0 had −18.7)`);
+  assert.ok(peak / 32768 >= 0.9 && secs >= 3, `the reminder sound is louder and longer (peak ${(peak / 32768).toFixed(2)} ≥ 0.9, ${secs.toFixed(2)} s ≥ 3 s)`);
+  assert.ok(notif.includes('CHANNEL = "jamal_life_dawn2"') && notif.includes("AudioAttributes.USAGE_ALARM") && notif.includes("AudioAttributes.USAGE_NOTIFICATION_EVENT") && notif.includes('CHANNEL_SOFT = "jamal_life_dawn2_soft"'), "loud channel on the alarm stream, quiet channel on the notification stream");
+  assert.ok(/OLD_CHANNELS = \{"jamal_life_dawn",/.test(notif), "the 74.0 channel jamal_life_dawn is deleted (new sound = new channel)");
+  assert.ok(notif.includes("enableVibration(true)") && notif.includes('getBoolean("loud", true)') && notif.includes("setOnlyAlertOnce(false)"), "reminders vibrate, loud is the default, a snoozed reminder rings again");
+  assert.ok(activity.includes("public void setLoudReminders(boolean on)") && html.includes("window.AndroidBridge?.setLoudReminders?.(state.settings?.loudReminders!==false)") && html.includes("if(typeof s.settings.loudReminders!=='boolean')s.settings.loudReminders=true;"), "the switch «Громкие напоминания» reaches Android and is on by default");
+  assert.ok(html.includes("g.gain.value=1;") && desktop.includes("new SoundPlayer(wav)") && desktop.includes('window.__jlHostSound=1'), "web plays at full gain; Windows plays the sound itself, also from the tray"); }
+// 74.1: one sync at a time — cloudSync() runs only inside cloudAutoSync (its in-flight guard); a direct call raced the background sync
+{ const direct = [...html.matchAll(/(?<!function )(?<![.\w])cloudSync\(\)/g)].length;
+  assert.equal(direct, 1, "cloudSync() is called only from cloudAutoSync (found " + direct + " calls)");
+  assert.ok(html.includes("const dirtyNow=dirty||isCloudDirty();") && html.includes("if(!dirtyNow){const changed=applyCloudState(row.state,row.updated_at);"), "an edit made during the download is merged, not overwritten");
+  assert.ok(html.includes("(_cloudBaseFingerprint?fingerprint!==_cloudBaseFingerprint:appReadyForSync)"), "an edit right after a restart (before the first sync) is marked unsent"); }
 console.log("LIFE_V73_STATIC_QA_OK");

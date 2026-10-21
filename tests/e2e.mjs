@@ -85,6 +85,8 @@ function makeCloud() {
         const r = { updated_at: cloud.row.updated_at };
         if (sel.includes("state")) Object.assign(r, { state: cloud.row.state, schema_version: cloud.row.schema_version });
         if (sel.includes("device_id")) r.device_id = cloud.row.device_id ?? null;
+        // 74.1: a slow download of the full state (the user keeps typing meanwhile)
+        if (sel.includes("state") && cloud.stateDelay) { await new Promise(res => setTimeout(res, cloud.stateDelay)); return send(200, [r]).catch(() => {}); }
         return send(200, [r]);
       }
       const body = JSON.parse(req.postData() || "{}");
@@ -312,6 +314,52 @@ await test("Правка во время идущей синхронизации
   const ids = cloud.row.state.notes.map(n => n.id);
   assert.ok(ids.includes("f1") && ids.includes("f2"), "lost: " + ids.join(","));
   await ctx.close();
+});
+
+// 74.1: the dirty flag was read before the download; an edit made while the other device's copy was downloading was overwritten by it
+await test("Правка во время скачивания чужих изменений не теряется", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud), B = await device(cloud);
+  await sync(A.page); await sync(B.page); await sync(A.page);
+  await B.page.evaluate(() => { state.notes.push({ id: "b1", title: "с телефона", body: "", at: new Date().toISOString() }); saveState(); });
+  await sync(B.page);
+  cloud.stateDelay = 600;
+  await A.page.evaluate(async () => {
+    while (cloudSyncInFlight) await cloudSyncInFlight.catch(() => {});
+    const p = cloudAutoSync();                         // A sees B's change and downloads it…
+    await new Promise(r => setTimeout(r, 200));
+    state.expenses.push({ id: "a1", amount: 10, category: "Еда", at: new Date().toISOString() }); saveState();
+    state.notes.push({ id: "a2", title: "с ПК", body: "", at: new Date().toISOString() }); saveState();
+    await p;
+  });
+  cloud.stateDelay = 0;
+  await sync(A.page); await sync(B.page);
+  for (const [name, d] of [["A", A], ["B", B]]) {
+    const s = await d.page.evaluate(() => ({ e: state.expenses.map(x => x.id), n: state.notes.map(x => x.id) }));
+    assert.ok(s.e.includes("a1") && s.n.includes("a2") && s.n.includes("b1"), name + " lost data: " + JSON.stringify(s));
+  }
+  assert.ok(cloud.row.state.notes.some(n => n.id === "a2") && cloud.row.state.expenses.some(x => x.id === "a1"), "edit not uploaded");
+  await A.ctx.close(); await B.ctx.close();
+});
+
+// 74.1: right after a restart (before the first sync) edits were not marked as unsent and the cloud copy replaced them
+await test("Правка сразу после перезапуска, до первой синхронизации, не теряется", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud), B = await device(cloud);
+  await sync(A.page); await sync(B.page); await sync(A.page);
+  await B.page.evaluate(() => { state.notes.push({ id: "b1", title: "с телефона", body: "", at: new Date().toISOString() }); saveState(); });
+  await sync(B.page);
+  cloud.stateDelay = 800;
+  await A.page.reload(); await A.page.waitForFunction(() => appReadyForSync === true);
+  await A.page.evaluate(() => { state.notes.push({ id: "a9", title: "сразу после запуска", body: "", at: new Date().toISOString() }); saveState(); });
+  await A.page.evaluate(async () => { while (cloudSyncInFlight) await cloudSyncInFlight.catch(() => {}); });
+  cloud.stateDelay = 0;
+  await sync(A.page); await sync(B.page);
+  for (const [name, d] of [["A", A], ["B", B]]) {
+    const n = await d.page.evaluate(() => state.notes.map(x => x.id));
+    assert.ok(n.includes("a9") && n.includes("b1"), name + " lost data: " + JSON.stringify(n));
+  }
+  await A.ctx.close(); await B.ctx.close();
 });
 
 await test("Истёкший токен обновляется сам, без запроса пароля", async () => {
@@ -1271,7 +1319,7 @@ await test("V72 D8: ритм дня — «главное» этапа связа
   // the hero and the day strip are open at once, no tap needed
   const ui = await page.evaluate(() => { showView("viewToday"); renderToday(); const v = id => { const e = document.getElementById(id); return !!e && e.offsetParent !== null && e.getBoundingClientRect().height > 10; }; return { focus: v("nowFocus"), strip: v("dayStrip"), text: document.getElementById("nowFocus").textContent, main: document.querySelector('#timeline .jl-rstep.current .jl-rstep-main')?.textContent || "" }; });
   assert.ok(ui.focus && ui.strip, "focus and the day strip are visible");
-  assert.match(ui.text, /Главное сейчас · до цели 45 тыс. сомони/); assert.match(ui.main, /Главное сейчас/);
+  assert.match(ui.text, /Главное сейчас · до цели 45 тыс. сомони/); assert.equal(ui.main, "", "74: «Главное сейчас» once — in the «Сейчас» window, not again in the rhythm");
   // «Да» from the reminder marks the main action done; «Перенести» moves it on as a goal task
   const act = await page.evaluate(() => { applyReminderAction("done", "stage:w"); applyReminderAction("snooze", "stage:f"); const t = state.tasks.find(x => x.goal && x.title.includes("Первый взнос"));
     return { done: !!dailyState().stageDone?.w, moved: dailyState().stageMoved?.f, task: t && { date: t.date, time: t.time, ms: t.ms }, report: dayLedger().gActs }; });
@@ -1930,12 +1978,12 @@ await test("73: строка владельца из облака на ново�
   await ctx.close();
 });
 
-await test("73: новый пустой аккаунт — чистый лист, цитаты «Мотивация», первая настройка из 3 шагов уходит в облако", async () => {
+await test("73: новый пустой аккаунт — чистый лист, хадис дня, первая настройка из 3 шагов уходит в облако", async () => {
   const cloud = makeCloud();
   const { ctx, page } = await device(cloud, { onboarding: true });
   await page.waitForSelector("#obNext", { timeout: 8000 });
   const clean = await page.evaluate(() => ({ income: state.income, debts: [state.debts.bank, state.debts.firms, state.debts.monthlyPayment], goal: state.goal.title, ms: state.goal.milestones.length, labels: [debtLabel("bank"), debtLabel("firms")], q: quoteSet(), src: profitSources(), title: document.title, brand: document.querySelector(".brand-name").textContent.trim() }));
-  assert.deepEqual(clean, { income: 0, debts: [0, 0, 0], goal: "", ms: 0, labels: ["Долг 1", "Долг 2"], q: "general", src: ["Зарплата", "Фриланс", "Бизнес", "Другое"], title: "Life — цели, деньги, день", brand: "Life" });
+  assert.deepEqual(clean, { income: 0, debts: [0, 0, 0], goal: "", ms: 0, labels: ["Долг 1", "Долг 2"], q: "hadith", src: ["Зарплата", "Фриланс", "Бизнес", "Другое"], title: "Life — цели, деньги, день", brand: "Life" });
   // step 1 — name and currency
   await page.fill("#obName", "Алия"); await page.selectOption("#obCur", "тенге"); await page.click("#obNext");
   // step 2 — the goal with two stages
@@ -1946,15 +1994,15 @@ await test("73: новый пустой аккаунт — чистый лист
   const r = await page.evaluate(() => ({ open: document.getElementById("modalBack").classList.contains("open"), on: state.settings.onboarded, name: state.profile.name, cur: currencyLabel(), goal: [state.goal.title, state.goal.finance.targetAmount, state.goal.finance.targetDate, state.goal.next], ms: state.goal.milestones.map(m => m.title), steps: state.day.steps.map(x => x.title + " " + x.time), debt: [state.debts.bank, state.debts.monthlyPayment] }));
   assert.deepEqual(r, { open: false, on: true, name: "Алия", cur: "тенге", goal: ["Накопить на машину", 30000, "2027-09-01", "Отложить 10 000"], ms: ["Отложить 10 000", "Выбрать машину"], steps: ["Учёба 08:30", "Домашние задания и дела 15:00", "Итог дня 21:00"], debt: [5000, 500] });
   const c = cloud.row.state;
-  assert.deepEqual([c.goal.title, c.goal.milestones.length, c.day.steps[0].time, c.settings.onboarded, c.settings.quoteSet], ["Накопить на машину", 2, "08:30", true, "general"], "the setup went to the cloud");
+  assert.deepEqual([c.goal.title, c.goal.milestones.length, c.day.steps[0].time, c.settings.onboarded, c.settings.quoteSet], ["Накопить на машину", 2, "08:30", true, "hadith"], "the setup went to the cloud");
   // never again — not after a reload, not on another device
   await page.reload(); await page.waitForFunction(() => appReadyForSync === true); await sync(page); await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open")), false);
   const B = await device(cloud, { onboarding: true }); await sync(B.page); await B.page.waitForTimeout(300);
   assert.equal(await B.page.evaluate(() => document.getElementById("modalBack").classList.contains("open") || state.goal.title), "Накопить на машину");
-  // the quote of the day: neutral thought, no religious text; «Выключить» hides it
+  // 74: the quote of the day is a hadith for everybody; «Мотивация» is a choice in the settings; «Выключить» hides it
   const q = await page.evaluate(() => { showView("viewToday"); renderToday(); const m = motivation(); return { a: m.author, t: m.text, set: m.set }; });
-  assert.equal(q.a, "Мысль дня"); assert.ok(!/Аллах|Пророк|ﷺ/.test(q.t)); assert.equal(q.set, "general");
+  assert.match(q.a, /Пророк/); assert.equal(q.set, "hadith");
   const off = await page.evaluate(() => { showView("viewSettings"); const sel = document.getElementById("setQuoteSet"); sel.value = "off"; sel.dispatchEvent(new Event("change")); showView("viewToday"); return document.querySelector(".jl-quote").hidden; });
   assert.equal(off, true, "«Выключить» hides the quote");
   assert.deepEqual(page.errors, []); assert.deepEqual(B.page.errors, []);
@@ -1978,7 +2026,7 @@ await test("73: настройку можно пропустить целико�
   await ctx.close(); await C.ctx.close();
 });
 
-await test("73: цитаты дня — у пользователя с данными хадисы, у нового — мотивация (миграция quoteSet)", async () => {
+await test("74: хадис дня у всех; «Мотивация» остаётся, только если человек выбрал её сам (миграция quoteSet)", async () => {
   const { ctx, page } = await device(makeCloud());
   const r = await page.evaluate(() => {
     const withData = normalize({ version: 58, profits: [{ id: "x", amount: 1, at: "2026-01-01T00:00:00Z" }] }).settings.quoteSet;
@@ -1987,9 +2035,11 @@ await test("73: цитаты дня — у пользователя с данн�
     const onlyClock = normalize({ version: 58, reports: { "2026-01-01": { steps: { s1: true } } } }).settings.quoteSet; // stage marks set by the clock are not user data
     const empty = normalize({ version: 58 }).settings.quoteSet;
     const chosen = normalize({ version: 58, settings: { quoteSet: "off" }, profits: [{ id: "x", amount: 1 }] }).settings.quoteSet;
-    return { withData, withTasks, withReport, onlyClock, empty, chosen, n: GENERAL_QUOTES.length, uniq: new Set(GENERAL_QUOTES).size };
+    const auto73 = normalize({ version: 58, settings: { quoteSet: "general" } }).settings.quoteSet; // put there by 73, not by the person
+    const picked = normalize({ version: 58, settings: { quoteSet: "general", quoteSetChosen: true } }).settings.quoteSet;
+    return { withData, withTasks, withReport, onlyClock, empty, chosen, auto73, picked, n: GENERAL_QUOTES.length, uniq: new Set(GENERAL_QUOTES).size };
   });
-  assert.deepEqual(r, { withData: "hadith", withTasks: "hadith", withReport: "hadith", onlyClock: "general", empty: "general", chosen: "off", n: 60, uniq: 60 });
+  assert.deepEqual(r, { withData: "hadith", withTasks: "hadith", withReport: "hadith", onlyClock: "hadith", empty: "hadith", chosen: "off", auto73: "hadith", picked: "general", n: 60, uniq: 60 });
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -2108,6 +2158,126 @@ await test("73: правка во время самой первой выгру�
   assert.equal(await B.page.evaluate(() => state.goal.title), "Из облака");
   assert.deepEqual(page.errors, []); assert.deepEqual(B.page.errors, []);
   await ctx.close(); await B.ctx.close();
+});
+
+await test("74: живой «Сегодня» — задачи сразу после «Сейчас», итог дня в конце, линия «Сейчас» в задачах, пульс по дням за 14 дней", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T13:30:00+05:00") });
+  const r = await page.evaluate(() => {
+    const k = keyDay(), y = new Date(); y.setDate(y.getDate() - 1); const ky = keyDay(y);
+    state.habits = [{ id: "h1", title: "Зарядка" }]; state.habitLog = { h1: { [ky]: true } };
+    state.tasks = [{ id: "a", title: "Утро", time: "08:00", date: k, done: true }, { id: "b", title: "Звонок", time: "18:00", date: k, done: false }, { id: "c", title: "Вчера", time: "09:00", date: ky, done: true }];
+    state.reports[ky] = { done: "x", savedAt: y.toISOString(), steps: Object.fromEntries(state.day.steps.map(x => [x.id, true])) }; saveState(); showView("viewToday"); renderAll();
+    const kids = [...document.querySelectorAll("#viewToday > .card, #viewToday > .jl-hero")];
+    const pos = sel => kids.findIndex(e => e.matches(sel));
+    const rows = [...document.querySelectorAll("#taskList > *")].map(e => e.classList.contains("jl-now-line") ? "|" : e.dataset.taskRow);
+    const box = document.getElementById("pulseChart");
+    return { tasksAfterHero: pos(".jl-hero") === 0 && kids[1].contains(document.getElementById("taskList")), rhythmNext: kids[2].classList.contains("jl-rhythm"), reportLast: pos(".jl-report") === kids.length - 1,
+      rows: rows.join(""), dots: box.querySelectorAll(".jl-pc-dot").length, yesterday: pulseOn(ky), view: document.documentElement.dataset.view, sum: box.querySelector(".jl-pc-sum")?.textContent || "" };
+  });
+  assert.ok(r.tasksAfterHero && r.rhythmNext && r.reportLast, "order: «Сейчас» → задачи → ритм … итог дня в конце " + JSON.stringify(r));
+  assert.equal(r.rows, "a|b", "the «Сейчас» line sits between the done morning task and the evening one");
+  assert.equal(r.dots, 14, "14 days on the pulse chart"); assert.equal(r.yesterday, 100, "yesterday: task, habit, stages and the closed day all done");
+  assert.equal(r.view, "viewToday", "the sky knows which section is open"); assert.match(r.sum, /сегодня/);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.1: без повторов — ритм не дублирует «Твой вечер» и «Главное», деньги и цель без лишних строк, версия только в «О приложении»", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T13:30:00+05:00") });
+  await page.evaluate(seedGoal);
+  const r = await page.evaluate(() => {
+    state.goal.finance.targetAmount = 50000; state.goal.finance.savedAmount = 0; state.goal.next = ""; state.goal.milestones[0].done = true;
+    state.profits.push({ id: "p1", amount: 8000, sourceGroup: "Зарплата", at: new Date().toISOString(), dateKey: keyDay() });
+    state.debts = { ...state.debts, bank: 90000, firms: 10000, monthlyPayment: 4500 }; ensureDebtHistory();
+    saveState(); renderAll(); showView("viewToday"); renderToday();
+    const steps = state.day.steps, rows = [...document.querySelectorAll("#timeline .jl-rstep")];
+    const free = steps.findIndex(s => !isWorkStage(s) && !isCloseStage(s)), close = steps.findIndex(isCloseStage);
+    const freeRow = rows[free], closeRow = rows[close];
+    const out = {
+      freeMainInRhythm: !!freeRow.querySelector(".jl-rstep-main, [data-stage-main]"),
+      evening: !!document.querySelector("#freePlan [data-free-goal]"),
+      closeMain: closeRow.querySelector(".jl-rstep-main")?.textContent || "", closeNote: closeRow.querySelector(".jl-rstep-note")?.textContent || "",
+      workNote: rows[steps.findIndex(isWorkStage)].querySelector(".jl-rstep-note")?.textContent || "",
+      cashLine: document.getElementById("todayCashState").hidden, cashText: document.getElementById("todayCashState").textContent,
+    };
+    document.querySelector("#freePlan [data-free-goal]").click();
+    const sid = steps[free].id; out.markBoth = !!dailyState().goalDone && !!dailyState().stageDone?.[sid];
+    document.querySelector("#freePlan [data-free-goal]").click();
+    out.unmarkBoth = !dailyState().goalDone && !dailyState().stageDone?.[sid];
+    stageMainDone(sid, true); renderFreePlan(); out.androidYesShows = document.querySelector("#freePlan [data-free-goal]").getAttribute("aria-pressed") === "true";
+    showView("viewGoal"); renderGoal();
+    out.next = document.getElementById("goalNext").textContent; out.globalBalance = !!document.getElementById("goalGlobalBalance");
+    showView("viewMoney"); renderMoney();
+    out.debtCells = [...document.querySelectorAll("#debtSummary [data-debt-open]")].map(b => b.dataset.debtOpen);
+    // the version: only in «Настройки → О приложении»
+    out.versionPlaces = ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings"].filter(v => { showView(v); return document.getElementById(v).innerText.includes(APP_VERSION) && !document.getElementById(v).contains(document.getElementById("appVersion")); });
+    out.authHasVersion = document.getElementById("authLock").innerText.includes(APP_VERSION);
+    out.topHasVersion = (document.querySelector(".topbar, header")?.innerText || "").includes(APP_VERSION);
+    return out;
+  });
+  assert.ok(r.evening && !r.freeMainInRhythm, "the goal step of the free stage is shown once — in «Твой вечер»: " + JSON.stringify(r));
+  assert.match(r.closeMain, /Закрыть день/); assert.equal(r.closeNote, "", "«Итог дня»: the note «Закрыть день: …» repeated «Главное»");
+  assert.equal(r.workNote, "Главный рабочий блок дня.", "a note that says something new stays");
+  assert.ok(r.cashLine && r.cashText === "", "«Касса» repeated the «Баланс» tile: " + r.cashText);
+  assert.ok(r.markBoth && r.unmarkBoth && r.androidYesShows, "«Сделал» in the evening and «Да» of the stage are one mark");
+  assert.equal(r.next, "Этап 2 из 4: Закрыть кредит за машину", "the next step is the stage in progress");
+  assert.ok(!r.globalBalance, "«Касса · Общий капитал» repeated the tiles");
+  assert.deepEqual(r.debtCells, ["bank", "firms", "pay", "paid"], "«Всего» repeated «Долг осталось»");
+  assert.deepEqual(r.versionPlaces, [], "the version is shown outside «О приложении»"); assert.ok(!r.authHasVersion && !r.topHasVersion);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.1: «Громкие напоминания» — по умолчанию ВКЛ (канал jamal_life_dawn2, USAGE_ALARM), выключение доходит до Android и переживает перезапуск", async () => {
+  const cloud = makeCloud();
+  const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 6 : k === "takeActions" ? "[]" : undefined; } }); };
+  const { ctx, page } = await device(cloud, { init });
+  const loudCalls = () => page.evaluate(() => __calls.filter(x => x[0] === "setLoudReminders").map(x => x[1]));
+  const sw = () => page.evaluate(() => { showView("viewSettings"); const el = document.getElementById("setLoudReminders"), row = document.getElementById("loudRow"); return { checked: el.checked, shown: getComputedStyle(row).display !== "none", label: row.textContent.replace(/\s+/g, " ").trim(), setting: state.settings.loudReminders }; });
+  let r = await sw();
+  assert.ok(r.shown && r.checked && r.setting === true, "on by default and visible on Android: " + JSON.stringify(r));
+  assert.match(r.label, /Громкие напоминания \(как будильник\)/);
+  await page.evaluate(() => scheduleNative());
+  assert.equal((await loudCalls()).at(-1), true, "the app tells Android: alarm volume");
+  await page.click("#loudRow .v-switch");
+  r = await sw();
+  assert.ok(!r.checked && r.setting === false, "switched off: " + JSON.stringify(r));
+  assert.equal((await loudCalls()).at(-1), false, "Android hears «off» right away (notification volume channel)");
+  await sync(page);
+  await page.reload(); await page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true, null, { timeout: 10000 });
+  await page.evaluate(() => scheduleNative());
+  r = await sw();
+  assert.ok(!r.checked && r.setting === false, "after a restart the switch stays off: " + JSON.stringify(r));
+  assert.equal((await loudCalls()).at(-1), false, "and Android gets «off» again on start");
+  // an account from before 74.1 (no value yet) gets loud reminders; a saved choice is kept
+  const mig = await page.evaluate(() => [normalize({ version: 58, settings: {} }).settings.loudReminders, normalize({ version: 58, settings: { loudReminders: false } }).settings.loudReminders]);
+  assert.deepEqual(mig, [true, false]);
+  // the Android side: loud = channel jamal_life_dawn2 on the alarm stream, quiet = its own channel on the notification stream, both vibrate
+  const java = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8");
+  assert.ok(/make\(ctx, nm, CHANNEL, "[^"]+", about, AudioAttributes\.USAGE_ALARM\)/.test(java) && java.includes('CHANNEL = "jamal_life_dawn2"'), "loud channel jamal_life_dawn2 uses USAGE_ALARM");
+  assert.ok(/make\(ctx, nm, CHANNEL_SOFT, "[^"]+", about, AudioAttributes\.USAGE_NOTIFICATION_EVENT\)/.test(java) && java.includes("isLoud(ctx) ? CHANNEL : CHANNEL_SOFT"), "quiet channel keeps the old notification stream");
+  assert.ok(java.includes("ch.enableVibration(true)") && /OLD_CHANNELS = \{"jamal_life_dawn",/.test(java), "vibration on; the old 74.0 channel is removed");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.1: «Через 15 мин» — напоминание повторяется со звуком (веб), на Windows звук играет сама программа (и из трея)", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T10:00:00+05:00") });
+  await page.evaluate(() => { state.tasks.push({ id: "s1", title: "Позвонить маме", date: keyDay(new Date()), time: "10:00", createdAt: new Date().toISOString() }); saveState();
+    window.__snd = 0; const orig = playNotificationSound; window.playNotificationSound = f => { window.__snd++; return orig(f); }; });
+  const ok = await page.evaluate(() => applyReminderAction("snooze", "s1"));
+  assert.ok(ok, "snooze applied");
+  await page.clock.runFor(15 * 60 * 1000 + 30 * 1000);
+  const r = await page.evaluate(() => { runScheduler(); return { snd: __snd, log: state.notificationsLog.filter(n => /Позвонить маме/.test(n.title + n.body)).length }; });
+  assert.ok(r.log >= 1 && r.snd >= 1, "the reminder came back after 15 minutes with the sound: " + JSON.stringify(r));
+  // Windows: with the desktop host the page does not play the sound itself, it asks the host (works with the window hidden)
+  const w = await page.evaluate(() => { window.__jlHostSound = 1; const sent = []; window.chrome = { webview: { postMessage: m => sent.push(m) } }; const before = __snd; _lastChimeAt = 0;
+    notify("Тест", "текст", "tasks"); return { sent, played: __snd - before }; });
+  assert.equal(w.sent.length, 1); assert.equal(w.sent[0].sound, true, "the host is asked to play the sound"); assert.equal(w.played, 0, "no double sound from the page");
+  const cs = fs.readFileSync(path.join(ROOT, "desktop/MainWindow.xaml.cs"), "utf8");
+  assert.ok(cs.includes("PlayChime()") && cs.includes('"sounds", "jamal-dawn.wav"'), "Windows plays Web/sounds/jamal-dawn.wav");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
 });
 
 await browser.close(); server.close();

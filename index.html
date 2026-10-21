@@ -868,9 +868,13 @@ html[data-theme="light"] .auth-stars{display:block}
 .modal-back.open .modal{animation:lcSheetIn .28s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 .jl-logo{display:grid;place-items:center;box-shadow:0 6px 18px rgba(8,18,30,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
+/* 74.1: the live sprout — the ring appears, the sprout sways from its root, the dew drop glints (transform/opacity only) */
 .jl-logo .jl-ring{animation:jlDraw 1.4s cubic-bezier(.65,0,.35,1) .15s backwards}
-.jl-logo .jl-dot{transform-origin:101px 191px;animation:jlPulse 2.6s ease-in-out 1.5s infinite}
-.jl-logo svg{width:76%;height:76%;color:#fff;overflow:visible;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.jl-logo .jl-sprout{transform-origin:258px 356px;animation:jlSway 4.8s ease-in-out 1.2s infinite}
+.jl-logo .jl-dew{transform-origin:318px 200px;animation:jlDew 4.8s ease-in-out 1.2s infinite}
+@keyframes jlSway{0%,100%{transform:rotate(0)}30%{transform:rotate(-4deg)}70%{transform:rotate(3deg)}}
+@keyframes jlDew{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.8)}}
+.jl-logo svg{width:94%;height:94%;color:#fff;overflow:visible;transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
 .brand:hover .jl-logo svg,#homeBrand:hover .jl-logo svg{transform:rotate(-12deg) scale(1.06)}
 @keyframes jlDraw{from{opacity:0}to{opacity:1}}
 @keyframes jlPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.65}}
@@ -921,8 +925,8 @@ body[data-sync=offline] #cloudSyncState::before,body[data-sync=auth] #cloudSyncS
 .bottom{z-index:300!important;pointer-events:auto!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;transition:transform .25s ease,opacity .2s ease}
 body.modal-open .bottom{opacity:0!important;pointer-events:none!important;transform:translate3d(0,120%,0)!important}
 body[data-layout="desktop"].modal-open .bottom{transform:translate(-50%,140%)!important}
-@media (prefers-reduced-motion:reduce){.jl-logo .jl-ring{animation:none;stroke-dashoffset:0}
-.jl-logo .jl-dot,#notifyBtn.has-unread .ui-icon,.v-remind .ui-icon,.v-task,.bottom button.active .ui-icon{animation:none}
+@media (prefers-reduced-motion:reduce){.jl-logo .jl-ring{animation:none}
+.jl-logo .jl-sprout,.jl-logo .jl-dew,#notifyBtn.has-unread .ui-icon,.v-remind .ui-icon,.v-task,.bottom button.active .ui-icon{animation:none}
 .ui-icon,.bottom{transition:none}}
 
 :root,html[data-theme="dark"]{--gold:#e3b04b;--gold-2:#f6d58a}
@@ -995,7 +999,7 @@ body[data-layout="desktop"] .jl-fab{bottom:28px;right:28px}
 .jl-quick-grid b{font-size:1rem}
 .jl-quick-grid small{font-size:0.7812rem;color:var(--muted)}
 #viewToday{padding-bottom:84px}
-.jl-logo{background:linear-gradient(145deg,#14304d,#08121e)!important;flex:none;width:40px!important;height:40px!important;min-width:40px;border-radius:12px!important}
+.jl-logo{background:linear-gradient(145deg,#15324f,#07111d)!important;flex:none;width:40px!important;height:40px!important;min-width:40px;border-radius:12px!important}
 .jl-crown{width:21px;height:21px}
 .jl-now-status{display:none}
 body[data-layout="mobile"] #topChips{display:none}
@@ -1730,7 +1734,7 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .jl-chips .jl-chip.gold{background:linear-gradient(135deg,#e3b04b,#f6d58a);color:#2a1d00;border-color:transparent}
 .v-kpi4{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
 .v-kpi4 .v-kpi{position:relative;overflow:hidden;padding:12px 12px 11px!important;border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--kc) 22%,var(--soft)),color-mix(in srgb,var(--kc) 6%,var(--soft)))!important;border:1px solid color-mix(in srgb,var(--kc) 30%,var(--line))!important}
-.v-kpi4 .v-kpi>span{font-size:.78rem!important;color:var(--text);opacity:.85}
+.v-kpi4 .v-kpi>span{font-size:.78rem!important;color:var(--text)}
 .v-kpi4 .v-kpi>span i{display:inline-grid!important;place-items:center;width:28px!important;height:28px!important;border-radius:10px!important;background:color-mix(in srgb,var(--kc) 28%,transparent)!important;font-style:normal;font-size:.95rem}
 .v-kpi4 .v-kpi:nth-child(1)>span i::before{content:"💳"}.v-kpi4 .v-kpi:nth-child(2)>span i::before{content:"📈"}
 .v-kpi4 .v-kpi:nth-child(3)>span i::before{content:"🧾"}.v-kpi4 .v-kpi:nth-child(4)>span i::before{content:"🏦"}
@@ -1785,7 +1789,9 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .jl-step.done .jl-step-dot{background:linear-gradient(140deg,#f6d27a,#d99a2b)!important;border-color:#f2b451!important;color:#3a2400!important}
 .jl-step.done .jl-step-body small{color:color-mix(in srgb,var(--gold) 70%,var(--text))}
 .jl-step.done{background:color-mix(in srgb,var(--gold) 6%,transparent)}
-.jl-step.locked{opacity:.62}
+/* 74.1: only the lock dot fades — faded text fell below 4.5:1 on the photo */
+.jl-step.locked .jl-step-dot{opacity:.62}
+.jl-step.locked .jl-step-body b{color:var(--muted)}
 .jl-step.locked .jl-step-dot{font-size:.95rem;filter:grayscale(.3)}
 .jl-step.current{padding:14px 12px 14px 0;border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line));box-shadow:0 10px 30px -18px color-mix(in srgb,var(--gold) 70%,transparent);animation:jlRise .55s cubic-bezier(.2,.8,.2,1) both}
 .jl-step.current .jl-step-dot{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 50%,transparent);width:44px;height:44px;font-size:1.05rem}
@@ -1843,6 +1849,141 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .jl-ob-debt summary{cursor:pointer;font-weight:650;padding:6px 0}
 html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
 .jl-app-ver{font-size:.75rem}
+
+/* ===== 74 · живой «Сегодня»: чёткое окно «Сейчас», светлее небо с картинкой раздела, живые иконки, пульс с графиком ===== */
+html[data-theme="dark"]{--bg:#132848;--panel:#1b3156;--soft:#172b4d;--line:#2f4a75;--muted:#c6d2e3} /* 74.1: lighter muted text for the glass cards */
+html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 62%,transparent)}
+/* 74.1: see-through glass — the photo shows behind the cards, a stronger blur keeps the text sharp and easy to read */
+.card,.jl-hero{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.jl-hero{background:linear-gradient(155deg,rgba(36,76,134,.66) 0%,rgba(23,53,99,.66) 55%,rgba(18,42,80,.66) 100%)!important}
+html[data-theme="light"] .card{background:color-mix(in srgb,var(--panel) 92%,transparent)}
+/* the background: the photo of the Kaaba; its light follows the real sun (setSky → --dawn, --dusk, --night, --sun, --sun-x, --sun-y) */
+body{background:transparent!important} /* the sky behind the page was hidden under the body's own fill */
+.jl-sky{background:linear-gradient(180deg,#003f8f 0%,#0055b5 calc(100% - max(64vh,100vw)),rgba(0,85,181,0) calc(100% - max(64vh,100vw) + 160px)),url("images/bg-kaaba.jpg") no-repeat 50% 100%/auto max(64vh,100vw),#0055b5}
+html .jl-sky i[class]{inset:0;left:0;top:0;right:0;bottom:0;width:auto;height:auto;border-radius:0;filter:none;animation:none!important;transform:none;transition:opacity 3s ease}
+html .jl-sky i.s1{background:linear-gradient(180deg,rgba(70,60,140,.55) 0%,rgba(255,150,120,.45) 55%,rgba(255,196,140,.35) 100%);opacity:var(--dawn,0)}
+html .jl-sky i.s2{background:linear-gradient(180deg,rgba(60,40,110,.5) 0%,rgba(255,110,60,.5) 50%,rgba(255,170,80,.4) 100%);opacity:var(--dusk,0)}
+html .jl-sky i.s3{background:linear-gradient(180deg,rgba(6,12,32,.86) 0%,rgba(10,22,52,.8) 60%,rgba(14,28,60,.72) 100%);opacity:var(--night,0)}
+/* the sun: rises on the left in the morning, goes over the sky, sets on the right; the moon at night */
+.jl-sky::before{content:"";position:absolute;z-index:1;width:170px;height:170px;margin:-85px 0 0 -85px;left:var(--sun-x,70%);top:var(--sun-y,20%);border-radius:50%;background:radial-gradient(circle,#fff7dc 0%,#ffd98a 18%,rgba(255,190,110,.45) 38%,transparent 70%);opacity:var(--sun,0);transition:left 60s linear,top 60s linear,opacity 3s ease;animation:jlSunGlow 7s ease-in-out infinite}
+html[data-daypart="night"] .jl-sky::before{width:90px;height:90px;margin:-45px 0 0 -45px;left:78%;top:12%;background:radial-gradient(circle,#f6f3e8 0%,#e6ebf7 34%,rgba(220,230,255,.25) 50%,transparent 72%);opacity:.9}
+/* a soft shade so the cards and titles stay easy to read on the photo */
+.jl-sky::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(10,22,46,.62) 0%,rgba(10,22,46,.28) 34%,rgba(10,22,46,.38) 70%,rgba(10,22,46,.7) 100%)}
+.v-empty{background:color-mix(in srgb,var(--panel) 82%,transparent)}
+@keyframes jlSunGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+/* stars at night */
+.jl-sky b{z-index:1;opacity:0;animation:none}
+html[data-daypart="night"] .jl-sky b{animation:firefly 6s ease-in-out infinite}
+html[data-theme="light"] .jl-sky::after{background:linear-gradient(180deg,rgba(238,243,250,.55) 0%,rgba(238,243,250,.15) 40%,rgba(238,243,250,.5) 100%)}
+/* the «Сейчас» window: clear and sharp instead of a milky glass */
+.jl-hero{background:linear-gradient(155deg,#244c86 0%,#173563 55%,#122a50 100%);border:1px solid rgba(155,196,255,.28);box-shadow:0 18px 40px rgba(6,14,30,.35),inset 0 1px 0 rgba(255,255,255,.08)}
+.jl-now{background:#0f2546;border:1px solid rgba(155,196,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.jl-now-meta,.jl-now-foot{color:#c4d5ec}
+.jl-nf{background:#173a35;border:1px solid rgba(52,211,153,.45)}
+.jl-nf-txt small{color:#f6d58a}
+.jl-quote{background:#0f2546;box-shadow:inset 0 0 0 1px rgba(246,213,138,.35)}
+html[data-theme="light"] .jl-hero{background:linear-gradient(155deg,#2c5aa0 0%,#1e4580 60%,#183a6e 100%)}
+/* 74.1: the main goal card and the cards of «Цель» are glass too; the blocks inside stay dense (≈85 %) so numbers read well */
+html[data-theme="dark"] .jl-goalhero{background:linear-gradient(160deg,rgba(20,48,78,.66) 0%,rgba(11,26,44,.66) 72%)!important}
+html[data-theme="dark"] .v-goal-card .v-cover{background:linear-gradient(115deg,rgba(10,24,48,.62) 0%,rgba(22,52,99,.6) 55%,rgba(180,97,42,.55) 100%)}
+html[data-theme="dark"] .v-goal-card .v-cover::after{background:linear-gradient(90deg,rgba(5,11,22,.62) 0%,rgba(5,11,22,.42) 55%,rgba(5,11,22,.12) 100%)}
+.jl-now,.jl-quote{background:rgba(15,37,70,.85)}
+.jl-nf{background:rgba(23,58,53,.85)}
+html[data-theme="dark"] .v-kpi{background:color-mix(in srgb,var(--soft) 85%,transparent)}
+html[data-theme="dark"] .jl-rstep.current{background:linear-gradient(135deg,rgba(60,58,52,.85),rgba(30,48,82,.85))}
+html[data-theme="dark"] .jl-goalhero-next{background:rgba(15,37,70,.85)}
+html[data-theme="dark"] .jl-gh-tiles>div{background:rgba(15,37,70,.85)}
+html[data-theme="dark"] .jl-free{background:linear-gradient(160deg,rgba(124,92,255,.22),rgba(91,156,255,.10)),rgba(15,37,70,.85)}
+html[data-theme="dark"] .btn.primary{background:linear-gradient(135deg,#2f6fdc,#1559b0)}
+html[data-theme="dark"] .v-link{color:#bcd6ff}
+html[data-theme="dark"] .ring-state{--blue:#bcd6ff;--cyan:#a5f0fa;--orange:#fed7aa;--green:#a7f3d0}
+/* 74.1: text on the glass at noon (bright photo behind) and in the evening light theme stays ≥ 4.5:1 */
+html[data-theme="dark"] .v-task.overdue .v-task-meta{color:#ffaba3}
+html[data-theme="dark"] .jl-rstep-note{color:color-mix(in srgb,var(--muted) 70%,var(--text))}
+html[data-theme="light"] .v-minilegend{color:#46566c}
+html[data-theme="light"] .jl-focus-item span,html[data-theme="light"] .jl-focus-item small{color:#46566c}
+html[data-theme="light"] .ring-state{--blue:#1e40af;--cyan:#155e75;--orange:#9a3412;--green:#065f46;--purple:#5b21b6;--red:#991b1b}
+html[data-theme="dark"] .bell-dot{background:#d42a2a}
+/* the light theme keeps its dense «Сейчас» window and goal tiles: the bright sky behind them would wash the text out */
+html[data-theme="light"] .jl-hero{background:linear-gradient(155deg,rgba(44,90,160,.94) 0%,rgba(30,69,128,.94) 60%,rgba(24,58,110,.94) 100%)!important}
+html[data-theme="light"] .jl-gh-tiles>div{background:rgba(255,255,255,.96)}
+html[data-theme="light"] .v-group-title{display:inline-block;color:#2f3f55;padding:.15rem .55rem;border-radius:99px;background:rgba(255,255,255,.82)}
+html[data-theme="light"] .jl-hero #todayDate{color:#d6e3f4}
+html[data-theme="light"] .jl-hero .ck-s,html[data-theme="light"] .jl-hero .clock-state,html[data-theme="light"] .jl-now-label{color:#ffe9b5}
+html[data-theme="light"] .jl-now-line{color:#7a4f00}
+html[data-theme="light"] .jl-quote figcaption{color:#f6d58a!important;opacity:1}
+html[data-theme="light"] .jl-rstep.current .jl-rstep-time,html[data-theme="light"] .jl-ms-eyebrow,html[data-theme="light"] .jl-step.current .jl-step-dot{color:#7a4f00}
+html[data-theme="light"] .jl-ledger small,html[data-theme="light"] .jl-rstep-main small{color:#26354b}
+.v-goal-card .v-pct{color:#93c5fd}
+html[data-theme="light"] .v-head .v-sub{display:inline-block;color:#2f3f55;padding:.1rem .5rem;border-radius:99px;background:rgba(255,255,255,.82)}
+html[data-theme="dark"] .v-head .v-sub{display:inline-block;padding:.1rem .5rem;border-radius:99px;background:rgba(10,22,46,.6)}
+.v-head .v-sub:empty{display:none}
+/* section titles sit right on the photo: a small dark plate keeps them readable at noon */
+html[data-theme="dark"] .v-group-title{display:inline-block;color:#dbe6f5;padding:.15rem .55rem;border-radius:99px;background:rgba(10,22,46,.72)}
+/* 74.1: the «Долг» title also sits on the photo (outside a card) */
+html[data-theme="dark"] .jl-section-head .v-title{display:inline-flex;align-items:center;padding:.2rem .7rem;border-radius:99px;background:rgba(10,22,46,.72)}
+html[data-theme="light"] .jl-section-head .v-title{display:inline-flex;align-items:center;padding:.2rem .7rem;border-radius:99px;background:rgba(255,255,255,.86);color:#1c2b40}
+/* the day's tasks: a «Сейчас» line runs through the list */
+.jl-now-line{position:relative;display:flex;align-items:center;gap:8px;margin:6px 0;height:22px;color:var(--gold-2);font-size:.75rem;font-weight:800;letter-spacing:.04em}
+.jl-now-line::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--gold-2);box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 25%,transparent);animation:jlPulse 1.8s ease-in-out infinite}
+.jl-now-line::after{content:"";flex:1;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--gold-2),transparent)}
+/* the rhythm of the day: a living road */
+.jl-rhythm{background:radial-gradient(130% 70% at 0% 0%,rgba(91,156,255,.18),transparent 60%),color-mix(in srgb,var(--panel) 93%,transparent)}
+.jl-rstep{border:1px solid transparent}
+.jl-rstep.current{background:linear-gradient(135deg,rgba(246,213,138,.16),rgba(91,156,255,.10));border-color:rgba(246,213,138,.45);box-shadow:0 8px 24px rgba(227,176,75,.12)}
+.jl-rstep.todo{background:rgba(255,255,255,.03);border-color:rgba(155,196,255,.12)}
+.jl-rstep.todo:hover{transform:translateY(-2px)}
+.jl-rstep.current .jl-rstep-dot{background:radial-gradient(circle at 35% 30%,#fff3cf,#e3b04b);color:#1d1403}
+.jl-rstep.current .jl-rstep-dot::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--gold-2);animation:jlRipple 2s ease-out infinite}
+.jl-rstep.todo .jl-rstep-dot{background:#16305a;border-color:rgba(155,196,255,.35);color:#dbe8fb}
+.jl-rstep-main{background:rgba(91,156,255,.10);border:1px solid rgba(155,196,255,.25);border-style:solid}
+.jl-rstep-acts{flex-wrap:nowrap}
+.jl-rstep-acts .jl-pill{flex:1;justify-content:center}
+.jl-seg.current{background:linear-gradient(90deg,rgba(246,213,138,.35),rgba(246,213,138,.18));overflow:hidden}
+.jl-seg.current::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);transform:translateX(-100%);animation:jlShine 2.8s ease-in-out infinite}
+.jl-seg.done{background:rgba(52,211,153,.32)}
+@keyframes jlRipple{0%{opacity:.9;transform:scale(.9)}100%{opacity:0;transform:scale(1.35)}}
+/* the evening: the reminder comes first and is easy to see */
+.jl-free{background:linear-gradient(160deg,rgba(124,92,255,.22),rgba(91,156,255,.10));border-color:rgba(182,156,255,.4)}
+.jl-free-note{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:rgba(246,213,138,.14);border:1px solid rgba(246,213,138,.45);color:var(--text);font-size:.84rem}
+.jl-free-note>span:last-child{flex:1;min-width:0;text-align:left}
+.jl-free-note b{display:block;font-size:.92rem}
+.jl-free-note small{display:block;color:var(--muted);font-size:.76rem;margin-top:2px}
+.jl-free-note.off{background:rgba(255,255,255,.05);border-color:var(--line)}
+.jl-bell{font-size:1.35rem;display:inline-block;transform-origin:50% 10%}
+.jl-bell.swing{animation:jlBellSwing 3.6s ease-in-out infinite}
+@keyframes jlBellSwing{0%,70%,100%{transform:none}74%{transform:rotate(16deg)}78%{transform:rotate(-14deg)}82%{transform:rotate(10deg)}86%{transform:rotate(-6deg)}90%{transform:rotate(2deg)}}
+/* the pulse: a chart by day */
+.jl-pchart{margin-top:14px;padding:12px 12px 10px;border-radius:16px;background:rgba(15,37,70,.85);border:1px solid rgba(155,196,255,.2)}
+.jl-pc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.jl-pc-top b{font-size:.9rem}
+.jl-pc-trend{font-size:.75rem;font-weight:700;color:var(--muted)}
+.jl-pc-trend.up{color:var(--green)}
+.jl-pc-trend.down{color:var(--red)}
+.jl-pc-svg{display:block;width:100%;height:auto;margin-top:6px;overflow:visible}
+.jl-pc-grid{stroke:rgba(155,196,255,.16);stroke-width:1;stroke-dasharray:3 5}
+.jl-pc-line{stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.jl-pc-area{animation:jlFade .9s ease both}
+.jl-pc-dot{fill:#0f2546;stroke:#9cc4ff;stroke-width:2;transform-box:fill-box;transform-origin:center;animation:jlPop .45s cubic-bezier(.34,1.56,.64,1) backwards;animation-delay:calc(var(--i) * 40ms)}
+.jl-pc-dot.now{fill:var(--gold-2);stroke:#fff;animation:jlPop .45s cubic-bezier(.34,1.56,.64,1) backwards,jlBeat 2s ease-in-out .8s infinite}
+.jl-pc-lbl{fill:var(--muted);font-size:11px;font-family:inherit}
+.jl-pc-lbl.now{fill:var(--gold-2);font-weight:700}
+.jl-pc-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.jl-pc-sum span{display:grid;gap:2px;padding:8px;border-radius:12px;background:rgba(255,255,255,.04);font-size:.72rem;color:var(--muted);text-align:center}
+.jl-pc-sum b{font-size:1.05rem;color:var(--text);font-variant-numeric:tabular-nums}
+html[data-theme="light"] .jl-pchart{background:var(--soft)}
+html[data-theme="light"] .jl-pc-dot{fill:#fff}
+.ring-item:hover .ring,.ring-item:focus-visible .ring{transform:scale(1.06)}
+.ring{transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
+/* every section icon lives: its own gentle motion, mostly at rest */
+.card>.row .v-title .jl-emo,.v-pulse-head .jl-emo,.jl-week-head .jl-emo,.v-goal-head .jl-emo{animation:jlEmoIn .7s cubic-bezier(.34,1.56,.64,1) backwards,jlIconIdle 6s ease-in-out 1.2s infinite}
+.jl-rhythm .v-title .jl-emo{animation:jlEmoIn .7s cubic-bezier(.34,1.56,.64,1) backwards,jlIconSway 7s ease-in-out 1.5s infinite}
+.v-pulse-head .jl-emo{animation:jlEmoIn .7s cubic-bezier(.34,1.56,.64,1) backwards,jlBeat 1.6s ease-in-out 1s infinite}
+.jl-week-head .jl-emo{animation:jlEmoIn .7s cubic-bezier(.34,1.56,.64,1) backwards,jlTwinkle 3.4s ease-in-out 1s infinite}
+.jl-free-head .jl-emo{animation:jlIconSway 6s ease-in-out infinite}
+.ring-label{white-space:nowrap;font-size:.72rem!important;letter-spacing:-.01em}
+@keyframes jlIconIdle{0%,78%,100%{transform:none}84%{transform:translateY(-4px) rotate(-8deg) scale(1.08)}90%{transform:translateY(0) rotate(6deg)}95%{transform:rotate(-2deg)}}
+@keyframes jlIconSway{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg) translateY(-1px)}}
 </style>
 
 
@@ -1933,7 +2074,7 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
   </div>
 </div>
 <header class="topbar">
-  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><circle cx="256" cy="256" r="168" fill="none" stroke="currentColor" stroke-opacity=".14" stroke-width="30"/><path class="jl-ring" d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="#3fc4d6" stroke-width="30" stroke-linecap="round"/><circle class="jl-dot" cx="101" cy="191" r="20" fill="#3fd0c9"/><path d="M256 352 V244" fill="none" stroke="#f2b451" stroke-width="34" stroke-linecap="round"/><path d="M248 270 C190 272 156 240 152 186 C212 184 246 214 248 270 Z M264 238 C266 176 304 146 362 146 C362 206 326 238 264 238 Z" fill="#f2b451"/></svg></div><div><div class="brand-name"><span data-app-name>Life</span> <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
+  <div class="brand" id="homeBrand" role="button" tabindex="0" title="Открыть Сегодня"><div class="logo jl-logo"><svg viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="jlRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ee7b7"/><stop offset=".55" stop-color="#22c3a0"/><stop offset="1" stop-color="#e3b04b"/></linearGradient><linearGradient id="jlLeafL" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#166534"/><stop offset=".45" stop-color="#22c55e"/><stop offset="1" stop-color="#a7f3c4"/></linearGradient><linearGradient id="jlLeafR" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#14532d"/><stop offset=".45" stop-color="#16a34a"/><stop offset="1" stop-color="#86efac"/></linearGradient><linearGradient id="jlStem" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4ade80"/><stop offset=".5" stop-color="#22a55a"/><stop offset="1" stop-color="#15703b"/></linearGradient></defs><circle cx="256" cy="256" r="168" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="26"/><g class="jl-ring"><path d="M256 88 A168 168 0 1 1 101 191" fill="none" stroke="url(#jlRing)" stroke-width="26" stroke-linecap="round"/><circle cx="101" cy="191" r="19" fill="#6ee7b7"/></g><g class="jl-sprout"><path d="M258 356 C254 320 252 290 256 252" fill="none" stroke="url(#jlStem)" stroke-width="28" stroke-linecap="round"/><path class="jl-leaf" d="M252 262 C214 270 168 252 150 200 C146 188 146 180 148 174 C196 168 240 192 252 262 Z" fill="url(#jlLeafL)"/><path d="M249 256 C224 232 196 206 158 182" fill="none" stroke="#0f5132" stroke-opacity=".55" stroke-width="6" stroke-linecap="round"/><path d="M262 240 C262 182 300 142 366 138 C372 138 376 140 378 142 C376 210 330 246 262 240 Z" fill="url(#jlLeafR)"/><path d="M266 236 C300 210 336 178 370 146" fill="none" stroke="#0f5132" stroke-opacity=".55" stroke-width="6" stroke-linecap="round"/><g class="jl-dew"><ellipse cx="318" cy="200" rx="10" ry="12" fill="#e9fdf2" fill-opacity=".9"/><circle cx="315" cy="196" r="3.5" fill="#fff"/></g></g></svg></div><div><div class="brand-name"><span data-app-name>Life</span> <svg class="jl-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18.5 4.6 8.2l4.6 4.3L12 5.5l2.8 7 4.6-4.3L21 18.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M3.5 20.5h17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="4.4" cy="7.8" r="1.2" fill="currentColor"/><circle cx="19.6" cy="7.8" r="1.2" fill="currentColor"/></svg></div><div class="brand-sub" id="brandSub">личная система движения</div></div></div>
   <div class="actions">
     <button class="iconbtn" id="searchBtn" type="button" aria-label="Поиск" title="Поиск"><svg class="ui-icon" aria-hidden="true"><use href="#i-search"></use></svg></button>
     <button class="iconbtn" id="notifyBtn" type="button" aria-label="Уведомления" title="Уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg><i class="bell-dot" id="bellDot"></i></button>
@@ -1970,23 +2111,24 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
     <div class="v-tasks" id="taskList"></div>
   </div>
 
+  <div class="card jl-rhythm">
+    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🗓️</span>Ритм дня</h2><div class="v-sub">Твой день по этапам · напомню в начале и в конце</div></div><span class="jl-count" id="dayCompletion">0 / 3</span></div>
+    <div class="jl-daystrip" id="dayStrip" aria-hidden="true"></div>
+    <div class="timeline jl-rsteps" id="timeline"></div>
+    <div class="jl-free" id="freePlan"></div>
+  </div>
+
   <div class="card jl-habits">
     <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🔥</span>Привычки</h2><div class="v-sub" id="habitSummary">Отмечай каждый день — серия растёт</div></div><div class="jl-head-act"><span class="jl-miniring" id="habitRing" aria-hidden="true"></span><button class="v-add sm" type="button" id="addHabitBtn" aria-label="Добавить привычку" title="Добавить привычку"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button></div></div>
     <div class="jl-habit-list" id="habitList"></div>
     <div class="jl-hweek" id="habitWeek" aria-label="Привычки за 7 дней"></div>
   </div>
 
-  <div class="card jl-rhythm">
-    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🗓️</span>Ритм дня</h2><div class="v-sub">Этапы отмечаются сами, когда время этапа прошло</div></div><span class="jl-count" id="dayCompletion">0 / 3</span></div>
-    <div class="jl-daystrip" id="dayStrip" aria-hidden="true"></div>
-    <div class="timeline jl-rsteps" id="timeline"></div>
-    <div class="jl-free" id="freePlan"></div>
-  </div>
-
   <div class="card v-pulse">
     <div class="v-pulse-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">⚡</span>Пульс жизни</h2></div>
     <div class="v-pulse-sub"><span class="v-sub" id="pulseStatus">—</span><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">—</strong></div></div>
     <div class="pulse-gauge" id="pulseGauge"><svg viewBox="0 0 132 76" aria-hidden="true"><defs><linearGradient id="pgGrad" x1="0" x2="1"><stop offset="0" stop-color="#fb7185"/><stop offset=".45" stop-color="#fbbf4d"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs><path class="pg-track" d="M10 66 A56 56 0 0 1 122 66" pathLength="100"/><path class="pg-arc" id="pgArc" d="M10 66 A56 56 0 0 1 122 66" pathLength="100"/><g class="pg-needle" id="pgNeedle"><line x1="66" y1="66" x2="66" y2="22"/><circle cx="66" cy="66" r="5"/></g></svg><div class="pg-text"><b id="pgValue">0<small>%</small></b><span id="pgLabel">—</span><em id="pgDeg">0° из 180°</em></div></div>
+    <div class="jl-pchart" id="pulseChart"></div>
     <div class="ring-grid">
       <button class="ring-item" id="pulseDayCard" type="button" title="Открыть ход дня" aria-label="День: открыть ход дня"><span class="ring" style="--rc:var(--blue)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringDay" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseDay">0%</b></span><span class="ring-label">День</span><span class="ring-state" id="ringDayState">—</span></button>
       <button class="ring-item" type="button" data-ring="goal" aria-label="Цель"><span class="ring" style="--rc:var(--purple)"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="ring-bg" cx="22" cy="22" r="18"/><circle class="ring-fg" id="ringGoal" cx="22" cy="22" r="18" pathLength="100"/></svg><b id="pulseGoal">0%</b></span><span class="ring-label">Цель</span><span class="ring-state" id="ringGoalState">—</span></button>
@@ -2027,6 +2169,14 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
     </div>
   </div>
 
+  <div class="card jl-week" id="weekCard">
+    <div class="jl-week-head"><span class="jl-emo" aria-hidden="true">✨</span><b>Разбор недели от AI</b><small id="wkWhen">по воскресеньям</small></div>
+    <div class="jl-week-stats"><div><b id="wkDays">0 / 7</b><span>дней закрыто</span></div><div><b id="wkIncome">0</b><span>доход</span></div><div><b id="wkExpense">0</b><span>расход</span></div></div>
+    <div class="jl-debtpay" id="wkDebtPay" hidden></div>
+    <div class="jl-week-text" id="wkText" aria-live="polite"></div>
+    <button class="jl-pill gold jl-week-btn" type="button" id="wkRun"><svg class="ui-icon" aria-hidden="true"><use href="#i-spark"></use></svg><span id="wkRunLabel">Получить разбор недели</span></button>
+  </div>
+
   <div class="card jl-report">
     <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🌙</span>Итог дня</h2><div class="v-sub">2 минуты — и день закрыт</div></div>
       <button class="jl-pill" type="button" id="historyBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg>История</button></div>
@@ -2043,14 +2193,6 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
     <div class="jl-report-foot"><span class="autosave-status" id="reportSaved" aria-live="polite">—</span>
       <div class="jl-analysis"><button class="jl-pill" type="button" id="lifeAnalysisBtn"><span class="jl-emo" aria-hidden="true">📊</span>Полный разбор</button>
       <button class="jl-pill gold" type="button" id="aiAnalysisBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-spark"></use></svg>AI-анализ</button></div></div>
-  </div>
-
-  <div class="card jl-week" id="weekCard">
-    <div class="jl-week-head"><span class="jl-emo" aria-hidden="true">✨</span><b>Разбор недели от AI</b><small id="wkWhen">по воскресеньям</small></div>
-    <div class="jl-week-stats"><div><b id="wkDays">0 / 7</b><span>дней закрыто</span></div><div><b id="wkIncome">0</b><span>доход</span></div><div><b id="wkExpense">0</b><span>расход</span></div></div>
-    <div class="jl-debtpay" id="wkDebtPay" hidden></div>
-    <div class="jl-week-text" id="wkText" aria-live="polite"></div>
-    <button class="jl-pill gold jl-week-btn" type="button" id="wkRun"><svg class="ui-icon" aria-hidden="true"><use href="#i-spark"></use></svg><span id="wkRunLabel">Получить разбор недели</span></button>
   </div>
 
   <button class="jl-fab" type="button" id="quickAddBtn" aria-label="Быстро добавить: задачу, доход, расход или заметку"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus"></use></svg></button>
@@ -2084,7 +2226,6 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
         <div class="kpi"><div class="label">Осталось</div><div class="value orange-txt" id="goalRemainingAmount">0</div></div>
       </div>
       <div class="sub" id="goalFinanceDays" style="margin-top:10px">—</div>
-      <div class="sub" id="goalGlobalBalance" style="margin-top:4px">—</div>
       <div class="goal-potential-box"><div class="goal-potential-main" id="goalPotentialText">—</div><div class="goal-potential-sub" id="goalPotentialSub">—</div></div>
       <div class="goal-saving-list" id="goalSavingList"></div>
           
@@ -2237,6 +2378,7 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
     <label class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg></span><span class="v-row-main"><b>Цели</b><small>Пополнения и достижение целей</small></span><span class="v-switch"><input type="checkbox" id="setNotifyGoals"><i></i></span></label>
     <label class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg></span><span class="v-row-main"><b>Каждые 2 часа</b><small>Совет, чем заняться для успеха, и пауза в работе</small></span><span class="v-switch"><input type="checkbox" id="setEvery2h"><i></i></span></label>
     <label class="v-row"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Звук</b><small>Короткий сигнал при уведомлении</small></span><span class="v-switch"><input type="checkbox" id="setNotifySound"><i></i></span></label>
+    <label class="v-row" id="loudRow"><span class="v-row-ico" style="--c:var(--red)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Громкие напоминания (как будильник)</b><small>Задачи и этапы звучат громкостью будильника — слышно даже при тихом звонке</small></span><span class="v-switch"><input type="checkbox" id="setLoudReminders"><i></i></span></label>
     <button class="v-row" type="button" id="setNotifyPermission"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"></use></svg></span><span class="v-row-main"><b>Разрешить системные уведомления</b><small>Запросить доступ у устройства</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
   </div>
   <div class="v-group-title">Ещё</div>
@@ -2244,7 +2386,7 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">73.0</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.1</span></div>
   </div>
 </section>
 
@@ -2295,7 +2437,7 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='73.0';
+const APP_NAME='Life',APP_VERSION='74.1';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -2512,6 +2654,8 @@ async function cloudSync(){
     }
     const row=(await supaFetch(q+'state,updated_at,schema_version,device_id'))?.[0];
     if(!row?.state)continue;
+    // 74.1: an edit made while the download was in flight must be merged, not overwritten by the cloud copy
+    const dirtyNow=dirty||isCloudDirty();
     if(!base){
       // 73: our own first upload landed but its answer never came (the app was closed or reloaded):
       // the cloud row is this device's older copy, so the local state (that copy + later edits) wins
@@ -2524,7 +2668,7 @@ async function cloudSync(){
       if(await cloudPushNow(user,row.updated_at))return {ok:true,logged:true,user,pulled:changed};
       continue;
     }
-    if(!dirty){const changed=applyCloudState(row.state,row.updated_at);storeCloudBase(row.state);return {ok:true,logged:true,user,pulled:changed}}
+    if(!dirtyNow){const changed=applyCloudState(row.state,row.updated_at);storeCloudBase(row.state);return {ok:true,logged:true,user,pulled:changed}}
     const baseState=await loadCloudBase();
     const merged=mergeStates(baseState||{},state,normalize(clone(row.state)));
     const changed=applyCloudState(merged,row.updated_at);
@@ -2733,10 +2877,14 @@ function clearLegacyDemo(s){
 // settings that did not exist before 73 get the value that keeps the current behaviour of a user who already has data
 function applyV73(s){
   const old=hasUserData(s);
-  if(!['hadith','general','off'].includes(s.settings.quoteSet))s.settings.quoteSet=old?'hadith':'general';
+  if(!['hadith','general','off'].includes(s.settings.quoteSet))s.settings.quoteSet='hadith';
+  // 74: hadith of the day is the default; 73 put accounts it judged «new» on «Мотивация» without the person choosing it
+  if(s.settings.quoteSetChosen!==true&&s.settings.quoteSet==='general')s.settings.quoteSet='hadith';
   const L=s.debts.labels&&typeof s.debts.labels==='object'&&!Array.isArray(s.debts.labels)?s.debts.labels:{};
   s.debts.labels={bank:cleanLabel(L.bank)||(old?'Банк':'Долг 1'),firms:cleanLabel(L.firms)||(old?'Фирмы':'Долг 2')};
   if(typeof s.settings.onboarded!=='boolean')s.settings.onboarded=old;
+  // 74.1: loud reminders (alarm volume) — on by default for everyone, the owner asked for it because reminders were missed
+  if(typeof s.settings.loudReminders!=='boolean')s.settings.loudReminders=true;
 }
 function cleanLabel(v){return String(v??'').replace(/[<>&"'`=\\]/g,'').replace(/\s+/g,' ').trim().slice(0,24)}
 function debtLabel(k){return state?.debts?.labels?.[k]||(k==='bank'?'Долг 1':'Долг 2')}
@@ -2860,7 +3008,8 @@ function saveState(){if(_wipingDevice)return;
     if(fingerprint && fingerprint===_persistFingerprint){
       return;
     }
-    if(fingerprint && _cloudBaseFingerprint && fingerprint!==_cloudBaseFingerprint)markCloudDirty();
+    // 74.1: after a restart the cloud fingerprint is unknown until the first sync — an edit made before it is still unsent
+    if(fingerprint && (_cloudBaseFingerprint?fingerprint!==_cloudBaseFingerprint:appReadyForSync))markCloudDirty();
     state._lastSavedAt=new Date().toISOString();
     const savedAt=state._lastSavedAt;
     const payload=JSON.stringify(state);
@@ -3391,7 +3540,7 @@ const MOTIVATIONS=[
   {author:'Пророк Мухаммад ﷺ',text:'«Пророк ﷺ не молился над умершим, на котором был долг, пока кто-то не брал этот долг на себя.»',source:'Сахих аль-Бухари 2289'}
  ];
 const QUOTE_SETS={hadith:'Хадисы',general:'Мотивация',off:'Выключить'};
-function quoteSet(){const q=state?.settings?.quoteSet;return QUOTE_SETS[q]?q:'general'}
+function quoteSet(){const q=state?.settings?.quoteSet;return QUOTE_SETS[q]?q:'hadith'}
 function motivation(){const k=keyDay(),set=quoteSet();if(set==='off')return null;const list=set==='hadith'?MOTIVATIONS:GENERAL_QUOTES;const day=Math.floor(Date.UTC(...k.split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS);const idx=day%list.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);const c=state.dailyMotivations[k];if(c?.idx===idx&&(c.set||'hadith')===set)return c;const m=set==='hadith'?MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length]:{text:list[Math.abs(idx)%list.length],author:'Мысль дня',source:''};const result={idx,set,text:m.text,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
 function applyLayoutMode(mode,persist=true){
   // The layout belongs to this device only (phone, tablet and PC can differ) — never synced.
@@ -3426,8 +3575,8 @@ function playNotificationSound(force=false){
   const now=Date.now();if(now-_lastChimeAt<1200)return;_lastChimeAt=now;
   try{
     const ctx=audioCtx();if(!ctx)return;
-    // «Dawn» — the same soft nature tone as on Android (sounds/jamal-dawn.wav: a water drop, kalimba, a breath of wind)
-    if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
+    // «Dawn» — the same nature tone as on Android (sounds/jamal-dawn.wav: a water drop, kalimba, a breath of wind; 74.1: twice, louder)
+    if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=1;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
     loadGlass();
     const t0=ctx.currentTime+.03,out=ctx.createGain(),echo=ctx.createDelay(),fb=ctx.createGain();
     out.gain.value=.5;echo.delayTime.value=.13;fb.gain.value=.2;
@@ -3468,12 +3617,15 @@ function notify(title,body,kind='tasks',opts={}){
   const allowed=state.settings?.notifications!==false&&noticeAllowed(kind);
   const android=!!window.AndroidBridge?.notify;
   if(allowed&&opts.native&&hasNativeAlarms())return;          // the alarm already rang with the chime
-  if(!(allowed&&android))playNotificationSound();               // Android channel plays the same chime itself
+  const host=allowed&&!android&&hostPlaysSound();
+  if(!(allowed&&android)&&!host)playNotificationSound();       // Android channel / the Windows host play the same chime themselves
   if(!allowed)return;
   try{if(android){const br=window.AndroidBridge;if(opts.taskId&&opts.due&&br.notifyTaskAt)br.notifyTaskAt(title,body,opts.taskId,opts.due);else if(opts.taskId&&br.notifyTask)br.notifyTask(title,body,opts.taskId);else br.notify(title,body);return}}catch(e){}
-  try{if(window.chrome?.webview?.postMessage){window.chrome.webview.postMessage({type:'notify',title,body});return}}catch(e){}
+  try{if(window.chrome?.webview?.postMessage){window.chrome.webview.postMessage({type:'notify',title,body,sound:host&&state.settings?.sound!==false});return}}catch(e){}
   showWebNotification(title,body,opts.taskId);
 }
+/* 74.1: the Windows app (desktop host sets window.__jlHostSound) plays the chime itself, so it is heard with the window in the tray */
+function hostPlaysSound(){try{return !!(window.__jlHostSound&&window.chrome?.webview?.postMessage)}catch(e){return false}}
 /* «Готово» / «Через 15 мин» from a reminder (Android notification, browser notification, link). */
 const SNOOZE_MIN=15;
 function applyReminderAction(a,taskId){
@@ -3511,7 +3663,10 @@ function handleActionLink(){
 }
 if(navigator.serviceWorker){navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='jl-action'&&appReadyForSync)applyReminderAction(d.a,String(d.task||''))});try{navigator.serviceWorker.startMessages?.()}catch(e){}}
 function requestNotifications(){try{if(window.AndroidBridge?.requestNotifications){state.settings.notifications=true;saveState();window.AndroidBridge.requestNotifications();scheduleNative();toast('Запрос уведомлений отправлен');return}}catch(e){}if(!('Notification'in window)){toast('Системные уведомления недоступны','История уведомлений всё равно работает внутри приложения.');return}if(Notification.permission==='denied'){toast('Уведомления запрещены','Разреши их в настройках браузера для этого сайта.');return}if(Notification.permission==='granted'){state.settings.notifications=true;saveState();scheduleNative();toast('Уведомления уже разрешены');return}toast('Запрашиваю разрешение…');Notification.requestPermission().then(p=>{if(p==='granted'){state.settings.notifications=true;saveState();scheduleNative();toast('Уведомления разрешены')}else toast('Уведомления не разрешены')}).catch(()=>toast('Не удалось запросить разрешение'))}
+/* 74.1: «Громкие напоминания» live on the device too (Android alarms ring with the app closed): alarm volume or notification volume */
+function syncLoudReminders(){try{window.AndroidBridge?.setLoudReminders?.(state.settings?.loudReminders!==false)}catch(e){}}
 function scheduleNative(){
+  syncLoudReminders();
   scheduleNativeTasks();
   try{
     if(!window.AndroidBridge?.scheduleDaily)return;
@@ -3582,8 +3737,16 @@ const REMINDER_GRACE_MIN=10; // a reminder missed while the phone/PC was asleep 
 const isDue=(m,t)=>t>=0&&m>=t&&m<t+REMINDER_GRACE_MIN;
 function taskLead(t){const v=t?.remind;if(v===0||v==='0')return 0;const n=Number(v);return Number.isFinite(n)&&n>0?n:Math.max(0,Number(state.settings?.preMinutes)||0)}
 let _actionsRetryAt=0;
+// 74: the light of the background photo follows the real sun: sunrise and sunset by month (≈40° N, local clock)
+const SUN_TIMES=[[7.9,17.6],[7.5,18.2],[6.8,18.7],[6.0,19.2],[5.3,19.8],[5.0,20.1],[5.2,20.0],[5.7,19.4],[6.2,18.6],[6.7,17.8],[7.3,17.2],[7.8,17.2]];
+function setSky(){const d=new Date(),h=d.getHours()+d.getMinutes()/60,[up,down]=SUN_TIMES[d.getMonth()],r=document.documentElement,near=(x,c,w)=>Math.max(0,1-Math.abs(x-c)/w);
+  const day=h>=up&&h<=down,k=Math.min(1,Math.max(0,(h-up)/(down-up))),v={dawn:near(h,up+.3,1.4),dusk:near(h,down-.2,1.4),night:h<up-.6||h>down+.9?1:h<up?(up-h)/.6:h>down?(h-down)/.9:0};
+  const part=v.night>=.8?'night':v.dawn>.35?'dawn':v.dusk>.35?'evening':'day';
+  const css={'--dawn':v.dawn.toFixed(2),'--dusk':v.dusk.toFixed(2),'--night':Math.min(1,v.night).toFixed(2),'--sun':(day||h>up-.4&&h<down+.4)?'1':'0','--sun-x':(8+k*84).toFixed(1)+'%','--sun-y':(62-Math.sin(Math.PI*k)*50).toFixed(1)+'%'};
+  for(const n in css)if(r.style.getPropertyValue(n)!==css[n])r.style.setProperty(n,css[n]);if(r.dataset.daypart!==part)r.dataset.daypart=part}
 function runScheduler(){
   const day=keyDay();
+  if(!runScheduler._sky||Date.now()-runScheduler._sky>60000){runScheduler._sky=Date.now();setSky()}
   if(appReadyForSync&&Date.now()>_actionsRetryAt){_actionsRetryAt=Date.now()+30000;try{if(localStorage.getItem(ACTIONS_LEFT_KEY))pullNativeActions()}catch(e){}}
   if(day!==lastDay){lastDay=day;renderAll();scheduleNative()} // a new day: new words in the stage alarms
   const autoDone=autoCompleteExpiredStages(),info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
@@ -3716,7 +3879,7 @@ function openLifeAnalysis(){
   $('closeModalBtn').onclick=closeModal;
   $('deepAiBtn').onclick=async()=>{
     const btn=$('deepAiBtn'),box=$('deepAiText');btn.disabled=true;btn.querySelector('span').textContent='AI читает все твои данные…';
-    try{if(cloudAuth()){try{await cloudSync()}catch(e){}}
+    try{if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}
       const data=await callAI({mode:'deep',facts:lifeFacts(),onSlow:()=>{if($('deepAiBtn'))btn.querySelector('span').textContent=AI_SLOW_TEXT}});const text=String(data.output_text||'').trim();if(!text)throw new Error('AI вернул пустой ответ.');
       state.ai.history=Array.isArray(state.ai.history)?state.ai.history:[];state.ai.history.unshift({id:uid(),at:new Date().toISOString(),scope:{mode:'deep'},result:text,sources:[]});state.ai.history=state.ai.history.slice(0,60);saveState();
       box.innerHTML=deepTextHtml(text);btn.querySelector('span').textContent='🤖 Обновить разбор AI';
@@ -3828,7 +3991,7 @@ function renderToday(){
   const mo=motivation(),qf=$('motivationText')?.closest('.jl-quote');if(qf&&qf.hidden!==!mo)qf.hidden=!mo;if(mo){textOf($('motivationText')).v=String(mo.text||'').split(/\n+\s*Сегодня:/)[0].trim();textOf($('motivationSource')).v=mo.source?`${mo.author} — ${mo.source}`:mo.author}
   renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
   autoCompleteExpiredStages();renderRhythm(info);
-  setText('todayBalance',fmtMoney(daySum(state.profits)-daySum(state.expenses)));const fs=financialSnapshot();setText('todayCashState',`Касса: ${fmtMoney(fs.cash)} · На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`);
+  setText('todayBalance',fmtMoney(daySum(state.profits)-daySum(state.expenses)));const fs=financialSnapshot();{const el=$('todayCashState');/* 74.1: the cash is the «Баланс» tile above — only what it does not show */const t=fs.goal>0?`На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`:'';if(el){textOf(el).v=t;if(el.hidden!==!t)el.hidden=!t}}
   for(const k of ['done','block','tomorrow']){const el=$('r'+k[0].toUpperCase()+k.slice(1));if(el&&document.activeElement!==el)el.value=rep[k]||''}
   textOf($('reportSaved')).v=rep.closedAt?`Закрыт в ${new Date(rep.closedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}`:(rep.done||rep.block||rep.tomorrow)?'Черновик сохранён':'';
   renderStreak();renderDayLedger();renderWeek();renderTodayLimit();renderHabits();renderFreePlan();pushWidget();
@@ -3852,14 +4015,18 @@ function renderNowFocus(info=getStageInfo()){
 }
 function toggleStageMain(sid){const on=!dailyState().stageDone?.[sid];stageMainDone(sid,on);saveState();renderToday();if(on){haptic(16);toast('Главное этапа сделано ✅','Ещё шаг к цели «'+(state.goal?.title||'')+'»')}}
 function renderRhythm(info=getStageInfo()){
-  const box=$('timeline');if(!box)return;const steps=state.day.steps||[],rep=dayReport(),now=Math.floor(nowMin()),dd=dailyState();
+  const box=$('timeline');if(!box)return;const steps=state.day.steps||[],rep=dayReport(),now=Math.floor(nowMin()),dd=dailyState(),fw=freePlanStage();
+  const same=(x,y)=>{const n=v=>String(v||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();const a=n(x),b=n(y);return !!a&&!!b&&(a===b||a.startsWith(b)||b.startsWith(a)||a.split(' ').slice(0,2).join(' ')===b.split(' ').slice(0,2).join(' '))};
   const rows=steps.map((s,i)=>{const a=timeToMin(s.time),b=timeToMin(s.end),expired=now>=b,done=!!rep.steps[s.id]||expired,current=!done&&info.kind==='active'&&info.i===i;
     const pct=done?100:current?clamp(Math.round(info.pct),0,100):0;const len=b-a;
     const p=done?1:current?pct/100:0;const cls=done?'done':current?'current':'todo';
     const meta=done?'✅ Пройден':current?`🔥 Сейчас · ещё ${durText(b-now)}`:(a>now?`⏳ через ${durText(a-now)}`:'⏳ Впереди');
-    const f=stageFocus(i),mDone=!!dd.stageDone?.[s.id],moved=dd.stageMoved?.[s.id];
-    const focus=f?`<div class="jl-rstep-main ${mDone?'on':''}"><span aria-hidden="true">${mDone?'✅':moved?'↪️':'🎯'}</span><span><small>${mDone?'Главное сделано':moved?'Главное перенесено':current?'Главное сейчас':'Главное'}</small>${esc(f.main)}</span></div>${current&&f.src!=='close'?`<div class="jl-rstep-acts"><button class="jl-pill ${mDone?'on':''}" type="button" data-stage-main="${esc(s.id)}" aria-pressed="${mDone}">${mDone?'✅ Сделал':'Да, сделал'}</button>${mDone?'':`<button class="jl-pill" type="button" data-stage-move="${esc(s.id)}">↪️ Перенести</button>`}</div>`:''}`:'';
-    return `<div class="jl-rstep ${cls}" style="--p:${p.toFixed(3)}"><span class="jl-rstep-dot" aria-hidden="true">${done?'✓':stageEmoji(s,i)}</span><div class="jl-rstep-body"><div class="jl-rstep-top"><b>${esc(s.title)}</b><span class="jl-rstep-time">${esc(s.time)}–${esc(s.end)}</span></div><small class="jl-rstep-meta">${meta}${current?'':' · '+durText(len)}</small>${current?`<div class="jl-rstep-bar"><i style="width:${pct}%"></i></div>`:''}${focus}${s.text?`<div class="jl-rstep-note">${esc(s.text)}</div>`:''}</div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${done?'Этап завершён: '+esc(s.title):'Завершить этап: '+esc(s.title)}"></div>`});
+    let f=stageFocus(i);const mDone=!!dd.stageDone?.[s.id],moved=dd.stageMoved?.[s.id];
+    // 74.1: no repeats — the goal step of the free stage lives in «Твой вечер» (with its «Сделал»); the note is hidden when «Главное» already says it
+    if(f&&f.src==='goal'&&fw&&fw.st===s)f=null;
+    const note=s.text&&!(f&&(f.src==='close'||same(f.main,s.text)))?s.text:'';
+    const focus=f?`${current?'':`<div class="jl-rstep-main ${mDone?'on':''}"><span aria-hidden="true">${mDone?'✅':moved?'↪️':'🎯'}</span><span><small>${mDone?'Главное сделано':moved?'Главное перенесено':'Главное'}</small>${esc(f.main)}</span></div>`}${current&&f.src!=='close'?`<div class="jl-rstep-acts"><button class="jl-pill ${mDone?'on':''}" type="button" data-stage-main="${esc(s.id)}" aria-pressed="${mDone}">${mDone?'✅ Сделал':'Да, сделал'}</button>${mDone?'':`<button class="jl-pill" type="button" data-stage-move="${esc(s.id)}">↪️ Перенести</button>`}</div>`:''}`:'';
+    return `<div class="jl-rstep ${cls}" style="--p:${p.toFixed(3)}"><span class="jl-rstep-dot" aria-hidden="true">${done?'✓':stageEmoji(s,i)}</span><div class="jl-rstep-body"><div class="jl-rstep-top"><b>${esc(s.title)}</b><span class="jl-rstep-time">${esc(s.time)}–${esc(s.end)}</span></div><small class="jl-rstep-meta">${meta}${current?'':' · '+durText(len)}</small>${current?`<div class="jl-rstep-bar"><i style="width:${pct}%"></i></div>`:''}${focus}${note?`<div class="jl-rstep-note">${esc(note)}</div>`:''}</div><input class="check" type="checkbox" data-day-step="${esc(s.id)}" ${done?'checked':''} ${expired?'disabled':''} aria-label="${done?'Этап завершён: '+esc(s.title):'Завершить этап: '+esc(s.title)}"></div>`});
   const html=rows.join('')||'<div class="v-empty">Этапов дня нет.</div>';
   if(box.dataset.sig!==html){box.dataset.sig=html;box.innerHTML=html}
   box.querySelectorAll('[data-stage-main]').forEach(b=>b.onclick=()=>toggleStageMain(b.dataset.stageMain));
@@ -4093,12 +4260,11 @@ function maybeAutoGoalAI(){
 function renderGoal(){autoMilestones();
   syncGoalFinanceCompletion();
   const total=state.goal.milestones.length,done=state.goal.milestones.filter(m=>m.done).length,p=total?Math.round(done/total*100):0;
-  setText('goalTitle',goalName());setText('goalWhy',state.goal.why||(hasGoal()?'Добавь, зачем тебе эта цель — так легче держать курс.':'Назови цель, сумму и срок — приложение покажет путь и следующий шаг.'));setText('goalPct',p+'%');setWidth('goalBar',p+'%');setText('goalNext',state.goal.next||(hasGoal()?'Добавь первый этап':'Задай цель в «Изменить цель»'));setText('goalCount',`${done} / ${total}`);
+  setText('goalTitle',goalName());setText('goalWhy',state.goal.why||(hasGoal()?'Добавь, зачем тебе эта цель — так легче держать курс.':'Назови цель, сумму и срок — приложение покажет путь и следующий шаг.'));setText('goalPct',p+'%');setWidth('goalBar',p+'%');{const cm=currentMilestone(),ms=state.goal.milestones||[];/* 74.1: the stage in progress, not «Добавь первый этап» when stages exist */setText('goalNext',state.goal.next||(cm?`Этап ${cm.i+1} из ${cm.n}: ${cm.m.title}`:ms.length?'Все этапы пройдены — добавь следующий':hasGoal()?'Добавь первый этап':'Задай цель в «Изменить цель»'))}setText('goalCount',`${done} / ${total}`);
   const f=goalFinanceMetrics();
   {const noT=!(Number(f.target)>0),em=$('goalMoneyEmpty'),bd=$('goalMoneyBody');if(em)em.hidden=!noT;if(bd)bd.hidden=noT;const gc=$('goalChartCard');if(gc)gc.hidden=noT;const sb=$('goalMoneySetBtn');if(sb)sb.onclick=()=>openGoalFinanceEdit()}
   setText('goalTargetAmount',fmtMoney(f.target));setText('goalSavedAmount',fmtMoney(f.saved));setText('goalCashAmount',fmtMoney(f.cash));setText('goalRemainingAmount',fmtMoney(f.remaining));setText('goalFinancePct',f.target?`${f.pct}%`:'—');
   setText('goalFinanceStatus',f.target?(f.completed?'Капитала достаточно — цель закрыта':`Собрано ${fmtMoney(Math.min(f.target,f.available))} из ${fmtMoney(f.target)}`):'Задай сумму — увидишь, сколько осталось');
-  setText('goalGlobalBalance',`Касса: ${fmtMoney(f.cash)} · Общий капитал: ${fmtMoney(f.available)}`);
   setText('goalPotentialText',f.target?`Доступно к цели: ${fmtMoney(Math.min(f.target,f.available))} / ${fmtMoney(f.target)}`:'Потенциал цели появится после задания суммы.');
   setText('goalPotentialSub',f.target?`В цели ${fmtMoney(f.saved)} + свободная касса ${fmtMoney(f.cash)}. Деньги в руках автоматически учитываются в направлении к цели.`:'Сумма цели ещё не задана.');
   if(f.target){const d=f.days?`${f.completed?`Полный капитал собран за ${f.days} дн.`:`Идёт ${f.days}-й день накопления.`}`:'Первое пополнение запустит отсчёт дней.';setText('goalFinanceDays',d);renderGoalDistance();}else setText('goalFinanceDays','После задания суммы здесь появится срок накопления.');
@@ -4210,7 +4376,7 @@ function openBudget(id=''){
 function renderMoney(){
   const debt=debtTotal(),debtBase=Math.max(0,Number(state.debtBaseline)||debt),debtPaid=Math.max(0,debtBase-debt),incomePlan=Math.max(0,Number(state.income)||0),payShare=incomePlan?Math.round((Number(state.debts.monthlyPayment||0)/incomePlan)*100):0;
   const ds=$('debtSummary');if(ds){const cell=(key,ico,label,val,note,cls='')=>`<button type="button" class="kpi jl-debt-cell" data-debt-open="${key}"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#${ico}"></use></svg></span>${label}</div><div class="value ${cls}">${esc(val)}</div><div class="debt-kpi-note">${note}</div><span class="jl-debt-go" aria-hidden="true">${svgIcon('i-chevron-right')}</span></button>`;
-    painter(ds).html=`<div class="kpi-row jl-debt-cells">${cell('bank','i-card',esc(debtLabel('bank')),fmtMoney(state.debts.bank),'платежи и история')}${cell('firms','i-briefcase',esc(debtLabel('firms')),fmtMoney(state.debts.firms),'платежи и история')}${cell('all','i-money','Всего',fmtMoney(debt),'всех обязательств')}${cell('pay','i-calendar','Платёж / месяц',fmtMoney(state.debts.monthlyPayment||0),payShare?`≈ ${payShare}% от плана дохода`:'изменить')}${cell('paid','i-check','Погашено',fmtMoney(debtPaid),'от стартовой суммы','blue')}</div>`;
+    painter(ds).html=`<div class="kpi-row jl-debt-cells">${cell('bank','i-card',esc(debtLabel('bank')),fmtMoney(state.debts.bank),'платежи и история')}${cell('firms','i-briefcase',esc(debtLabel('firms')),fmtMoney(state.debts.firms),'платежи и история')}${cell('pay','i-calendar','Платёж / месяц',fmtMoney(state.debts.monthlyPayment||0),payShare?`≈ ${payShare}% от плана дохода`:'изменить')}${cell('paid','i-check','Погашено',fmtMoney(debtPaid),'от стартовой суммы','blue')}</div>`;
     $$('[data-debt-open]').forEach(b=>b.onclick=()=>b.dataset.debtOpen==='pay'?openDebtEdit():openDebtHistory(b.dataset.debtOpen))}
   renderDebtChart();renderDebtPlan();renderBudgets();renderMoneyCharts();renderMoneyV57();
 }
@@ -4468,7 +4634,7 @@ function openGeminiAnalysis(){
   openModal('<div class="close-row"><div><div class="eyebrow">'+APP_NAME+' AI</div><h2>Анализ моей жизни</h2><div class="sub">AI получает только выбранные данные из твоего аккаунта. Запрос запускается только вручную.</div></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="card" style="margin-top:12px;padding:13px;background:var(--soft)"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Что использовать</div><div class="stack" style="margin-top:8px"><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span><input id="aiGoal" type="checkbox" '+(consent.goal?'checked':'')+'> Цель и её прогресс</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span><input id="aiMoney" type="checkbox" '+(consent.money?'checked':'')+'> Деньги, доходы, расходы и долги</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span><input id="aiReports" type="checkbox" '+(consent.reports?'checked':'')+'> Итоги и этапы дня</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-note"></use></svg></span><input id="aiNotes" type="checkbox" '+(consent.notes?'checked':'')+'> Заметки (последние 15)</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg></span><input id="aiWeb" type="checkbox" '+(state.ai?.webSearch?'checked':'')+'> Проверять актуальные внешние факты через Google</label></div><div class="sub" style="margin-top:8px">Основные данные сервер читает из твоей строки life_state в Supabase. Полный JSON состояния из браузера не отправляется.</div></div><div style="margin-top:10px"><button class="btn primary" id="aiRunBtn" style="width:100%"><svg class="ui-icon"><use href="#i-spark"></use></svg> Запустить AI-анализ</button></div><div class="ai-result" id="aiResult" style="margin-top:12px"></div>');
   $('closeModalBtn').onclick=closeModal;
   $('aiWeb').onchange=()=>{state.ai.webSearch=$('aiWeb').checked;saveState()};
- $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult'),runBtn=$('aiRunBtn');runBtn.disabled=true;box.innerHTML='<div class="empty">AI читает твои данные: деньги, долг, цель, дни, привычки и задачи…</div>';try{if(cloudAuth()){try{await cloudSync()}catch(e){}}const data=await callAI({scope:c,facts:lifeFacts(),onSlow:()=>{if($('aiResult')===box)box.innerHTML='<div class="empty" data-ai-slow>'+AI_SLOW_TEXT+'</div>'}}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item jl-ai-result"><b>Разбор твоей жизни · '+esc(data.model||'Gemini')+'</b>'+aiTextHtml(entry.result)+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Gemini сейчас не ответил</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{runBtn.disabled=false}};
+ $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult'),runBtn=$('aiRunBtn');runBtn.disabled=true;box.innerHTML='<div class="empty">AI читает твои данные: деньги, долг, цель, дни, привычки и задачи…</div>';try{if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}const data=await callAI({scope:c,facts:lifeFacts(),onSlow:()=>{if($('aiResult')===box)box.innerHTML='<div class="empty" data-ai-slow>'+AI_SLOW_TEXT+'</div>'}}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item jl-ai-result"><b>Разбор твоей жизни · '+esc(data.model||'Gemini')+'</b>'+aiTextHtml(entry.result)+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Gemini сейчас не ответил</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{runBtn.disabled=false}};
 }
 function validateDaySteps(){
   const steps=state.day.steps;
@@ -4614,6 +4780,7 @@ function showView(id){
   const opts=arguments[1]||{};
   const target=document.getElementById(id);
   if(!target||!target.classList.contains('view'))return;
+  document.documentElement.dataset.view=id;
   const prev=currentView;
   // every screen remembers where it was scrolled: «назад» and the bottom tabs return to that place
   if(prev&&prev!==id)viewScroll[prev]=window.scrollY;
@@ -4628,7 +4795,9 @@ function showView(id){
   onViewShown(id);
   // a sub-screen opened fresh starts at the top; going back or switching tabs restores the place; the same tab again scrolls up
   const fresh=prev===id||(opts.push!==false&&VIEW_PARENT[id]),top=fresh?0:(viewScroll[id]||0);
-  requestAnimationFrame(()=>{window.scrollTo({top,left:0,behavior:'auto'});if(top)requestAnimationFrame(()=>{if(currentView===id&&Math.abs(window.scrollY-top)>2)window.scrollTo({top,left:0,behavior:'auto'})})});
+  // 74.1: scroll at once (a busy phone may skip frames — the new screen showed at the old place); one frame later only correct
+  window.scrollTo({top,left:0,behavior:'auto'});
+  requestAnimationFrame(()=>{if(currentView===id&&Math.abs(window.scrollY-top)>2)window.scrollTo({top,left:0,behavior:'auto'})});
 }
 var viewScroll={};
 
@@ -4763,7 +4932,7 @@ function renderWeek(){
 async function runWeekReview(){
   const btn=$('wkRun'),box=$('wkText');if(!btn||btn.disabled)return;btn.disabled=true;setText('wkRunLabel','AI разбирает неделю…');
   try{
-    if(cloudAuth()){try{await cloudSync()}catch(e){}}
+    if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}
     const data=await callAI({mode:'week',scope:{goal:true,money:true,reports:true,notes:false},onSlow:()=>setText('wkRunLabel',AI_SLOW_TEXT)});
     const text=String(data.output_text||'').trim();if(!text)throw new Error('AI вернул пустой ответ.');
     state.ai.weekly=state.ai.weekly&&typeof state.ai.weekly==='object'?state.ai.weekly:{};
@@ -4985,22 +5154,29 @@ function freeWindows(){
 const fmtMin=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
 // the next «every 2 hours» reminder — the same list the scheduler and the Android alarms use
 function nextTwoHour(){const m=nowMin();return twoHourSlots().find(x=>!x.work&&x.min>m)||null}
+// the free window shown in «Твой вечер» (the current one, else the next) and the day stage behind it
+function freePlanStage(){
+  const m=nowMin(),wins=freeWindows(),w=wins.find(x=>m>=x.from&&m<x.to)||wins.find(x=>x.from>m);if(!w)return null;
+  const st=(state.day?.steps||[]).find(s=>s.title===w.title&&timeToMin(s.time)===w.from)||null;
+  return {...w,cur:m>=w.from&&m<w.to,st};
+}
 function renderFreePlan(){
-  const box=$('freePlan');if(!box)return;const m=nowMin(),wins=freeWindows();
-  const cur=wins.find(w=>m>=w.from&&m<w.to),next=wins.find(w=>w.from>m);
-  const w=cur||next;
+  const box=$('freePlan');if(!box)return;const m=nowMin(),w=freePlanStage(),cur=w?.cur;
   if(!w){if(box.innerHTML){box.innerHTML='';box.dataset.sig=''}return}
-  const d=dailyState(),fd=d.freeDone||{},g=goalFocusLine(),gDone=!!d.goalDone,nx=nextTwoHour();
+  // «Сделал» here and «Да» of the stage (rhythm, Android) are one mark: either one counts
+  const d=dailyState(),fd=d.freeDone||{},g=goalFocusLine(),gDone=!!d.goalDone||!!(w.st&&d.stageDone?.[w.st.id]),nx=nextTwoHour();
   const main=g.main||'шаг к цели';
   const SI=successIdeas(),ideas=SI.length?[0,1].map(k=>SI[(dayIndex()+k)%SI.length]):[];
-  const remind=state.settings?.every2h===false?'🔕 Напоминания каждые 2 часа выключены (Настройки)':state.settings?.notifications===false?'🔕 Уведомления выключены':nx?`🔔 Следующее напоминание в <b data-next-2h>${esc(nx.time)}</b> — о главном по цели`:'🔔 Сегодня напоминаний о цели больше нет';
-  const html=`<div class="jl-free-head"><span class="jl-emo" aria-hidden="true">🌙</span><div><b>${cur?'Свободное время — сейчас':'Свободное время в '+fmtMin(w.from)}</b><small>${esc(w.title)} · ${fmtMin(w.from)}–${fmtMin(w.to)} · сначала главное по цели</small></div></div>`+
+  const off=state.settings?.every2h===false?'Напоминания о цели выключены в настройках':state.settings?.notifications===false?'Уведомления выключены':'';
+  const remind=off?`<span class="jl-bell" aria-hidden="true">🔕</span><span><b>${off}</b></span>`:nx?`<span class="jl-bell swing" aria-hidden="true">🔔</span><span><b>Напомню в <span data-next-2h>${esc(nx.time)}</span></b><small>через ${durText(Math.max(1,nx.min-Math.floor(m)))} · о главном по цели</small></span>`:`<span class="jl-bell" aria-hidden="true">🔔</span><span><b>Сегодня напоминаний о цели больше нет</b></span>`;
+  const html=`<div class="jl-free-head"><span class="jl-emo" aria-hidden="true">🌙</span><div><b>${cur?'Твой вечер — сейчас':'Твой вечер · с '+fmtMin(w.from)}</b><small>${esc(w.title)} · ${fmtMin(w.from)}–${fmtMin(w.to)} · сначала главное по цели</small></div></div>`+
+    `<div class="jl-free-note ${off?'off':''}" role="status">${remind}</div>`+
     `<button class="jl-free-item jl-free-goal ${gDone?'done':''}" type="button" data-free-goal aria-pressed="${gDone}"><span class="jl-emo" aria-hidden="true">🎯</span><span><small class="jl-free-k">Главное по цели «${esc(String(g.title).slice(0,40))}» · ${g.pct}%</small><b>${esc(String(main).slice(0,120))}</b><small>До цели: ${esc(goalLeftText())}</small></span><i class="jl-free-do">${gDone?svgIcon('i-check')+' Сделал':'Сделал'}</i></button>`+
     ideas.map(([e,t,why])=>{const done=!!fd[t];return `<button class="jl-free-item ${done?'done':''}" type="button" data-free="${esc(t)}" aria-pressed="${done}"><span class="jl-emo" aria-hidden="true">${e}</span><span><b>${esc(t)}</b><small>${esc(why)}</small></span><i class="jl-free-check">${svgIcon('i-check')}</i></button>`}).join('')+
-    `<div class="jl-free-note">${remind}</div>`;
+    '';
   if(box.dataset.sig===html)return;box.dataset.sig=html;box.innerHTML=html;
   box.querySelectorAll('[data-free]').forEach(b=>b.onclick=()=>{const dd=dailyState();dd.freeDone=dd.freeDone||{};const t=b.dataset.free;dd.freeDone[t]=!dd.freeDone[t];saveState();renderFreePlan();if(dd.freeDone[t]){haptic(14);toast('Отлично! '+t,'Ещё один шаг к успеху')}});
-  box.querySelector('[data-free-goal]').onclick=()=>{const dd=dailyState();if(dd.goalDone)delete dd.goalDone;else dd.goalDone={at:new Date().toISOString(),text:String(main).slice(0,140)};saveState();renderFreePlan();renderDayLedger();if(dd.goalDone){haptic(16);toast('Главное по цели сделано 🎯','Это пойдёт в итог дня')}};
+  box.querySelector('[data-free-goal]').onclick=()=>{const dd=dailyState(),on=!(dd.goalDone||(w.st&&dd.stageDone?.[w.st.id]));if(!on)delete dd.goalDone;else dd.goalDone={at:new Date().toISOString(),text:String(main).slice(0,140)};if(w.st)stageMainDone(w.st.id,on);saveState();renderFreePlan();renderDayLedger();if(dd.goalDone){haptic(16);toast('Главное по цели сделано 🎯','Это пойдёт в итог дня')}};
 }
 // «Главное сейчас» for a reminder: the goal (what is missing, days left), its next stage and the open tasks of the day
 function goalFocusLine(){
@@ -5181,7 +5357,7 @@ async function openMoveDevice(){
     <button class="btn primary jl-close-btn" id="mvSync" type="button">${svgIcon('i-sync')} Сохранить в облако сейчас</button>
   </div>`);
   $('closeModalBtn').onclick=closeModal;
-  const st=async()=>{try{const r=await cloudSync();setText('mvStatus',r?.ok?'✅ Облако синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+' — можно переходить на новое устройство':'⚠️ Нет входа в облако — войди в аккаунт')}catch(e){setText('mvStatus','⚠️ Нет связи с облаком: '+(e?.message||e))}};
+  const st=async()=>{try{const ok=cloudAuth()&&await cloudAutoSync();setText('mvStatus',ok?'✅ Облако синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+' — можно переходить на новое устройство':(cloudAuth()?'⚠️ Нет связи с облаком — повтори, когда будет интернет':'⚠️ Нет входа в облако — войди в аккаунт'))}catch(e){setText('mvStatus','⚠️ Нет связи с облаком: '+(e?.message||e))}};
   $('mvSync').onclick=async()=>{const b=$('mvSync');b.disabled=true;await st();b.disabled=false;haptic(14)};
   st();
 }
@@ -5257,7 +5433,8 @@ function renderGoalHero(){
   const main=(state.goals||[]).find(g=>g.main),f=goalFinanceMetrics(),pct=f.target?clamp(f.pct,0,100):0,C=2*Math.PI*50,ring=$('goalRing');
   if(ring){ring.style.strokeDasharray=C.toFixed(1);ring.style.strokeDashoffset=(C*(1-pct/100)).toFixed(1)}
   const ico=$('goalHeroIco');if(ico&&main){const h=svgIcon(ICON_IDS[main.icon]||'i-target');if(ico.innerHTML!==h)painter(ico).html=h;ico.style.color=goalColor(main)}
-  setText('goalLeftText',f.target?(f.completed?'🎉 Цель достигнута!':`Осталось ${fmtMoney(f.remaining)}${f.targetDate?' · до '+new Date(f.targetDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}):''}`):'');
+  // 74.1: «Осталось» is the tile below — here only the deadline
+  setText('goalLeftText',f.target?(f.completed?'🎉 Цель достигнута!':f.targetDate?'Срок: до '+new Date(f.targetDate+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}):''):'');
   {const cur=currencyLabel(),ms=state.goal?.milestones||[],msDone=ms.filter(m=>m.done).length;
    setText('ghSaved',fmtShort(f.target?Math.min(f.target,f.available):f.saved));setText('ghSavedSub',cur+(f.saved?` · в цели ${fmtShort(f.saved)}`:''));
    setText('ghLeft',f.target?(f.completed?'0 🎉':fmtShort(f.remaining)):'—');setText('ghLeftSub',f.target?(f.targetDate&&goalDaysLeft(f.targetDate)!==null?`${cur} · ${goalDaysLeft(f.targetDate)} дн.`:cur):'задай сумму');
@@ -5330,7 +5507,30 @@ function renderPulseRings(){
   const avg=Math.round((p.goal+p.finance+p.discipline+p.debt)/4);
   setText('pulseStatus',avg>=70?'Отличный темп':avg>=45?'Стабильно':avg>=25?'Нужен шаг вперёд':'Начни с малого');
   renderPulseGauge(Math.round((p.day+p.goal+p.finance+p.discipline+p.debt)/5));
+  renderPulseChart();
 }
+// 74: the pulse by day — tasks, habits, stages of the day and a closed day report, the last 14 days on one chart
+function pulseOn(k){const parts=[],today=k===keyDay(),now=Math.floor(nowMin()),rep=state.reports?.[k];
+  const tk=(state.tasks||[]).filter(t=>t.date===k);if(tk.length)parts.push(tk.filter(t=>t.done).length/tk.length);
+  const hb=state.habits||[];if(hb.length)parts.push(hb.filter(h=>habitDoneOn(h,k)).length/hb.length);
+  const st=state.day.steps||[];if(st.length&&(rep||today))parts.push(st.filter(s=>!!rep?.steps?.[s.id]||(today&&now>=timeToMin(s.end))).length/st.length);
+  if(!today)parts.push(rep?.savedAt?1:0);
+  return parts.length?Math.round(parts.reduce((a,b)=>a+b,0)/parts.length*100):0}
+function renderPulseChart(){
+  const box=$('pulseChart');if(!box)return;const N=14,W=320,H=118,L=8,R=8,T=14,B=26,days=[];
+  for(let i=N-1;i>=0;i--){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-i);const k=keyDay(d);days.push({k,d,v:pulseOn(k)})}
+  const x=i=>L+i*(W-L-R)/(N-1),y=v=>T+(100-v)/100*(H-T-B);
+  const pts=days.map((p,i)=>[x(i),y(p.v)]),line=pts.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' ');
+  const area=line+` L${x(N-1).toFixed(1)} ${H-B} L${x(0).toFixed(1)} ${H-B} Z`;
+  const wk=['вс','пн','вт','ср','чт','пт','сб'],last=days[N-1],prev7=days.slice(0,7),this7=days.slice(7),avg=a=>Math.round(a.reduce((s,p)=>s+p.v,0)/a.length);
+  const a1=avg(this7),a0=avg(prev7),diff=a1-a0,best=days.reduce((m,p)=>p.v>m.v?p:m,days[0]);
+  const grid=[0,50,100].map(v=>`<line class="jl-pc-grid" x1="${L}" x2="${W-R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`).join('');
+  const dots=pts.map((q,i)=>`<circle class="jl-pc-dot${i===N-1?' now':''}" style="--i:${i}" cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="${i===N-1?5:3}"/>`).join('');
+  const labels=days.map((p,i)=>i%2===(N-1)%2?`<text class="jl-pc-lbl${i===N-1?' now':''}" x="${x(i).toFixed(1)}" y="${H-8}" text-anchor="${i===N-1?'end':'middle'}">${i===N-1?'сегодня':wk[p.d.getDay()]}</text>`:'').join('');
+  const html=`<div class="jl-pc-top"><b>Твои дни · задачи, привычки, этапы</b><span class="jl-pc-trend ${diff>0?'up':diff<0?'down':''}">${diff>0?'▲ +'+diff:diff<0?'▼ '+diff:'= 0'} к прошлой неделе</span></div>`+
+    `<svg class="jl-pc-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Пульс за 14 дней: сегодня ${last.v}%, в среднем за неделю ${a1}%"><defs><linearGradient id="pcFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5b9cff" stop-opacity=".45"/><stop offset="1" stop-color="#5b9cff" stop-opacity="0"/></linearGradient><linearGradient id="pcLine" x1="0" x2="1"><stop offset="0" stop-color="#38d6f0"/><stop offset="1" stop-color="#f6d58a"/></linearGradient></defs>${grid}<path class="jl-pc-area" d="${area}" fill="url(#pcFill)"/><path class="jl-pc-line" d="${line}" fill="none" stroke="url(#pcLine)"/>${dots}${labels}</svg>`+
+    `<div class="jl-pc-sum"><span><b>${last.v}%</b>сегодня</span><span><b>${a1}%</b>за 7 дней</span><span><b>${best.v}%</b>лучший · ${best.k===last.k?'сегодня':wk[best.d.getDay()]+' '+best.d.getDate()}</span></div>`;
+  if(box.dataset.sig===html)return;box.dataset.sig=html;box.innerHTML=html}
 // the overall pulse: one gauge, the needle turns 0–180°, the number counts up to the new value
 function renderPulseGauge(v){
   v=clamp(Math.round(Number(v)||0),0,100);const arc=$('pgArc'),needle=$('pgNeedle'),val=$('pgValue');if(!arc||!val)return;
@@ -5371,6 +5571,8 @@ function todayTasks(){const k=keyDay();return (state.tasks||[]).filter(t=>t.date
 function renderTasks(){if(appReadyForSync)carryOverTasks();pushWidget();
   const list=$('taskList');if(!list)return;const rep=dayReport(),m=nowMin();
   const tasks=todayTasks().map(t=>{const late=!t.done&&t.time&&m>=timeToMin(t.time),lead=taskLead(t);return `<div class="v-task ${t.done?'done':''} ${late?'overdue':''} ${t.time&&!t.done?'timed':''}" data-task-row="${esc(t.id)}"><input class="v-check" type="checkbox" data-task-id="${esc(t.id)}" ${t.done?'checked':''} aria-label="${esc('Задача: '+t.title)}"><button class="jl-task-emo" type="button" data-task-emo="${esc(t.id)}" aria-label="${esc((t.done?'Вернуть: ':'Готово: ')+t.title)}">${t.done?'✅':taskEmoji(t.title)}</button><div><div class="v-task-title">${esc(t.title)}${t.goal?`<span class="jl-goal-tag" title="Задача к цели">🎯 ${esc(taskGoalLabel(t))}</span>`:''}</div><div class="v-task-meta">${t.done&&t.doneAt?'Выполнено в '+esc(new Date(t.doneAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})):late?'Время прошло — отметь или перенеси':t.time?`<span class="v-remind">${svgIcon('i-bell')} <span data-task-left>в ${esc(t.time)}</span></span>`:(t.carriedFrom?'↪️ перенесено с '+esc(new Date(t.carriedFrom+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})):'Задача')}</div>${t.time&&!t.done?`<div class="jl-task-bar" data-task-bar="${esc(t.id)}"><i></i></div>`:''}</div><span class="v-task-time">${esc(t.time||'')}</span><button class="v-task-del" type="button" data-task-del="${esc(t.id)}" aria-label="Удалить задачу">${svgIcon('i-x')}</button></div>`});
+  // 74: the day runs through the list — a «Сейчас» line between what is behind and what is ahead
+  const tt=todayTasks();if(tt.some(t=>t.time)){let at=tt.findIndex(t=>t.time&&timeToMin(t.time)>m);if(at<0)at=tt.length;if(at>0||tt.some(t=>t.time&&timeToMin(t.time)<=m))tasks.splice(at,0,'<div class="jl-now-line" aria-hidden="true"><span>Сейчас</span></div>')}
   painter(list).html=tasks.join('')||'<div class="v-empty">Задач на сегодня нет — нажми «+», чтобы добавить.</div>';
   const all=todayTasks(),doneCount=all.filter(t=>t.done).length;setText('taskSummary',all.length?(doneCount===all.length?`Все ${all.length} готовы — отличный день 🎉`:`${doneCount} из ${all.length} задач выполнено`):'Добавь задачу кнопкой «+»');miniRing('taskRing',doneCount,all.length);
   $$('[data-task-emo]').forEach(b=>b.onclick=()=>{const c=document.querySelector(`[data-task-id="${CSS.escape(b.dataset.taskEmo)}"]`);if(c){c.checked=!c.checked;c.dispatchEvent(new Event('change',{bubbles:true}))}});
@@ -5665,7 +5867,7 @@ function renderSettingsView(){
   if(!$('viewSettings'))return;const a=cloudAuth();
   setText('setProfileSub',[state.profile.name,a?.user?.email].filter(Boolean).join(' · ')||'Имя не указано');
   const set=(id,v)=>{const el=$(id);if(el)el.checked=!!v};
-  set('setDarkTheme',state.settings.theme==='dark');set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setEvery2h',state.settings.every2h!==false);
+  set('setDarkTheme',state.settings.theme==='dark');set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setLoudReminders',state.settings.loudReminders!==false);{const lr=$('loudRow');if(lr)lr.style.display=window.AndroidBridge?.setLoudReminders?'':'none'}set('setEvery2h',state.settings.every2h!==false);
   const sf=$('setFont');if(sf)sf.value=state.settings.font||'manrope';const qs=$('setQuoteSet');if(qs)qs.value=quoteSet();
   const fs=$('setFontScale');if(fs){const v=Number(state.settings.fontScale)||1.1;fs.value=v<1.05?'1':v>1.15?'1.2':'1.1'}
   setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный');renderBiometricRow();refreshCloudUI();
@@ -5752,13 +5954,14 @@ function bindV57(){
   $$('[data-fmt]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>noteFormat(b.dataset.fmt)});
   ['neTitle','neBody'].forEach(id=>$(id).addEventListener('input',noteEditorSync));$('nePinned').addEventListener('change',noteEditorSync);$('neSave').onclick=noteEditorSave;
   $('neTrash').onclick=()=>{if(noteEditId){const id=noteEditId;noteEditId='';showView('viewNotes');moveToTrash(id)}else{clearDraft('note');showView('viewNotes');toast('Черновик удалён')}};
-  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify)playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 '+APP_NAME,'Так звучат напоминания 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:APP_NAME,body:'Так звучат напоминания.'});return}}catch(e){}showWebNotification(APP_NAME,'Так звучат напоминания.');toast(APP_NAME,'Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
+  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify&&!(hostPlaysSound()&&state.settings?.notifications!==false))playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 '+APP_NAME,'Так звучат напоминания 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:APP_NAME,body:'Так звучат напоминания.',sound:hostPlaysSound()});return}}catch(e){}showWebNotification(APP_NAME,'Так звучат напоминания.');toast(APP_NAME,'Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
   $('setDarkTheme').onchange=e=>{state.settings.theme=e.target.checked?'dark':'light';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');
-  $('setQuoteSet')&&($('setQuoteSet').onchange=e=>{state.settings.quoteSet=QUOTE_SETS[e.target.value]?e.target.value:'general';saveState();renderAll();toast('Цитаты дня',QUOTE_SETS[state.settings.quoteSet])});
+  $('setQuoteSet')&&($('setQuoteSet').onchange=e=>{state.settings.quoteSet=QUOTE_SETS[e.target.value]?e.target.value:'hadith';state.settings.quoteSetChosen=true;saveState();renderAll();toast('Цитаты дня',QUOTE_SETS[state.settings.quoteSet])});
   $('setFont')&&($('setFont').onchange=e=>{state.settings.font=['manrope','nunito','inter'].includes(e.target.value)?e.target.value:'manrope';saveState();applyFont();toast('Шрифт изменён',e.target.selectedOptions[0]?.textContent||'')});$('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
   [['setNotifyAll','notifications'],['setNotifyTasks','notifyTasks'],['setNotifyFinance','notifyFinance'],['setNotifyGoals','notifyGoals'],['setNotifySound','sound']].forEach(([id,key])=>$(id).onchange=e=>{state.settings[key]=e.target.checked;saveState();if(key==='notifications'||key==='notifyTasks')scheduleNative()});
+  $('setLoudReminders').onchange=e=>{state.settings.loudReminders=e.target.checked;saveState();syncLoudReminders();toast(e.target.checked?'Громкие напоминания включены':'Обычная громкость напоминаний',e.target.checked?'Звучат громкостью будильника.':'Звучат громкостью уведомлений.')};
   $('setNotifyPermission').onclick=requestNotifications;$('setAdvancedRow').onclick=openSettings;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;
   $('pfLogout').onclick=()=>{if(confirm('Выйти из '+APP_NAME+'? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};

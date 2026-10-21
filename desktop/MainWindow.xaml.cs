@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Media;
 using System.Reflection;
 using System.Text.Json;
 using System.Windows;
@@ -96,6 +97,8 @@ public partial class MainWindow : Window
                 }
             };
             web.WebMessageReceived += OnWebMessage;
+            // 74.1: the host plays the reminder sound itself, so it is heard while the window is hidden in the tray
+            await web.AddScriptToExecuteOnDocumentCreatedAsync("window.__jlHostSound=1");
             Browser.Source = new Uri($"https://{Host}/index.html");
         }
         catch (WebView2RuntimeNotFoundException)
@@ -129,12 +132,32 @@ public partial class MainWindow : Window
                 var title = root.TryGetProperty("title", out var ti) ? ti.GetString() ?? AppName : AppName;
                 var body = root.TryGetProperty("body", out var b) ? b.GetString() ?? "" : "";
                 _tray.ShowBalloonTip(8000, title, string.IsNullOrWhiteSpace(body) ? " " : body, Forms.ToolTipIcon.None);
+                if (root.TryGetProperty("sound", out var snd) && snd.ValueKind == JsonValueKind.True) PlayChime();
                 if (!IsVisible || WindowState == WindowState.Minimized) FlashTaskbar();
             }
             else if (type == "autostart")
             {
                 SetAutostart(root.TryGetProperty("on", out var on) && on.GetBoolean());
             }
+        }
+        catch { }
+    }
+
+    private SoundPlayer? _chime;
+
+    /// <summary>The same «Dawn» sound as on Android (Web/sounds/jamal-dawn.wav), played by Windows even with the window in the tray.</summary>
+    private void PlayChime()
+    {
+        try
+        {
+            if (_chime == null)
+            {
+                var wav = Path.Combine(AppContext.BaseDirectory, "Web", "sounds", "jamal-dawn.wav");
+                if (!File.Exists(wav)) return;
+                _chime = new SoundPlayer(wav);
+                _chime.Load();
+            }
+            _chime.Play(); // async, does not block the UI thread
         }
         catch { }
     }

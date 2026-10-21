@@ -15,7 +15,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -31,6 +31,8 @@ jobs:
         run: npm run test:edge
       - name: End-to-end tests (sync, reminders, UI)
         run: npm run test:e2e
+      - name: Text contrast on the photo background (4 times of day, both themes)
+        run: npm run test:contrast
 
   android:
     needs: test
