@@ -84,6 +84,6 @@ for (const time of ["06:50", "13:30", "17:40", "21:30"]) {
   await ctx.close();
 }
 await browser.close(); server.close();
-let total = 0; for (const [n, c, ex] of report) { total += c; if (c) console.log(n, c, ex.join(" | ")); }
+let total = 0; for (const [n, c, ex] of report) { total += c; if (c) { console.log(n, c, ex.join(" | ")); if (process.env.GITHUB_ACTIONS) console.log(`::error title=contrast ${n}::${c} below the norm: ${ex.join(" | ")}`); } }
 console.log(total ? "contrast: " + total + " texts below the norm" : "contrast: " + report.length + " screens, 0 texts below 4.5:1");
 process.exit(total ? 1 : 0);
