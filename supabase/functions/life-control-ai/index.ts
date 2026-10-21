@@ -45,12 +45,12 @@ function scope(s: any) {
 }
 
 function promptRules() {
-  return ["Ты — AI-помощник приложения " + APP_NAME + ", персональный аналитический агент.","Работай только с фактами из переданных данных приложения. Не придумывай суммы, даты, достижения, события или причины.","Отделяй факт от предположения.","Если цель, доход или долги не заданы (пусто или 0) — не придумывай их; скажи, что их стоит добавить в приложении, и дай совет по тому, что есть.","Не давай мелких общих советов вроде «будь дисциплинированнее», «отдыхай больше», «продолжай работать» без конкретного действия.","Каждый вывод должен приводить к практическому решению.","Дай короткий управленческий разбор и затем КОНКРЕТНЫЙ ПЛАН ДЕЙСТВИЙ.","План должен содержать 3–5 действий с приоритетом P1/P2/P3, конкретным сроком, измеримым результатом и основанием из данных.","P1 — действие, которое нужно сделать первым и которое сильнее всего влияет на текущую проблему.","Если есть долги или финансовое давление, отдельно укажи конкретное действие по деньгам: сумму/лимит, срок или правило, только если это можно вывести из данных. Не придумывай возможность платить больше, чем позволяют данные.","Если есть цель, свяжи действия с ближайшим измеримым этапом цели.","Для режима goal обязательно отдельно покажи: ЧТО УЖЕ ДОСТИГНУТО — закрытые этапы и реальные результаты; ЧТО УЖЕ ЕСТЬ — собранный капитал, доступная касса и другие подтверждённые ресурсы; ЧТО МЕШАЕТ — один главный ограничитель; ЗАТЕМ ПЛАН — 3–5 конкретных действий.","Если есть незавершённые задачи или препятствия из отчётов, преврати наиболее существенное препятствие в конкретное действие.","Заверши блоком «ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ» — ровно одно действие, которое пользователь может выполнить сразу.","Не предлагай десять действий. Отсекай второстепенное.","Для денег показывай арифметику; не обещай гарантированный результат.","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов.","Пиши по-русски, прямо, серьёзно и без мотивационной воды.","Не изменяй данные пользователя."].join("\n");
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", персональный аналитический агент.","Работай только с фактами из переданных данных приложения. Не придумывай суммы, даты, достижения, события или причины.","all_data — все разделы приложения (долги своими именами и их история, все цели, привычки с отметками за 30 дней, задачи, банки, распорядок и график по дням недели, деньги по месяцам, победы): опирайся на них, называй долги и цели их именами.","Отделяй факт от предположения.","Если цель, доход или долги не заданы (пусто или 0) — не придумывай их; скажи, что их стоит добавить в приложении, и дай совет по тому, что есть.","Не давай мелких общих советов вроде «будь дисциплинированнее», «отдыхай больше», «продолжай работать» без конкретного действия.","Каждый вывод должен приводить к практическому решению.","Дай короткий управленческий разбор и затем КОНКРЕТНЫЙ ПЛАН ДЕЙСТВИЙ.","План должен содержать 3–5 действий с приоритетом P1/P2/P3, конкретным сроком, измеримым результатом и основанием из данных.","P1 — действие, которое нужно сделать первым и которое сильнее всего влияет на текущую проблему.","Если есть долги или финансовое давление, отдельно укажи конкретное действие по деньгам: сумму/лимит, срок или правило, только если это можно вывести из данных. Не придумывай возможность платить больше, чем позволяют данные.","Если есть цель, свяжи действия с ближайшим измеримым этапом цели.","Для режима goal обязательно отдельно покажи: ЧТО УЖЕ ДОСТИГНУТО — закрытые этапы и реальные результаты; ЧТО УЖЕ ЕСТЬ — собранный капитал, доступная касса и другие подтверждённые ресурсы; ЧТО МЕШАЕТ — один главный ограничитель; ЗАТЕМ ПЛАН — 3–5 конкретных действий.","Если есть незавершённые задачи или препятствия из отчётов, преврати наиболее существенное препятствие в конкретное действие.","Заверши блоком «ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ» — ровно одно действие, которое пользователь может выполнить сразу.","Не предлагай десять действий. Отсекай второстепенное.","Для денег показывай арифметику; не обещай гарантированный результат.","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов.","Пиши по-русски, прямо, серьёзно и без мотивационной воды.","Не изменяй данные пользователя."].join("\n");
 }
 
 // WEEK mode: short Sunday review of the last 7 days (strong side, weak spot, one step).
 function weekRules() {
-  return ["Ты — AI-помощник приложения " + APP_NAME + ", личный наставник по итогам недели.","Работай только с фактами из переданных данных за последние 7 дней. Не придумывай суммы, события и причины.","Пиши по-русски, коротко, прямо, по-человечески, без воды и без markdown (#, **, списков).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", личный наставник по итогам недели.","Работай только с фактами из переданных данных за последние 7 дней. Не придумывай суммы, события и причины.","all_data — все разделы приложения: используй их, называй долги и цели их именами.","Пиши по-русски, коротко, прямо, по-человечески, без воды и без markdown (#, **, списков).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
 }
 // deno-lint-ignore no-explicit-any
 function weekContext(s: any, today: string): any {
@@ -71,7 +71,7 @@ function weekContext(s: any, today: string): any {
 
 // DEEP mode: honest money leaks + weak/strong side, from the whole state and the app's own numbers.
 function deepRules() {
-  return ["Ты — AI-помощник приложения " + APP_NAME + ", честный личный аналитик денег и дисциплины.","Опирайся только на переданные данные и цифры. Не придумывай суммы и события.","Говори прямо, по-человечески, коротко, с конкретными цифрами из данных. Без воды, без markdown (#, **, списков со звёздочками).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", честный личный аналитик денег и дисциплины.","Опирайся только на переданные данные и цифры. Не придумывай суммы и события.","all_data — все разделы приложения: используй их, называй долги и цели их именами.","Говори прямо, по-человечески, коротко, с конкретными цифрами из данных. Без воды, без markdown (#, **, списков со звёздочками).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
 }
 // deno-lint-ignore no-explicit-any
 function deepContext(s: any, facts: any): any {
@@ -108,6 +108,40 @@ function context(s: any, c: any): any {
  if(c.reports){const rs=s?.reports&&typeof s.reports==="object"?s.reports:{},r=Object.entries(rs).filter(([d,v])=>v&&new Date(d+"T23:59:59").getTime()>=Date.now()-30*86400000).sort((a,b)=>String(b[0]).localeCompare(String(a[0]))).slice(0,30);o.reports=r.map(([day,v])=>({day,done:clip(v?.done,800),block:clip(v?.block,800),future:clip(v?.future,800),tomorrow:clip(v?.tomorrow,800),steps:v?.steps||{}}))}
  if(c.notes){const ns=Array.isArray(s?.notes)?s.notes:[];o.notes=ns.slice().sort((a,b)=>String(b?.at||"").localeCompare(String(a?.at||""))).slice(0,15).map(n=>({createdAt:n?.at||"",title:clip(n?.title,180),body:clip(n?.body,900)}))}
  return o;
+}
+
+// 74.4: every part of the user's data, compact — the AI sees the whole picture whatever mode was asked
+// (debts by their own names and their history, all goals, habits with marks, tasks, banks, the day and the weekday schedule,
+// money by month for half a year, wins). Notes go only when the user ticked them.
+// deno-lint-ignore no-explicit-any
+function allData(s: any, withNotes: boolean): any {
+  const num = (v: unknown) => Number(v) || 0, arr = (v: any) => (Array.isArray(v) ? v : []);
+  const labels = s?.debts?.labels || {};
+  const debts = { [clip(labels.bank || "Долг 1", 60)]: num(s?.debts?.bank), [clip(labels.firms || "Долг 2", 60)]: num(s?.debts?.firms),
+    monthlyPayment: num(s?.debts?.monthlyPayment), startedFrom: num(s?.debtBaseline),
+    history: arr(s?.debtHistory).slice(-12).map((h: any) => ({ day: clip(h?.day, 12), total: num(h?.total) })) };
+  const goals = arr(s?.goals).slice(0, 12).map((g: any) => ({ title: clip(g?.title, 120), main: !!g?.main, target: num(g?.targetAmount), date: clip(g?.targetDate, 12),
+    saved: num(g?.manualSaved) + arr(g?.contributions).reduce((a: number, c: any) => a + num(c?.amount), 0), done: !!g?.completedAt }));
+  const since = Date.now() - 30 * 86400000, log = s?.habitLog || {};
+  const habits = arr(s?.habits).slice(0, 15).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind, avoid: !!h?.avoid,
+    marksLast30: Object.keys(log?.[h?.id] || {}).filter((d) => log[h.id][d] && Date.parse(d + "T12:00:00") >= since).length }));
+  const tasks = arr(s?.tasks), today = new Date().toISOString().slice(0, 10);
+  const taskInfo = { total: tasks.length, done: tasks.filter((t: any) => t?.done).length,
+    overdue: tasks.filter((t: any) => !t?.done && t?.date && t.date < today).slice(0, 10).map((t: any) => clip(t?.title, 100) + " (" + t.date + ")"),
+    upcoming: tasks.filter((t: any) => !t?.done && (!t?.date || t.date >= today)).slice(0, 12).map((t: any) => clip(t?.title, 100) + (t?.date ? " · " + t.date + (t?.time ? " " + t.time : "") : "")) };
+  const banks = arr(s?.budgets).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthly: num(b?.planned), topups: arr(b?.tops).length }));
+  const months: Record<string, { income: number; spent: number; debtPaid: number }> = {};
+  const m = (x: any) => String(x?.dateKey || x?.at || "").slice(0, 7), cut = new Date(); cut.setMonth(cut.getMonth() - 6);
+  for (const x of arr(s?.profits)) { const k = m(x); if (k >= cut.toISOString().slice(0, 7)) (months[k] ||= { income: 0, spent: 0, debtPaid: 0 }).income += num(x?.amount); }
+  for (const x of arr(s?.expenses)) { const k = m(x); if (k < cut.toISOString().slice(0, 7)) continue; const o = (months[k] ||= { income: 0, spent: 0, debtPaid: 0 });
+    if (x?.debtPayment) o.debtPaid += num(x?.amount); else if (!x?.transfer) o.spent += num(x?.amount); }
+  const steps = arr(s?.day?.steps).slice(0, 6).map((x: any) => ({ title: clip(x?.title, 60), from: clip(x?.time, 5), to: clip(x?.end, 5), main: arr(x?.details).slice(0, 3).map((d: any) => clip(d, 80)) }));
+  const week = s?.day?.week && typeof s.day.week === "object" ? Object.fromEntries(Object.entries(s.day.week).slice(0, 7).map(([d, v]: any) => [d, v?.off ? "выходной" : "свои часы"])) : null;
+  const out: any = { name: clip(s?.profile?.name, 60), currency: clip(s?.profile?.currency || "сомони", 20), cash: num(s?.wallet?.openingBalance), debts, goals, habits, tasks: taskInfo, banks,
+    moneyByMonth: months, day: { steps, week, mode: clip(s?.dayMode, 20) }, wins: arr(s?.achievements).slice(-10).map((a: any) => clip(a?.text, 160)),
+    closedDaysLast30: Object.entries(s?.reports || {}).filter(([d, v]: any) => v && Date.parse(d + "T12:00:00") >= since && (v?.closedAt || String(v?.done || "").trim())).length };
+  if (withNotes) out.notes = arr(s?.notes).slice(-15).map((n: any) => ({ title: clip(n?.title, 120), body: clip(n?.body, 400) }));
+  return out;
 }
 
 async function getUser(req: Request) {
@@ -246,6 +280,7 @@ Deno.serve(async (req) => {
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return fail("state_read", 500, "Не удалось прочитать твои данные из облака. Проверь синхронизацию («Настройки → Аккаунт») и повтори через минуту.", { code: error.code || "", msg: error.message || "" });
     const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
+    ctx.all_data = allData(row?.state || {}, sc.notes);
     const p = mode === "deep"
       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "week"

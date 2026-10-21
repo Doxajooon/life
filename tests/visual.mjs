@@ -58,7 +58,7 @@ const WINDOWS = [
   ["quick", "openQuickAdd()"], ["expense", "openMoneyForm('expense')"], ["profit", "openMoneyForm('profit')"], ["expense-edit", "openMoneyEdit('expense','swE')"],
   ["transfer", "openTransferForm()"], ["txtype", "openTxTypePicker()"], ["task", "openTaskForm()"], ["habit", "openHabitEditor()"], ["bank-new", "openBudget()"], ["bank", "openBudget('swB')"],
   ["bank-topup", "openBankTopup('swB')"], ["debt", "openDebtEdit()"], ["debt-history", "openDebtHistory('all')"], ["goal-edit", "openGoalEdit()"], ["goal-finance", "openGoalFinanceEdit()"],
-  ["goal-saving", "openGoalSaving()"], ["calendar", "openCalendar()"], ["settings", "openSettings()"], ["security", "openSecurity()"], ["trash", "openTrash()"], ["move", "openMoveDevice()"],
+  ["goal-saving", "openGoalSaving()"], ["calendar", "openCalendar()"], ["settings", "openSettings()"], ["security", "openSecurity()"], ["trash", "openTrash()"],
   ["ai", "openGeminiAnalysis()"], ["life", "openLifeAnalysis()"], ["search", "openSearch()"], ["achievement", "openAchievement()"], ["backup", "openBackupDialog()"],
   ["backups", "openBackups()"], ["profile", "openProfileEdit()"], ["reports", "openReportHistory()"], ["day", "openDayProgress()"], ["cash", "openMetricDetail('cash')"],
 ];

@@ -10,7 +10,7 @@
     <RootNamespace>JamalLife.Desktop</RootNamespace>
     <!-- the visible name of the app on Windows (web: APP_NAME in index.html, Android: strings.xml) -->
     <Product>Life</Product>
-    <Version>74.3.0</Version>
+    <Version>74.4.0</Version>
     <ApplicationIcon>app.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>

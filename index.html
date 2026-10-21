@@ -304,7 +304,7 @@ h2{margin:0;font-size:1.1875rem;line-height:1.1}
 
 .section-title-icon{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);display:grid;place-items:center}
 .kpi .label{display:flex;align-items:center;gap:6px}
-.runtime-status{color:var(--muted);margin-top:7px}
+
 .kpi-icon{width:21px;height:21px;border-radius:7px;display:inline-grid;place-items:center;border:1px solid var(--line);flex:0 0 auto}
 .kpi-icon .ui-icon{width:12px;height:12px;vertical-align:0}
 .kpi .label::before{content:"•";color:var(--blue);font-size:1.125rem;line-height:0;display:none}
@@ -348,7 +348,7 @@ body.auth-locked>.topbar,body.auth-locked>.shell,body.auth-locked>.bottom{visibi
 .kpi .label,.calendar-kpi .label,.distance-kpi .label{font-size:0.7188rem}
 .calendar-num{font-size:0.75rem}
 .debt-kpi-note{font-size:0.75rem}
-.runtime-status{font-size:0.75rem}
+
 .auth-intro{font-size:0.75rem;color:var(--muted);margin-top:5px}
 .auth-progress{display:flex;align-items:center;gap:7px;margin-top:10px;font-size:0.75rem;color:var(--muted)}
 .auth-progress-bar{height:5px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:6px}
@@ -1091,7 +1091,7 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 
 .jl-debt-block{margin:0 0 12px}.jl-section-head{padding:2px 4px 0}.jl-debt-block .jl-debtplan{margin-top:10px}
 .jl-backup{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}.jl-backup b{display:block;font-size:0.9062rem}.jl-backup small{display:block;font-size:0.75rem;color:var(--muted)}
-.jl-move-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.jl-move-grid>div{padding:10px;border-radius:14px;background:var(--soft);border:1px solid var(--line);text-align:center}.jl-move-grid b{display:block;font-size:1.2rem}.jl-move-grid span{display:block;font-size:.75rem;color:var(--muted);margin-top:2px}
+
 .jl-quick3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
 .jl-quick3 .jl-pill{padding:0 8px}
 .jl-pill.blue .ui-icon{color:var(--blue)}
@@ -1852,9 +1852,9 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
 
 /* ===== 74 · живой «Сегодня»: чёткое окно «Сейчас», светлее небо с картинкой раздела, живые иконки, пульс с графиком ===== */
 html[data-theme="dark"]{--bg:#132848;--panel:#1b3156;--soft:#172b4d;--line:#2f4a75;--muted:#c6d2e3} /* 74.1: lighter muted text for the glass cards */
-html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 62%,transparent)}
+
 /* 74.1: see-through glass — the photo shows behind the cards, a stronger blur keeps the text sharp and easy to read */
-.card,.jl-hero{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+
 .jl-hero{background:linear-gradient(155deg,rgba(36,76,134,.66) 0%,rgba(23,53,99,.66) 55%,rgba(18,42,80,.66) 100%)!important}
 html[data-theme="light"] .card{background:color-mix(in srgb,var(--panel) 92%,transparent)}
 /* the background: the photo of the Kaaba; its light follows the real sun (setSky → --dawn, --dusk, --night, --sun, --sun-x, --sun-y) */
@@ -2019,6 +2019,40 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
 .jl-wk-days{display:grid;gap:6px;margin-top:8px}
 .jl-wk-day{display:grid;grid-template-columns:2.6rem minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
 .jl-wk-day select{min-width:0}
+/* ===== 74.4: без рамок, плавная прокрутка, мгновенный отклик =====
+   Разделы больше не «лежат в рамках»: у карточек и вложенных блоков нет обводки (место под неё осталось — ничего не сдвигается).
+   Размытие под карточками (backdrop-filter) убрано: на телефоне оно пересчитывалось под каждой карточкой в каждом кадре прокрутки —
+   отсюда мерцание и пустой экран при резком листании. Вместо него карточки чуть плотнее. Фон — один неподвижный слой. */
+.card,.v-group,.jl-hero,.jl-now,.jl-nf,.v-empty,.jl-rstep,.jl-rstep-main,.jl-free,.jl-free-note,.pulse-gauge,.jl-pchart,.jl-focus-item,.v-kpi,.v-kpi4,.jl-money-today,.jl-streak,.jl-ledger,.jl-lg-k,.jl-lg-goal,.report-shell,.jl-ach-empty,.jl-quote,.modal .card{border-color:transparent!important}
+.card,.jl-hero,.v-group{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html[data-theme="dark"] .card,html[data-theme="dark"] .v-group{background:color-mix(in srgb,var(--panel) 84%,transparent)}
+html[data-theme="dark"] .card .card,html[data-theme="dark"] .jl-hero .jl-now{background:rgba(255,255,255,.055)}
+html[data-theme="light"] .card .card{background:rgba(15,34,64,.04)}
+.card,.v-group{box-shadow:0 10px 28px rgba(4,10,24,.22)}
+html[data-theme="light"] .card,html[data-theme="light"] .v-group{box-shadow:0 8px 22px rgba(20,40,80,.08)}
+.card .card{box-shadow:none}
+/* the thin outline some blocks drew with an inset shadow goes too; the soft outer shadow stays */
+html .card,html .jl-hero{box-shadow:0 10px 28px rgba(4,10,24,.22)!important}
+html[data-theme="light"] .card,html[data-theme="light"] .jl-hero{box-shadow:0 8px 22px rgba(20,40,80,.08)!important}
+html .card .card,html .jl-hero .jl-now,html .jl-quote{box-shadow:none!important}
+html body .v-kpi4 .v-kpi,html body .jl-strip,html body .day-mood,html body .jl-lg-pill,.jl-pray div,.jl-pray div.next{border-color:transparent!important}
+.jl-pray div.next{box-shadow:none;background:color-mix(in srgb,#34d399 26%,#0f2546)}
+body{background-attachment:scroll!important}
+.jl-sky{transform:translateZ(0);contain:strict}
+.jl-sky i{filter:none!important;will-change:auto}
+body.is-scrolling .jl-sky i,body.is-scrolling .jl-sky b,body.is-scrolling .jl-logo *{animation-play-state:paused!important}
+/* отклик на касание: сразу, без задержки и без синей вспышки */
+button,a,label,select,summary,[role="button"],.v-row,.card[role="button"]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;transition:scale .06s ease,opacity .06s ease}
+.v-row:active{background:color-mix(in srgb,var(--text) 6%,transparent)}
+/* поля ввода без своего оформления (например, «Что нужно сделать?») были системно-серыми */
+:where(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select){background:var(--soft);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;box-sizing:border-box}
+:where(input,textarea,select):focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb,var(--blue) 22%,transparent)}
+.jl-big-input{width:100%}
+/* настройки: строка с выпадающим списком — текст не сжимается по букве */
+.v-row:has(> select){grid-template-columns:auto minmax(0,1fr) minmax(6.5rem,44%)}
+.v-row > select{width:100%;min-width:0;max-width:100%;text-overflow:ellipsis}
+.v-row-main b,.v-row-main small{overflow-wrap:normal;word-break:normal;hyphens:manual}
 </style>
 
 
@@ -2422,15 +2456,15 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
     <label class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg></span><span class="v-row-main"><b>Каждые 2 часа</b><small>Совет, чем заняться для успеха, и пауза в работе</small></span><span class="v-switch"><input type="checkbox" id="setEvery2h"><i></i></span></label>
     <label class="v-row"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Звук</b><small>Короткий сигнал при уведомлении</small></span><span class="v-switch"><input type="checkbox" id="setNotifySound"><i></i></span></label>
     <label class="v-row" id="loudRow"><span class="v-row-ico" style="--c:var(--red)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Громкие напоминания (как будильник)</b><small>Задачи и этапы звучат громкостью будильника — слышно даже при тихом звонке</small></span><span class="v-switch"><input type="checkbox" id="setLoudReminders"><i></i></span></label>
+    <button class="v-row" type="button" id="setTestSound"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg></span><span class="v-row-main"><b>Проверить звук</b><small>Так звучат напоминания</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setNotifyPermission"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"></use></svg></span><span class="v-row-main"><b>Разрешить системные уведомления</b><small>Запросить доступ у устройства</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
   </div>
   <div class="v-group-title">Ещё</div>
   <div class="v-group">
-    <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.3</span></div>
+    <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, копия в файл</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.4</span></div>
   </div>
 </section>
 
@@ -2481,7 +2515,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.3';
+const APP_NAME='Life',APP_VERSION='74.4';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -4718,6 +4752,8 @@ async function callAI(options={}){
   if(state.ai?.enabled===false)throw new Error('AI-анализ выключен. Включи его в «Настройки → AI».');
   if('onLine' in navigator&&navigator.onLine===false)throw new Error('Нет интернета, поэтому AI не ответит. Подключись к сети и повтори — '+APP_NAME+' пока работает офлайн.'+AI_FALLBACK);
   const token=await getAISessionToken();
+  // 74.4: the AI reads the cloud copy — the latest edits go there first (6 s at most, then the AI runs anyway)
+  if(!options.ping&&isCloudDirty()){try{await Promise.race([cloudAutoSync(),new Promise(r=>setTimeout(r,6000))])}catch(e){}}
   const headers={'Content-Type':'application/json','apikey':SUPABASE_CONFIG.publishableKey,'Authorization':'Bearer '+token,'X-Life-Control':'1'};
   const body=options.ping?{ping:true}:{mode:options.mode||'life',today:keyDay(),facts:options.facts?JSON.parse(JSON.stringify(options.facts)):undefined,scope:{goal:options.scope?.goal!==false,money:options.scope?.money!==false,reports:options.scope?.reports!==false,notes:options.scope?.notes===true,webSearch:options.scope?.webSearch===true}};
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),50000),slow=options.onSlow?setTimeout(()=>{try{options.onSlow()}catch(e){}},AI_SLOW_MS):0;
@@ -4797,27 +4833,6 @@ async function refreshAIHealth(force=false){
   })();
   return aiHealthPromise;
 }
-function runSelfTest(){
-  const checks=[];
-  checks.push(['Хранилище',('localStorage' in window)&&('indexedDB' in window)]);
-  checks.push(['Часы',!!$('clock')]);
-  checks.push(['Цель',!!$('goalTitle')]);
-  checks.push(['Деньги',!!$('mvRecent')&&!!$('budgetList')]);
-  checks.push(['Заметки',!!$('notesList')]);
-  checks.push(['Уведомления',('Notification' in window)||!!window.AndroidBridge]);
-  checks.push(['Автосохранение',typeof saveState==='function'&&typeof restoreFromIndexedDB==='function']);
-  checks.push(['Gemini / Supabase AI',typeof callAI==='function'&&typeof getAISessionToken==='function']);
-  checks.push(['Три этапа',validateDaySteps()==='']);
-  const navButtons=$$('.bottom button[data-view]');
-  const navViews=['viewToday','viewGoal','viewMoney','viewNotes'];
-  checks.push(['Навигация',navButtons.length===4&&navViews.every(id=>!!$(id))&&!!$('viewProfile')]);
-  checks.push(['Прокрутка',getComputedStyle(document.documentElement).overflowY!=='hidden'&&getComputedStyle(document.body).overflowY!=='hidden']);
-  const errors=Array.isArray(state.runtimeErrors)?state.runtimeErrors.length:0;
-  const ok=checks.every(x=>x[1])&&errors===0;
-  const text=checks.map(([name,yes])=>`${yes?'✓':'✕'} ${name}`).join(' · ')+` · Ошибок сеанса: ${errors}`;
-  const el=$('runtimeStatus');if(el)el.textContent=text;
-  return ok;
-}
 
 function refreshCloudUI(){const a=cloudAuth(),st=$('cloudState'),u=$('cloudUserState'),net=$('cloudNetworkState'),sync=$('cloudSyncState');if(!st)return;if(a?.user?.email){st.textContent='Подключено';u.textContent=a.user.email;if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'В сети';if(sync&&sync.textContent==='Проверяется…')sync.textContent='Автоматически'}else{st.textContent='Войди';u.textContent='и данные будут на всех устройствах';if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'данные только на этом устройстве';if(sync)sync.textContent='Нет входа'}}
 function weekSummary(){const w=state.day?.week||{},a=WEEK_DAYS.filter(([k])=>w[k]);if(!a.length)return 'Каждый день одинаково · '+(state.day.steps[0]?.time||'')+'–'+(state.day.steps.at(-1)?.end||'');
@@ -4840,15 +4855,14 @@ function openWeekSchedule(){
 function openSettings(){
   const steps=state.day.steps;const stepDraft=Array.isArray(state.drafts?.settingsSteps)?state.drafts.settingsSteps:steps;
   const stepFields=steps.map((st,i)=>{const src=stepDraft[i]||st;return `<div class="card" style="padding:12px"><div class="row"><strong><svg class="ui-icon" style="width:14px;height:14px;vertical-align:-2px;color:var(--blue)"><use href="#i-arrow-right"></use></svg> Этап ${i+1}</strong><span class="small muted">в расписании</span></div><div class="grid g2" style="margin-top:9px"><div class="field"><label>Название</label><input id="dsTitle${i}" value="${esc(src.title)}"></div><div class="field"><label>Время начала / окончания</label><div class="grid g2"><input id="dsTime${i}" type="time" value="${esc(src.time)}" aria-label="Начало этапа ${i+1}"><input id="dsEnd${i}" type="time" value="${esc(src.end)}" aria-label="Окончание этапа ${i+1}"></div></div></div><div class="field" style="margin-top:9px"><label>Описание</label><input id="dsText${i}" value="${esc(src.text)}"></div><div class="field" style="margin-top:9px"><label>Важные занятия, по одному в строке</label><textarea id="dsDetails${i}" placeholder="Например: начать с главного\nзакрыть начатое">${esc((src.details||[]).join('\n'))}</textarea></div></div>`}).join('');
-  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-settings"></use></svg></span>Система</div><h2>Расширенные настройки</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Имя</label><input id="setName" value="${esc(state.profile.name)}"></div><div class="field"><label>Валюта</label><input id="setCurrency" value="${esc(state.profile.currency)}"></div><div class="field"><label>Плановая прибыль / месяц</label><input id="setIncome" type="number" min="0" value="${esc(state.income)}"></div><div class="field"><label>Начальный капитал / касса</label><input id="setOpeningBalance" type="number" min="0" step="0.01" value="${esc(state.wallet?.openingBalance||0)}"></div><div class="field"><label>Предупреждать до этапа, минут</label><input id="setPre" type="number" min="0" max="60" value="${esc(state.settings.preMinutes)}"></div><label class="small"><input id="setNotify" type="checkbox" ${state.settings.notifications?'checked':''}> Локальные уведомления</label><div class="grid g2"><button class="btn" id="reqN"><svg class="ui-icon"><use href="#i-bell"></use></svg> Разрешить уведомления</button><button class="btn" id="testN"><svg class="ui-icon"><use href="#i-check"></use></svg> Тест</button></div><div class="card" style="padding:12px"><div class="row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-spark"></use></svg></span>Интеллектуальный слой</div><strong>${APP_NAME} AI</strong><div class="sub">AI работает только по твоей команде и получает только выбранные данные.</div></div><span class="small muted" id="aiSettingsState">—</span></div><div class="card" style="margin-top:9px;padding:12px;background:var(--soft)"><div class="eyebrow">AI-сервис</div><strong>Gemini 3.6 Flash</strong><div class="sub" style="margin-top:3px">Проверка подключения выполняется автоматически. API-ключ хранится только в Supabase Secrets.</div><div class="notice-time" style="margin-top:6px">Supabase Edge Function · безопасный серверный доступ</div></div><label class="small" style="display:flex;align-items:center;gap:7px;margin-top:8px"><input id="setAiEnabled" type="checkbox" ${state.ai.enabled!==false?'checked':''}> AI-анализ включён</label><div class="sub" style="margin-top:7px">Статус AI обновляется автоматически при входе, подключении сети и открытии настроек. Отдельная кнопка проверки не нужна.</div></div></div><div class="section"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>Расписание</div><h2 style="margin-top:4px">Настроить 3 этапа</h2><div class="stack" style="margin-top:10px">${stepFields}</div><button class="btn primary" id="saveDayBtn" style="margin-top:10px"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить расписание</button></div><div class="grid g2"><button class="btn" id="exportBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Экспорт JSON</button><label class="btn" style="display:grid;place-items:center">Импорт JSON<input id="importInput" type="file" accept="application/json" hidden></label></div><div class="card section"><div class="eyebrow"><svg class="ui-icon"><use href="#i-settings"></use></svg> Состояние системы</div><h2 style="margin-top:4px">Самопроверка</h2><div class="runtime-status" id="runtimeStatus">Проверяется автоматически.</div><div class="grid g2" style="margin-top:9px"><button class="btn" id="selfTestBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Проверить</button><button class="btn" id="clearErrorsBtn"><svg class="ui-icon"><use href="#i-trash"></use></svg> Очистить ошибки</button></div></div><button class="btn red" id="resetBtn"><svg class="ui-icon"><use href="#i-trash"></use></svg> Сбросить локальные данные</button></div>`);
-  $('closeModalBtn').onclick=closeModal;$('reqN').onclick=requestNotifications;$('testN').onclick=()=>notify(APP_NAME,'Тест: система уведомлений работает.');$('selfTestBtn').onclick=()=>runSelfTest();$('clearErrorsBtn').onclick=()=>{state.runtimeErrors=[];saveState();runSelfTest()};runSelfTest();$('exportBtn').onclick=exportJSON;$('importInput').onchange=importJSON;
-  $('closeModalBtn').onclick=closeModal;refreshAIHealth();$('setName').addEventListener('input',()=>{state.profile.name=$('setName').value;saveState()});$('setCurrency').addEventListener('input',()=>{state.profile.currency=$('setCurrency').value||'сомони';saveState();renderAll()});$('setIncome').addEventListener('input',()=>{state.income=Math.max(0,Number($('setIncome').value)||0);saveState();renderAll()});$('setOpeningBalance').addEventListener('input',()=>{state.wallet.openingBalance=Math.max(0,Number($('setOpeningBalance').value)||0);saveState();renderAll()});$('setPre').addEventListener('input',()=>{state.settings.preMinutes=clamp(Number($('setPre').value)||0,0,60);saveState();scheduleNative()});$('setNotify').addEventListener('change',()=>{state.settings.notifications=$('setNotify').checked;saveState();scheduleNative()});
+  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-settings"></use></svg></span>Система</div><h2>Расширенные настройки</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="field"><label>Валюта</label><input id="setCurrency" value="${esc(state.profile.currency)}"></div><div class="field"><label>Сколько денег на руках (касса)</label><input id="setOpeningBalance" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(state.wallet?.openingBalance||0)}"></div><div class="field"><label>Напоминать до начала этапа, минут</label><input id="setPre" type="number" min="0" max="60" inputmode="numeric" value="${esc(state.settings.preMinutes)}"></div><label class="v-row" style="border:0;padding:6px 0;display:flex;justify-content:space-between;gap:12px"><span class="v-row-main"><b>AI-анализ</b><small>Только по твоей команде</small></span><span class="v-switch"><input type="checkbox" id="setAiEnabled" ${state.ai.enabled!==false?'checked':''}><i></i></span></label></div><div class="section"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-clock"></use></svg></span>Расписание</div><h2 style="margin-top:4px">Мой обычный день — 3 этапа</h2><div class="stack" style="margin-top:10px">${stepFields}</div><button class="btn primary" id="saveDayBtn" style="margin-top:10px"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить расписание</button></div><div class="section"><div class="eyebrow">Копия данных в файл</div><div class="grid g2" style="margin-top:8px"><button class="btn" id="exportBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Скачать файл</button><label class="btn" style="display:grid;place-items:center">Загрузить файл<input id="importInput" type="file" accept="application/json" hidden></label></div></div>`);
+  $('exportBtn').onclick=exportJSON;$('importInput').onchange=importJSON;
+  $('closeModalBtn').onclick=closeModal;refreshAIHealth();$('setCurrency').addEventListener('input',()=>{state.profile.currency=$('setCurrency').value||'сомони';saveState();renderAll()});$('setOpeningBalance').addEventListener('input',()=>{state.wallet.openingBalance=Math.max(0,Number($('setOpeningBalance').value)||0);saveState();renderAll()});$('setPre').addEventListener('input',()=>{state.settings.preMinutes=clamp(Number($('setPre').value)||0,0,60);saveState();scheduleNative()});
   $('setAiEnabled').addEventListener('change',()=>{state.ai.enabled=$('setAiEnabled').checked;saveState();updateAISettingsState();refreshAIHealth(true)});updateAISettingsState();refreshAIHealth();
   const readStepDraft=()=>steps.map((st,i)=>({id:st.id,title:$('dsTitle'+i).value,text:$('dsText'+i).value,time:$('dsTime'+i).value,end:$('dsEnd'+i).value,details:$('dsDetails'+i).value.split(/\n+/).map(x=>x.trim()).filter(Boolean)}));
   const autoSchedule=()=>{const d=readStepDraft();state.drafts.settingsSteps=d;const probe={...state,day:{...state.day,steps:d}};const prev=state;state=probe;const err=validateDaySteps();state=prev;if(err){saveState();return}state.day.steps=d;delete state.drafts.settingsSteps;saveState();scheduleNative();renderAll()};
   for(let i=0;i<steps.length;i++)['dsTitle','dsText','dsTime','dsEnd','dsDetails'].forEach(prefix=>$(prefix+i)?.addEventListener('input',autoSchedule));
   $('saveDayBtn').onclick=()=>{if(saveDaySchedule())closeModal()};
-  $('resetBtn').onclick=()=>{if(confirm('Удалить все локальные данные '+APP_NAME+'?')){for(const k of [KEY,BACKUP_KEY,BACKUP2_KEY,FIRST_PUSH_KEY,...LEGACY]){try{localStorage.removeItem(k)}catch(e){}}try{indexedDB.deleteDatabase('LifeControlDB');indexedDB.deleteDatabase('LifeControlV26DB')}catch(e){}location.reload()}}
 }
 function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`life-control-backup-${keyDay()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Резервная копия сохранена')}
 async function forgetDeletedNoteFromSnapshots(id){
@@ -5512,21 +5526,6 @@ function openBankTopup(id){
 }
 
 /* ===== V62: переезд на новое устройство ===== */
-async function openMoveDevice(){
-  const email=cloudAuth()?.user?.email||'';
-  const counts=[['💰 операций',(state.profits||[]).length+(state.expenses||[]).length],['✅ задач',(state.tasks||[]).length],['📝 заметок',(state.notes||[]).length],['🔥 привычек',(state.habits||[]).length],['🏦 банков',(state.budgets||[]).length],['🎯 целей',(state.goals||[]).length],['🌙 итогов дня',Object.keys(state.reports||{}).length]];
-  openModal(`<div class="close-row"><div><div class="eyebrow">Переезд</div><h2>📲 Новое устройство</h2><div class="sub">Всё хранится в облаке ${APP_NAME} и приходит на любое устройство — телефон Android или iPhone, планшет, компьютер.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
-  <div class="stack" style="margin-top:12px">
-    <div class="jl-deep-note" id="mvStatus">☁️ Проверяю облако…</div>
-    <div class="jl-move-grid">${counts.map(([l,v])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>
-    <div class="jl-deep-tip">1️⃣ Нажми «Сохранить в облако сейчас» на этом устройстве.<br>2️⃣ На новом: установи ${APP_NAME} (APK для Android, <b>doxajooon.github.io/life</b> для iPhone, планшета и ПК — «Добавить на главный экран»).<br>3️⃣ Войди с почтой <b>${esc(email||'твоего аккаунта')}</b> — данные придут полностью за пару секунд.<br>4️⃣ Разреши уведомления на новом устройстве — напоминания включатся сами.</div>
-    <button class="btn primary jl-close-btn" id="mvSync" type="button">${svgIcon('i-sync')} Сохранить в облако сейчас</button>
-  </div>`);
-  $('closeModalBtn').onclick=closeModal;
-  const st=async()=>{try{const ok=cloudAuth()&&await cloudAutoSync();setText('mvStatus',ok?'✅ Облако синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+' — можно переходить на новое устройство':(cloudAuth()?'⚠️ Нет связи с облаком — повтори, когда будет интернет':'⚠️ Нет входа в облако — войди в аккаунт'))}catch(e){setText('mvStatus','⚠️ Нет связи с облаком: '+(e?.message||e))}};
-  $('mvSync').onclick=async()=>{const b=$('mvSync');b.disabled=true;await st();b.disabled=false;haptic(14)};
-  st();
-}
 
 /* ===== V63: банки — свои, с эмодзи; категории расходов из банков ===== */
 const BANK_STICKERS=[['🍔','Еда'],['🛒','Продукты'],['🍽️','Кафе'],['☕','Кофе'],['🎉','Развлечения','Досуг'],['🎮','Игры'],['🎬','Кино'],['🚕','Транспорт'],['⛽','Бензин'],['🏠','Дом'],['💡','Коммуналка','Свет, газ'],['📱','Связь'],['👕','Одежда'],['💊','Здоровье'],['🎓','Учёба'],['📚','Книги'],['🎁','Подарки'],['👨‍👩‍👦','Семья'],['🕌','Садака'],['⚽','Спорт'],['💈','Красота'],['🐾','Питомцы'],['🧾','Платежи'],['💰','Копилка']];
@@ -6164,7 +6163,7 @@ function bindV57(){
   $('setFont')&&($('setFont').onchange=e=>{state.settings.font=['manrope','nunito','inter'].includes(e.target.value)?e.target.value:'manrope';saveState();applyFont();toast('Шрифт изменён',e.target.selectedOptions[0]?.textContent||'')});$('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
   [['setNotifyAll','notifications'],['setNotifyTasks','notifyTasks'],['setNotifyFinance','notifyFinance'],['setNotifyGoals','notifyGoals'],['setNotifySound','sound']].forEach(([id,key])=>$(id).onchange=e=>{state.settings[key]=e.target.checked;saveState();if(key==='notifications'||key==='notifyTasks')scheduleNative()});
   $('setLoudReminders').onchange=e=>{state.settings.loudReminders=e.target.checked;saveState();syncLoudReminders();toast(e.target.checked?'Громкие напоминания включены':'Обычная громкость напоминаний',e.target.checked?'Звучат громкостью будильника.':'Звучат громкостью уведомлений.')};
-  $('setNotifyPermission').onclick=requestNotifications;$('setAdvancedRow').onclick=openSettings;$('setWeekRow').onclick=openWeekSchedule;
+  $('setNotifyPermission').onclick=requestNotifications;$('setTestSound').onclick=()=>notify(APP_NAME,'Так звучат напоминания. Хорошего дня!','tasks');$('setAdvancedRow').onclick=openSettings;$('setWeekRow').onclick=openWeekSchedule;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;
   $('pfLogout').onclick=()=>{if(confirm('Выйти из '+APP_NAME+'? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};
   $$('[data-layout-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный'),0)));
@@ -6181,7 +6180,7 @@ function bind(){
   $('saveReportBtn').onclick=closeDay;$('quickCloseBtn').onclick=quickCloseDay;
   $$('[data-qblock]').forEach(b=>b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';$$('[data-qblock]').forEach(x=>x.setAttribute('aria-pressed',String(x===b&&on)));$('rBlock').value=on?b.dataset.qblock:'';$('rBlock').dispatchEvent(new Event('input'));haptic(8)});
   $('mcRangeBtn')&&($('mcRangeBtn').onclick=()=>{mcRangeMode=!mcRangeMode;$('mcRangeBtn').classList.toggle('active',mcRangeMode);if(mcRangeMode)toast('Выбери первый день периода','потом последний');});
-  $$('[data-mc-quick]').forEach(b=>b.onclick=()=>{const d=new Date(),q=b.dataset.mcQuick;let from,to;if(q==='week'){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));from=keyDay(x);to=keyDay(d)}else if(q==='month'){from=keyDay(new Date(d.getFullYear(),d.getMonth(),1));to=keyDay(d)}else{from=keyDay(new Date(d.getFullYear(),d.getMonth()-1,1));to=keyDay(new Date(d.getFullYear(),d.getMonth(),0))}const f=new Date(from+'T12:00:00');mcYear=f.getFullYear();mcMonth=f.getMonth();mcRangeMode=false;mcSetRange(from,to)});$('setEvery2h')?.addEventListener('change',e=>{state.settings.every2h=e.target.checked;saveState();scheduleNative2h();renderFreePlan();toast(e.target.checked?'Напоминания каждые 2 часа включены':'Напоминания каждые 2 часа выключены')});$('addHabitBtn').onclick=()=>openHabitEditor();$('setBackupRow').onclick=openBackups;$('setMoveRow').onclick=openMoveDevice;$('wkRun').onclick=runWeekReview;
+  $$('[data-mc-quick]').forEach(b=>b.onclick=()=>{const d=new Date(),q=b.dataset.mcQuick;let from,to;if(q==='week'){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));from=keyDay(x);to=keyDay(d)}else if(q==='month'){from=keyDay(new Date(d.getFullYear(),d.getMonth(),1));to=keyDay(d)}else{from=keyDay(new Date(d.getFullYear(),d.getMonth()-1,1));to=keyDay(new Date(d.getFullYear(),d.getMonth(),0))}const f=new Date(from+'T12:00:00');mcYear=f.getFullYear();mcMonth=f.getMonth();mcRangeMode=false;mcSetRange(from,to)});$('setEvery2h')?.addEventListener('change',e=>{state.settings.every2h=e.target.checked;saveState();scheduleNative2h();renderFreePlan();toast(e.target.checked?'Напоминания каждые 2 часа включены':'Напоминания каждые 2 часа выключены')});$('addHabitBtn').onclick=()=>openHabitEditor();$('setBackupRow').onclick=openBackups;$('wkRun').onclick=runWeekReview;
   $('setBiometric')?.addEventListener('change',e=>{try{const ok=window.AndroidBridge.setBiometric(e.target.checked);if(e.target.checked&&!ok){e.target.checked=false;toast('Отпечаток недоступен','Добавь отпечаток в настройках телефона.')}else toast(e.target.checked?'Вход по отпечатку включён':'Вход по отпечатку выключен',e.target.checked?'При следующем открытии приложение спросит отпечаток.':'')}catch(err){e.target.checked=false}});
   $('historyBtn').onclick=openReportHistory;$('lifeAnalysisBtn').onclick=openLifeAnalysis;$('aiAnalysisBtn').onclick=openGeminiAnalysis;
   $('dayMode').onchange=()=>{const d=dailyState();d.mode=$('dayMode').value;state.dayMode=d.mode;saveState();renderToday()};
@@ -6245,6 +6244,8 @@ async function init(){
   document.addEventListener('visibilitychange',()=>{if(document.hidden){saveState()}else{runScheduler();scheduleNative();if(appReadyForSync)pullNativeActions();restoreFromIndexedDB().finally(()=>{if(appReadyForSync&&cloudAuth()&&navigator.onLine!==false)cloudAutoSync().catch(()=>{})})}});
   window.addEventListener('pagehide',saveState);window.addEventListener('beforeunload',saveState);
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  // 74.4: while the page moves, the living background stands still — every frame goes to the scroll
+  {let t=0;window.addEventListener('scroll',()=>{if(!t)document.body.classList.add('is-scrolling');clearTimeout(t);t=setTimeout(()=>{t=0;document.body.classList.remove('is-scrolling')},160)},{passive:true})}
 }
 window.addEventListener('online',()=>{refreshCloudUI();if(appReadyForSync&&cloudAuth()){cloudAutoSync();refreshAIHealth(true)}});window.addEventListener('offline',()=>{refreshCloudUI();refreshAIHealth(true)});init();
 </script>

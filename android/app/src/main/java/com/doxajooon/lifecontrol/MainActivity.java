@@ -26,7 +26,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -331,37 +330,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void showLockView() {
         if (lockView == null) {
+            // 74.4: a calm lock screen — the sprout and the name on the app's own blue, no grey system button and no extra text;
+            // the fingerprint window opens by itself, and a tap anywhere opens it again
             LinearLayout box = new LinearLayout(this);
             box.setOrientation(LinearLayout.VERTICAL);
             box.setGravity(Gravity.CENTER);
-            box.setBackgroundColor(BG_DARK);
+            android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, new int[]{0xFF14284A, 0xFF0F1D33, 0xFF0C182B});
+            box.setBackground(bg);
             box.setClickable(true);
+            box.setOnClickListener(v -> { if (!prompting) promptUnlock(); });
             box.setPadding(dp(32), dp(32), dp(32), dp(32));
             ImageView logo = new ImageView(this);
-            logo.setImageResource(R.mipmap.ic_launcher);
-            box.addView(logo, new LinearLayout.LayoutParams(dp(88), dp(88)));
+            logo.setImageResource(R.drawable.ic_launcher_foreground);
+            logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            box.addView(logo, new LinearLayout.LayoutParams(dp(132), dp(132)));
             TextView name = new TextView(this);
             name.setText(R.string.app_name);
             name.setTextColor(0xFFF3F7FC);
-            name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+            name.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
             name.setTypeface(name.getTypeface(), android.graphics.Typeface.BOLD);
             name.setGravity(Gravity.CENTER);
-            name.setPadding(0, dp(18), 0, dp(6));
+            name.setPadding(0, dp(4), 0, 0);
             box.addView(name);
-            TextView sub = new TextView(this);
-            sub.setText("Приложение защищено отпечатком");
-            sub.setTextColor(0xFFA9BDD3);
-            sub.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-            sub.setGravity(Gravity.CENTER);
-            box.addView(sub);
-            Button open = new Button(this);
-            open.setText("Открыть");
-            open.setAllCaps(false);
-            open.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-            open.setOnClickListener(v -> promptUnlock());
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(220), dp(56));
-            lp.topMargin = dp(28);
-            box.addView(open, lp);
             lockView = box;
             rootView.addView(lockView, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         }
@@ -384,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
         });
         BiometricPrompt.PromptInfo info = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle(getString(R.string.app_name))
-                .setSubtitle("Приложи палец, чтобы открыть")
+                .setSubtitle("Приложи палец")
                 .setAllowedAuthenticators(AUTH)
                 .build();
         try { p.authenticate(info); } catch (Exception e) { prompting = false; unlocked = true; hideLockView(); }

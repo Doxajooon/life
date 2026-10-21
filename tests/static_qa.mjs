@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.3.0");
-assert.match(gradle, /versionCode 743\b/); assert.match(gradle, /versionName '74\.3'/);
-assert.match(csproj, /<Version>74\.3\.0<\/Version>/);
+assert.equal(pkg.version, "74.4.0");
+assert.match(gradle, /versionCode 744\b/); assert.match(gradle, /versionName '74\.4'/);
+assert.match(csproj, /<Version>74\.4\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.3'") && html.includes('id="appVersion">74.3</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.4'") && html.includes('id="appVersion">74.4</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-3'"), "service worker cache must be life-v74-3");
+assert.ok(sw.includes("'life-v74-4'"), "service worker cache must be life-v74-4");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -177,7 +177,11 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(html.includes('<g class="jl-sprout">') && html.includes('id="jlRing"') && html.includes('stop-color="#e3b04b"') && html.includes(".jl-logo{background:linear-gradient(145deg,#15324f,#07111d)"), "the logo next to «Life» is the same green sprout, ring turquoise → gold");
   assert.ok(html.includes(".jl-logo .jl-sprout{transform-origin:258px 356px;animation:jlSway") && html.includes(".jl-logo .jl-sprout,.jl-logo .jl-dew,"), "the logo is alive and calms down with reduced motion");
   // glass
-  assert.ok(html.includes('html[data-theme="dark"] .card{background:color-mix(in srgb,var(--panel) 62%,transparent)}') && html.includes(".card,.jl-hero{-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}") && html.includes("rgba(36,76,134,.66)"), "dark cards 62 %, blur 12px, «Сейчас» .66");
+  // 74.4: no blur under the cards (it was recomputed under every card on every scroll frame — the flicker and the blank screen); no frames
+  assert.ok(!html.includes(".card,.jl-hero{-webkit-backdrop-filter:blur(12px)") && html.includes(".card,.jl-hero,.v-group{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}") && html.includes(".jl-sky i{filter:none!important") && html.includes("body.is-scrolling .jl-sky i") && html.includes("rgba(36,76,134,.66)"), "cards without blur, the background stands still while scrolling");
+  assert.ok(/\.card,\.v-group,\.jl-hero,\.jl-now,[^{]*\{border-color:transparent!important\}/.test(html), "sections are not framed");
+  assert.ok(html.includes(".v-row:has(> select){grid-template-columns:auto minmax(0,1fr) minmax(6.5rem,44%)}"), "a settings row with a list keeps its words whole");
+  assert.ok(html.includes(":where(input:not([type=checkbox])") && !html.includes('id="resetBtn"') && !html.includes('id="selfTestBtn"') && !html.includes('id="setMoveRow"') && html.includes('id="setTestSound"'), "inputs are styled, old settings removed, sound check added");
   assert.ok(html.includes("html[data-theme=\"dark\"] .jl-goalhero{background:linear-gradient(160deg,rgba(20,48,78,.66)") && html.includes(".jl-now,.jl-quote{background:rgba(15,37,70,.85)}") && html.includes(".jl-sky::after{content:\"\""), "goal cards are glass, inner blocks stay dense, the shade on the photo stays");
   // louder reminders
   const wav = readFileSync(new URL("sounds/jamal-dawn.wav", root)), raw = readFileSync(new URL("android/app/src/main/res/raw/jamal_dawn.wav", root));

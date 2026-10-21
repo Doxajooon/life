@@ -71,7 +71,7 @@ function makeCloud() {
     if (url.pathname === "/auth/v1/user") return ok(req.headers().authorization) ? send(200, { id: UID, email: "me@test.tj" }) : send(401, { msg: "expired" });
     if (url.pathname.startsWith("/functions/")) {
       if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
-      const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
+      const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b]; cloud.rowAtAI = cloud.row ? JSON.parse(JSON.stringify(cloud.row.state)) : null;
       if (cloud.aiDelay) await new Promise(r => setTimeout(r, cloud.aiDelay));
       if (cloud.aiReply === "abort") return route.abort("connectionreset");
       if (cloud.aiReply) return route.fulfill({ status: cloud.aiReply.status, headers: cors, contentType: cloud.aiReply.type || "application/json", body: cloud.aiReply.body });
@@ -383,6 +383,15 @@ await test("74.3: данные, сохранённые на устройстве
   const pushes = () => cloud.hits.filter(h => /^(POST|PATCH) \/rest\/v1\/life_state$/.test(h)).length, before = pushes();
   await sync(page); await sync(page); await page.reload(); await page.waitForFunction(() => appReadyForSync === true); await sync(page);
   assert.equal(pushes(), before, "uploads with no change: " + (pushes() - before));
+  await ctx.close();
+});
+
+await test("74.4: перед AI свежие правки уходят в облако — AI читает их", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  await sync(page);
+  await page.evaluate(async () => { state.notes.push({ id: "fresh1", title: "только что", body: "", at: new Date().toISOString() }); saveState(); await callAI({ mode: "life" }).catch(() => {}); });
+  assert.ok(cloud.rowAtAI?.notes?.some(n => n.id === "fresh1"), "AI read an old copy: " + JSON.stringify(cloud.rowAtAI?.notes?.map(n => n.id)));
   await ctx.close();
 });
 
@@ -755,7 +764,7 @@ await test("Безопасность: вредный текст в любом п
     state.ai.weekly = { [weekKey()]: { at: now, text: "СИЛЬНАЯ СТОРОНА — " + X } };
     saveState(); renderAll();
     for (const v of ["viewToday", "viewGoal", "viewMoney", "viewNotes", "viewSettings", "viewProfile", "viewNotifications"]) { showView(v); document.querySelectorAll("[data-more]").forEach(b => b.getAttribute("aria-expanded") !== "true" && b.click()); }
-    for (const op of [() => openLifeAnalysis(), () => openReportHistory(), () => openHabitEditor("hx"), () => openBankTopup("bx"), () => openMoveDevice(), () => openNoteEditor("nx"), () => openGoalEditor("gx"), () => openMoneyForm("expense", X), () => openSettings()]) { try { closeModal(); op(); } catch (e) { return "THROW " + e.message; } }
+    for (const op of [() => openLifeAnalysis(), () => openReportHistory(), () => openHabitEditor("hx"), () => openBankTopup("bx"), () => openNoteEditor("nx"), () => openGoalEditor("gx"), () => openMoneyForm("expense", X), () => openSettings()]) { try { closeModal(); op(); } catch (e) { return "THROW " + e.message; } }
     await new Promise(r => setTimeout(r, 500));
     return window.__xss;
   });
@@ -1575,7 +1584,7 @@ const WINDOWS = [
   ["Быстрое добавление", "openQuickAdd()"], ["Расход", "openMoneyForm('expense')"], ["Доход", "openMoneyForm('profit')"], ["Изменить расход", "openMoneyEdit('expense','swE')"],
   ["Перевод", "openTransferForm()"], ["Тип операции", "openTxTypePicker()"], ["Задача", "openTaskForm()"], ["Привычка", "openHabitEditor()"], ["Новый банк", "openBudget()"], ["Банк", "openBudget('swB')"],
   ["Пополнить банк", "openBankTopup('swB')"], ["Долг", "openDebtEdit()"], ["История долга", "openDebtHistory('all')"], ["Главная цель", "openGoalEdit()"], ["Сумма цели", "openGoalFinanceEdit()"],
-  ["В цель", "openGoalSaving()"], ["Календарь", "openCalendar()"], ["Настройки", "openSettings()"], ["Безопасность", "openSecurity()"], ["Корзина", "openTrash()"], ["Переезд", "openMoveDevice()"],
+  ["В цель", "openGoalSaving()"], ["Календарь", "openCalendar()"], ["Настройки", "openSettings()"], ["Безопасность", "openSecurity()"], ["Корзина", "openTrash()"],
   ["AI-анализ", "openGeminiAnalysis()"], ["Полный разбор", "openLifeAnalysis()"], ["Поиск", "openSearch()"], ["Достижение", "openAchievement()"], ["Резервная копия", "openBackupDialog()"],
   ["Копии", "openBackups()"], ["Профиль", "openProfileEdit()"], ["Отчёты", "openReportHistory()"], ["День", "openDayProgress()"], ["Касса", "openMetricDetail('cash')"],
   // the calendar opens on «1 January → today»; start from another period so its quick buttons have something to change

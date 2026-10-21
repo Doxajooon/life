@@ -65,6 +65,22 @@ for (const [mode, mark] of [["life", "РЕЖИМ: LIFE"], ["goal", "РЕЖИМ: 
     assert.equal(db.usage, 1, "the request is counted");
   });
 }
+await test("74.4: AI видит все разделы — долги своими именами, все цели, привычки, задачи, банки, график, деньги по месяцам; заметки только с галочкой", async () => {
+  const keep = db.state, now = new Date(), day = now.toISOString().slice(0, 10);
+  db.state = { ...keep, debts: { bank: 70000, firms: 5000, monthlyPayment: 4500, labels: { bank: "Эсхата", firms: "Сомон" } }, debtHistory: [{ day, total: 75000 }],
+    goals: [{ id: "g1", title: "Дом у моря", main: true, targetAmount: 90000, contributions: [{ amount: 2500 }] }],
+    habits: [{ id: "h1", title: "Спорт", kind: "daily" }], habitLog: { h1: { [day]: true } },
+    tasks: [{ id: "t1", title: "Позвонить в банк", date: day, time: "18:00" }], budgets: [{ name: "Поездки", planned: 1000, tops: [] }],
+    day: { steps: [{ title: "Работа", time: "09:00", end: "18:00", details: ["Отчёт"] }], week: { "6": { off: true } } }, notes: [{ title: "секрет", body: "личное" }] };
+  const r = await call("POST", { mode: "life", scope: { goal: true, money: true, reports: true, notes: false }, today: day });
+  assert.equal(r.status, 200);
+  const sent = JSON.stringify(gem.calls[0].body);
+  for (const want of ["all_data", "Эсхата", "Сомон", "Дом у моря", "Спорт", "marksLast30", "Позвонить в банк", "Поездки", "Работа", "выходной", "moneyByMonth"]) assert.ok(sent.includes(want), "AI did not get: " + want);
+  assert.ok(!sent.includes("личное"), "notes went without the tick");
+  await call("POST", { mode: "life", scope: { goal: true, money: true, reports: true, notes: true }, today: day });
+  assert.ok(JSON.stringify(gem.calls.at(-1).body).includes("личное"), "notes with the tick");
+  db.state = keep;
+});
 await test("Квота одной модели (429) → следующая модель", async () => {
   gem.plan = m => m === "gemini-flash-latest" ? { status: 429 } : { status: 200 };
   const r = await call("POST", { mode: "life" }); assert.equal(r.status, 200); assert.equal(r.body.model, "gemini-2.5-flash");
