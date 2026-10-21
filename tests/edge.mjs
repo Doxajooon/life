@@ -99,5 +99,32 @@ await test("Лимит 10 запросов в час", async () => {
 await test("Ключ не настроен → 503 по-русски", async () => {
   env.GEMINI_API_KEY = ""; const r = await call("POST", { mode: "life" }); assert.equal(r.status, 503); assert.ok(ru(r.body.error));
 });
+await test("74.2: каждая ошибка пишет причину в логи — без ключа, токена, почты и данных", async () => {
+  const logs = [], orig = console.error; console.error = (...a) => logs.push(a.map(String).join(" "));
+  const cases = [];
+  try {
+    const leak = "Bad key AIzaSyA1234567890abcdefXYZ for owner@mail.com token=abc.def";
+    for (const [name, prep, body, token, reason] of [
+      ["auth", () => {}, { mode: "life" }, "bad", "auth"],
+      ["quota", () => { gem.plan = () => ({ status: 429 }); }, { mode: "life" }, "good", "gemini_quota"],
+      ["key", () => { gem.plan = () => ({ status: 400, message: leak + " API_KEY_INVALID" }); }, { mode: "goal" }, "good", "gemini_bad_key"],
+      ["503", () => { gem.plan = () => ({ status: 503, message: "high demand" }); }, { mode: "week" }, "good", "gemini_overloaded"],
+      ["500", () => { gem.plan = () => ({ status: 500, message: leak }); }, { mode: "deep" }, "good", "gemini_http_500"],
+      ["limit", () => { db.usage = 10; }, { mode: "life" }, "good", "app_limit"],
+      ["nokey", () => { env.GEMINI_API_KEY = ""; }, { mode: "life" }, "good", "no_key"],
+    ]) {
+      db.usage = 0; gem.plan = () => ({ status: 200 }); env.GEMINI_API_KEY = "test-key"; prep(); logs.length = 0;
+      const r = await call("POST", body, token);
+      cases.push(name);
+      assert.ok(r.status >= 400, name + " status " + r.status);
+      assert.equal(r.body.reason, reason, name + ": " + JSON.stringify(r.body));
+      assert.ok(ru(r.body.error) && /\./.test(r.body.error), name + ": the app gets a Russian «what happened. what to do»: " + r.body.error);
+      const line = logs.find(l => l.startsWith("ai fail"));
+      assert.ok(line && line.includes('"reason":"' + reason + '"'), name + ": no reason in the logs: " + logs.join(" | "));
+      const all = logs.join("\n");
+      assert.ok(!/AIzaSy|test-key|owner@mail|abc\.def|Квартира|9000/.test(all), name + ": a secret or user data leaked into the logs: " + all);
+    }
+  } finally { console.error = orig; }
+});
 console.log(`\n${results.length}/${results.length + failed} passed`);
 process.exit(failed ? 1 : 0);

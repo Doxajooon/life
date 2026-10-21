@@ -1765,7 +1765,7 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 @media (prefers-reduced-motion:reduce){.jl-nf,.jl-nf-ico{animation:none!important}.jl-nf-btn{transition:none!important}}
 .jl-free-goal{border-color:color-mix(in srgb,var(--gold) 45%,var(--line));background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 12%,var(--panel)),var(--panel))}
 .jl-free-goal .jl-emo{display:inline-block;animation:jlBreath 3.2s ease-in-out infinite}
-.jl-free-k{color:color-mix(in srgb,var(--gold) 70%,var(--text))!important;font-weight:700;margin:0 0 4px!important}
+.jl-free-k{color:color-mix(in srgb,var(--gold) 55%,var(--text))!important;font-weight:700;margin:0 0 4px!important}
 .jl-free-do{font-style:normal;display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 12px;border-radius:11px;background:var(--gold);color:#2a1a00;font-weight:800;font-size:.8rem;white-space:nowrap}
 .jl-free-do .ui-icon{width:14px;height:14px}
 .jl-free-goal.done .jl-free-do{background:var(--green);color:#fff}
@@ -1914,6 +1914,7 @@ html[data-theme="light"] .jl-now-line{color:#7a4f00}
 html[data-theme="light"] .jl-quote figcaption{color:#f6d58a!important;opacity:1}
 html[data-theme="light"] .jl-rstep.current .jl-rstep-time,html[data-theme="light"] .jl-ms-eyebrow,html[data-theme="light"] .jl-step.current .jl-step-dot{color:#7a4f00}
 html[data-theme="light"] .jl-ledger small,html[data-theme="light"] .jl-rstep-main small{color:#26354b}
+html[data-theme="dark"] .jl-rstep-main small{color:#dbe4f0} /* 74.2: a done stage fades to .75 — its label stays ≥ 4.5:1 on the photo */
 .v-goal-card .v-pct{color:#93c5fd}
 html[data-theme="light"] .v-head .v-sub{display:inline-block;color:#2f3f55;padding:.1rem .5rem;border-radius:99px;background:rgba(255,255,255,.82)}
 html[data-theme="dark"] .v-head .v-sub{display:inline-block;padding:.1rem .5rem;border-radius:99px;background:rgba(10,22,46,.6)}
@@ -1984,6 +1985,39 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
 .ring-label{white-space:nowrap;font-size:.72rem!important;letter-spacing:-.01em}
 @keyframes jlIconIdle{0%,78%,100%{transform:none}84%{transform:translateY(-4px) rotate(-8deg) scale(1.08)}90%{transform:translateY(0) rotate(6deg)}95%{transform:rotate(-2deg)}}
 @keyframes jlIconSway{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg) translateY(-1px)}}
+/* 74.2: «Путь к свободе», «Куда разложить доход», намаз, вечер за 30 секунд, график по дням недели */
+.jl-fpath{margin-top:14px;padding:12px 12px 10px;border-radius:16px;background:color-mix(in srgb,var(--panel) 85%,transparent);border:1px solid var(--line)}
+.jl-fpath:empty{display:none}
+.jl-fpath-head,.jl-split-row,.jl-pray-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.jl-fpath-head small,.jl-fpath-foot,.jl-split-row small{color:var(--muted);font-size:12px}
+.jl-fpath-track{height:8px;margin:12px 0 4px;border-radius:99px;background:rgba(127,127,127,.22);overflow:hidden}
+.jl-fpath-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#c8902c,#f6d58a);transform-origin:left;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.jl-fpath-stops{position:relative;display:flex;justify-content:space-between;list-style:none;margin:0 0 6px;padding:0}
+.jl-fpath-stops li{display:grid;justify-items:center;gap:2px;min-width:44px}
+.jl-fpath-stops i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;font-style:normal;font-size:13px;background:rgba(127,127,127,.18);color:var(--muted)}
+.jl-fpath-stops li.on i{background:linear-gradient(135deg,#c8902c,#f6d58a);color:#3b2a06}
+.jl-fpath-stops li.next i{box-shadow:0 0 0 2px #e0b25a}
+.jl-fpath-stops small{font-size:11px;color:var(--muted)}
+.jl-split-row{padding:8px 0;border-top:1px solid var(--line)}
+.jl-split-row label{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 8px;align-items:center;flex:1;min-width:0}
+.jl-split-row label small{grid-column:2}
+.jl-split-row input{width:7.5rem;flex:none}
+.jl-split-row output{font-weight:800}
+.jl-pray{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:8px}
+/* the hero is dark in both themes, so the prayer block keeps the colours of «Сейчас» and the quote (≥ 4.5:1 on the photo) */
+.jl-pray div{display:grid;justify-items:center;gap:1px;padding:7px 2px;border-radius:12px;background:#0f2546;border:1px solid rgba(155,196,255,.22);color:#f4efe3}
+.jl-pray small{color:#c6d2e3;font-size:11px}
+.jl-pray div.next{border-color:#34d399;box-shadow:inset 0 0 0 1px #34d399}
+.jl-pray div.next small{color:#7ee8bd}
+.jl-pray div.past b{color:#c6d2e3}
+.jl-pray b{font-variant-numeric:tabular-nums}
+.jl-pray-head{margin-top:12px;padding:7px 10px;border-radius:12px;background:#0f2546;color:#f4efe3;font-size:13px}
+.jl-pray-head small{text-align:right;color:#c6d2e3;font-size:12px}
+.jl-quick-close{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.jl-quick-close button[aria-pressed="true"]{background:var(--blue);color:#fff;border-color:transparent}
+.jl-wk-days{display:grid;gap:6px;margin-top:8px}
+.jl-wk-day{display:grid;grid-template-columns:2.6rem minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.jl-wk-day select{min-width:0}
 </style>
 
 
@@ -2104,6 +2138,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
       <blockquote id="motivationText">—</blockquote>
       <figcaption id="motivationSource">—</figcaption>
     </figure>
+    <div id="prayerBox" hidden><div class="jl-pray-head"><b>🕌 Время намаза</b><small id="prayerNext">—</small></div><div class="jl-pray" id="prayerTimes"></div></div>
   </div>
 
   <div class="card">
@@ -2112,7 +2147,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
   </div>
 
   <div class="card jl-rhythm">
-    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🗓️</span>Ритм дня</h2><div class="v-sub">Твой день по этапам · напомню в начале и в конце</div></div><span class="jl-count" id="dayCompletion">0 / 3</span></div>
+    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🗓️</span>Ритм дня</h2><div class="v-sub" id="rhythmSub">Твой день по этапам · напомню в начале и в конце</div></div><span class="jl-count" id="dayCompletion">0 / 3</span></div>
     <div class="jl-daystrip" id="dayStrip" aria-hidden="true"></div>
     <div class="timeline jl-rsteps" id="timeline"></div>
     <div class="jl-free" id="freePlan"></div>
@@ -2178,10 +2213,14 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
   </div>
 
   <div class="card jl-report">
-    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🌙</span>Итог дня</h2><div class="v-sub">2 минуты — и день закрыт</div></div>
+    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🌙</span>Итог дня</h2><div class="v-sub">30 секунд — и день закрыт</div></div>
       <button class="jl-pill" type="button" id="historyBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg>История</button></div>
     <div class="jl-streak" id="streakBox"><span class="jl-flame" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5C7 10 8.5 8.5 9.5 7.5 10 10 11.5 10.5 12 10.5 12 7 11 4.5 12 2Z"/></svg></span><div><b><span id="streakDays">0</span> <span id="streakWord">дней</span> подряд</b><small id="streakBest">Закрой сегодняшний день — начнётся серия</small></div></div>
     <div class="jl-ledger" id="dayLedger" aria-live="polite"></div>
+    <div class="jl-quick-close" id="quickClose" role="group" aria-label="Вечер за 30 секунд: что помешало">
+      <button class="jl-pill" type="button" data-qblock="Телефон и соцсети" aria-pressed="false">📱 Телефон</button><button class="jl-pill" type="button" data-qblock="Усталость" aria-pressed="false">😴 Усталость</button><button class="jl-pill" type="button" data-qblock="Чужие дела и гости" aria-pressed="false">👥 Чужие дела</button><button class="jl-pill" type="button" data-qblock="Ничего не помешало" aria-pressed="false">💪 Ничего</button>
+      <button class="jl-pill gold" type="button" id="quickCloseBtn"><span class="jl-emo" aria-hidden="true">⚡</span>Закрыть за 30 секунд</button>
+    </div>
     <div class="report-shell">
       <div class="jl-close-fields">
         <div class="field"><label for="rDone">Что сделал сегодня</label><textarea id="rDone" rows="2" placeholder="Коротко: главное, что реально сделано"></textarea></div>
@@ -2298,7 +2337,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
         <div class="donut-layout" style="margin-top:12px"><div class="donut" id="expenseDonut"><div class="donut-center" id="expenseDonutCenter">Нет данных</div></div><div class="chart-legend" id="expenseLegend"></div></div><div class="sub" id="expenseChartNote" style="margin-top:9px">Добавь расходы — распределение появится автоматически.</div>
         <h2 class="v-title" style="margin-top:18px"><span class="jl-emo" aria-hidden="true">💼</span>Откуда приходят</h2><div class="source-list" id="profitSourceList"></div><div class="sub" id="profitSourceNote" style="margin-top:9px">Источники появятся после первой записи дохода.</div>
       </div>
-    <div class="jl-debt-block"><div class="row jl-section-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📉</span>Долг</h2><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div><div class="jl-debtplan" id="debtPlan"></div></div>
+    <div class="jl-debt-block"><div class="row jl-section-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📉</span>Долг</h2><button class="btn small" id="editDebtBtn2"><svg class="ui-icon"><use href="#i-pencil"></use></svg> Изменить</button></div><div class="jl-debtplan" id="debtPlan"></div><div class="jl-fpath" id="freedomPath" aria-label="Путь к свободе от долга"></div></div>
     <div class="card"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">📋</span>История долга</h2><div id="debtSummary" style="margin-top:10px"></div><div class="debt-chart" id="debtChart" role="group" aria-label="Динамика долга по последним записям"></div><div class="debt-chart-note" id="debtChartNote"></div></div>
 
     <div class="card">
@@ -2369,6 +2408,9 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
     <div class="v-row"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-text"></use></svg></span><span class="v-row-main"><b>Размер текста</b><small>Масштаб нового интерфейса</small></span><select id="setFontScale" aria-label="Размер текста"><option value="1">Мелкий</option><option value="1.1">Обычный</option><option value="1.2">Крупный</option></select></div>
     <div class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-text"></use></svg></span><span class="v-row-main"><b>Шрифт</b><small>Какой приятнее глазам</small></span><select id="setFont" aria-label="Шрифт"><option value="manrope">Manrope — мягкий</option><option value="nunito">Nunito — округлый</option><option value="inter">Inter — строгий</option></select></div>
     <div class="v-row"><span class="v-row-ico" style="--c:var(--gold)"><svg class="ui-icon" aria-hidden="true"><use href="#i-bulb"></use></svg></span><span class="v-row-main"><b>Цитаты дня</b><small>Что показывать на «Сегодня»</small></span><select id="setQuoteSet" aria-label="Цитаты дня"><option value="hadith">Хадисы</option><option value="general">Мотивация</option><option value="off">Выключить</option></select></div>
+    <label class="v-row"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg></span><span class="v-row-main"><b>Время намаза</b><small>Пять намазов на «Сегодня» и напоминание</small></span><span class="v-switch"><input type="checkbox" id="setPrayerOn"><i></i></span></label>
+    <div class="v-row" id="prayerCityRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-globe"></use></svg></span><span class="v-row-main"><b>Город для намаза</b><small id="prayerCitySub">Время считается по солнцу</small></span><select id="setPrayerCity" aria-label="Город для намаза"></select></div>
+    <div class="v-row" id="prayerAsrRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg></span><span class="v-row-main"><b>Аср</b><small>Мазхаб для времени Аср</small></span><select id="setPrayerAsr" aria-label="Время Аср по мазхабу"><option value="hanafi">Ханафи</option><option value="shafii">Шафии, Малики, Ханбали</option></select></div>
   </div>
   <div class="v-group-title">Уведомления</div>
   <div class="v-group">
@@ -2385,8 +2427,9 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
   <div class="v-group">
     <button class="v-row" type="button" id="setMoveRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone"></use></svg></span><span class="v-row-main"><b>Новый телефон, планшет или ПК</b><small>Все данные переедут сами — войди с той же почтой</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
+    <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, импорт, самопроверка</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.1</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.2</span></div>
   </div>
 </section>
 
@@ -2437,7 +2480,7 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.1';
+const APP_NAME='Life',APP_VERSION='74.2';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -2449,6 +2492,7 @@ const LEGACY_SOURCE='Спортивная аналитика',ALL_PROFIT_SOURCES
 const PROFIT_ICONS={'Зарплата':'💼','Фриланс':'💻','Бизнес':'🏪','Спортивная аналитика':'📊','Другое':'➕'};
 function profitSources(){return (state?.profits||[]).some(p=>normalizeProfitSource(p.sourceGroup||p.source)===LEGACY_SOURCE)?['Зарплата','Фриланс',LEGACY_SOURCE,'Бизнес','Другое']:PROFIT_SOURCES}
 // neutral day templates: a new person picks one at the first start (or keeps «Работа 9–18») and changes it any time
+const FREEDOM_STOPS=[25,50,75,100]; // 74.2: the wins on «Путь к свободе» (share of the starting debt paid)
 const DAY_TEMPLATES={
   work:{label:'Работа 9–18',steps:[
     {id:'s1',title:'Работа',text:'Главный рабочий блок дня.',time:'09:00',end:'18:00',details:['Начать с самого важного дела','Закрыть начатое до конца','Записать, что осталось на завтра']},
@@ -2885,9 +2929,17 @@ function applyV73(s){
   if(typeof s.settings.onboarded!=='boolean')s.settings.onboarded=old;
   // 74.1: loud reminders (alarm volume) — on by default for everyone, the owner asked for it because reminders were missed
   if(typeof s.settings.loudReminders!=='boolean')s.settings.loudReminders=true;
+  // 74.2: prayer times — no value means «follow the hadiths» (prayerOn()); only clean wrong types
+  if('prayerOn' in s.settings&&typeof s.settings.prayerOn!=='boolean')delete s.settings.prayerOn;
+  for(const k of ['prayerCity','prayerAsr'])if(k in s.settings&&typeof s.settings[k]!=='string')delete s.settings[k];
+  // 74.2: «Путь к свободе» — the stops already passed before 74.2 count as won (no confetti for the past)
+  if(!Array.isArray(s.debts.freedomWon)){const base=Math.max(Number(s.debtBaseline)||0,s.debts.bank+s.debts.firms),left=s.debts.bank+s.debts.firms,pct=base>0?Math.floor((base-left)/base*100):0;s.debts.freedomWon=base>0?FREEDOM_STOPS.filter(x=>pct>=x&&(x<100||left<=0)):[]}
+  else s.debts.freedomWon=s.debts.freedomWon.filter(x=>FREEDOM_STOPS.includes(x));
 }
 function cleanLabel(v){return String(v??'').replace(/[<>&"'`=\\]/g,'').replace(/\s+/g,' ').trim().slice(0,24)}
 function debtLabel(k){return state?.debts?.labels?.[k]||(k==='bank'?'Долг 1':'Долг 2')}
+// 74.2: a debt is called by its own name; «Долг 1 / Долг 2» are placeholders that ask for the real one
+function debtNamed(k){const l=String(state?.debts?.labels?.[k]||'').trim();return !!l&&!/^Долг\s*[12]$/i.test(l)}
 function goalName(){return String(state?.goal?.title||'').trim()||'Задай свою цель'}
 function hasGoal(){return !!String(state?.goal?.title||'').trim()}
 /* ===== 73: the first start of a new person — 3 short steps, each can be skipped =====
@@ -2910,7 +2962,7 @@ function openOnboarding(step=1){
     body=head('Главная цель','Что ты хочешь достичь? Сумма, срок и этапы — по желанию.')+`<div class="stack" style="margin-top:12px"><div class="field"><label for="obGoal">Цель</label><input id="obGoal" maxlength="120" placeholder="Например: накопить на машину"></div><div class="grid g2"><div class="field"><label for="obAmount">Сумма (необязательно)</label><input id="obAmount" type="number" min="0" inputmode="decimal" placeholder="0"></div><div class="field"><label for="obDate">Срок (необязательно)</label><input id="obDate" type="date"></div></div><div class="field"><label for="obMs1">Этапы — от 1 до 4 (необязательно)</label>${[1,2,3,4].map(i=>`<input id="obMs${i}" maxlength="120" placeholder="Этап ${i}" aria-label="Этап ${i}"${i>1?' style="margin-top:6px"':''}>`).join('')}</div></div>`+foot('Добавлю позже','Дальше');}
   else{
     const tplBtns=Object.entries(DAY_TEMPLATES).map(([k,t])=>`<button type="button" class="${k===(_onbTpl||'work')?'active':''}" data-ob-tpl="${k}" aria-pressed="${k===(_onbTpl||'work')}">${esc(t.label)}</button>`).join('');
-    body=head('Распорядок дня','Выбери шаблон и поправь время — напоминания придут по нему.')+`<div class="stack" style="margin-top:12px"><div class="jl-ob-tpls" role="group" aria-label="Шаблон дня">${tplBtns}</div><div id="obSteps"></div><details class="jl-ob-debt"><summary>Есть долги? (необязательно)</summary><div class="grid g2" style="margin-top:8px"><div class="field"><label for="obDebt1">Долг 1</label><input id="obDebt1" type="number" min="0" inputmode="decimal" placeholder="0"></div><div class="field"><label for="obDebt2">Долг 2</label><input id="obDebt2" type="number" min="0" inputmode="decimal" placeholder="0"></div></div><div class="field"><label for="obPay">Платёж в месяц</label><input id="obPay" type="number" min="0" inputmode="decimal" placeholder="0"></div></details></div>`+foot('Пропустить','Готово');}
+    body=head('Распорядок дня','Выбери шаблон и поправь время — напоминания придут по нему.')+`<div class="stack" style="margin-top:12px"><div class="jl-ob-tpls" role="group" aria-label="Шаблон дня">${tplBtns}</div><div id="obSteps"></div><details class="jl-ob-debt"><summary>Есть долги? (необязательно)</summary><div class="grid g2" style="margin-top:8px"><div class="field"><label for="obDebtN1">Кому должен</label><input id="obDebtN1" maxlength="24" placeholder="Например: Банк Эсхата"></div><div class="field"><label for="obDebt1">Сколько</label><input id="obDebt1" type="number" min="0" inputmode="decimal" placeholder="0"></div><div class="field"><label for="obDebtN2">Второй долг — кому</label><input id="obDebtN2" maxlength="24" placeholder="Например: Брат"></div><div class="field"><label for="obDebt2">Сколько</label><input id="obDebt2" type="number" min="0" inputmode="decimal" placeholder="0"></div></div><div class="field"><label for="obPay">Платёж в месяц</label><input id="obPay" type="number" min="0" inputmode="decimal" placeholder="0"></div></details></div>`+foot('Пропустить','Готово');}
   openModal(body);_onb={step};
   if(step===1){$('obCur').onchange=e=>{$('obCurOtherWrap').hidden=e.target.value!==''};}
   if(step===3){const paint=()=>{const t=DAY_TEMPLATES[_onbTpl||'work'];$('obSteps').innerHTML=t.steps.map((x,i)=>`<div class="jl-ob-step"><div class="field"><label for="obT${i}">Этап ${i+1}</label><input id="obT${i}" maxlength="40" value="${esc(x.title)}"></div><div class="field"><label for="obS${i}">С</label><input id="obS${i}" type="time" value="${x.time}"></div><div class="field"><label for="obE${i}">До</label><input id="obE${i}" type="time" value="${x.end}"></div></div>`).join('');$$('[data-ob-tpl]').forEach(b=>{const on=b.dataset.obTpl===(_onbTpl||'work');b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))})};
@@ -2928,6 +2980,7 @@ function applyOnboardingStep(step){
   if(step===3){const t=DAY_TEMPLATES[_onbTpl||'work'],tm=v=>/^\d{2}:\d{2}$/.test(v);
     state.day={steps:clone(t.steps).map((x,i)=>({...x,title:$('obT'+i).value.trim().slice(0,40)||x.title,time:tm($('obS'+i).value)?$('obS'+i).value:x.time,end:tm($('obE'+i).value)?$('obE'+i).value:x.end}))};
     const d1=Math.max(0,Number($('obDebt1').value)||0),d2=Math.max(0,Number($('obDebt2').value)||0),pay=Math.max(0,Number($('obPay').value)||0);
+    const n1=cleanLabel($('obDebtN1').value),n2=cleanLabel($('obDebtN2').value);if(n1||n2)state.debts.labels={bank:n1||debtLabel('bank'),firms:n2||debtLabel('firms')};
     if(d1||d2||pay){state.debts.bank=d1;state.debts.firms=d2;state.debts.monthlyPayment=pay;ensureDebtHistory()}}
   saveState();
 }
@@ -2966,6 +3019,8 @@ function normalize(s){
   s.income=Math.max(0,Number(s.income)||0);s.debts=s.debts&&typeof s.debts==='object'?s.debts:{};for(const k of ['bank','firms','monthlyPayment'])s.debts[k]=Math.max(0,Number(s.debts[k])||0);
   s.day=s.day&&Array.isArray(s.day.steps)?s.day:clone(DEFAULT.day);s.day.steps=s.day.steps.slice(0,3);while(s.day.steps.length<3)s.day.steps.push(clone(DEFAULT.day.steps[s.day.steps.length]));
   for(let i=0;i<s.day.steps.length;i++){const d=DEFAULT.day.steps[i];s.day.steps[i]=merge(s.day.steps[i],d);if(!Array.isArray(s.day.steps[i].details))s.day.steps[i].details=[]}
+  // 74.2: the schedule by weekday — {"0".."6": {off:true} | {t:[[start,end]×3]}}; a day that is missing or wrong follows the usual times
+  if('week' in s.day){const w=s.day.week,ok={};if(w&&typeof w==='object'&&!Array.isArray(w))for(const k of Object.keys(w)){const v=cleanWeekDay(w[k]);if(/^[0-6]$/.test(k)&&v)ok[k]=v}if(Object.keys(ok).length)s.day.week=ok;else delete s.day.week}
   s.goal=s.goal&&Array.isArray(s.goal.milestones)?s.goal:clone(DEFAULT.goal);s.goal.finance=merge(s.goal.finance||{},DEFAULT.goal.finance);s.goal.finance.targetAmount=Math.max(0,Number(s.goal.finance.targetAmount)||0);s.goal.finance.savedAmount=Math.max(0,Number(s.goal.finance.savedAmount)||0);s.goal.finance.manualSavedAmount=Math.max(0,Number(s.goal.finance.manualSavedAmount)||0);if(!('manualSavedAmount' in s.goal.finance))s.goal.finance.manualSavedAmount=s.goal.finance.savedAmount;s.goal.finance.targetDate=s.goal.finance.targetDate||'';s.goal.finance.startedAt=s.goal.finance.startedAt||'';s.goal.finance.completedAt=s.goal.finance.completedAt||'';s.goal.finance.contributions=Array.isArray(s.goal.finance.contributions)?s.goal.finance.contributions:[];if(s.goal.finance.contributions.length===0&&Number(s.goal.finance.manualSavedAmount||0)===0&&Number(s.goal.finance.savedAmount||0)>0)s.goal.finance.manualSavedAmount=Number(s.goal.finance.savedAmount||0);s.goal.milestones=s.goal.milestones.map((m,i)=>merge(m,DEFAULT.goal.milestones[i]||{id:uid(),title:`Этап ${i+1}`,done:false}));s.goal.milestones.forEach(m=>{if(m.autoOff!==true)delete m.autoOff});
   s.ai=s.ai&&typeof s.ai==='object'?s.ai:clone(DEFAULT.ai);s.ai.endpoint=AI_FUNCTION_URL;s.ai.model=AI_MODEL;s.ai.enabled=s.ai.enabled!==false;s.ai.webSearch=!!s.ai.webSearch;s.ai.history=Array.isArray(s.ai.history)?s.ai.history:[];s.ai.consent=s.ai.consent&&typeof s.ai.consent==='object'?s.ai.consent:clone(DEFAULT.ai.consent);migrateV57(s,fromVersion);purgeExpiredTrash(s);applyV73(s);return s;
 }
@@ -3097,7 +3152,23 @@ function initPersistence(){
   window.addEventListener('storage',ev=>{if(ev.key!==KEY||!ev.newValue)return;try{const incoming=normalize(JSON.parse(ev.newValue));if((Date.parse(incoming._lastSavedAt||'')||0)>(Date.parse(state._lastSavedAt||'')||0)){state=incoming;renderAll();scheduleNative()}}catch(e){}});
   try{navigator.storage?.persist?.().then(ok=>{state._persistentStorageRequestedAt=new Date().toISOString();state._persistentStorageGranted=!!ok;queueAutosave()}).catch(()=>{});}catch(e){}
 }
-function getStageInfo(){const m=nowMin();for(let i=0;i<state.day.steps.length;i++){const s=state.day.steps[i],st=timeToMin(s.time),endRaw=timeToMin(s.end);let en=endRaw;if(en<=st)en=i<state.day.steps.length-1?timeToMin(state.day.steps[i+1].time):1440;if(m>=st&&m<en)return {kind:'active',i,s,start:st,end:en,now:m,pct:clamp((m-st)/(en-st)*100,0,100)}}const next=state.day.steps.find(s=>timeToMin(s.time)>m);return next?{kind:'between',next,now:m,pct:0}:{kind:'after',now:m,pct:100}}
+/* 74.2: the strict schedule by weekday. state.day.steps stays the usual day (titles, words, times);
+   state.day.week[getDay()] gives a weekday its own times or makes it a day off (no stage reminders).
+   daySteps() is what the day really looks like — the same objects every call while nothing changes. */
+const WEEK_DAYS=[['1','Пн'],['2','Вт'],['3','Ср'],['4','Чт'],['5','Пт'],['6','Сб'],['0','Вс']];
+const _tmOK=v=>/^([01]\d|2[0-3]):[0-5]\d$/.test(String(v||''));
+function cleanWeekDay(v){if(!v||typeof v!=='object')return null;if(v.off===true)return {off:true};if(!Array.isArray(v.t)||v.t.length!==3)return null;
+  const t=v.t.map(x=>Array.isArray(x)&&_tmOK(x[0])&&_tmOK(x[1])&&timeToMin(x[1])>timeToMin(x[0])?[x[0],x[1]]:null);if(t.some(x=>!x))return null;
+  for(let i=1;i<3;i++)if(timeToMin(t[i][0])<timeToMin(t[i-1][1]))return null;return {t}}
+function weekPlan(d=new Date()){const dt=typeof d==='string'?new Date(d+'T12:00:00'):d;return state?.day?.week?.[String(dt.getDay())]||null}
+function dayOff(d=new Date()){return weekPlan(d)?.off===true}
+let _dsCache={};
+function daySteps(d=new Date()){
+  const base=state?.day?.steps||[],p=weekPlan(d);if(!p||!p.t)return base;
+  const sig=JSON.stringify(p.t)+'|'+JSON.stringify(base);if(_dsCache.sig===sig)return _dsCache.out;
+  const out=base.map((s,i)=>p.t[i]?{...s,time:p.t[i][0],end:p.t[i][1]}:s);_dsCache={sig,out};return out;
+}
+function getStageInfo(){const m=nowMin();for(let i=0;i<daySteps().length;i++){const s=daySteps()[i],st=timeToMin(s.time),endRaw=timeToMin(s.end);let en=endRaw;if(en<=st)en=i<daySteps().length-1?timeToMin(daySteps()[i+1].time):1440;if(m>=st&&m<en)return {kind:'active',i,s,start:st,end:en,now:m,pct:clamp((m-st)/(en-st)*100,0,100)}}const next=daySteps().find(s=>timeToMin(s.time)>m);return next?{kind:'between',next,now:m,pct:0}:{kind:'after',now:m,pct:100}}
 // 375 hadiths of the Prophet ﷺ (Russian meaning, with the source): a new one every day, no repeat for more than a year
 // 73: 60 neutral thoughts of the day (no religious texts) — the default for a new account
 const GENERAL_QUOTES=[
@@ -3539,6 +3610,33 @@ const MOTIVATIONS=[
   {author:'Пророк Мухаммад ﷺ',text:'«Аллах в помощь тому, кто взял долг, желая его вернуть.»',source:'Ибн Маджа 2409'},
   {author:'Пророк Мухаммад ﷺ',text:'«Пророк ﷺ не молился над умершим, на котором был долг, пока кто-то не брал этот долг на себя.»',source:'Сахих аль-Бухари 2289'}
  ];
+/* 74.2: prayer times, counted from the sun for the chosen city (the angles of the Muslim World League: Fajr 18°, Isha 17°;
+   Asr by madhab — Hanafi shadow ×2 by default). Shown with the hadiths (or switched on by hand), a reminder at each time. */
+const PRAYER_CITIES={dushanbe:['Душанбе',38.56,68.79],khujand:['Худжанд',40.28,69.62],bokhtar:['Бохтар',37.84,68.78],kulob:['Куляб',37.91,69.78],khorog:['Хорог',37.49,71.55],istaravshan:['Истаравшан',39.91,69.0],tashkent:['Ташкент',41.3,69.24],samarkand:['Самарканд',39.65,66.96],bishkek:['Бишкек',42.87,74.59],almaty:['Алматы',43.24,76.89],moscow:['Москва',55.76,37.62],spb:['Санкт-Петербург',59.94,30.31],istanbul:['Стамбул',41.01,28.98],dubai:['Дубай',25.2,55.27],makkah:['Мекка',21.42,39.83]};
+const PRAYER_NAMES=[['fajr','Фаджр'],['dhuhr','Зухр'],['asr','Аср'],['maghrib','Магриб'],['isha','Иша']];
+function prayerOn(){const v=state?.settings?.prayerOn;return typeof v==='boolean'?v:quoteSet()==='hadith'}
+function prayerCity(){const c=state?.settings?.prayerCity;return PRAYER_CITIES[c]?c:'dushanbe'}
+function prayerTimes(date=new Date(),city=prayerCity(),asr=state?.settings?.prayerAsr==='shafii'?1:2){
+  const [,lat,lng]=PRAYER_CITIES[city]||PRAYER_CITIES.dushanbe,R=Math.PI/180,sin=d=>Math.sin(d*R),cos=d=>Math.cos(d*R),tan=d=>Math.tan(d*R),fix=(a,b)=>{a-=b*Math.floor(a/b);return a<0?a+b:a};
+  const d0=new Date(date.getFullYear(),date.getMonth(),date.getDate(),12),tz=-d0.getTimezoneOffset()/60;
+  const jd=Date.UTC(date.getFullYear(),date.getMonth(),date.getDate())/864e5+2440587.5-lng/360;
+  const sun=t=>{const D=jd+t-2451545,g=fix(357.529+.98560028*D,360),q=fix(280.459+.98564736*D,360),L=fix(q+1.915*sin(g)+.02*sin(2*g),360),e=23.439-.00000036*D;
+    const RA=fix(Math.atan2(cos(e)*sin(L),cos(L))/R/15,24);return {decl:Math.asin(sin(e)*sin(L))/R,eqt:q/15-RA}};
+  const noon=t=>fix(12-sun(t).eqt,24);
+  const at=(angle,t,before)=>{const dc=sun(t).decl,x=(-sin(angle)-sin(dc)*sin(lat))/(cos(dc)*cos(lat));if(Math.abs(x)>1)return NaN;const T=Math.acos(x)/R/15;return noon(t)+(before?-T:T)};
+  const asrAt=t=>{const dc=sun(t).decl,angle=-Math.atan(1/(asr+tan(Math.abs(lat-dc))))/R;return at(angle,t,false)};
+  const h={fajr:at(18,5/24,true),sunrise:at(.833,6/24,true),dhuhr:noon(12/24)+1/60,asr:asrAt(13/24),maghrib:at(.833,18/24,false)+1/60,isha:at(17,18/24,false)};
+  const out={};for(const k in h){const v=h[k]+tz-lng/15;out[k]=Number.isFinite(v)?Math.round(fix(v,24)*60)%1440:null}
+  return out;
+}
+function renderPrayer(){
+  const box=$('prayerBox');if(!box)return;const on=prayerOn();if(box.hidden===on)box.hidden=!on;if(!on)return;
+  const t=prayerTimes(),m=Math.floor(nowMin()),list=PRAYER_NAMES.filter(([k])=>t[k]!==null),next=list.find(([k])=>t[k]>m);
+  const tm=new Date();tm.setDate(tm.getDate()+1);const nt=next?t[next[0]]:prayerTimes(tm).fajr,left=next?nt-m:nt+1440-m;
+  painter($('prayerTimes')).html=list.map(([k,n])=>`<div class="${next&&next[0]===k?'next':t[k]<=m?'past':''}"><small>${n}</small><b>${fmtMin(t[k])}</b></div>`).join('');
+  textOf($('prayerNext')).v=`${next?next[1]:'Фаджр'} в ${fmtMin(nt)} · через ${left>=60?Math.floor(left/60)+' ч '+left%60+' мин':left+' мин'} · ${PRAYER_CITIES[prayerCity()][0]}`;
+}
+function prayerReminders(day=new Date()){if(!prayerOn()||state.settings?.notifications===false)return [];const t=prayerTimes(day);return PRAYER_NAMES.filter(([k])=>t[k]!==null).map(([k,n])=>({k,min:t[k],title:'🕌 Время намаза: '+n,body:fmtMin(t[k])+' · '+PRAYER_CITIES[prayerCity()][0]}))}
 const QUOTE_SETS={hadith:'Хадисы',general:'Мотивация',off:'Выключить'};
 function quoteSet(){const q=state?.settings?.quoteSet;return QUOTE_SETS[q]?q:'hadith'}
 function motivation(){const k=keyDay(),set=quoteSet();if(set==='off')return null;const list=set==='hadith'?MOTIVATIONS:GENERAL_QUOTES;const day=Math.floor(Date.UTC(...k.split('-').map((v,i)=>i===1?Number(v)-1:Number(v)))/DAY_MS);const idx=day%list.length;const info=getStageInfo();const action=info.kind==='active'?(info.s.details?.[0]||info.s.title):(info.next?.details?.[0]||info.next?.title||state.goal.next);const c=state.dailyMotivations[k];if(c?.idx===idx&&(c.set||'hadith')===set)return c;const m=set==='hadith'?MOTIVATIONS[Math.abs(idx)%MOTIVATIONS.length]:{text:list[Math.abs(idx)%list.length],author:'Мысль дня',source:''};const result={idx,set,text:m.text,author:m.author,source:m.source,goal:state.goal.title,action,createdAt:new Date().toISOString()};state.dailyMotivations[k]=result;saveState();return result}
@@ -3629,7 +3727,7 @@ function hostPlaysSound(){try{return !!(window.__jlHostSound&&window.chrome?.web
 /* «Готово» / «Через 15 мин» from a reminder (Android notification, browser notification, link). */
 const SNOOZE_MIN=15;
 function applyReminderAction(a,taskId){
-  if(String(taskId).startsWith('stage:')){const sid=String(taskId).slice(6);if(!(state.day?.steps||[]).some(s=>s.id===sid))return false;
+  if(String(taskId).startsWith('stage:')){const sid=String(taskId).slice(6);if(!daySteps().some(s=>s.id===sid))return false;
     if(a==='done'){stageMainDone(sid,true);saveState();renderAll();toast('Главное этапа сделано ✅','Ещё шаг к цели');haptic(14);return true}
     if(a==='snooze'){const when=moveStageMain(sid);saveState();scheduleNativeTasks();renderAll();toast('Перенёс главное',when);return true}
     return false}
@@ -3669,29 +3767,24 @@ function scheduleNative(){
   syncLoudReminders();
   scheduleNativeTasks();
   try{
-    if(!window.AndroidBridge?.scheduleDaily)return;
-    for(const s of state.day.steps){
-      window.AndroidBridge.cancelDaily?.(s.id);
-      window.AndroidBridge.cancelDaily?.('pre_'+s.id);
-      window.AndroidBridge.cancelDaily?.('end_'+s.id);
-      window.AndroidBridge.cancelDaily?.('stend_'+s.id);
-    }
+    const br=window.AndroidBridge;if(!br?.scheduleDaily)return;
+    // 74.2: by weekday the same stage may start at other times — each distinct time is one alarm «<id>@n» with a Mon..Sun mask
+    for(const s of state.day.steps)for(const v of ['','@1','@2','@3','@4','@5','@6'])for(const k of ['','pre_','end_','stend_'])br.cancelDaily?.(k+s.id+v);
     if(!state.settings.notifications)return;
-    const preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
-    for(let i=0;i<state.day.steps.length;i++){
-      const s=state.day.steps[i],previous=state.day.steps[i-1],r=stageReminderTexts(i);
-      window.AndroidBridge.scheduleDaily?.(s.id,s.time,r.start.title,r.start.body);
-      if(preMinutes>0&&!(previous&&previous.end===s.time)){
-        const pre=timeToMin(s.time)-preMinutes;
-        if(pre>=0){
-          const hh=String(Math.floor(pre/60)%24).padStart(2,'0'),mm=String(pre%60).padStart(2,'0');
-          window.AndroidBridge.scheduleDaily?.('pre_'+s.id,`${hh}:${mm}`,`Через ${preMinutes} мин: ${s.title}`,`Главное там: ${r.focus.main}. Закончи текущее и переходи.`);
-        }
-      }
-      // «stend_<id>» rings 10 minutes before the end with the buttons «Да» / «Перенести» (AlarmReceiver → stage:<id>)
-      const sp=stageSpan(i),endAt=sp.b-STAGE_END_LEAD;
-      if(endAt>sp.a)window.AndroidBridge.scheduleDaily?.('stend_'+s.id,fmtMin(endAt),r.end.title,r.end.body);
-    }
+    const preMinutes=Math.max(0,Number(state.settings.preMinutes)||0),masks=typeof br.scheduleDailyDays==='function'&&state.day.week;
+    const plan=new Map(),add=(id,time,wd,title,body)=>{const k=id+'|'+time;let p=plan.get(k);if(!p){p={id,time,title,body,days:[0,0,0,0,0,0,0]};plan.set(k,p)}p.days[(wd+6)%7]=1};
+    const today=new Date();today.setHours(12,0,0,0);
+    for(let n=0;n<(masks?7:1);n++){const d=new Date(today);d.setDate(today.getDate()+n);const wd=d.getDay(),steps=daySteps(d);if(masks&&dayOff(d))continue;
+      for(let i=0;i<steps.length;i++){
+        const s=steps[i],previous=steps[i-1],r=stageReminderTexts(i);
+        add(s.id,s.time,wd,r.start.title,r.start.body);
+        if(preMinutes>0&&!(previous&&previous.end===s.time)){const pre=timeToMin(s.time)-preMinutes;if(pre>=0)add('pre_'+s.id,fmtMin(pre),wd,`Через ${preMinutes} мин: ${s.title}`,`Главное там: ${r.focus.main}. Закончи текущее и переходи.`)}
+        // «stend_<id>» rings 10 minutes before the end with the buttons «Да» / «Перенести» (AlarmReceiver → stage:<id>)
+        const sp=stageSpan(i,d),endAt=sp.b-STAGE_END_LEAD;if(endAt>sp.a)add('stend_'+s.id,fmtMin(endAt),wd,r.end.title,r.end.body);
+      }}
+    const used={};
+    for(const p of plan.values()){const n=used[p.id]=(used[p.id]??-1)+1,id=p.id+(n?'@'+n:''),days=p.days.join('');
+      if(masks&&days!=='1111111')br.scheduleDailyDays(id,p.time,days,p.title,p.body);else br.scheduleDaily(id,p.time,p.title,p.body)}
   }catch(e){
     state.runtimeErrors=Array.isArray(state.runtimeErrors)?state.runtimeErrors:[];
     state.runtimeErrors.unshift({at:new Date().toISOString(),message:`Уведомления: ${String(e.message||e)}`});
@@ -3714,9 +3807,11 @@ function scheduleNativeTasks(){
         const lead=taskLead(t);
         if(lead>0&&at-lead*60000>now){const p=taskNotice(t,'pre');once('taskpre_'+t.id,at-lead*60000,p.title,p.body,at);ids.push('taskpre_'+t.id)}
       }
-      const cd=nextCloseDayAt();if(cd){br.scheduleOnce('closeday',cd,'🌙 Закрой день','2 минуты: что сделал, что помешало и один шаг на завтра.');ids.push('closeday')}
+      const cd=nextCloseDayAt();if(cd){br.scheduleOnce('closeday',cd,'🌙 Закрой день','30 секунд: одно касание «Закрыть за 30 секунд» — итог запишется сам.');ids.push('closeday')}
       const wk=nextWeekReviewAt();if(wk){br.scheduleOnce('weekreview',wk,'✨ Разбор недели','Воскресенье: AI подведёт итог недели и даст один шаг.');ids.push('weekreview')}
     }
+    // 74.2: prayer times move a little every day — today's and tomorrow's are set as single alarms (renewed whenever the app runs)
+    for(let i=0;i<2;i++){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+i);for(const p of prayerReminders(d)){const at=d.getTime()+p.min*60000;if(at>now){const id='pray_'+p.k+'_'+i;br.scheduleOnce(id,at,p.title,p.body);ids.push(id)}}}
     for(const id of prev)if(!ids.includes(id))try{br.cancel?.(id)}catch(e){}
     localStorage.setItem(NATIVE_TASK_KEY,JSON.stringify(ids));
   }catch(e){}
@@ -3725,7 +3820,7 @@ function scheduleNativeTasks(){
 
 function autoCompleteExpiredStages(){
   const rep=dayReport(),m=nowMin();let changed=false;
-  for(const s of state.day.steps||[]){const en=timeToMin(s.end);if(m>=en&&!rep.steps[s.id]){rep.steps[s.id]=true;changed=true}}
+  for(const s of daySteps()){const en=timeToMin(s.end);if(m>=en&&!rep.steps[s.id]){rep.steps[s.id]=true;changed=true}}
   if(changed){rep.savedAt=new Date().toISOString();saveState()}
   return changed;
 }
@@ -3751,8 +3846,8 @@ function runScheduler(){
   if(day!==lastDay){lastDay=day;renderAll();scheduleNative()} // a new day: new words in the stage alarms
   const autoDone=autoCompleteExpiredStages(),info=getStageInfo(),m=nowMin(),preMinutes=Math.max(0,Number(state.settings.preMinutes)||0);
   const once=(key,fn)=>{if(markSent(day,key))fn()};
-  for(let i=0;i<state.day.steps.length;i++){
-    const s=state.day.steps[i],next=state.day.steps[i+1],previous=state.day.steps[i-1],st=timeToMin(s.time),en=timeToMin(s.end),pre=st-preMinutes;
+  for(let i=0,off=dayOff();!off&&i<daySteps().length;i++){ // 74.2: a day off by the weekday schedule has no stage reminders
+    const s=daySteps()[i],next=daySteps()[i+1],previous=daySteps()[i-1],st=timeToMin(s.time),en=timeToMin(s.end),pre=st-preMinutes;
     // start: «Сейчас: этап. Главное: … До цели: …»; 10 minutes before the end: «Сделал главное?» with Да / Перенести
     if(isDue(m,st))once('s|'+day+'|'+s.id,()=>{const r=stageReminderTexts(i,day);notify(r.start.title,r.start.body,'tasks',{native:true})});
     // the «through N minutes» warning is not needed when the previous stage ends right here (its end reminder already says what is next)
@@ -3770,9 +3865,10 @@ function runScheduler(){
     if(isDue(m,tm))once('t|'+day+'|'+t.id,()=>{const n=taskNotice(t,'at');notify(n.title,n.body,'tasks',{native:true,taskId:t.id,due});if(currentView==='viewToday')renderTasks()});
   }
   for(const sl of twoHourSlots())if(isDue(m,sl.min))once('2h|'+day+'|'+sl.time,()=>notify(sl.title,sl.body,'tasks',{native:true}));
-  if(m!==_lastMinute){_lastMinute=m;if(currentView==='viewToday'){updateTaskBars();renderRhythm(info);renderFreePlan();renderGoalDeadline()}}
+  for(const p of prayerReminders())if(isDue(m,p.min))once('pr|'+day+'|'+p.k,()=>notify(p.title,p.body,'tasks',{native:true}));
+  if(m!==_lastMinute){_lastMinute=m;if(currentView==='viewToday'){updateTaskBars();renderRhythm(info);renderFreePlan();renderGoalDeadline();renderPrayer()}}
   const cdm=timeToMin(closeDayTime());
-  if(isDue(m,cdm)&&!dayClosed(state.reports?.[day],day))once('cd|'+day,()=>notify('Закрой день','2 минуты: что сделал, что помешало и один шаг на завтра.','tasks',{native:true}));
+  if(isDue(m,cdm)&&!dayClosed(state.reports?.[day],day))once('cd|'+day,()=>notify('Закрой день','30 секунд: одно касание «Закрыть за 30 секунд» — итог запишется сам.','tasks',{native:true}));
   if(new Date().getDay()===0&&isDue(m,timeToMin(WEEK_REVIEW_TIME))&&!state.ai?.weekly?.[weekKey()])once('wk|'+day,()=>notify('Разбор недели','Воскресенье: AI подведёт итог недели и даст один шаг.','tasks',{native:true}));
   if(autoDone)renderToday();else if(!hasTextSelection()){renderClock(info);renderAuto(info);renderTodayLight()}
 }
@@ -3782,7 +3878,7 @@ function paintClock(d=new Date()){const el=$('clock');if(!el)return;const p=n=>S
 function renderClock(info=getStageInfo()){paintClock();setText('clockState',info.kind==='active'?`${info.s.time}–${info.s.end}`:info.kind==='between'?'перерыв между этапами':'день завершён')}
 function renderStagePercents(info=getStageInfo()){
   const now=nowMin();
-  state.day.steps.forEach((s,i)=>{
+  daySteps().forEach((s,i)=>{
     const el=$(`stagePct_${s.id}`);if(!el)return;
     const done=!!dayReport().steps?.[s.id];
     const st=timeToMin(s.time),en=timeToMin(s.end);
@@ -3790,7 +3886,7 @@ function renderStagePercents(info=getStageInfo()){
     el.textContent=done?'100% завершено':(info.kind==='active'&&info.i===i?`${pct}% времени прошло`:now>=en?'100% завершено':'0% времени прошло');
   });
 }
-function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${state.day.steps.length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=state.day.steps.map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info);renderNowFocus(info)}
+function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${daySteps().length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=daySteps().map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info);renderNowFocus(info)}
 // the day of a record: its dateKey, or for old records without one, the local day of «at»
 function txDay(x){return x?.dateKey||(validDate(x?.at)?keyDay(validDate(x.at)):'')}
 function daySum(arr,key=keyDay()){return (arr||[]).filter(x=>x&&txDay(x)===key).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0)}
@@ -3801,7 +3897,7 @@ function debtPayLine(id,sum){const el=$(id);if(!el)return;el.hidden=!(sum>0);el.
 function monthSum(arr,d=new Date()){const y=d.getFullYear(),m=d.getMonth();return arr.filter(x=>{const z=new Date(x.at);return z.getFullYear()===y&&z.getMonth()===m}).reduce((a,x)=>a+Number(x.amount||0),0)}
 
 function dailyState(){const k=keyDay();state.daily=state.daily&&typeof state.daily==='object'?state.daily:{};state.daily[k]=state.daily[k]||{mainAction:'',mainDone:false,mode:state.dayMode||'normal'};return state.daily[k]}
-function scheduleDayMetrics(){const first=state.day.steps[0],last=state.day.steps[state.day.steps.length-1];if(!first||!last)return {pct:0,start:0,end:1440,m:0};const start=timeToMin(first.time),end=Math.max(timeToMin(last.end),start+1),m=nowMin();return {pct:clamp((m-start)/(end-start)*100,0,100),start,end,m}}
+function scheduleDayMetrics(){const first=daySteps()[0],last=daySteps()[daySteps().length-1];if(!first||!last)return {pct:0,start:0,end:1440,m:0};const start=timeToMin(first.time),end=Math.max(timeToMin(last.end),start+1),m=nowMin();return {pct:clamp((m-start)/(end-start)*100,0,100),start,end,m}}
 function milestonePct(){const total=state.goal.milestones.length,done=state.goal.milestones.filter(m=>m.done).length;return total?Math.round(done/total*100):0}
 function financePulse(){const planned=Math.max(0,Number(state.income)||0),actual=monthSum(state.profits),income=actual>0?actual:planned,payment=Math.max(0,Number(state.debts.monthlyPayment)||0),expenses=monthSum(spendOnly(state.expenses)),cash=walletMetrics().cash;if(income<=0)return cash>0?100:0;const monthlyHealth=(income-payment-expenses)/income*100;const cashBuffer=clamp((cash/Math.max(income,1))*100,0,100);return clamp(Math.round((monthlyHealth*0.65)+(cashBuffer*0.35)),0,100)}
 function debtTotal(){return Math.max(0,Number(state.debts.bank||0)+Number(state.debts.firms||0))}
@@ -3809,8 +3905,8 @@ function ensureDebtHistory(){state.debtHistory=Array.isArray(state.debtHistory)?
 function debtPulse(){const base=Number(state.debtBaseline)||0,cur=debtTotal();if(base<=0)return 0;return clamp(Math.round((1-cur/base)*100),0,100)}
 
 function goalPulse(){const m=milestonePct(),f=goalFinanceMetrics();return f.target>0?f.pct:m}
-function getLifePulse(){const day=scheduleDayMetrics(),rep=dayReport(),steps=state.day.steps||[],done=steps.filter(s=>!!rep.steps?.[s.id]).length;return {day:Math.round(day.pct),goal:goalPulse(),finance:financePulse(),debt:debtPulse(),discipline:steps.length?Math.round(done/steps.length*100):0}}
-function effectiveDayMode(){const dow=new Date().getDay();if(dow===0||dow===6)return 'rest';const k=keyDay();const income=(state.profits||[]).filter(x=>x.dateKey===k).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);if(income>0)return 'normal';const m=nowMin(),start=timeToMin(state.day.steps?.[0]?.time||'08:30'),end=timeToMin(state.day.steps?.[state.day.steps.length-1]?.end||'22:00');return m>=start&&m<end?'heavy':'normal'}
+function getLifePulse(){const day=scheduleDayMetrics(),rep=dayReport(),steps=daySteps(),done=steps.filter(s=>!!rep.steps?.[s.id]).length;return {day:Math.round(day.pct),goal:goalPulse(),finance:financePulse(),debt:debtPulse(),discipline:steps.length?Math.round(done/steps.length*100):0}}
+function effectiveDayMode(){const dow=new Date().getDay();if(dow===0||dow===6)return 'rest';const k=keyDay();const income=(state.profits||[]).filter(x=>x.dateKey===k).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);if(income>0)return 'normal';const m=nowMin(),start=timeToMin(daySteps()?.[0]?.time||'08:30'),end=timeToMin(daySteps()?.[daySteps().length-1]?.end||'22:00');return m>=start&&m<end?'heavy':'normal'}
 function applyAutoDayMode(){const d=dailyState(),mode=effectiveDayMode();if(d.mode!==mode){d.mode=mode;state.dayMode=mode;saveState()}return mode}
 function dayMood(){const mode=applyAutoDayMode(),income=(state.profits||[]).filter(x=>x.dateKey===keyDay()).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);return mode==='rest'?{emoji:'🏖️',label:'Выходной'}:income>0?{emoji:'😄',label:'Хороший день'}:{emoji:'😔',label:'Тяжёлый день'}}
 function renderLifePulse(){applyAutoDayMode();const p=getLifePulse();for(const [name,val] of Object.entries(p)){const cap=name.charAt(0).toUpperCase()+name.slice(1);setText('pulse'+cap,val+'%');setWidth('pulse'+cap+'Bar',val+'%')}const d=dailyState(),modeLabel={normal:'Нормальный день',heavy:'Тяжёлый день',rest:'Выходной'}[d.mode]||'Нормальный день',tips={normal:'Работа → личное время → итог. Держи одно главное действие.',heavy:'Минимум на сегодня: обязательное → один шаг по цели → итог → сон.',rest:'Выходной: восстановление, близкие и одно полезное действие без гонки.'};setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);const mood=dayMood();setText('pulseNote',`Режим: ${modeLabel}. ${tips[d.mode]||tips.normal}`);setText('dayMoodEmoji',mood.emoji);setText('dayMoodLabel',mood.label);const mb=$('dayMoodBadge');if(mb)mb.className='day-mood '+(d.mode==='rest'?'rest':d.mode==='normal'?'good':'');const sel=$('dayMode');if(sel){sel.disabled=true;sel.value=d.mode}}
@@ -3883,7 +3979,7 @@ function openLifeAnalysis(){
       const data=await callAI({mode:'deep',facts:lifeFacts(),onSlow:()=>{if($('deepAiBtn'))btn.querySelector('span').textContent=AI_SLOW_TEXT}});const text=String(data.output_text||'').trim();if(!text)throw new Error('AI вернул пустой ответ.');
       state.ai.history=Array.isArray(state.ai.history)?state.ai.history:[];state.ai.history.unshift({id:uid(),at:new Date().toISOString(),scope:{mode:'deep'},result:text,sources:[]});state.ai.history=state.ai.history.slice(0,60);saveState();
       box.innerHTML=deepTextHtml(text);btn.querySelector('span').textContent='🤖 Обновить разбор AI';
-    }catch(e){box.textContent=String(e?.message||e);btn.querySelector('span').textContent='🤖 Попробовать ещё раз'}finally{btn.disabled=false}
+    }catch(e){box.textContent='⏳ Ответ AI не пришёл. '+String(e?.message||e);btn.querySelector('span').textContent='🤖 Попробовать ещё раз'}finally{btn.disabled=false}
   };
 }
 function lifeFacts(){const a=analyzeLife();return {...a,big:a.big.map(x=>({category:x.category,amount:x.amount,at:x.at})),habStats:a.habStats.map(h=>({title:h.h.title,due:h.due,done:h.done})),banksOver:a.banksOver.map(x=>({name:x.b.name,pct:x.li.pct,left:x.li.remaining})),cats:a.cats.slice(0,10),debtFreeLine:typeof debtFreeLine==='function'?String(debtFreeLine()||''):'',...v72Facts()}}
@@ -3972,13 +4068,13 @@ function renderControlDashboard(){
   setText('dashFinancialText',pressure);
 }
 function dayProgressMetrics(){
-  const steps=state.day.steps||[];if(!steps.length)return {pct:0,elapsed:0,remaining:0,stageIndex:-1,stage:'—',sleepAt:'—'};
+  const steps=daySteps();if(!steps.length)return {pct:0,elapsed:0,remaining:0,stageIndex:-1,stage:'—',sleepAt:'—'};
   const start=timeToMin(steps[0].time),sleep=timeToMin(steps[steps.length-1].end),now=nowMin(),span=Math.max(1,sleep-start),elapsed=clamp(now-start,0,span),pct=clamp(Math.round(elapsed/span*100),0,100);
   const info=getStageInfo();let remaining=0;if(now<start)remaining=sleep-start;else if(now<sleep)remaining=sleep-now;
   return {pct,elapsed,remaining,stageIndex:info.kind==='active'?info.i:info.kind==='between'?steps.findIndex(s=>s.id===info.next?.id):steps.length-1,stage:info.kind==='active'?info.s.title:info.kind==='between'?info.next?.title:'Сон / завершение дня',sleepAt:steps[steps.length-1].end};
 }
 function updateDayProgressModal(){
-  const p=dayProgressMetrics(),modal=$('dayProgressModal');if(!modal)return;modal.style.setProperty('--runner-progress',p.pct);setText('dayProgressPercent',p.pct+'%');setText('dayProgressPassed',p.pct+'% пройдено');setText('dayProgressLeft',(100-p.pct)+'% осталось');setText('dayProgressElapsed',fmtDuration(p.elapsed));setText('dayProgressRemain',p.remaining>0?fmtDuration(p.remaining):'День завершён');setText('dayProgressStage',p.stageIndex>=0?'Этап '+(p.stageIndex+1)+' из '+(state.day.steps.length||0):'До начала дня');setText('dayProgressSleep',p.sleepAt);
+  const p=dayProgressMetrics(),modal=$('dayProgressModal');if(!modal)return;modal.style.setProperty('--runner-progress',p.pct);setText('dayProgressPercent',p.pct+'%');setText('dayProgressPassed',p.pct+'% пройдено');setText('dayProgressLeft',(100-p.pct)+'% осталось');setText('dayProgressElapsed',fmtDuration(p.elapsed));setText('dayProgressRemain',p.remaining>0?fmtDuration(p.remaining):'День завершён');setText('dayProgressStage',p.stageIndex>=0?'Этап '+(p.stageIndex+1)+' из '+(daySteps().length||0):'До начала дня');setText('dayProgressSleep',p.sleepAt);
 }
 function openDayProgress(){
   openModal('<div class="close-row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-runner"></use></svg> Ход дня</div><h2>От начала дня до сна</h2><div class="sub">Процент считается по реальному расписанию и обновляется каждую секунду.</div></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div id="dayProgressModal" style="margin-top:12px"><div class="day-progress-main"><div class="day-progress-percent" id="dayProgressPercent">0%</div><div class="day-progress-sub" id="dayProgressPassed">0% пройдено</div></div><div class="runner-stage"><div class="runner-track"><div class="runner-runner"><svg class="ui-icon"><use href="#i-runner"></use></svg></div></div></div><div class="day-progress-kpis"><div class="day-progress-kpi"><div class="label">Прошло</div><div class="value" id="dayProgressElapsed">0 мин</div></div><div class="day-progress-kpi"><div class="label">Осталось до сна</div><div class="value" id="dayProgressRemain">0 мин</div></div><div class="day-progress-kpi"><div class="label">Текущий этап</div><div class="value" id="dayProgressStage">—</div></div></div><div class="card" style="margin-top:10px;background:var(--soft);padding:12px"><div class="row"><span class="small muted">Сон / завершение дня</span><strong id="dayProgressSleep">—</strong></div><div class="sub" id="dayProgressLeft" style="margin-top:5px">100% осталось</div></div></div>');
@@ -3989,7 +4085,8 @@ function renderToday(){
   autoCompleteExpiredStages();renderTodayLight();renderControlDashboard();const d=new Date(),info=getStageInfo(),rep=dayReport(),dd=dailyState();
   textOf($('todayTitle')).v=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});textOf($('todayDate')).v=d.toLocaleDateString('ru-RU',{weekday:'long'})+' · '+d.getFullYear();
   const mo=motivation(),qf=$('motivationText')?.closest('.jl-quote');if(qf&&qf.hidden!==!mo)qf.hidden=!mo;if(mo){textOf($('motivationText')).v=String(mo.text||'').split(/\n+\s*Сегодня:/)[0].trim();textOf($('motivationSource')).v=mo.source?`${mo.author} — ${mo.source}`:mo.author}
-  renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${state.day.steps.length}`);
+  textOf($('rhythmSub')).v=dayOff()?'Сегодня выходной по графику — напоминаний этапов нет':weekPlan()?'Сегодня свой график: '+daySteps()[0].time+'–'+daySteps().at(-1).end+' · напомню в начале и в конце':'Твой день по этапам · напомню в начале и в конце';
+  renderPrayer();renderClock(info);renderAuto(info);renderLifePulse();setText('dayCompletion',`${Object.values(rep.steps||{}).filter(Boolean).length} / ${daySteps().length}`);
   autoCompleteExpiredStages();renderRhythm(info);
   setText('todayBalance',fmtMoney(daySum(state.profits)-daySum(state.expenses)));const fs=financialSnapshot();{const el=$('todayCashState');/* 74.1: the cash is the «Баланс» tile above — only what it does not show */const t=fs.goal>0?`На цель: ${fmtMoney(fs.goal)} · Общий капитал: ${fmtMoney(fs.capital)}`:'';if(el){textOf(el).v=t;if(el.hidden!==!t)el.hidden=!t}}
   for(const k of ['done','block','tomorrow']){const el=$('r'+k[0].toUpperCase()+k.slice(1));if(el&&document.activeElement!==el)el.value=rep[k]||''}
@@ -4005,7 +4102,7 @@ function stageEmoji(s,i){const t=String(s?.title||'').toLowerCase();
 function durText(min){min=Math.max(0,Math.round(min));const h=Math.floor(min/60),m=min%60;return h?(m?`${h} ч ${m} мин`:`${h} ч`):`${m} мин`}
 // «Главное сейчас» in the hero: the current stage (or the next one) — one action, tied to the goal
 function renderNowFocus(info=getStageInfo()){
-  const el=$('nowFocus');if(!el)return;const i=info.kind==='active'?info.i:info.kind==='between'?(state.day.steps||[]).indexOf(info.next):-1;
+  const el=$('nowFocus');if(!el)return;const i=info.kind==='active'?info.i:info.kind==='between'?(daySteps()).indexOf(info.next):-1;
   const k=Math.floor(nowMin())+'|'+i+'|'+(state._lastSavedAt||'');if(el._k===k)return;el._k=k; // once a minute or after a change, not every second
   const f=i>=0?stageFocus(i):null,goal=state.goal?.title||mainGoal()?.title||'';
   const main=f?f.main.replace(/\s*\([^)]*\)\s*$/,''):''; // the hint in brackets stays in «Ритм дня»
@@ -4015,7 +4112,7 @@ function renderNowFocus(info=getStageInfo()){
 }
 function toggleStageMain(sid){const on=!dailyState().stageDone?.[sid];stageMainDone(sid,on);saveState();renderToday();if(on){haptic(16);toast('Главное этапа сделано ✅','Ещё шаг к цели «'+(state.goal?.title||'')+'»')}}
 function renderRhythm(info=getStageInfo()){
-  const box=$('timeline');if(!box)return;const steps=state.day.steps||[],rep=dayReport(),now=Math.floor(nowMin()),dd=dailyState(),fw=freePlanStage();
+  const box=$('timeline');if(!box)return;const steps=daySteps(),rep=dayReport(),now=Math.floor(nowMin()),dd=dailyState(),fw=freePlanStage();
   const same=(x,y)=>{const n=v=>String(v||'').toLowerCase().replace(/[^\p{L}\p{N}]+/gu,' ').trim();const a=n(x),b=n(y);return !!a&&!!b&&(a===b||a.startsWith(b)||b.startsWith(a)||a.split(' ').slice(0,2).join(' ')===b.split(' ').slice(0,2).join(' '))};
   const rows=steps.map((s,i)=>{const a=timeToMin(s.time),b=timeToMin(s.end),expired=now>=b,done=!!rep.steps[s.id]||expired,current=!done&&info.kind==='active'&&info.i===i;
     const pct=done?100:current?clamp(Math.round(info.pct),0,100):0;const len=b-a;
@@ -4035,7 +4132,7 @@ function renderRhythm(info=getStageInfo()){
   renderDayStrip(info);
 }
 function renderDayStrip(info=getStageInfo()){
-  const el=$('dayStrip');if(!el)return;const steps=state.day.steps||[];if(!steps.length){painter(el).html='';return}
+  const el=$('dayStrip');if(!el)return;const steps=daySteps();if(!steps.length){painter(el).html='';return}
   const start=Math.min(...steps.map(s=>timeToMin(s.time))),end=Math.max(...steps.map(s=>timeToMin(s.end))),span=Math.max(1,end-start),now=Math.floor(nowMin());
   const nowPct=clamp((now-start)/span*100,0,100),rep=dayReport();
   const segs=steps.map((s,i)=>{const a=timeToMin(s.time),b=timeToMin(s.end),done=!!rep.steps[s.id]||now>=b,cur=!done&&info.kind==='active'&&info.i===i;
@@ -4376,9 +4473,9 @@ function openBudget(id=''){
 function renderMoney(){
   const debt=debtTotal(),debtBase=Math.max(0,Number(state.debtBaseline)||debt),debtPaid=Math.max(0,debtBase-debt),incomePlan=Math.max(0,Number(state.income)||0),payShare=incomePlan?Math.round((Number(state.debts.monthlyPayment||0)/incomePlan)*100):0;
   const ds=$('debtSummary');if(ds){const cell=(key,ico,label,val,note,cls='')=>`<button type="button" class="kpi jl-debt-cell" data-debt-open="${key}"><div class="label"><span class="kpi-icon"><svg class="ui-icon"><use href="#${ico}"></use></svg></span>${label}</div><div class="value ${cls}">${esc(val)}</div><div class="debt-kpi-note">${note}</div><span class="jl-debt-go" aria-hidden="true">${svgIcon('i-chevron-right')}</span></button>`;
-    painter(ds).html=`<div class="kpi-row jl-debt-cells">${cell('bank','i-card',esc(debtLabel('bank')),fmtMoney(state.debts.bank),'платежи и история')}${cell('firms','i-briefcase',esc(debtLabel('firms')),fmtMoney(state.debts.firms),'платежи и история')}${cell('pay','i-calendar','Платёж / месяц',fmtMoney(state.debts.monthlyPayment||0),payShare?`≈ ${payShare}% от плана дохода`:'изменить')}${cell('paid','i-check','Погашено',fmtMoney(debtPaid),'от стартовой суммы','blue')}</div>`;
+    painter(ds).html=`<div class="kpi-row jl-debt-cells">${cell('bank','i-card',esc(debtLabel('bank')),fmtMoney(state.debts.bank),debtNamed('bank')?'платежи и история':'✏️ назови: кому должен')}${cell('firms','i-briefcase',esc(debtLabel('firms')),fmtMoney(state.debts.firms),debtNamed('firms')?'платежи и история':'✏️ назови: кому должен')}${cell('pay','i-calendar','Платёж / месяц',fmtMoney(state.debts.monthlyPayment||0),payShare?`≈ ${payShare}% от плана дохода`:'изменить')}${cell('paid','i-check','Погашено',fmtMoney(debtPaid),'от стартовой суммы','blue')}</div>`;
     $$('[data-debt-open]').forEach(b=>b.onclick=()=>b.dataset.debtOpen==='pay'?openDebtEdit():openDebtHistory(b.dataset.debtOpen))}
-  renderDebtChart();renderDebtPlan();renderBudgets();renderMoneyCharts();renderMoneyV57();
+  renderDebtChart();renderDebtPlan();renderFreedomPath();renderBudgets();renderMoneyCharts();renderMoneyV57();
 }
 
 function renderNotes(){
@@ -4512,7 +4609,7 @@ function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
   if(!isProfit){$$('[data-expense-quick]').forEach(btn=>btn.onclick=()=>{const v=btn.dataset.expenseQuick;$('moneyType').value=v;$$('[data-expense-quick]').forEach(x=>x.classList.toggle('active',x===btn));syncCustomVisibility();autosave();if(v==='Другое')setTimeout(()=>$('moneyCustomCategory')?.focus(),30)})}
   if($('moneyDebtPay')){$('moneyDebtPay').checked=!!draft.debtPay;$('moneyDebtWrap').style.display=draft.debtPay?'block':'none';if($('moneyDebtType'))$('moneyDebtType').value=draft.debtType||'bank'}
   syncCustomVisibility();
-  $('saveMoneyBtn').onclick=()=>{const amount=Number($('moneyAmount').value),dateKey=$('moneyDate').value||moneyViewDate||keyDay();if(!(amount>0)){toast('Укажи сумму');return}const at=moneyDateIso(dateKey,editItem?editItem.at:''),common={amount,at,dateKey,note:$('moneyNote').value.trim()};if(editing){const old=Number(editItem.amount)||0;if(!isProfit&&editItem.debtPayment)state.debts[editItem.debtPayment]=Math.max(0,Number(state.debts[editItem.debtPayment]||0)+old);Object.assign(editItem,common);if(isProfit){const g=normalizeProfitSource($('moneyType').value);editItem.source=g;editItem.sourceGroup=g}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';Object.assign(editItem,{category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;saveState();closeModal();renderAll();toast('Операция изменена','Все показатели и графики пересчитаны.');return}if(isProfit){const g=normalizeProfitSource($('moneyType').value);state.profits.push({...common,id:uid(),source:g,sourceGroup:g})}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';state.expenses.push({...common,id:uid(),category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;if(noticeAllowed('finance'))logNotice(isProfit?'Доход добавлен':'Расход добавлен',`${isProfit?'+':'−'}${fmtMoney(amount)} · ${isProfit?normalizeProfitSource($('moneyType').value):($('moneyType').value==='Другое'?(String($('moneyCustomCategory')?.value||'').trim()||'Другое'):$('moneyType').value)}`,'finance',true);saveState();closeModal();renderAll();toast(isProfit?'Прибыль добавлена':'Расход добавлен','Цель, капитал, графики и шкалы обновлены.')};focusSoon('moneyAmount',50)
+  $('saveMoneyBtn').onclick=()=>{const amount=Number($('moneyAmount').value),dateKey=$('moneyDate').value||moneyViewDate||keyDay();if(!(amount>0)){toast('Укажи сумму');return}const at=moneyDateIso(dateKey,editItem?editItem.at:''),common={amount,at,dateKey,note:$('moneyNote').value.trim()};if(editing){const old=Number(editItem.amount)||0;if(!isProfit&&editItem.debtPayment)state.debts[editItem.debtPayment]=Math.max(0,Number(state.debts[editItem.debtPayment]||0)+old);Object.assign(editItem,common);if(isProfit){const g=normalizeProfitSource($('moneyType').value);editItem.source=g;editItem.sourceGroup=g}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';Object.assign(editItem,{category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;saveState();closeModal();renderAll();toast('Операция изменена','Все показатели и графики пересчитаны.');return}if(isProfit){const g=normalizeProfitSource($('moneyType').value);state.profits.push({...common,id:uid(),source:g,sourceGroup:g})}else{const selected=$('moneyType').value.trim(),custom=String($('moneyCustomCategory')?.value||'').trim(),cat=selected==='Другое'?(custom||'Другое'):selected,debtPay=!!$('moneyDebtPay')?.checked,debtType=$('moneyDebtType')?.value||'bank';state.expenses.push({...common,id:uid(),category:cat,personal:['Личное','Ресторан','Лекарства','Компьютерные игры','Одежда','Транспорт','Еда','Семья'].includes(cat),categoryIcon:catIcon(cat)||(selected==='Другое'?'🧾':'•'),customCategory:selected==='Другое'?custom:'',debtPayment:debtPay?debtType:''});if(debtPay)state.debts[debtType]=Math.max(0,Number(state.debts[debtType]||0)-amount)}moneyViewDate=dateKey;if(noticeAllowed('finance'))logNotice(isProfit?'Доход добавлен':'Расход добавлен',`${isProfit?'+':'−'}${fmtMoney(amount)} · ${isProfit?normalizeProfitSource($('moneyType').value):($('moneyType').value==='Другое'?(String($('moneyCustomCategory')?.value||'').trim()||'Другое'):$('moneyType').value)}`,'finance',true);saveState();closeModal();renderAll();toast(isProfit?'Прибыль добавлена':'Расход добавлен','Цель, капитал, графики и шкалы обновлены.');if(isProfit&&splitTargets().length)setTimeout(()=>openIncomeSplit(amount,dateKey),0)};focusSoon('moneyAmount',50)
 }
 
 // a live goal preview inside the goal forms: the ring, «было → станет», what is left and what to put aside each month
@@ -4573,14 +4670,14 @@ function openDebtHistory(focus='all'){
   <div class="jl-dh-top"><div class="${focus==='bank'?'on':''}" data-dh="bank"><small>${esc(debtLabel('bank'))}</small><b>${esc(fmtMoney(state.debts.bank))}</b></div><div class="${focus==='firms'?'on':''}" data-dh="firms"><small>${esc(debtLabel('firms'))}</small><b>${esc(fmtMoney(state.debts.firms))}</b></div><div class="${!who?'on':''}" data-dh="all"><small>Всего</small><b>${esc(fmtMoney(debtTotal()))}</b></div></div>
   <section class="jl-dh-sec"><h3>💸 Платежи${pays.length?` · ${pays.length} на ${esc(fmtMoney(paidSum))}`:''}</h3>${payRows||'<div class="v-empty">Платежей по долгу ещё нет. Внеси первый — кнопкой ниже.</div>'}</section>
   <section class="jl-dh-sec"><h3>📉 Как менялся долг</h3>${histRows||'<div class="v-empty">История появится после первого изменения.</div>'}</section>
-  <div class="jl-dh-actions"><button class="btn primary" type="button" id="dhPay">${svgIcon('i-transfer')} Внести платёж</button><button class="btn" type="button" id="dhEdit">${svgIcon('i-pencil')} Изменить суммы</button></div>`);
+  <div class="jl-dh-actions"><button class="btn primary" type="button" id="dhPay">${svgIcon('i-transfer')} Внести платёж</button><button class="btn" type="button" id="dhEdit">${svgIcon('i-pencil')} ${(who?debtNamed(who):debtNamed('bank')&&debtNamed('firms'))?'Изменить суммы':'Назвать и изменить'}</button></div>`);
   $('closeModalBtn').onclick=closeModal;
   $$('[data-dh]').forEach(b=>b.onclick=()=>openDebtHistory(b.dataset.dh));
   $('dhPay').onclick=()=>{closeModal();openTransferForm({dir:'to-debt',debt:who||'bank'})};
   $('dhEdit').onclick=()=>{closeModal();openDebtEdit()};
 }
 function openDebtEdit(){
-  const d=state.drafts?.debt||{};openModal(`<div class="close-row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Обязательства</div><h2>Долги</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="grid g2"><div class="field"><label for="dnb">Название</label><input id="dnb" maxlength="24" value="${esc(d.bankName??debtLabel('bank'))}" placeholder="Долг 1"></div><div class="field"><label for="db">Сумма</label><input id="db" type="number" min="0" value="${esc(d.bank??state.debts.bank)}"></div></div><div class="grid g2"><div class="field"><label for="dnf">Название</label><input id="dnf" maxlength="24" value="${esc(d.firmsName??debtLabel('firms'))}" placeholder="Долг 2"></div><div class="field"><label for="df">Сумма</label><input id="df" type="number" min="0" value="${esc(d.firms??state.debts.firms)}"></div></div><div class="field"><label>Обязательный платёж / месяц</label><input id="dp" type="number" min="0" value="${esc(d.payment??state.debts.monthlyPayment)}"></div><div class="sub">Изменения долгов сохраняются автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveDebtBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;const autosave=()=>{state.debts.bank=Math.max(0,Number($('db').value)||0);state.debts.firms=Math.max(0,Number($('df').value)||0);state.debts.monthlyPayment=Math.max(0,Number($('dp').value)||0);state.debts.labels={bank:cleanLabel($('dnb').value)||'Долг 1',firms:cleanLabel($('dnf').value)||'Долг 2'};saveDraft('debt',{bank:$('db').value,firms:$('df').value,payment:$('dp').value,bankName:$('dnb').value,firmsName:$('dnf').value});renderMoney();renderTodayLight()};['db','df','dp','dnb','dnf'].forEach(id=>$(id).addEventListener('input',autosave));$('saveDebtBtn').onclick=()=>{autosave();clearDraft('debt');closeModal();renderMoney();toast('Долги обновлены')}
+  const d=state.drafts?.debt||{};openModal(`<div class="close-row"><div><div class="eyebrow"><svg class="ui-icon"><use href="#i-card"></use></svg> Обязательства</div><h2>Долги</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="grid g2"><div class="field"><label for="dnb">Кому должен</label><input id="dnb" maxlength="24" value="${esc(d.bankName??(debtNamed('bank')?debtLabel('bank'):''))}" placeholder="Банк, человек, магазин…"></div><div class="field"><label for="db">Сумма</label><input id="db" type="number" min="0" value="${esc(d.bank??state.debts.bank)}"></div></div><div class="grid g2"><div class="field"><label for="dnf">Второй долг — кому</label><input id="dnf" maxlength="24" value="${esc(d.firmsName??(debtNamed('firms')?debtLabel('firms'):''))}" placeholder="Банк, человек, магазин…"></div><div class="field"><label for="df">Сумма</label><input id="df" type="number" min="0" value="${esc(d.firms??state.debts.firms)}"></div></div><div class="field"><label>Обязательный платёж / месяц</label><input id="dp" type="number" min="0" value="${esc(d.payment??state.debts.monthlyPayment)}"></div><div class="sub">Изменения долгов сохраняются автоматически.</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveDebtBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;const autosave=()=>{state.debts.bank=Math.max(0,Number($('db').value)||0);state.debts.firms=Math.max(0,Number($('df').value)||0);state.debts.monthlyPayment=Math.max(0,Number($('dp').value)||0);state.debts.labels={bank:cleanLabel($('dnb').value)||(debtNamed('bank')?debtLabel('bank'):'Долг 1'),firms:cleanLabel($('dnf').value)||(debtNamed('firms')?debtLabel('firms'):'Долг 2')};saveDraft('debt',{bank:$('db').value,firms:$('df').value,payment:$('dp').value,bankName:$('dnb').value,firmsName:$('dnf').value});renderMoney();renderTodayLight()};['db','df','dp','dnb','dnf'].forEach(id=>$(id).addEventListener('input',autosave));$('saveDebtBtn').onclick=()=>{autosave();clearDraft('debt');closeModal();renderMoney();toast('Долги обновлены')}
 }
 function openNotifications(){closeModal();showView('viewNotifications')}
 
@@ -4588,41 +4685,48 @@ function aiSourceConsent(){
   const a=state.ai?.consent||{};
   return {goal:a.goal!==false,money:a.money!==false,reports:a.reports!==false,notes:a.notes===true};
 }
+// 74.2: every failure reads «what happened. what to do» in Russian — whatever answered (the function, the Supabase gateway or nothing)
+const AI_FALLBACK=' Пока работает «Полный разбор» — без AI, на телефоне.';
 function normalizeAIError(data,status){
-  const raw=String(data?.error||data?.message||'').trim();
-  if(status===401||status===403)return 'Нужен вход в '+APP_NAME+'. Войди в аккаунт и повтори запрос.';
-  if(status===429||/quota|rate.?limit|exceeded/i.test(raw))return /[а-яё]/i.test(raw)?raw:'Бесплатный лимит Gemini на сегодня исчерпан. Он обновится около 12:00–13:00. Пока работает «Полный разбор» — он считает всё на телефоне сам.';
-  if(status===503)return raw||'Gemini API-ключ ещё не настроен в Supabase Secrets.';
-  return raw||('AI HTTP '+status);
+  const raw=String(data?.error||data?.message||data?.msg||'').trim(),ru=/[а-яё]/i.test(raw);
+  if(ru)return raw;
+  if(status===401||status===403)return 'Вход в '+APP_NAME+' устарел. Выйди из аккаунта и войди снова, потом повтори.';
+  if(status===429||/quota|rate.?limit|exceeded|exhausted/i.test(raw))return 'Лимит запросов к Gemini исчерпан. Попробуй позже (лимит Google обновляется раз в сутки).'+AI_FALLBACK;
+  if(status===404)return 'Сервер AI не найден (функция не развёрнута). Напиши разработчику.'+AI_FALLBACK;
+  if(status===546||/WORKER_LIMIT|resource limit/i.test(raw))return 'Сервер AI перегружен. Попробуй через минуту.'+AI_FALLBACK;
+  if(status===502||status===503||status===504)return 'Google или сервер AI сейчас не отвечает ('+status+'). Попробуй через минуту.'+AI_FALLBACK;
+  if(status>=500)return 'Ошибка на сервере AI ('+status+'). Попробуй через минуту; если повторяется — напиши разработчику.'+AI_FALLBACK;
+  return 'AI не ответил (код '+status+'). Попробуй ещё раз через минуту.'+AI_FALLBACK;
 }
 async function getAISessionToken(){
   await cloudUser();
   let a=cloudAuth();
   if(!a?.access_token){await cloudRefresh();a=cloudAuth()}
-  if(!a?.access_token)throw new Error('Сначала войди в Supabase-аккаунт '+APP_NAME+'.');
+  if(!a?.access_token)throw new Error('AI работает только со входом в аккаунт. Открой «Настройки → Аккаунт», войди и повтори.');
   return a.access_token;
 }
 // after this long without an answer Google is usually overloaded (503) and the function is already trying the next model
 const AI_SLOW_MS=7000,AI_SLOW_TEXT='⏳ Google перегружен, пробую другую модель…';
 async function callAI(options={}){
-  if(state.ai?.enabled===false)throw new Error('AI-анализ отключён в настройках.');
-  if('onLine' in navigator&&navigator.onLine===false)throw new Error('Нет интернет-соединения. '+APP_NAME+' продолжает работать офлайн.');
+  if(state.ai?.enabled===false)throw new Error('AI-анализ выключен. Включи его в «Настройки → AI».');
+  if('onLine' in navigator&&navigator.onLine===false)throw new Error('Нет интернета, поэтому AI не ответит. Подключись к сети и повтори — '+APP_NAME+' пока работает офлайн.'+AI_FALLBACK);
   const token=await getAISessionToken();
   const headers={'Content-Type':'application/json','apikey':SUPABASE_CONFIG.publishableKey,'Authorization':'Bearer '+token,'X-Life-Control':'1'};
   const body=options.ping?{ping:true}:{mode:options.mode||'life',today:keyDay(),facts:options.facts?JSON.parse(JSON.stringify(options.facts)):undefined,scope:{goal:options.scope?.goal!==false,money:options.scope?.money!==false,reports:options.scope?.reports!==false,notes:options.scope?.notes===true,webSearch:options.scope?.webSearch===true}};
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),50000),slow=options.onSlow?setTimeout(()=>{try{options.onSlow()}catch(e){}},AI_SLOW_MS):0;
   let res;
   try{res=await fetch(AI_FUNCTION_URL,{method:'POST',headers,body:JSON.stringify(body),signal:controller.signal,cache:'no-store'})}
-  catch(e){if(e?.name==='AbortError')throw new Error('Gemini не ответил за 50 секунд. Проверь интернет.');throw new Error('Не удалось связаться с Supabase AI. Проверь интернет-соединение.')}
+  catch(e){if(e?.name==='AbortError')throw new Error('Google не ответил за 50 секунд. Проверь интернет и попробуй ещё раз.'+AI_FALLBACK);throw new Error('Нет связи с сервером AI. Проверь интернет и попробуй ещё раз.'+AI_FALLBACK)}
   finally{clearTimeout(timer);clearTimeout(slow)}
-  const raw=await res.text();let data={};try{data=JSON.parse(raw||'{}')}catch(e){}
+  const raw=await res.text().catch(()=>'');let data={};try{data=JSON.parse(raw||'{}')}catch(e){}
   if(!res.ok){
     if((res.status===401||res.status===403)&&cloudAuth()?.refresh_token){
-      await cloudRefresh();const rt=cloudAuth()?.access_token;
-      if(rt){const retry=await fetch(AI_FUNCTION_URL,{method:'POST',headers:{...headers,Authorization:'Bearer '+rt},body:JSON.stringify(body),cache:'no-store'});const rr=await retry.text();let rd={};try{rd=JSON.parse(rr||'{}')}catch(e){};if(retry.ok)return rd;throw new Error(normalizeAIError(rd,retry.status))}
-    }
-    throw new Error(normalizeAIError(data,res.status));
+      try{await cloudRefresh()}catch(e){}const rt=cloudAuth()?.access_token;
+      if(rt){let retry;try{retry=await fetch(AI_FUNCTION_URL,{method:'POST',headers:{...headers,Authorization:'Bearer '+rt},body:JSON.stringify(body),cache:'no-store'})}catch(e){throw new Error('Нет связи с сервером AI. Проверь интернет и попробуй ещё раз.'+AI_FALLBACK)}const rr=await retry.text();let rd={};try{rd=JSON.parse(rr||'{}')}catch(e){};if(!retry.ok)throw new Error(normalizeAIError(rd,retry.status));data=rd}
+      else throw new Error(normalizeAIError(data,res.status));
+    }else throw new Error(normalizeAIError(data,res.status));
   }
+  if(!options.ping&&!String(data?.output_text||'').trim())throw new Error('Google прислал пустой ответ. Нажми ещё раз — обычно со второго раза приходит.'+AI_FALLBACK);
   return data;
 }
 function sourcesHtml(sources){
@@ -4634,7 +4738,7 @@ function openGeminiAnalysis(){
   openModal('<div class="close-row"><div><div class="eyebrow">'+APP_NAME+' AI</div><h2>Анализ моей жизни</h2><div class="sub">AI получает только выбранные данные из твоего аккаунта. Запрос запускается только вручную.</div></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="card" style="margin-top:12px;padding:13px;background:var(--soft)"><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span>Что использовать</div><div class="stack" style="margin-top:8px"><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span><input id="aiGoal" type="checkbox" '+(consent.goal?'checked':'')+'> Цель и её прогресс</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-money"></use></svg></span><input id="aiMoney" type="checkbox" '+(consent.money?'checked':'')+'> Деньги, доходы, расходы и долги</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-report"></use></svg></span><input id="aiReports" type="checkbox" '+(consent.reports?'checked':'')+'> Итоги и этапы дня</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-note"></use></svg></span><input id="aiNotes" type="checkbox" '+(consent.notes?'checked':'')+'> Заметки (последние 15)</label><label class="small"><span class="kpi-icon"><svg class="ui-icon"><use href="#i-arrow-right"></use></svg></span><input id="aiWeb" type="checkbox" '+(state.ai?.webSearch?'checked':'')+'> Проверять актуальные внешние факты через Google</label></div><div class="sub" style="margin-top:8px">Основные данные сервер читает из твоей строки life_state в Supabase. Полный JSON состояния из браузера не отправляется.</div></div><div style="margin-top:10px"><button class="btn primary" id="aiRunBtn" style="width:100%"><svg class="ui-icon"><use href="#i-spark"></use></svg> Запустить AI-анализ</button></div><div class="ai-result" id="aiResult" style="margin-top:12px"></div>');
   $('closeModalBtn').onclick=closeModal;
   $('aiWeb').onchange=()=>{state.ai.webSearch=$('aiWeb').checked;saveState()};
- $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult'),runBtn=$('aiRunBtn');runBtn.disabled=true;box.innerHTML='<div class="empty">AI читает твои данные: деньги, долг, цель, дни, привычки и задачи…</div>';try{if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}const data=await callAI({scope:c,facts:lifeFacts(),onSlow:()=>{if($('aiResult')===box)box.innerHTML='<div class="empty" data-ai-slow>'+AI_SLOW_TEXT+'</div>'}}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item jl-ai-result"><b>Разбор твоей жизни · '+esc(data.model||'Gemini')+'</b>'+aiTextHtml(entry.result)+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Gemini сейчас не ответил</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{runBtn.disabled=false}};
+ $('aiRunBtn').onclick=async()=>{const c={goal:$('aiGoal').checked,money:$('aiMoney').checked,reports:$('aiReports').checked,notes:$('aiNotes').checked,webSearch:$('aiWeb').checked};state.ai.consent=c;state.ai.webSearch=c.webSearch;saveState();const box=$('aiResult'),runBtn=$('aiRunBtn');runBtn.disabled=true;box.innerHTML='<div class="empty">AI читает твои данные: деньги, долг, цель, дни, привычки и задачи…</div>';try{if(cloudAuth()){try{await cloudAutoSync()}catch(e){}}const data=await callAI({scope:c,facts:lifeFacts(),onSlow:()=>{if($('aiResult')===box)box.innerHTML='<div class="empty" data-ai-slow>'+AI_SLOW_TEXT+'</div>'}}),entry={id:uid(),at:new Date().toISOString(),scope:c,result:String(data.output_text||''),sources:Array.isArray(data.sources)?data.sources:[]};state.ai.lastAnalysisAt=entry.at;state.ai.history.unshift(entry);state.ai.history=state.ai.history.slice(0,60);saveState();if(cloudAuth())cloudPush().catch(()=>{});box.innerHTML='<div class="analysis-item jl-ai-result"><b>Разбор твоей жизни · '+esc(data.model||'Gemini')+'</b>'+aiTextHtml(entry.result)+sourcesHtml(entry.sources)+'<div class="notice-time" style="margin-top:8px">'+esc(fmtDateTime(new Date(entry.at)))+'</div></div>';toast('AI-анализ сохранён')}catch(e){box.innerHTML='<div class="analysis-item jl-ai-fail"><b>⏳ Ответ AI не пришёл</b><div>'+esc(e.message||e)+'</div><div style="margin-top:12px"><button class="btn primary small" id="localFallbackBtn"><svg class="ui-icon"><use href="#i-report"></use></svg> Показать полный разбор без AI</button></div></div>';$('localFallbackBtn')?.addEventListener('click',()=>{closeModal();openLifeAnalysis()})}finally{runBtn.disabled=false}};
 }
 function validateDaySteps(){
   const steps=state.day.steps;
@@ -4709,6 +4813,23 @@ function runSelfTest(){
 }
 
 function refreshCloudUI(){const a=cloudAuth(),st=$('cloudState'),u=$('cloudUserState'),net=$('cloudNetworkState'),sync=$('cloudSyncState');if(!st)return;if(a?.user?.email){st.textContent='Подключено';u.textContent=a.user.email;if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'В сети';if(sync&&sync.textContent==='Проверяется…')sync.textContent='Автоматически'}else{st.textContent='Войди';u.textContent='и данные будут на всех устройствах';if(net)net.textContent=('onLine' in navigator&&navigator.onLine===false)?'Нет сети':'данные только на этом устройстве';if(sync)sync.textContent='Нет входа'}}
+function weekSummary(){const w=state.day?.week||{},a=WEEK_DAYS.filter(([k])=>w[k]);if(!a.length)return 'Каждый день одинаково · '+(state.day.steps[0]?.time||'')+'–'+(state.day.steps.at(-1)?.end||'');
+  return WEEK_DAYS.map(([k,n])=>n+' '+(w[k]?.off?'выходной':w[k]?w[k].t[0][0]+'–'+w[k].t[2][1]:'обычно')).join(' · ')}
+function openWeekSchedule(){
+  const base=state.day.steps,w=state.day.week||{},row=([k,n])=>{const v=w[k],mode=v?.off?'off':v?'own':'base',t=v?.t||base.map(s=>[s.time,s.end]);
+    return `<div class="jl-wk-day" data-wk="${k}"><b>${n}</b><select id="wkMode${k}" aria-label="${n}: какой день"><option value="base" ${mode==='base'?'selected':''}>Как обычно</option><option value="own" ${mode==='own'?'selected':''}>Свои часы</option><option value="off" ${mode==='off'?'selected':''}>Выходной</option></select><span></span>
+    <div class="grid g2" id="wkTimes${k}" style="grid-column:1/-1" ${mode==='own'?'':'hidden'}>${base.map((s,i)=>`<div class="field"><label for="wkS${k}_${i}">${esc(s.title)}</label><div class="grid g2"><input id="wkS${k}_${i}" type="time" value="${esc(t[i][0])}" aria-label="${n}, ${esc(s.title)}: начало"><input id="wkE${k}_${i}" type="time" value="${esc(t[i][1])}" aria-label="${n}, ${esc(s.title)}: конец"></div></div>`).join('')}</div></div>`};
+  openModal(`<div class="close-row"><div><div class="eyebrow">Ритм дня</div><h2>График по дням недели</h2><div class="sub">Обычно: ${esc(base.map(s=>s.title+' '+s.time+'–'+s.end).join(' · '))}. В выходной напоминаний этапов нет.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
+  <div class="jl-wk-days">${WEEK_DAYS.map(row).join('')}</div><div class="v-sub" id="wkErr" aria-live="polite"></div><div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn primary" type="button" id="wkSave">${svgIcon('i-check')} Сохранить график</button></div>`);
+  $('closeModalBtn').onclick=closeModal;
+  for(const [k] of WEEK_DAYS)$('wkMode'+k).onchange=e=>{$('wkTimes'+k).hidden=e.target.value!=='own'};
+  $('wkSave').onclick=()=>{const out={};
+    for(const [k,n] of WEEK_DAYS){const m=$('wkMode'+k).value;if(m==='off'){out[k]={off:true};continue}if(m!=='own')continue;
+      const v=cleanWeekDay({t:base.map((_,i)=>[$('wkS'+k+'_'+i).value,$('wkE'+k+'_'+i).value])});
+      if(!v){setText('wkErr',n+': проверь время — конец этапа позже начала, этапы не налезают друг на друга.');$('wkS'+k+'_0').focus();return}out[k]=v}
+    if(Object.keys(out).length)state.day.week=out;else delete state.day.week;
+    saveState();scheduleNative();closeModal();renderAll();toast('График сохранён',weekSummary().slice(0,110))};
+}
 function openSettings(){
   const steps=state.day.steps;const stepDraft=Array.isArray(state.drafts?.settingsSteps)?state.drafts.settingsSteps:steps;
   const stepFields=steps.map((st,i)=>{const src=stepDraft[i]||st;return `<div class="card" style="padding:12px"><div class="row"><strong><svg class="ui-icon" style="width:14px;height:14px;vertical-align:-2px;color:var(--blue)"><use href="#i-arrow-right"></use></svg> Этап ${i+1}</strong><span class="small muted">в расписании</span></div><div class="grid g2" style="margin-top:9px"><div class="field"><label>Название</label><input id="dsTitle${i}" value="${esc(src.title)}"></div><div class="field"><label>Время начала / окончания</label><div class="grid g2"><input id="dsTime${i}" type="time" value="${esc(src.time)}" aria-label="Начало этапа ${i+1}"><input id="dsEnd${i}" type="time" value="${esc(src.end)}" aria-label="Окончание этапа ${i+1}"></div></div></div><div class="field" style="margin-top:9px"><label>Описание</label><input id="dsText${i}" value="${esc(src.text)}"></div><div class="field" style="margin-top:9px"><label>Важные занятия, по одному в строке</label><textarea id="dsDetails${i}" placeholder="Например: начать с главного\nзакрыть начатое">${esc((src.details||[]).join('\n'))}</textarea></div></div>`}).join('');
@@ -4857,7 +4978,7 @@ function dayLedger(key=keyDay()){
   const sum=f=>rows.filter(f).reduce((a,t)=>a+t.amount,0);
   const inc=sum(t=>t.kind==='income'),out=sum(t=>t.kind==='expense'&&!t.xfer),debt=sum(t=>t.kind==='debt'),goal=sum(t=>t.kind==='transfer'&&t.out)-sum(t=>t.kind==='transfer'&&!t.out);
   const cats={};for(const t of rows)if(t.kind==='expense'&&!t.xfer){const k=t.title||'Расход';cats[k]=cats[k]||{v:0,e:t.emoji||'🧾'};cats[k].v+=t.amount}
-  const tasks=todayTasks(),habits=(state.habits||[]).filter(h=>habitDue(h,new Date())),steps=state.day?.steps||[],rep=dayReport();
+  const tasks=todayTasks(),habits=(state.habits||[]).filter(h=>habitDue(h,new Date())),steps=daySteps(),rep=dayReport();
   const dd=key===keyDay()?dailyState():(state.daily?.[key]||{}),gActs=[];
   for(const st of steps)if(dd.stageDone?.[st.id]){const i=steps.indexOf(st),f=key===keyDay()?stageFocus(i,key):null;gActs.push((f?f.main:st.title))}
   if(dd.goalDone)gActs.push(dd.goalDone.text||'главное по цели');
@@ -4881,6 +5002,21 @@ function renderDayLedger(){
   ${L.cats.length?`<div class="jl-lg-where"><small>Куда ушло</small>${L.cats.slice(0,5).map(([k,c],i)=>`<div class="jl-lg-bar" style="--i:${i}"><span>${esc(c.e)} ${esc(k)}</span><i style="--w:${Math.max(6,c.v/max*100)}%"></i><b>${m(c.v)}</b></div>`).join('')}</div>`:'<div class="jl-lg-empty">Сегодня трат нет — отличный день для цели 🌿</div>'}
   <div class="jl-lg-goal ${L.gActs.length?'on':''}"><small>🎯 Для цели «${esc(String(state.goal?.title||'').slice(0,40))}» сегодня</small>${L.gActs.length?`<ul>${L.gActs.slice(0,6).map(t=>`<li>${esc(String(t).slice(0,120))}</li>`).join('')}</ul>`:'<span>Пока ничего — отметь «Сделал» у главного этапа или в свободном времени</span>'}</div>
   <div class="jl-lg-pills">${pill('✅','задачи',L.tasks)}${pill('🔥','привычки',L.habits)}${pill('🗓️','этапы',L.steps)}</div>`;
+}
+/* 74.2: the evening in 30 seconds — one tap on what got in the way, one tap to close; what was done and the step for tomorrow
+   are written from the day's facts when the fields are empty (the person can still type their own words) */
+function quickDayFacts(){
+  const L=dayLedger(),cur=currencyLabel(),parts=[];
+  if(L.gActs.length)parts.push('Для цели: '+L.gActs.slice(0,3).join(', '));
+  if(L.tasks[1])parts.push(`задачи ${L.tasks[0]}/${L.tasks[1]}`);if(L.habits[1])parts.push(`привычки ${L.habits[0]}/${L.habits[1]}`);
+  if(L.inc)parts.push('заработал '+fmtShort(L.inc)+' '+cur);if(L.out)parts.push('потратил '+fmtShort(L.out)+' '+cur);if(L.debt)parts.push('в долг '+fmtShort(L.debt)+' '+cur);
+  const tm=new Date();tm.setDate(tm.getDate()+1);const tk=keyDay(tm),open=(state.tasks||[]).filter(t=>!t.done&&(t.date===tk||t.date===keyDay())).sort((a,b)=>(a.date+(a.time||'99')).localeCompare(b.date+(b.time||'99')));
+  return {done:parts.join('; ')||'День прожит, записей нет',tomorrow:open[0]?.title||goalFocusLine().main||'Записать все траты дня'};
+}
+function quickCloseDay(){
+  const f=quickDayFacts();if(!$('rDone').value.trim())$('rDone').value=f.done;if(!$('rTomorrow').value.trim())$('rTomorrow').value=f.tomorrow;
+  if(!$('rBlock').value.trim()){const on=document.querySelector('[data-qblock][aria-pressed="true"]');if(on)$('rBlock').value=on.dataset.qblock}
+  closeDay();
 }
 function closeDay(){
   const r=dayReport();r.done=$('rDone').value.trim();r.block=$('rBlock').value.trim();r.tomorrow=$('rTomorrow').value.trim();
@@ -4972,6 +5108,27 @@ function renderDebtPlan(){
   $('dpPay').oninput=e=>{state.debts.monthlyPayment=Math.max(0,Number(e.target.value)||0);left();queueAutosave()};
   ['dpIncome','dpPay'].forEach(id=>$(id).onchange=()=>commit(()=>{}));
   const r=$('dpRange');let raf=0;r.oninput=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>upd(Number(r.value)))};r.onchange=()=>{state.debts.whatIf=Number(r.value);el.dataset.sig=[debt,pay,pct,Number(r.value),max].join('|');saveState()};
+}
+/* 74.2: «Путь к свободе» — the way from the starting debt to zero in 5 stops (25 %, 50 %, 75 %, the last payment);
+   each stop reached for the first time is a win: confetti, a toast and a line in the notifications (debts.freedomWon remembers it). */
+function freedomInfo(){const base=Math.max(Number(state.debtBaseline)||0,debtTotal()),left=debtTotal(),paid=Math.max(0,base-left),pct=base>0?Math.min(100,Math.floor(paid/base*100)):0;return {base,left,paid,pct,won:Array.isArray(state.debts?.freedomWon)?state.debts.freedomWon:[]}}
+function renderFreedomPath(){
+  const el=$('freedomPath');if(!el)return;const f=freedomInfo();
+  if(!(f.base>0)){if(el.innerHTML)el.innerHTML='';el.dataset.sig='';return}
+  const sig=[f.base,f.left,f.won.join(','),currencyLabel()].join('|');if(el.dataset.sig===sig)return;el.dataset.sig=sig;
+  const next=FREEDOM_STOPS.find(x=>f.pct<x),nextSum=next?Math.max(0,Math.ceil(f.base*next/100)-f.paid):0;
+  const stops=[0,...FREEDOM_STOPS].map(x=>`<li class="${f.pct>=x?'on':''}${x===next?' next':''}" style="--x:${x}%"><i aria-hidden="true">${x===100?'🕊️':f.pct>=x?'★':'·'}</i><small>${x===0?'старт':x===100?'свобода':x+'%'}</small></li>`).join('');
+  el.innerHTML=`<div class="jl-fpath-head"><b>🛤️ Путь к свободе</b><small>${f.left>0?'выплачено '+f.pct+'%':'ты свободен от долга'}</small></div>
+  <div class="jl-fpath-track"><i style="transform:scaleX(${(f.pct/100).toFixed(3)})"></i></div><ol class="jl-fpath-stops">${stops}</ol>
+  <div class="jl-fpath-foot">${f.left>0?`До ${next===100?'свободы':'победы «'+next+'%»'} — ${esc(fmtMoney(nextSum))} · ${esc(debtFreeLine())}`:`Все ${esc(fmtMoney(f.base))} выплачены. Теперь эти деньги работают на цель.`}</div>`;
+}
+function checkFreedomPath(){
+  const f=freedomInfo();if(!(f.base>0)||!state.debts)return;
+  const reached=FREEDOM_STOPS.filter(x=>f.pct>=x&&(x<100||f.left<=0)),fresh=reached.filter(x=>!f.won.includes(x));
+  if(!fresh.length)return;state.debts.freedomWon=[...new Set([...f.won,...fresh])].sort((a,b)=>a-b);
+  const top=Math.max(...fresh),title=top===100?'🕊️ Ты свободен от долга!':`🏆 Победа: выплачено ${top}% долга`,body=top===100?`Все ${fmtMoney(f.base)} выплачены. Это твоя большая победа.`:`Осталось ${fmtMoney(f.left)}. ${debtFreeLine()}.`;
+  if(noticeAllowed('finance'))logNotice(title,body,'finance',true);saveState();renderFreedomPath();
+  setTimeout(()=>{toast(title,body);haptic(24);celebrate()},900); // after the toast of the payment itself
 }
 function debtFreeLine(){const debt=debtTotal(),pay=Math.max(0,Number(state.debts?.monthlyPayment)||0);if(!(debt>0))return 'Долгов нет';if(!(pay>0))return 'Платёж не задан';return 'Свободен от долга: '+monthsLater(payoffMonths(debt,pay))}
 
@@ -5082,7 +5239,7 @@ let _widgetSig='';
 function pushWidget(){
   const br=window.AndroidBridge;if(typeof br?.updateWidget!=='function')return;
   const d=new Date(),t=keyDay(d);d.setDate(d.getDate()+1);const t2=keyDay(d);
-  const data={steps:(state.day?.steps||[]).map(s=>({t:s.time,e:s.end,title:String(s.title||'').slice(0,40)})),tasks:(state.tasks||[]).filter(x=>x.date===t||x.date===t2).slice(0,60).map(x=>({id:x.id,date:x.date,time:x.time||'',title:String(x.title||'').slice(0,80),done:!!x.done}))};
+  const data={steps:daySteps().map(s=>({t:s.time,e:s.end,title:String(s.title||'').slice(0,40)})),tasks:(state.tasks||[]).filter(x=>x.date===t||x.date===t2).slice(0,60).map(x=>({id:x.id,date:x.date,time:x.time||'',title:String(x.title||'').slice(0,80),done:!!x.done}))};
   const sig=JSON.stringify(data);if(sig===_widgetSig)return;_widgetSig=sig;try{br.updateWidget(sig)}catch(e){}
 }
 function handleLaunch(){try{const a=window.AndroidBridge?.takeLaunch?.();if(a==='quickadd')setTimeout(()=>{showView('viewToday');openQuickAdd()},150)}catch(e){}}
@@ -5146,7 +5303,7 @@ const SUCCESS_IDEAS_BASE=[
 function successIdeas(){if(quoteSet()!=='hadith')return SUCCESS_IDEAS_BASE;const x=SUCCESS_IDEAS_BASE.slice();x[3]=['🕌','Намаз и тишина','без телефона, спокойно'];x[4]=['📖','Чтение 15 минут','книга о деньгах, деле или вере'];return x}
 function isWorkStage(s){return /работ/i.test(s?.title||'')}
 function freeWindows(){
-  const steps=state.day?.steps||[],out=[],wake=timeToMin(state.settings?.wakeTime||'06:30');
+  const steps=daySteps(),out=[],wake=timeToMin(state.settings?.wakeTime||'06:30');
   if(steps.length&&Number.isFinite(wake)&&wake<timeToMin(steps[0].time))out.push({from:wake,to:timeToMin(steps[0].time),title:'Утро'});
   for(const st of steps)if(!isWorkStage(st)&&!/итог/i.test(st.title||''))out.push({from:timeToMin(st.time),to:timeToMin(st.end),title:st.title});
   return out;
@@ -5157,7 +5314,7 @@ function nextTwoHour(){const m=nowMin();return twoHourSlots().find(x=>!x.work&&x
 // the free window shown in «Твой вечер» (the current one, else the next) and the day stage behind it
 function freePlanStage(){
   const m=nowMin(),wins=freeWindows(),w=wins.find(x=>m>=x.from&&m<x.to)||wins.find(x=>x.from>m);if(!w)return null;
-  const st=(state.day?.steps||[]).find(s=>s.title===w.title&&timeToMin(s.time)===w.from)||null;
+  const st=daySteps().find(s=>s.title===w.title&&timeToMin(s.time)===w.from)||null;
   return {...w,cur:m>=w.from&&m<w.to,st};
 }
 function renderFreePlan(){
@@ -5168,13 +5325,15 @@ function renderFreePlan(){
   const main=g.main||'шаг к цели';
   const SI=successIdeas(),ideas=SI.length?[0,1].map(k=>SI[(dayIndex()+k)%SI.length]):[];
   const off=state.settings?.every2h===false?'Напоминания о цели выключены в настройках':state.settings?.notifications===false?'Уведомления выключены':'';
-  const remind=off?`<span class="jl-bell" aria-hidden="true">🔕</span><span><b>${off}</b></span>`:nx?`<span class="jl-bell swing" aria-hidden="true">🔔</span><span><b>Напомню в <span data-next-2h>${esc(nx.time)}</span></b><small>через ${durText(Math.max(1,nx.min-Math.floor(m)))} · о главном по цели</small></span>`:`<span class="jl-bell" aria-hidden="true">🔔</span><span><b>Сегодня напоминаний о цели больше нет</b></span>`;
+  const remind=off?`<span class="jl-bell" aria-hidden="true">🔕</span><span><b>${off}</b></span>`:nx?`<span class="jl-bell swing" aria-hidden="true">🔔</span><span><b>Напомню в <span data-next-2h>${esc(nx.time)}</span></b><small>через <span data-free-left></span> · о главном по цели</small></span>`:`<span class="jl-bell" aria-hidden="true">🔔</span><span><b>Сегодня напоминаний о цели больше нет</b></span>`;
   const html=`<div class="jl-free-head"><span class="jl-emo" aria-hidden="true">🌙</span><div><b>${cur?'Твой вечер — сейчас':'Твой вечер · с '+fmtMin(w.from)}</b><small>${esc(w.title)} · ${fmtMin(w.from)}–${fmtMin(w.to)} · сначала главное по цели</small></div></div>`+
     `<div class="jl-free-note ${off?'off':''}" role="status">${remind}</div>`+
     `<button class="jl-free-item jl-free-goal ${gDone?'done':''}" type="button" data-free-goal aria-pressed="${gDone}"><span class="jl-emo" aria-hidden="true">🎯</span><span><small class="jl-free-k">Главное по цели «${esc(String(g.title).slice(0,40))}» · ${g.pct}%</small><b>${esc(String(main).slice(0,120))}</b><small>До цели: ${esc(goalLeftText())}</small></span><i class="jl-free-do">${gDone?svgIcon('i-check')+' Сделал':'Сделал'}</i></button>`+
     ideas.map(([e,t,why])=>{const done=!!fd[t];return `<button class="jl-free-item ${done?'done':''}" type="button" data-free="${esc(t)}" aria-pressed="${done}"><span class="jl-emo" aria-hidden="true">${e}</span><span><b>${esc(t)}</b><small>${esc(why)}</small></span><i class="jl-free-check">${svgIcon('i-check')}</i></button>`}).join('')+
     '';
-  if(box.dataset.sig===html)return;box.dataset.sig=html;box.innerHTML=html;
+  // 74.2: the minute countdown is updated alone — redrawing the block every minute could swallow a tap on «Сделал»
+  const left=box.querySelector('[data-free-left]');if(box.dataset.sig===html){if(left&&nx)textOf(left).v=durText(Math.max(1,nx.min-Math.floor(m)));return}box.dataset.sig=html;box.innerHTML=html;
+  if(nx)textOf(box.querySelector('[data-free-left]')).v=durText(Math.max(1,nx.min-Math.floor(m)));
   box.querySelectorAll('[data-free]').forEach(b=>b.onclick=()=>{const dd=dailyState();dd.freeDone=dd.freeDone||{};const t=b.dataset.free;dd.freeDone[t]=!dd.freeDone[t];saveState();renderFreePlan();if(dd.freeDone[t]){haptic(14);toast('Отлично! '+t,'Ещё один шаг к успеху')}});
   box.querySelector('[data-free-goal]').onclick=()=>{const dd=dailyState(),on=!(dd.goalDone||(w.st&&dd.stageDone?.[w.st.id]));if(!on)delete dd.goalDone;else dd.goalDone={at:new Date().toISOString(),text:String(main).slice(0,140)};if(w.st)stageMainDone(w.st.id,on);saveState();renderFreePlan();renderDayLedger();if(dd.goalDone){haptic(16);toast('Главное по цели сделано 🎯','Это пойдёт в итог дня')}};
 }
@@ -5189,7 +5348,7 @@ function goalFocusLine(){
 }
 function twoHourSlots(){
   if(state.settings?.every2h===false||state.settings?.notifications===false)return [];
-  const steps=state.day?.steps||[];if(!steps.length)return [];
+  const steps=daySteps();if(!steps.length)return [];
   const edges=steps.flatMap(st=>[timeToMin(st.time),timeToMin(st.end)]);
   const f=goalFocusLine(),out=[],seen=new Set(),facts=goalFacts(),d=dayIndex();
   const stageEnd=st=>stageSpan(steps.indexOf(st)).b,stageMainOf=st=>{const x=stageFocus(steps.indexOf(st));return x?x.main:(st?.title||'')};
@@ -5212,7 +5371,7 @@ function twoHourSlots(){
    Everything here is built from the user's data (stage tasks, goal tasks, the next goal stage, the goal's numbers),
    so the words change every day as the numbers change; a rotating fact (by day) keeps them from repeating. */
 function dayIndex(k=keyDay()){return Math.floor(Date.parse(k+'T12:00:00Z')/DAY_MS)||0}
-function stageSpan(i){const steps=state.day?.steps||[],st=steps[i];if(!st)return {a:0,b:0};const a=timeToMin(st.time);let b=timeToMin(st.end);if(b<=a)b=i<steps.length-1?timeToMin(steps[i+1].time):1440;return {a,b}}
+function stageSpan(i,d=new Date()){const steps=daySteps(d),st=steps[i];if(!st)return {a:0,b:0};const a=timeToMin(st.time);let b=timeToMin(st.end);if(b<=a)b=i<steps.length-1?timeToMin(steps[i+1].time):1440;return {a,b}}
 function isCloseStage(s){return /итог/i.test(s?.title||'')}
 // the next open goal stage and the share of it done (numbers + its tasks)
 function currentMilestone(){const ms=state.goal?.milestones||[],i=ms.findIndex(m=>!m.done);return i<0?null:{m:ms[i],i,n:ms.length}}
@@ -5239,7 +5398,7 @@ function goalFacts(){
 }
 // «что делать сейчас» for stage i: a task of this stage › a goal task › the next goal stage › the user's own words for the stage
 function stageFocus(i,day=keyDay()){
-  const steps=state.day?.steps||[],s=steps[i];if(!s)return null;
+  const steps=daySteps(day),s=steps[i];if(!s)return null;
   const {a,b}=stageSpan(i),d=dayIndex(day),work=isWorkStage(s),done=dailyState().stageDone||{};
   const tasks=(state.tasks||[]).filter(t=>t.date===day&&!t.done);
   const inStage=tasks.filter(t=>t.time&&timeToMin(t.time)>=a&&timeToMin(t.time)<b).sort((x,y)=>(y.goal?1:0)-(x.goal?1:0)||x.time.localeCompare(y.time));
@@ -5263,7 +5422,7 @@ function stageFocus(i,day=keyDay()){
 }
 // texts of the reminders: start of the stage and 10 minutes before its end
 function stageReminderTexts(i,day=keyDay()){
-  const f=stageFocus(i,day);if(!f)return null;const steps=state.day.steps,next=steps[i+1],facts=goalFacts(),d=dayIndex(day);
+  const f=stageFocus(i,day);if(!f)return null;const steps=daySteps(day),next=steps[i+1],facts=goalFacts(),d=dayIndex(day);
   const goal=(state.goal?.title||mainGoal()?.title||'Главная цель').slice(0,60),fact=facts[(d+i)%facts.length].replace(/\.+$/,'');
   return {
     start:{title:`Сейчас: ${stageEmoji(f.s,i)} ${f.s.title}`,body:`Главное: ${f.main}. До цели «${goal}»: ${goalLeftText()}. ${fact[0].toUpperCase()+fact.slice(1)}.`},
@@ -5274,7 +5433,7 @@ const STAGE_END_LEAD=10;
 function stageMainDone(sid,yes=true){const d=dailyState();d.stageDone=d.stageDone&&typeof d.stageDone==='object'?d.stageDone:{};if(yes)d.stageDone[sid]=new Date().toISOString();else delete d.stageDone[sid]}
 // «Перенести»: a stage task moves to the next stage (or tomorrow); otherwise the action becomes a goal task there
 function moveStageMain(sid){
-  const steps=state.day?.steps||[],i=steps.findIndex(s=>s.id===sid);if(i<0)return '';const f=stageFocus(i);if(!f)return '';
+  const steps=daySteps(),i=steps.findIndex(s=>s.id===sid);if(i<0)return '';const f=stageFocus(i);if(!f)return '';
   const next=steps.slice(i+1).find(s=>!isCloseStage(s)),tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
   const date=next?keyDay():keyDay(tomorrow),time=next?next.time:(steps[i].time||'09:00'); // no stage left today → the same stage tomorrow
   const t=f.taskId&&(state.tasks||[]).find(x=>x.id===f.taskId);
@@ -5307,7 +5466,7 @@ function carryOverTasks(){
 }
 function taskWindow(t){
   const due=new Date(t.date+'T'+t.time+':00').getTime(),created=Date.parse(t.createdAt||'')||0;
-  const dayStart=new Date(t.date+'T'+((state.day?.steps||[])[0]?.time||'08:00')+':00').getTime();
+  const dayStart=new Date(t.date+'T'+(daySteps()[0]?.time||'08:00')+':00').getTime();
   let from=created&&created<due?created:dayStart;if(due-from<30*60000)from=due-30*60000;
   return {from,due};
 }
@@ -5464,8 +5623,8 @@ function renderAchievementsV71(){
 }
 function celebrate(){if(!_motionOK())return;document.querySelectorAll('.jl-confetti').forEach(x=>x.remove());const box=document.createElement('div');box.className='jl-confetti';box.innerHTML=Array.from({length:14},(_,i)=>`<i style="--x:${Math.round(Math.random()*100)}vw;--d:${(Math.random()*.25).toFixed(2)}s;--r:${Math.round(Math.random()*360)}deg">${['🎉','✨','🏆','⭐','💛'][i%5]}</i>`).join('');document.body.appendChild(box);setTimeout(()=>box.remove(),1500)}
 
-function renderAll(){setTheme();purgeExpiredTrash(state);syncMainGoalMirror();renderToday();renderGoal();renderGoals();renderMoney();renderNotes();updateBell();if(currentView==='viewProfile')renderProfile();if(currentView==='viewSettings')renderSettingsView();if(currentView==='viewNotifications')renderNotifications();checkBudgetAlerts()}
-function openMetricDetail(type){const wm=walletMetrics(),debt=debtTotal(),goal=goalFinanceMetrics(),p=daySum(state.profits),e=daySum(state.expenses);let title='Показатель',body='';if(type==='cash'){title='Баланс денег';body='<div class="kpi-row"><div class="kpi"><div class="label">Сегодня пришло</div><div class="value blue">'+esc(fmtMoney(p))+'</div></div><div class="kpi"><div class="label">Сегодня ушло</div><div class="value red-txt">'+esc(fmtMoney(e))+'</div></div><div class="kpi"><div class="label">Свободно</div><div class="value orange-txt">'+esc(fmtMoney(wm.cash))+'</div></div></div>'}else if(type==='debt'){title='Долг';body='<div class="kpi-row"><div class="kpi"><div class="label">'+esc(debtLabel('bank'))+'</div><div class="value">'+esc(fmtMoney(state.debts.bank))+'</div></div><div class="kpi"><div class="label">'+esc(debtLabel('firms'))+'</div><div class="value">'+esc(fmtMoney(state.debts.firms))+'</div></div><div class="kpi"><div class="kpi"><div class="label">Всего</div><div class="value red-txt">'+esc(fmtMoney(debt))+'</div></div></div><div class="sub" style="margin-top:10px">Платёж / месяц: '+esc(fmtMoney(state.debts.monthlyPayment||0))+'</div>'}else if(type==='goal'){title='Цель';body='<div class="kpi-row"><div class="kpi"><div class="label">Доступно</div><div class="value blue">'+esc(fmtMoney(goal.available))+'</div></div><div class="kpi"><div class="label">Цель</div><div class="value">'+esc(fmtMoney(goal.target))+'</div></div><div class="kpi"><div class="label">Осталось</div><div class="value orange-txt">'+esc(fmtMoney(goal.remaining))+'</div></div></div>'}else{title='Дисциплина';body='<div class="kpi"><div class="label">Этапов выполнено сегодня</div><div class="value">'+Object.values(dayReport().steps||{}).filter(Boolean).length+' / '+state.day.steps.length+'</div></div>'}openModal('<div class="close-row"><div><div class="eyebrow">'+APP_NAME+' · подробности</div><h2>'+title+'</h2></div><button class="btn small" id="closeModalBtn">Закрыть</button></div><div style="margin-top:12px">'+body+'</div>');$('closeModalBtn').onclick=closeModal}
+function renderAll(){setTheme();purgeExpiredTrash(state);syncMainGoalMirror();renderToday();renderGoal();renderGoals();renderMoney();renderNotes();updateBell();if(currentView==='viewProfile')renderProfile();if(currentView==='viewSettings')renderSettingsView();if(currentView==='viewNotifications')renderNotifications();checkBudgetAlerts();if(appReadyForSync)checkFreedomPath()}
+function openMetricDetail(type){const wm=walletMetrics(),debt=debtTotal(),goal=goalFinanceMetrics(),p=daySum(state.profits),e=daySum(state.expenses);let title='Показатель',body='';if(type==='cash'){title='Баланс денег';body='<div class="kpi-row"><div class="kpi"><div class="label">Сегодня пришло</div><div class="value blue">'+esc(fmtMoney(p))+'</div></div><div class="kpi"><div class="label">Сегодня ушло</div><div class="value red-txt">'+esc(fmtMoney(e))+'</div></div><div class="kpi"><div class="label">Свободно</div><div class="value orange-txt">'+esc(fmtMoney(wm.cash))+'</div></div></div>'}else if(type==='debt'){title='Долг';body='<div class="kpi-row"><div class="kpi"><div class="label">'+esc(debtLabel('bank'))+'</div><div class="value">'+esc(fmtMoney(state.debts.bank))+'</div></div><div class="kpi"><div class="label">'+esc(debtLabel('firms'))+'</div><div class="value">'+esc(fmtMoney(state.debts.firms))+'</div></div><div class="kpi"><div class="kpi"><div class="label">Всего</div><div class="value red-txt">'+esc(fmtMoney(debt))+'</div></div></div><div class="sub" style="margin-top:10px">Платёж / месяц: '+esc(fmtMoney(state.debts.monthlyPayment||0))+'</div>'}else if(type==='goal'){title='Цель';body='<div class="kpi-row"><div class="kpi"><div class="label">Доступно</div><div class="value blue">'+esc(fmtMoney(goal.available))+'</div></div><div class="kpi"><div class="label">Цель</div><div class="value">'+esc(fmtMoney(goal.target))+'</div></div><div class="kpi"><div class="label">Осталось</div><div class="value orange-txt">'+esc(fmtMoney(goal.remaining))+'</div></div></div>'}else{title='Дисциплина';body='<div class="kpi"><div class="label">Этапов выполнено сегодня</div><div class="value">'+Object.values(dayReport().steps||{}).filter(Boolean).length+' / '+daySteps().length+'</div></div>'}openModal('<div class="close-row"><div><div class="eyebrow">'+APP_NAME+' · подробности</div><h2>'+title+'</h2></div><button class="btn small" id="closeModalBtn">Закрыть</button></div><div style="margin-top:12px">'+body+'</div>');$('closeModalBtn').onclick=closeModal}
 /* ===== V57 screens ===== */
 const ICON_IDS={target:'i-target',home2:'i-home2',car:'i-car',plane:'i-plane',laptop:'i-laptop',graduation:'i-graduation',heart:'i-heart',gift:'i-gift',briefcase:'i-briefcase',bank:'i-bank',star:'i-star',trophy:'i-trophy'};
 function svgIcon(id,extra=''){return `<svg class="ui-icon"${extra} aria-hidden="true"><use href="#${id}"></use></svg>`}
@@ -5513,7 +5672,7 @@ function renderPulseRings(){
 function pulseOn(k){const parts=[],today=k===keyDay(),now=Math.floor(nowMin()),rep=state.reports?.[k];
   const tk=(state.tasks||[]).filter(t=>t.date===k);if(tk.length)parts.push(tk.filter(t=>t.done).length/tk.length);
   const hb=state.habits||[];if(hb.length)parts.push(hb.filter(h=>habitDoneOn(h,k)).length/hb.length);
-  const st=state.day.steps||[];if(st.length&&(rep||today))parts.push(st.filter(s=>!!rep?.steps?.[s.id]||(today&&now>=timeToMin(s.end))).length/st.length);
+  const st=daySteps();if(st.length&&(rep||today))parts.push(st.filter(s=>!!rep?.steps?.[s.id]||(today&&now>=timeToMin(s.end))).length/st.length);
   if(!today)parts.push(rep?.savedAt?1:0);
   return parts.length?Math.round(parts.reduce((a,b)=>a+b,0)/parts.length*100):0}
 function renderPulseChart(){
@@ -5742,6 +5901,34 @@ function openTransferForm(opts={}){
   };
   focusSoon('trAmount',50);
 }
+/* 74.2: a new income asks where the money goes — into a debt, into a bank (spending budget of the month), the rest stays in hand.
+   Nothing new is stored: a debt part is the usual debt payment, a bank part is the usual bank top-up. */
+function splitTargets(){
+  const t=[];for(const k of ['bank','firms'])if(Number(state.debts?.[k])>0)t.push({key:'debt:'+k,icon:'🏦',label:debtLabel(k),sub:'долг · осталось '+fmtMoney(state.debts[k]),max:Number(state.debts[k])});
+  for(const b of state.budgets||[])if(b&&b.id&&b.name)t.push({key:'bank:'+b.id,icon:cleanEmoji(b.emoji)||'💳',label:b.name,sub:'банк · '+limitInfo(b).text,max:Infinity});
+  return t;
+}
+function openIncomeSplit(amount,dateKey=keyDay()){
+  const T=splitTargets();if(!T.length||!(amount>0))return;
+  const pay=Math.max(0,Number(state.debts?.monthlyPayment)||0),firstDebt=T.find(x=>x.key.startsWith('debt:'));
+  const rows=T.map((x,i)=>`<div class="jl-split-row"><label for="spl${i}"><span aria-hidden="true">${esc(x.icon)}</span><b>${esc(x.label)}</b><small>${esc(x.sub)}</small></label><input id="spl${i}" data-split="${esc(x.key)}" type="number" min="0" step="1" inputmode="decimal" placeholder="0" value="${x===firstDebt&&pay>0?esc(String(Math.min(pay,amount,x.max))):''}"></div>`).join('');
+  openModal(`<div class="close-row"><div><div class="eyebrow">Доход +${esc(fmtMoney(amount))}</div><h2>Куда разложить деньги?</h2><div class="sub">Часть — в долг, часть — в банк, остальное — на руки.</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
+  <div class="stack" style="margin-top:12px">${rows}<div class="jl-split-row hand"><label><span aria-hidden="true">👛</span><b>На руки</b><small>остаётся в кошельке</small></label><output id="splHand">—</output></div>
+  <div class="v-sub" id="splHint" aria-live="polite"></div>
+  <div class="grid g2"><button class="btn" type="button" id="splAllHand">Всё на руки</button><button class="btn primary" type="button" id="splSave">${svgIcon('i-check')} Разложить</button></div></div>`);
+  $('closeModalBtn').onclick=closeModal;$('splAllHand').onclick=closeModal;
+  const read=()=>$$('[data-split]').map(i=>({key:i.dataset.split,v:Math.max(0,Math.round((Number(i.value)||0)*100)/100)}));
+  const live=()=>{const used=read().reduce((a,x)=>a+x.v,0),hand=amount-used;setText('splHand',fmtMoney(Math.max(0,hand)));
+    setText('splHint',hand<0?'Больше, чем пришло: убери '+fmtMoney(-hand):'');$('splSave').disabled=hand<0||!used;return hand};
+  $$('[data-split]').forEach(i=>i.addEventListener('input',live));live();
+  $('splSave').onclick=()=>{if(live()<0)return;const at=moneyDateIso(dateKey),done=[];
+    for(const {key,v} of read()){if(!(v>0))continue;const [kind,id]=key.split(':');
+      if(kind==='debt'){const debt=Math.max(0,Number(state.debts[id])||0),p=Math.min(v,debt);if(!(p>0))continue;state.expenses.push({id:uid(),amount:p,at,dateKey,note:'из дохода',category:'Платёж по долгу',categoryIcon:'🏦',personal:false,customCategory:'',debtPayment:id,transfer:true});state.debts[id]=Math.max(0,debt-p);done.push(debtLabel(id)+' −'+fmtMoney(p))}
+      else{const b=(state.budgets||[]).find(x=>x.id===id);if(!b)continue;b.tops=Array.isArray(b.tops)?b.tops:[];b.tops.push({id:uid(),month:dateKey.slice(0,7),amount:v,at:new Date().toISOString()});done.push(b.name+' +'+fmtMoney(v))}}
+    if(!done.length){closeModal();return}
+    saveState();closeModal();renderAll();toast('Деньги разложены',done.join(' · ').slice(0,120));haptic(16)};
+  focusSoon('spl0',60);
+}
 function openTxTypePicker(dateKey){
   openModal(`<div class="close-row"><div><div class="eyebrow">${esc(new Date((dateKey||keyDay())+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}))}</div><h2>Новая транзакция</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="v-quick" style="margin-top:14px"><button type="button" id="ttIncome" style="--qc:var(--green)"><i>${svgIcon('i-plus')}</i>Доход</button><button type="button" id="ttExpense" style="--qc:var(--red)"><i>${svgIcon('i-minus')}</i>Расход</button><button type="button" id="ttTransfer" style="--qc:var(--blue)"><i>${svgIcon('i-transfer')}</i>Перевод</button></div>`);
   $('closeModalBtn').onclick=closeModal;$('ttIncome').onclick=()=>openMoneyForm('profit','',null,dateKey);$('ttExpense').onclick=()=>openMoneyForm('expense','',null,dateKey);$('ttTransfer').onclick=()=>openTransferForm({dateKey});
@@ -5864,11 +6051,16 @@ function markAllNoticesRead(){(state.notificationsLog||[]).forEach(n=>n.read=tru
 
 /* ---- Settings / display / profile ---- */
 function renderSettingsView(){
+  textOf($('setWeekSub')).v=weekSummary();
   if(!$('viewSettings'))return;const a=cloudAuth();
   setText('setProfileSub',[state.profile.name,a?.user?.email].filter(Boolean).join(' · ')||'Имя не указано');
   const set=(id,v)=>{const el=$(id);if(el)el.checked=!!v};
   set('setDarkTheme',state.settings.theme==='dark');set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setLoudReminders',state.settings.loudReminders!==false);{const lr=$('loudRow');if(lr)lr.style.display=window.AndroidBridge?.setLoudReminders?'':'none'}set('setEvery2h',state.settings.every2h!==false);
   const sf=$('setFont');if(sf)sf.value=state.settings.font||'manrope';const qs=$('setQuoteSet');if(qs)qs.value=quoteSet();
+  {const pc=$('setPrayerCity');if(pc&&!pc.options.length)pc.innerHTML=Object.entries(PRAYER_CITIES).map(([k,c])=>`<option value="${k}">${esc(c[0])}</option>`).join('');if(pc)pc.value=prayerCity();
+   const po=$('setPrayerOn');if(po)po.checked=prayerOn();if($('setPrayerAsr'))$('setPrayerAsr').value=state.settings.prayerAsr==='shafii'?'shafii':'hanafi';
+   for(const id of ['prayerCityRow','prayerAsrRow']){const r=$(id);if(r&&r.hidden===prayerOn())r.hidden=!prayerOn()}
+   if(prayerOn()){const t=prayerTimes();setText('prayerCitySub',PRAYER_NAMES.map(([k,n])=>n+' '+(t[k]===null?'—':fmtMin(t[k]))).join(' · '))}}
   const fs=$('setFontScale');if(fs){const v=Number(state.settings.fontScale)||1.1;fs.value=v<1.05?'1':v>1.15?'1.2':'1.1'}
   setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный');renderBiometricRow();refreshCloudUI();
 }
@@ -5958,11 +6150,14 @@ function bindV57(){
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
   $('setDarkTheme').onchange=e=>{state.settings.theme=e.target.checked?'dark':'light';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');
+  $('setPrayerOn').onchange=e=>{state.settings.prayerOn=e.target.checked;saveState();scheduleNativeTasks();renderSettingsView();renderToday();toast(e.target.checked?'Время намаза включено':'Время намаза выключено',e.target.checked?'Пять намазов на «Сегодня» и напоминание в каждое время.':'')};
+  $('setPrayerCity').onchange=e=>{state.settings.prayerCity=PRAYER_CITIES[e.target.value]?e.target.value:'dushanbe';saveState();scheduleNativeTasks();renderSettingsView();renderToday()};
+  $('setPrayerAsr').onchange=e=>{state.settings.prayerAsr=e.target.value==='shafii'?'shafii':'hanafi';saveState();scheduleNativeTasks();renderSettingsView();renderToday()};
   $('setQuoteSet')&&($('setQuoteSet').onchange=e=>{state.settings.quoteSet=QUOTE_SETS[e.target.value]?e.target.value:'hadith';state.settings.quoteSetChosen=true;saveState();renderAll();toast('Цитаты дня',QUOTE_SETS[state.settings.quoteSet])});
   $('setFont')&&($('setFont').onchange=e=>{state.settings.font=['manrope','nunito','inter'].includes(e.target.value)?e.target.value:'manrope';saveState();applyFont();toast('Шрифт изменён',e.target.selectedOptions[0]?.textContent||'')});$('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
   [['setNotifyAll','notifications'],['setNotifyTasks','notifyTasks'],['setNotifyFinance','notifyFinance'],['setNotifyGoals','notifyGoals'],['setNotifySound','sound']].forEach(([id,key])=>$(id).onchange=e=>{state.settings[key]=e.target.checked;saveState();if(key==='notifications'||key==='notifyTasks')scheduleNative()});
   $('setLoudReminders').onchange=e=>{state.settings.loudReminders=e.target.checked;saveState();syncLoudReminders();toast(e.target.checked?'Громкие напоминания включены':'Обычная громкость напоминаний',e.target.checked?'Звучат громкостью будильника.':'Звучат громкостью уведомлений.')};
-  $('setNotifyPermission').onclick=requestNotifications;$('setAdvancedRow').onclick=openSettings;
+  $('setNotifyPermission').onclick=requestNotifications;$('setAdvancedRow').onclick=openSettings;$('setWeekRow').onclick=openWeekSchedule;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;
   $('pfLogout').onclick=()=>{if(confirm('Выйти из '+APP_NAME+'? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};
   $$('[data-layout-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный'),0)));
@@ -5976,7 +6171,8 @@ function bind(){
   const homeBrand=$('homeBrand');homeBrand.onclick=()=>{closeModal();showView('viewToday')};homeBrand.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();homeBrand.click()}};
   $('notifyBtn').onclick=openNotifications;$('settingsBtn').onclick=()=>{closeModal();showView('viewSettings')};bindV57();$('calendarBtn').onclick=openCalendar;$('pulseDayCard').onclick=openDayProgress;
   ['rDone','rBlock','rTomorrow'].forEach(id=>$(id).addEventListener('input',()=>{const r=dayReport();r.done=$('rDone').value;r.block=$('rBlock').value;r.tomorrow=$('rTomorrow').value;r.savedAt=r.savedAt||new Date().toISOString();queueAutosave();textOf($('reportSaved')).v='Черновик сохранён'}));
-  $('saveReportBtn').onclick=closeDay;
+  $('saveReportBtn').onclick=closeDay;$('quickCloseBtn').onclick=quickCloseDay;
+  $$('[data-qblock]').forEach(b=>b.onclick=()=>{const on=b.getAttribute('aria-pressed')!=='true';$$('[data-qblock]').forEach(x=>x.setAttribute('aria-pressed',String(x===b&&on)));$('rBlock').value=on?b.dataset.qblock:'';$('rBlock').dispatchEvent(new Event('input'));haptic(8)});
   $('mcRangeBtn')&&($('mcRangeBtn').onclick=()=>{mcRangeMode=!mcRangeMode;$('mcRangeBtn').classList.toggle('active',mcRangeMode);if(mcRangeMode)toast('Выбери первый день периода','потом последний');});
   $$('[data-mc-quick]').forEach(b=>b.onclick=()=>{const d=new Date(),q=b.dataset.mcQuick;let from,to;if(q==='week'){const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));from=keyDay(x);to=keyDay(d)}else if(q==='month'){from=keyDay(new Date(d.getFullYear(),d.getMonth(),1));to=keyDay(d)}else{from=keyDay(new Date(d.getFullYear(),d.getMonth()-1,1));to=keyDay(new Date(d.getFullYear(),d.getMonth(),0))}const f=new Date(from+'T12:00:00');mcYear=f.getFullYear();mcMonth=f.getMonth();mcRangeMode=false;mcSetRange(from,to)});$('setEvery2h')?.addEventListener('change',e=>{state.settings.every2h=e.target.checked;saveState();scheduleNative2h();renderFreePlan();toast(e.target.checked?'Напоминания каждые 2 часа включены':'Напоминания каждые 2 часа выключены')});$('addHabitBtn').onclick=()=>openHabitEditor();$('setBackupRow').onclick=openBackups;$('setMoveRow').onclick=openMoveDevice;$('wkRun').onclick=runWeekReview;
   $('setBiometric')?.addEventListener('change',e=>{try{const ok=window.AndroidBridge.setBiometric(e.target.checked);if(e.target.checked&&!ok){e.target.checked=false;toast('Отпечаток недоступен','Добавь отпечаток в настройках телефона.')}else toast(e.target.checked?'Вход по отпечатку включён':'Вход по отпечатку выключен',e.target.checked?'При следующем открытии приложение спросит отпечаток.':'')}catch(err){e.target.checked=false}});

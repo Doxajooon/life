@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.1.0");
-assert.match(gradle, /versionCode 741\b/); assert.match(gradle, /versionName '74\.1'/);
-assert.match(csproj, /<Version>74\.1\.0<\/Version>/);
+assert.equal(pkg.version, "74.2.0");
+assert.match(gradle, /versionCode 742\b/); assert.match(gradle, /versionName '74\.2'/);
+assert.match(csproj, /<Version>74\.2\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.1'") && html.includes('id="appVersion">74.1</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.2'") && html.includes('id="appVersion">74.2</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-1'"), "service worker cache must be life-v74-1");
+assert.ok(sw.includes("'life-v74-2'"), "service worker cache must be life-v74-2");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -199,4 +199,15 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.equal(direct, 1, "cloudSync() is called only from cloudAutoSync (found " + direct + " calls)");
   assert.ok(html.includes("const dirtyNow=dirty||isCloudDirty();") && html.includes("if(!dirtyNow){const changed=applyCloudState(row.state,row.updated_at);"), "an edit made during the download is merged, not overwritten");
   assert.ok(html.includes("(_cloudBaseFingerprint?fingerprint!==_cloudBaseFingerprint:appReadyForSync)"), "an edit right after a restart (before the first sync) is marked unsent"); }
+// 74.2: AI failures are explained and logged; the checklist of the owner
+{ const ts = read("supabase/functions/life-control-ai/index.ts");
+  assert.ok(ts.includes('console.error("ai fail", JSON.stringify(info))') && (ts.match(/return fail\(/g) || []).length >= 7 && !/return json\(\{ error: /.test(ts), "every error answer of the Edge Function goes through fail() and leaves its reason in the logs");
+  assert.ok(ts.includes('replace(/AIza[0-9A-Za-z_-]{10,}/g, "AIza***")') && !/console\.(log|error)\([^)]*(key|token|email|JSON\.stringify\(ctx|input)\b/i.test(ts.replace(/safe\([^)]*\)/g, "")), "the logs never get the key, the token, the e-mail or the user's data");
+  assert.ok(html.includes("function normalizeAIError(data,status){") && html.includes("const AI_FALLBACK=") && html.includes("Google прислал пустой ответ"), "the app explains every AI failure in Russian");
+  for (const f of ["function daySteps(", "function dayOff(", "function openWeekSchedule(", "function prayerTimes(", "function renderPrayer(", "function openIncomeSplit(", "function renderFreedomPath(", "function checkFreedomPath(", "function quickCloseDay(", "function debtNamed("]) assert.ok(html.includes(f), "74.2 needs " + f);
+  assert.ok(!/state\.day\.steps\[i\]|for\(const s of state\.day\.steps\)\{\s*window/.test(html.slice(html.indexOf("function runScheduler"), html.indexOf("function runScheduler") + 4000)), "the scheduler reads daySteps() (the weekday schedule)");
+  assert.ok(activity.includes("public void scheduleDailyDays(String id, String time, String days") && activity.includes("bridgeVersion() { return 7; }") && read("android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java").includes("AlarmScheduler.ringsToday(days)"), "Android rings weekday alarms only on their days");
+  assert.ok(html.includes("const FREEDOM_STOPS=[25,50,75,100];") && html.indexOf("const FREEDOM_STOPS") < html.indexOf("let state=load()"), "FREEDOM_STOPS is defined before the first normalize()");
+  assert.ok(html.includes("if(!Array.isArray(s.debts.freedomWon))") && html.includes("if('week' in s.day)"), "74.2 data is migrated in normalize()");
+  assert.ok(html.includes("<span data-free-left></span>"), "«Твой вечер» updates only its countdown every minute (a tap is never lost)"); }
 console.log("LIFE_V73_STATIC_QA_OK");
