@@ -144,6 +144,13 @@ function allData(s: any, withNotes: boolean): any {
   return out;
 }
 
+// 74.6: the goal photo is not data for the AI — a picture left inside the data by 74.5 (g.photo) never goes to Google
+// deno-lint-ignore no-explicit-any
+function noPhotos(s: any): any {
+  if (!Array.isArray(s?.goals)) return s;
+  return { ...s, goals: s.goals.map((g: any) => { if (!g || typeof g !== "object") return g; const { photo: _p, photoPath: _q, ...rest } = g; return rest; }) };
+}
+
 async function getUser(req: Request) {
   const h = req.headers.get("Authorization") || "";
   if (!h.startsWith("Bearer ")) return { bad: "no token" };
@@ -159,23 +166,30 @@ async function getUser(req: Request) {
 
 // Rate limit stored in the database (public.ai_usage), so it survives cold starts of the function.
 // 74.5: a row is written only AFTER Google answered — Google's own 503/timeouts no longer eat the limit.
-// Failed attempts are still counted (no new table, no migration): their row is stored with `at` moved back
-// exactly ATTEMPT_SHIFT_MS, so it never counts as an answer, and «attempts in the last hour» reads that shifted window.
+// 74.6: every row says what it is — kind 'ok' (an answer, 10 per hour) or 'try' (a failed attempt, 30 per hour together
+// with the answers). A real column (migration ai_usage_kind) rather than a count in the function's memory: Supabase runs
+// several copies of the function and restarts them at any time, so a memory count would forget attempts and let more through.
+// The old «attempt rows moved ten years back» were deleted by the same migration. Rows older than 30 days are removed
+// here (the user's own rows, at most once an hour per function copy; RLS lets a user delete only own rows older than 30 days).
 const MAX_ATTEMPTS_PER_HOUR = 30;
-const ATTEMPT_SHIFT_MS = 3650 * 86400_000;
+const KEEP_DAYS = 30;
+const cleaned: Record<string, number> = {};
 // deno-lint-ignore no-explicit-any
 async function allowRequest(sb: any, userId: string): Promise<"" | "answers" | "attempts"> {
-  const now = Date.now(), iso = (t: number) => new Date(t).toISOString();
-  const ok = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - 3600_000));
+  const since = new Date(Date.now() - 3600_000).toISOString();
+  const ok = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).eq("kind", "ok").gte("at", since);
   if (ok.error) return ""; // never block the user because of the counter itself
   if ((ok.count ?? 0) >= MAX_REQUESTS_PER_HOUR) return "answers";
-  const bad = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - ATTEMPT_SHIFT_MS - 3600_000)).lt("at", iso(now - ATTEMPT_SHIFT_MS + 60_000));
-  if (!bad.error && (ok.count ?? 0) + (bad.count ?? 0) >= MAX_ATTEMPTS_PER_HOUR) return "attempts";
+  const all = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", since);
+  if (!all.error && (all.count ?? 0) >= MAX_ATTEMPTS_PER_HOUR) return "attempts";
   return "";
 }
 // deno-lint-ignore no-explicit-any
 async function countUse(sb: any, userId: string, answered: boolean) {
-  try { await sb.from("ai_usage").insert(answered ? { user_id: userId } : { user_id: userId, at: new Date(Date.now() - ATTEMPT_SHIFT_MS).toISOString() }); } catch { /* the counter never breaks an answer */ }
+  try { await sb.from("ai_usage").insert({ user_id: userId, kind: answered ? "ok" : "try" }); } catch { /* the counter never breaks an answer */ }
+  if (Date.now() - (cleaned[userId] || 0) < 3600_000) return;
+  cleaned[userId] = Date.now();
+  try { await sb.from("ai_usage").delete().eq("user_id", userId).lt("at", new Date(Date.now() - KEEP_DAYS * 86400_000).toISOString()); } catch { /* cleaning never breaks an answer */ }
 }
 
 const API = "https://generativelanguage.googleapis.com/v1beta";
@@ -292,8 +306,9 @@ Deno.serve(async (req) => {
     const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return fail("state_read", 500, "Не удалось прочитать твои данные из облака. Проверь синхронизацию («Настройки → Аккаунт») и повтори через минуту.", { code: error.code || "", msg: error.message || "" });
-    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
-    ctx.all_data = allData(row?.state || {}, sc.notes);
+    const st = noPhotos(row?.state || {});
+    const ctx = mode === "week" ? weekContext(st, String(body?.today || "")) : mode === "deep" ? deepContext(st, body?.facts) : mode === "life" ? lifeContext(st, sc, body?.facts) : context(st, sc);
+    ctx.all_data = allData(st, sc.notes);
     const p = mode === "deep"
       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "week"

@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.5.0");
-assert.match(gradle, /versionCode 745\b/); assert.match(gradle, /versionName '74\.5'/);
-assert.match(csproj, /<Version>74\.5\.0<\/Version>/);
+assert.equal(pkg.version, "74.6.0");
+assert.match(gradle, /versionCode 746\b/); assert.match(gradle, /versionName '74\.6'/);
+assert.match(csproj, /<Version>74\.6\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.5'") && html.includes('id="appVersion">74.5</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.6'") && html.includes('id="appVersion">74.6</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-5'"), "service worker cache must be life-v74-5");
+assert.ok(sw.includes("'life-v74-6'"), "service worker cache must be life-v74-6");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -191,8 +191,10 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const secs = len / (rate * ch * 2);
   let sq = 0; for (let i = data + 8; i < data + 8 + len; i += 2) sq += (wav.readInt16LE(i) / 32768) ** 2;
   const rmsDb = 10 * Math.log10(sq / (len / 2));
-  assert.ok(rmsDb >= -10, `the reminder sound is loud on average (${rmsDb.toFixed(1)} dBFS ≥ −10; 74.0 had −18.7)`);
-  assert.ok(peak / 32768 >= 0.9 && secs >= 3, `the reminder sound is louder and longer (peak ${(peak / 32768).toFixed(2)} ≥ 0.9, ${secs.toFixed(2)} s ≥ 3 s)`);
+  // 74.6: one phrase, not two — 1.5–2.2 s, peak ≤ −1 dB, average −16…−10 dBFS
+  const peakDb = 20 * Math.log10(peak / 32768);
+  assert.ok(rmsDb >= -16 && rmsDb <= -10, `the reminder sound is clear but not harsh (${rmsDb.toFixed(1)} dBFS in −16…−10)`);
+  assert.ok(peakDb <= -1 && secs >= 1.5 && secs <= 2.2, `the reminder sound plays once (${secs.toFixed(2)} s in 1.5–2.2 s, peak ${peakDb.toFixed(1)} dB ≤ −1)`);
   assert.ok(notif.includes('CHANNEL = "jamal_life_dawn2"') && notif.includes("AudioAttributes.USAGE_ALARM") && notif.includes("AudioAttributes.USAGE_NOTIFICATION_EVENT") && notif.includes('CHANNEL_SOFT = "jamal_life_dawn2_soft"'), "loud channel on the alarm stream, quiet channel on the notification stream");
   assert.ok(/OLD_CHANNELS = \{"jamal_life_dawn",/.test(notif), "the 74.0 channel jamal_life_dawn is deleted (new sound = new channel)");
   assert.ok(notif.includes("enableVibration(true)") && notif.includes('getBoolean("loud", true)') && notif.includes("setOnlyAlertOnce(false)"), "reminders vibrate, loud is the default, a snoozed reminder rings again");
@@ -223,4 +225,12 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(html.indexOf("const GOAL_PHOTO_MAX") < html.indexOf("let state=load()") && html.indexOf("const DIRTY_SINCE_KEY") < html.indexOf("let state=load()"), "74.5 constants exist before the first load()");
   assert.ok(html.includes("return PRAYER_CITIES[c]?c:'khujand'"), "Khujand by default");
   assert.ok(act.includes(".setConfirmationRequired(false)"), "the finger opens the app at once"); }
+// 74.6: one sound, the goal photo apart from the data, an honest AI counter
+{ const html = read("index.html"), fn = read("supabase/functions/life-control-ai/index.ts"), sql = read("supabase/setup.sql"), cs = read("desktop/MainWindow.xaml.cs"), nu = read("android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java");
+  for (const f of ["function migrateGoalPhotos(", "function loadGoalPhoto(", "function photoPathOk(", "function uploadPhoto(", "function queuePhotoDelete("]) assert.ok(html.includes(f), "74.6 function: " + f);
+  assert.ok(html.includes("const PHOTO_BUCKET='goal-photos'") && html.includes("/storage/v1/object/sign/") && html.includes("1280/Math.max(") && html.includes("'image/jpeg',.8"), "goal photos: Storage bucket goal-photos, signed links, 1280 px JPEG 0.8");
+  assert.ok(html.includes("x.goals.forEach(g=>{if(g)delete g.photo})") && fn.includes("function noPhotos(") && fn.includes("const st = noPhotos(row?.state || {});"), "no picture in the cloud copies or in the AI request");
+  assert.ok(!fn.includes("ATTEMPT_SHIFT_MS") && !fn.includes("3650 * 86400") && fn.includes('kind: answered ? "ok" : "try"') && fn.includes('.eq("kind", "ok")') && fn.includes("KEEP_DAYS = 30"), "ai_usage: kind ok/try, no rows ten years back, 30 days kept");
+  assert.ok(sql.includes("add column if not exists kind text not null default 'ok'") && sql.includes("'goal-photos', 'goal-photos', false") && sql.includes("(storage.foldername(name))[1] = (select auth.uid())::text") && sql.includes("at < now() - interval '30 days')"), "setup.sql: kind, the private bucket with own-folder RLS, delete only old own rows");
+  assert.ok(nu.includes("rangLately(ctx, nid)") && nu.includes("b.setSilent(true)") && cs.includes("QuietBalloon(") && cs.includes("0x10 /* NIIF_NOSOUND */"), "one reminder = one sound on Android and Windows"); }
 console.log("LIFE_V73_STATIC_QA_OK");

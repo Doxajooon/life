@@ -64,3 +64,29 @@ create policy "life_state_history_insert_own" on public.life_state_history for i
 drop policy if exists "life_state_history_delete_own" on public.life_state_history;
 create policy "life_state_history_delete_own" on public.life_state_history for delete to authenticated using (user_id = (select auth.uid()));
 grant select, insert, delete on public.life_state_history to authenticated;
+-- 74.6: ai_usage says what a row is: 'ok' = an answer (10 per hour), 'try' = a failed attempt (30 per hour together).
+-- Replaces the 74.5 trick «attempt rows moved ten years back» (those rows are removed). Rows older than 30 days are
+-- deleted by the Edge Function (own rows only; the policy allows nothing newer, so the hourly limit can't be reset).
+alter table public.ai_usage add column if not exists kind text not null default 'ok';
+do $$ begin
+  if not exists (select 1 from pg_constraint where conname = 'ai_usage_kind_check') then
+    alter table public.ai_usage add constraint ai_usage_kind_check check (kind in ('ok', 'try'));
+  end if;
+end $$;
+delete from public.ai_usage where at < now() - interval '5 years';
+delete from public.ai_usage where at < now() - interval '30 days';
+drop policy if exists "ai_usage_delete_old_own" on public.ai_usage;
+create policy "ai_usage_delete_old_own" on public.ai_usage for delete to authenticated using (user_id = (select auth.uid()) and at < now() - interval '30 days');
+grant delete on public.ai_usage to authenticated;
+-- 74.6: goal photos apart from the data — private bucket goal-photos, path <user_id>/<goal_id>.jpg, own folder only
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('goal-photos', 'goal-photos', false, 2097152, array['image/jpeg'])
+on conflict (id) do nothing;
+drop policy if exists "goal_photos_select_own" on storage.objects;
+create policy "goal_photos_select_own" on storage.objects for select to authenticated using (bucket_id = 'goal-photos' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "goal_photos_insert_own" on storage.objects;
+create policy "goal_photos_insert_own" on storage.objects for insert to authenticated with check (bucket_id = 'goal-photos' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "goal_photos_update_own" on storage.objects;
+create policy "goal_photos_update_own" on storage.objects for update to authenticated using (bucket_id = 'goal-photos' and (storage.foldername(name))[1] = (select auth.uid())::text) with check (bucket_id = 'goal-photos' and (storage.foldername(name))[1] = (select auth.uid())::text);
+drop policy if exists "goal_photos_delete_own" on storage.objects;
+create policy "goal_photos_delete_own" on storage.objects for delete to authenticated using (bucket_id = 'goal-photos' and (storage.foldername(name))[1] = (select auth.uid())::text);

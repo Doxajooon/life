@@ -131,7 +131,9 @@ public partial class MainWindow : Window
             {
                 var title = root.TryGetProperty("title", out var ti) ? ti.GetString() ?? AppName : AppName;
                 var body = root.TryGetProperty("body", out var b) ? b.GetString() ?? "" : "";
-                _tray.ShowBalloonTip(8000, title, string.IsNullOrWhiteSpace(body) ? " " : body, Forms.ToolTipIcon.None);
+                // 74.6: one reminder = one sound — the balloon itself is silent (no Windows «ding»), the «Dawn» chime plays once
+                if (!QuietBalloon(title, string.IsNullOrWhiteSpace(body) ? " " : body))
+                    _tray.ShowBalloonTip(8000, title, string.IsNullOrWhiteSpace(body) ? " " : body, Forms.ToolTipIcon.None);
                 if (root.TryGetProperty("sound", out var snd) && snd.ValueKind == JsonValueKind.True) PlayChime();
                 if (!IsVisible || WindowState == WindowState.Minimized) FlashTaskbar();
             }
@@ -174,6 +176,44 @@ public partial class MainWindow : Window
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool FlashWindow(IntPtr hwnd, bool invert);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private struct NotifyIconData
+    {
+        public int cbSize; public IntPtr hWnd; public int uID; public int uFlags; public int uCallbackMessage; public IntPtr hIcon;
+        [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = 128)] public string szTip;
+        public int dwState; public int dwStateMask;
+        [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = 256)] public string szInfo;
+        public int uTimeoutOrVersion;
+        [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = 64)] public string szInfoTitle;
+        public int dwInfoFlags; public Guid guidItem; public IntPtr hBalloonIcon;
+    }
+
+    [System.Runtime.InteropServices.DllImport("shell32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern bool Shell_NotifyIcon(int message, ref NotifyIconData data);
+
+    /// <summary>74.6: the tray balloon with NIIF_NOSOUND, so Windows does not add its own sound to the «Dawn» chime.
+    /// The tray icon's window and id are read from the WinForms NotifyIcon; if that fails, the caller shows the usual balloon.</summary>
+    private bool QuietBalloon(string title, string body)
+    {
+        try
+        {
+            const BindingFlags F = BindingFlags.NonPublic | BindingFlags.Instance;
+            var t = typeof(Forms.NotifyIcon);
+            var window = (t.GetField("_window", F) ?? t.GetField("window", F))?.GetValue(_tray) as Forms.NativeWindow;
+            var idValue = (t.GetField("_id", F) ?? t.GetField("id", F))?.GetValue(_tray);
+            if (window == null || window.Handle == IntPtr.Zero || idValue == null) return false;
+            var data = new NotifyIconData
+            {
+                hWnd = window.Handle, uID = Convert.ToInt32(idValue), uFlags = 0x10 /* NIF_INFO */, szTip = "",
+                szInfo = body.Length > 255 ? body.Substring(0, 255) : body, szInfoTitle = title.Length > 63 ? title.Substring(0, 63) : title,
+                uTimeoutOrVersion = 8000, dwInfoFlags = 0x10 /* NIIF_NOSOUND */
+            };
+            data.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(data);
+            return Shell_NotifyIcon(1 /* NIM_MODIFY */, ref data);
+        }
+        catch { return false; }
+    }
 
     private void BuildTray()
     {

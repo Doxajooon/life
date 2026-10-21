@@ -127,6 +127,8 @@ public final class NotificationUtil {
         Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pi = PendingIntent.getActivity(ctx, 999, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         String text = body == null ? "" : body;
+        int nid = id == 0 ? (int) (System.currentTimeMillis() & 0x7fffffff) : id;
+        boolean again = id != 0 && id != 4242 && rangLately(ctx, nid);
         NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, channel(ctx))
                 .setSmallIcon(R.drawable.ic_notification)
                 .setColor(0xFF22C55E)
@@ -142,14 +144,17 @@ public final class NotificationUtil {
                 .setAutoCancel(true)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOnlyAlertOnce(false) // a repeated reminder («Через 15 мин») rings again
+                .setOnlyAlertOnce(false) // a repeated reminder («Через 15 мин», its own id tasksnz_…) rings again
                 .setSound(chimeUri(ctx))
                 .setVibrate(VIBRATION);
+        // 74.6: one reminder = one sound. The same reminder posted again within 2 minutes (the alarm rang with the app closed,
+        // then the opened app reposts it) only updates the text, silently. The channel plays the sound once —
+        // not «insistent», so the alarm stream (USAGE_ALARM) does not repeat it in a loop; the app plays nothing itself.
+        if (again) b.setSilent(true);
         if (dueAt > System.currentTimeMillis()) {
             b.setWhen(dueAt).setShowWhen(true).setUsesChronometer(true);
             if (Build.VERSION.SDK_INT >= 24) b.setChronometerCountDown(true);
         }
-        int nid = id == 0 ? (int) (System.currentTimeMillis() & 0x7fffffff) : id;
         if (taskId != null && !taskId.isEmpty()) {
             boolean stage = taskId.startsWith("stage:"); // «Этап заканчивается. Сделал главное?»
             if (taskId.startsWith("debtpay:")) {
@@ -161,6 +166,17 @@ public final class NotificationUtil {
             }
         }
         NotificationManagerCompat.from(ctx).notify(nid, b.build());
+    }
+
+    /** true if the notification with this id already rang in the last 2 minutes; remembers this ring. */
+    static boolean rangLately(Context ctx, int nid) {
+        android.content.SharedPreferences p = ctx.getSharedPreferences("lc_rang", Context.MODE_PRIVATE);
+        long now = System.currentTimeMillis(), was = p.getLong(String.valueOf(nid), 0);
+        android.content.SharedPreferences.Editor e = p.edit();
+        for (java.util.Map.Entry<String, ?> en : p.getAll().entrySet())
+            if (en.getValue() instanceof Long && now - (Long) en.getValue() > 600_000L) e.remove(en.getKey());
+        e.putLong(String.valueOf(nid), now).apply();
+        return now - was < 120_000L;
     }
 
     private static PendingIntent action(Context ctx, String act, String taskId, int nid, String title, String body, long due) {

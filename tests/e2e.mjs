@@ -57,6 +57,21 @@ function makeCloud() {
       if (m === "GET") { let rows = H.filter(r => r.user_id === UID); if (q.get("id")) rows = rows.filter(r => r.id === val("id")); rows = [...rows].sort((a, b) => b.day.localeCompare(a.day));
         const sel = (q.get("select") || "").split(","); return send(200, rows.map(r => Object.fromEntries(sel.map(k => [k, r[k]])))); }
     }
+    // 74.6: Storage, private bucket goal-photos — own folder only (<user_id>/...), signed links to download
+    if (url.pathname.startsWith("/storage/v1/")) {
+      if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
+      const P = cloud.photos = cloud.photos || {}, sm = /^\/storage\/v1\/object\/(sign\/)?goal-photos\/(.+)$/.exec(url.pathname);
+      if (!sm) return send(400, { error: "bad path" });
+      const key = decodeURIComponent(sm[2]);
+      if (sm[1] && m === "GET") { if (url.searchParams.get("token") !== "t-" + key || !P[key]) return send(400, { error: "InvalidJWT" }); cloud.photoGets = (cloud.photoGets || 0) + 1; return route.fulfill({ status: 200, headers: cors, contentType: "image/jpeg", body: P[key] }); }
+      if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
+      if (!key.startsWith(UID + "/")) return send(403, { message: "new row violates row-level security policy" });
+      if (cloud.photoDown) return send(503, { message: "storage unavailable" });
+      if (sm[1] && m === "POST") return P[key] ? send(200, { signedURL: "/object/sign/goal-photos/" + key + "?token=t-" + key }) : send(400, { statusCode: "404", error: "not_found", message: "Object not found" });
+      if (m === "POST" || m === "PUT") { P[key] = req.postDataBuffer(); cloud.photoPuts = (cloud.photoPuts || 0) + 1; return send(200, { Key: "goal-photos/" + key }); }
+      if (m === "DELETE") { if (!P[key]) return send(400, { statusCode: "404", error: "not_found" }); delete P[key]; return send(200, { message: "Successfully deleted" }); }
+      return send(405, {});
+    }
     cloud.hits.push(m + " " + url.pathname + (url.search.includes("select=updated_at") ? "?meta" : ""));
     if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
     if (url.pathname === "/auth/v1/token") {
@@ -2316,6 +2331,35 @@ await test("74.1: «Через 15 мин» — напоминание повто
   await ctx.close();
 });
 
+await test("74.6: одно напоминание — один звук: веб ровно 1 раз (и «Через 15 мин» — 1 раз в новое время), Android — один notify и ноль звуков из приложения, Windows без системного «дзынь»", async () => {
+  const count = () => { window.__snd = 0; const orig = playNotificationSound; window.playNotificationSound = f => { window.__snd++; return orig(f); }; };
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T09:58:00+05:00") });
+  await page.evaluate(c => { state.tasks.push({ id: "one", title: "Позвонить маме", remind: 0, date: keyDay(new Date()), time: "10:00", createdAt: new Date().toISOString() }); saveState(); eval("(" + c + ")()"); }, count.toString());
+  await page.clock.runFor(2 * 60 * 1000 + 20 * 1000);
+  let r = await page.evaluate(() => { runScheduler(); runScheduler(); return { snd: __snd, log: state.notificationsLog.filter(n => /Позвонить маме/.test(n.title + n.body)).length }; });
+  assert.deepEqual(r, { snd: 1, log: 1 }, "one reminder → one sound: " + JSON.stringify(r));
+  await page.evaluate(() => applyReminderAction("snooze", "one"));
+  await page.clock.runFor(15 * 60 * 1000 + 30 * 1000);
+  await page.evaluate(() => { runScheduler(); runScheduler(); }); await page.clock.runFor(5 * 60 * 1000); await page.evaluate(() => runScheduler());
+  r = await page.evaluate(() => ({ snd: __snd, log: state.notificationsLog.filter(n => /Позвонить маме/.test(n.title + n.body)).length }));
+  assert.deepEqual(r, { snd: 2, log: 2 }, "«Через 15 мин» rings once at the new time: " + JSON.stringify(r));
+  await ctx.close();
+  // Android: the channel plays the sound — the app itself stays silent, one notify per reminder
+  const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 7 : k === "takeActions" ? "[]" : undefined; } }); };
+  const a = await device(makeCloud(), { init, clock: new Date("2026-10-16T09:58:00+05:00") });
+  await a.page.evaluate(c => { eval("(" + c + ")()"); __calls.length = 0; notify("💵 Пришла зарплата?", "Отложи на долг", "finance"); notify("Цель достигнута", "Дом", "goals"); }, count.toString());
+  const an = await a.page.evaluate(() => ({ notify: __calls.filter(x => /^notify/.test(x[0])).length, snd: __snd }));
+  assert.deepEqual(an, { notify: 2, snd: 0 }, "Android: one notify per reminder, no sound from the app: " + JSON.stringify(an));
+  // a reminder the alarm already rang (native) is not posted or played again by the app
+  await a.page.evaluate(() => { __calls.length = 0; notify("Через 10 мин: Работа", "Главное", "tasks", { native: true }); });
+  assert.deepEqual(await a.page.evaluate(() => ({ notify: __calls.filter(x => /^notify/.test(x[0])).length, snd: __snd })), { notify: 0, snd: 0 });
+  await a.ctx.close();
+  const java = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8");
+  assert.ok(java.includes("rangLately(ctx, nid)") && java.includes("b.setSilent(true)") && !java.includes("FLAG_INSISTENT"), "Android: a reminder reposted within 2 minutes is silent; the alarm stream does not loop");
+  const cs = fs.readFileSync(path.join(ROOT, "desktop/MainWindow.xaml.cs"), "utf8");
+  assert.ok(cs.includes("0x10 /* NIIF_NOSOUND */") && cs.includes("QuietBalloon("), "Windows: the tray balloon is silent, only the «Dawn» chime plays");
+});
+
 await test("74.2: AI — ответ не пришёл: на любой сбой понятное «что случилось и что делать» по-русски, и разбор без AI", async () => {
   const cloud = makeCloud();
   const { ctx, page } = await device(cloud);
@@ -2706,31 +2750,63 @@ await test("74.5: тема «Авто» — днём светлая, вечер�
   await ctx.close();
 });
 
-await test("74.5: фото цели — при добавлении и изменении цели можно загрузить фото; уменьшается на устройстве, видно на «Цели» и в списке; битое фото отбрасывается", async () => {
+await test("74.6: фото цели — отдельно от данных: в облаке только путь, файл в Storage (1280 px, JPEG), второе устройство видит, без сети — из кэша; удаление цели удаляет фото", async () => {
   const cloud = makeCloud();
   const { ctx, page } = await device(cloud);
   await page.evaluate(() => openGoalEditor(""));
   await page.fill("#geName", "Дом у моря");
   await page.setInputFiles("#gePhotoFile", path.join(ROOT, "icon-512.png"));
-  await until(() => page.evaluate(() => /^data:image\/jpeg;base64,/.test(geState.photo)), "photo read");
+  await until(() => page.evaluate(() => geState.photoBlob instanceof Blob && geState.photoBlob.type === "image/jpeg"), "photo read");
   assert.ok(await page.isVisible("#gePhotoImg")); assert.equal(await page.textContent("#gePhotoPickLabel"), "Заменить фото");
   await page.click("#geSave");
-  const g = await page.evaluate(() => { const g = state.goals.find(x => x.title === "Дом у моря"); return { len: (g.photo || "").length, ok: goalPhotoOk(g.photo), img: !!document.querySelector(`[data-goal-open="${g.id}"] .v-goal-ico.has-photo img`) }; });
-  assert.ok(g.ok && g.len < 350000, "a small JPEG: " + g.len); assert.ok(g.img, "seen in the list");
-  // the main goal: photo in the hero
+  const g = await page.evaluate(() => { const g = state.goals.find(x => x.title === "Дом у моря"); return { id: g.id, inside: "photo" in g, path: g.photoPath, at: g.photoAt, img: !!document.querySelector(`[data-goal-open="${g.id}"] .v-goal-ico.has-photo img`) }; });
+  assert.ok(!g.inside && g.path === UID + "/" + g.id + ".jpg" && g.at, "only the path and the time are in the data: " + JSON.stringify(g)); assert.ok(g.img, "seen in the list at once");
+  await sync(page); await until(() => cloud.photos?.[g.path], "uploaded to the Storage");
+  const file = cloud.photos[g.path]; assert.ok(file[0] === 0xff && file[1] === 0xd8 && file.length < 2e6, "a JPEG under 2 MB: " + file.length);
+  await sync(page);
+  const cg = cloud.row.state.goals.find(x => x.id === g.id); assert.equal(cg.photoPath, g.path); assert.ok(!("photo" in cg));
+  assert.ok(!JSON.stringify(cloud.row.state).includes("data:image"), "no picture inside the cloud data");
+  // the second device downloads it once by a signed link; offline it shows the cached copy
+  const d2 = await device(cloud); await sync(d2.page);
+  const seen = () => d2.page.evaluate(id => { showView("viewGoal"); renderGoals(); return !!document.querySelector(`[data-goal-open="${id}"] .v-goal-ico.has-photo img[src^="blob:"]`); }, g.id);
+  await until(seen, "photo on the second device"); assert.equal(cloud.photoGets, 1);
+  cloud.down = true; await d2.page.reload(); await d2.page.waitForFunction(() => appReadyForSync === true);
+  await until(seen, "photo from the cache without network"); cloud.down = false; assert.equal(cloud.photoGets, 1, "the cache is used, no second download");
+  // the main goal: photo in the hero, then removed → the file goes too
   await page.evaluate(() => { state.goal.title = "Квартира"; syncMainGoalMirror(); saveState(); openGoalEditor(state.goals.find(x => x.main).id); });
   await page.setInputFiles("#gePhotoFile", path.join(ROOT, "icon-192.png"));
-  await until(() => page.evaluate(() => !!geState.photo), "main photo read");
+  await until(() => page.evaluate(() => !!geState.photoBlob), "main photo read");
   await page.click("#geSave");
-  assert.ok(await page.evaluate(() => { showView("viewGoal"); renderGoal(); const i = document.getElementById("goalPhoto"); return !i.hidden && i.src.startsWith("data:image/jpeg"); }), "main goal photo on «Цели»");
-  // remove
+  assert.ok(await page.evaluate(() => { showView("viewGoal"); renderGoal(); const i = document.getElementById("goalPhoto"); return !i.hidden && i.src.startsWith("blob:"); }), "main goal photo on «Цели»");
+  const mainPath = await page.evaluate(() => state.goals.find(x => x.main).photoPath);
+  await sync(page); await until(() => cloud.photos[mainPath], "main photo uploaded");
   await page.evaluate(() => openGoalEditor(state.goals.find(x => x.main).id)); await page.click("#gePhotoDrop"); await page.click("#geSave");
-  assert.ok(await page.evaluate(() => !("photo" in state.goals.find(x => x.main)) && document.getElementById("goalPhoto").hidden));
-  // it travels through the cloud; a broken one is dropped by normalize
-  await sync(page); assert.ok(cloud.row.state.goals.some(x => x.title === "Дом у моря" && /^data:image\/jpeg/.test(x.photo)));
-  await page.reload(); await page.waitForFunction(() => appReadyForSync === true);
-  assert.ok(await page.evaluate(() => goalPhotoOk(state.goals.find(x => x.title === "Дом у моря")?.photo)), "the photo is kept after a restart");
-  assert.deepEqual(await page.evaluate(() => normalize({ version: 58, goals: [{ id: "a", title: "x", photo: "javascript:alert(1)" }, { id: "b", title: "y", photo: "data:image/png;base64,AAAA" }] }).goals.map(g => "photo" in g)), [false, true]);
+  assert.ok(await page.evaluate(() => { const m = state.goals.find(x => x.main); return !("photo" in m) && !m.photoPath && !m.photoAt && document.getElementById("goalPhoto").hidden; }));
+  await sync(page); await until(() => !cloud.photos[mainPath], "removed photo deleted from the Storage");
+  // deleting the goal deletes its photo
+  await page.evaluate(id => { window.confirm = () => true; deleteGoal(id); }, g.id);
+  await sync(page); await until(() => !cloud.photos[g.path], "the photo of a deleted goal is deleted");
+  assert.deepEqual(await page.evaluate(() => normalize({ version: 58, goals: [{ id: "a", title: "x", photo: "javascript:alert(1)", photoPath: "../x" }, { id: "b", title: "y", photo: "data:image/png;base64,AAAA", photoPath: "11111111-1111-1111-1111-111111111111/b.jpg", photoAt: "2026-10-20T10:00:00Z" }] }).goals.map(g => [("photo" in g), !!g.photoPath])), [[false, false], [true, true]]);
+  assert.deepEqual(page.errors, []); assert.deepEqual(d2.page.errors, []);
+  await ctx.close(); await d2.ctx.close();
+});
+
+await test("74.6: старая цель с фото внутри данных переезжает в Storage один раз; пока загрузка не удалась — фото не пропадает", async () => {
+  const cloud = makeCloud(), pic = "data:image/png;base64," + fs.readFileSync(path.join(ROOT, "icon-192.png")).toString("base64");
+  cloud.photoDown = true;
+  cloud.row = { user_id: UID, schema_version: 58, updated_at: cloud.nextStamp(), state: { version: 58, settings: { onboarded: true }, goal: { title: "Дом" }, goals: [{ id: "old1", title: "Дом", main: true, photo: pic }, { id: "old2", title: "Сад", photo: pic }], expenses: [{ id: "e1", amount: 5, category: "Еда", at: "2026-10-20T10:00:00.000Z", dateKey: "2026-10-20" }] } };
+  const { ctx, page } = await device(cloud); await sync(page);
+  await page.evaluate(() => migrateGoalPhotos());
+  assert.ok(await page.evaluate(() => state.goals.filter(g => goalPhotoOk(g.photo)).length === 2), "the Storage is down — the photos stay inside the data");
+  assert.ok(await page.evaluate(() => { showView("viewGoal"); renderGoals(); return !!document.querySelector('[data-goal-open="old2"] .v-goal-ico.has-photo img'); }), "and are still shown");
+  cloud.photoDown = false; await sync(page);
+  await until(() => page.evaluate(() => state.goals.every(g => !g.photo && g.photoPath)), "moved after the Storage is back");
+  assert.ok(cloud.photos[UID + "/old1.jpg"] && cloud.photos[UID + "/old2.jpg"]);
+  const puts = cloud.photoPuts; await sync(page); await page.evaluate(() => migrateGoalPhotos());
+  assert.ok(!JSON.stringify(cloud.row.state).includes("data:image"), "the cloud data no longer carries the picture");
+  assert.equal(cloud.photoPuts, puts, "moved once — no new uploads");
+  assert.ok(await page.evaluate(() => { renderGoals(); return !!document.querySelector('[data-goal-open="old2"] .v-goal-ico.has-photo img[src^="blob:"]'); }), "shown from the device cache");
+  assert.ok(!JSON.stringify(await page.evaluate(() => snapshotOf({ goals: [{ id: "x", photo: "data:image/png;base64,AAAA" }] }))).includes("data:image"), "no picture in the daily cloud copies");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });

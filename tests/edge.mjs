@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-// usage = answered requests (rows at «now»), failed = failed attempts (74.5: rows moved back ten years)
+// usage = answered requests (kind ok), failed = failed attempts (74.6: kind try, written at «now» — no rows ten years back)
 const db = { usage: 0, failed: 0, state: null, user: { id: "u1" } };
 const env = { GEMINI_API_KEY: "test-key", SUPABASE_URL: "https://x.supabase.co", SUPABASE_ANON_KEY: "anon" };
 let handler = null;
@@ -15,10 +15,12 @@ globalThis.Deno = { env: { get: k => env[k] }, serve: fn => { handler = fn; } };
 globalThis.__mockCreateClient = () => ({
   auth: { getUser: async t => t === "good" ? { data: { user: db.user }, error: null } : { data: null, error: { message: "bad jwt" } } },
   from: table => {
-    const q = { single: false, upper: null, then: (ok, bad) => Promise.resolve(table === "ai_usage" ? { count: q.upper && Date.parse(q.upper) < Date.now() - 365 * 86400e3 ? db.failed : db.usage, error: null } : { data: db.state ? { state: db.state, schema_version: 58, updated_at: "x" } : null, error: null }).then(ok, bad) };
-    for (const m of ["select", "eq", "gte"]) q[m] = () => q;
+    const q = { kind: null, del: false, upper: null, then: (ok, bad) => Promise.resolve(q.del ? (db.deletes = [...(db.deletes || []), { table, upper: q.upper, user: q.user }], { error: null }) : table === "ai_usage" ? { count: q.kind === "ok" ? db.usage : db.usage + db.failed, error: null } : { data: db.state ? { state: db.state, schema_version: 58, updated_at: "x" } : null, error: null }).then(ok, bad) };
+    for (const m of ["select", "gte"]) q[m] = () => q;
+    q.eq = (k, v) => { if (k === "kind") q.kind = v; if (k === "user_id") q.user = v; return q; };
     q.lt = (_, v) => { q.upper = v; return q; };
-    q.maybeSingle = () => q; q.insert = async row => { db.inserts = [...(db.inserts || []), row]; if (row.at && Date.parse(row.at) < Date.now() - 365 * 86400e3) db.failed++; else db.usage++; return { error: null }; };
+    q.delete = () => { q.del = true; return q; };
+    q.maybeSingle = () => q; q.insert = async row => { db.inserts = [...(db.inserts || []), row]; if (row.kind === "try") db.failed++; else db.usage++; return { error: null }; };
     return q;
   },
 });
@@ -119,10 +121,10 @@ await test("74.5: ошибка Google (503, тайм-аут) не тратит �
   for (let i = 0; i < 5; i++) { const r = await call("POST", { mode: "life" }); assert.equal(r.status, 503); assert.equal(r.body.reason, "gemini_overloaded"); }
   assert.equal(db.usage, 0, "Google's 503 must not count as an answer");
   assert.equal(db.failed, 5, "every failed attempt is still counted (30 per hour)");
-  assert.ok(db.inserts.every(x => x.user_id === "u1" && (!x.at || Date.parse(x.at) < Date.now() - 3000 * 86400e3)), "attempt rows are moved far back: " + JSON.stringify(db.inserts));
+  assert.ok(db.inserts.every(x => x.user_id === "u1" && x.kind === "try" && !x.at), "74.6: an attempt is a row kind=try at «now», never ten years back: " + JSON.stringify(db.inserts));
   gem.plan = () => ({ status: 200 });
   const ok = await call("POST", { mode: "life" }); assert.equal(ok.status, 200); assert.equal(db.usage, 1, "a real answer is counted once");
-  assert.ok(!db.inserts.at(-1).at, "an answer is written at «now»");
+  assert.ok(!db.inserts.at(-1).at && db.inserts.at(-1).kind === "ok", "an answer is written at «now» with kind=ok");
 });
 await test("74.5: не больше 30 попыток в час — дальше Google не вызывается", async () => {
   db.usage = 3; db.failed = 27; const r = await call("POST", { mode: "life" });
@@ -158,6 +160,21 @@ await test("74.2: каждая ошибка пишет причину в лог�
       assert.ok(!/AIzaSy|test-key|owner@mail|abc\.def|Квартира|9000/.test(all), name + ": a secret or user data leaked into the logs: " + all);
     }
   } finally { console.error = orig; }
+});
+await test("74.6: фото цели не уходит в Gemini (ни старое внутри данных, ни путь в Storage)", async () => {
+  const pic = "data:image/jpeg;base64," + "A".repeat(4000);
+  db.state = { goal: { title: "Дом" }, goals: [{ id: "g1", title: "Дом", main: true, photo: pic }, { id: "g2", title: "Машина", photoPath: "u1/g2.jpg", photoAt: "2026-10-20T10:00:00Z" }] };
+  for (const mode of ["life", "goal", "week", "deep"]) {
+    gem.calls = []; const r = await call("POST", { mode, scope: { goal: true, money: true, reports: true, notes: true } }); assert.equal(r.status, 200, mode);
+    const sent = JSON.stringify(gem.calls); assert.ok(!sent.includes("data:image") && !sent.includes("AAAAAAAA") && !sent.includes("g2.jpg"), mode + ": the photo went to Google");
+    assert.ok(sent.includes("Машина"), mode + ": the goals themselves still go");
+  }
+  db.state = null;
+});
+await test("74.6: ai_usage — записи kind ok/try, старше 30 дней удаляются сами (только свои)", async () => {
+  db.deletes = []; db.user = { id: "u2" }; const r = await call("POST", { mode: "life" }); assert.equal(r.status, 200);
+  const d = db.deletes.find(x => x.table === "ai_usage"); assert.ok(d, "old rows are cleaned");
+  assert.equal(d.user, "u2", "only own rows"); db.deletes = []; await call("POST", { mode: "life" }); assert.equal(db.deletes.length, 0, "at most once an hour"); db.user = { id: "u1" }; const age = (Date.now() - Date.parse(d.upper)) / 86400e3; assert.ok(age > 29.9 && age < 30.1, "older than 30 days: " + age);
 });
 console.log(`\n${results.length}/${results.length + failed} passed`);
 process.exit(failed ? 1 : 0);

@@ -2492,7 +2492,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, копия в файл</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.5</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.6</span></div>
   </div>
 </section>
 
@@ -2543,7 +2543,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.5';
+const APP_NAME='Life',APP_VERSION='74.6';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -2793,7 +2793,7 @@ async function cloudSync(){
    A day is written once (the unique key user_id+day ignores repeats); copies older than 30 days are removed by the app. */
 const CLOUD_SNAP_KEY='JL_CLOUD_SNAP_DAY_V72',CLOUD_KEEP_DAYS=30,HISTORY='/rest/v1/life_state_history';
 let _cloudSnapBusy=null;
-function snapshotOf(st){const x=clone(st);for(const k of [...SYNC_META_KEYS,'runtimeErrors','notificationsLog','drafts'])delete x[k];return x}
+function snapshotOf(st){const x=clone(st);for(const k of [...SYNC_META_KEYS,'runtimeErrors','notificationsLog','drafts'])delete x[k];if(Array.isArray(x.goals))x.goals.forEach(g=>{if(g)delete g.photo});return x} // 74.6: no pictures in the daily cloud copies
 async function cloudDailySnapshot(user){
   if(_cloudSnapBusy||!user?.id)return _cloudSnapBusy||false;const day=keyDay(),mark=user.id+'|'+day;
   try{if(localStorage.getItem(CLOUD_SNAP_KEY)===mark)return false}catch(e){}
@@ -2829,7 +2829,7 @@ async function cloudAutoSync(){
   cloudSyncInFlight=(async()=>{
     try{
       const r=await cloudSync();
-      if(r?.ok){_lastSyncOkAt=Date.now();if(!isCloudDirty())lsSet(CLOUD_OK_KEY,Date.now());setTimeout(renderSyncWarn,0);if(r.user)cloudDailySnapshot(r.user).catch(()=>{});setTimeout(maybeOnboarding,0);setSyncStatus('Синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));if(r.merged)toast('Данные объединены','Изменения с другого устройства добавлены без потерь.')}
+      if(r?.ok){_lastSyncOkAt=Date.now();if(!isCloudDirty())lsSet(CLOUD_OK_KEY,Date.now());setTimeout(renderSyncWarn,0);if(r.user)cloudDailySnapshot(r.user).catch(()=>{});setTimeout(maybeOnboarding,0);setTimeout(migrateGoalPhotos,0);setSyncStatus('Синхронизировано · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}));if(r.merged)toast('Данные объединены','Изменения с другого устройства добавлены без потерь.')}
       else if(!cloudAuth())setSyncStatus('Нужен вход');
       return !!r?.ok;
     }catch(e){
@@ -2955,7 +2955,7 @@ function migrateV57(s,fromVersion){
   // V56 → V57: the existing single goal becomes the first, main entry of goals[].
   if(!goals.length)goals=[{id:'goal-main',title:s.goal.title,description:s.goal.why||'',icon:'target',color:'blue',targetAmount:0,targetDate:'',manualSaved:0,contributions:[],createdAt:s.goal.finance?.startedAt||s.profile.createdAt||now,completedAt:'',main:true}];
   const mains=goals.filter(g=>g.main);if(mains.length!==1){const keep=mains[0]||goals[0];goals.forEach(g=>{g.main=g===keep})}
-  goals.forEach(g=>{if('photo' in g&&!goalPhotoOk(g.photo))delete g.photo});s.goals=goals;syncMainGoalMirror(s);
+  goals.forEach(g=>{if('photo' in g&&!goalPhotoOk(g.photo))delete g.photo;if('photoPath' in g&&!photoPathOk(g.photoPath))delete g.photoPath;if('photoAt' in g&&!(typeof g.photoAt==='string'&&Number.isFinite(Date.parse(g.photoAt))))delete g.photoAt});s.goals=goals;syncMainGoalMirror(s);
   if(fromVersion&&fromVersion<57)s._migratedToV57At=s._migratedToV57At||now;
 }
 // The main entry mirrors state.goal; its money lives only in state.goal.finance so nothing is counted twice.
@@ -5979,7 +5979,7 @@ function renderGoals(){
   setText('goalsSummary',`${all.length} ${plural(all.length,'цель','цели','целей')} · достигнуто ${doneCount}`);
   $$('[data-goal-open]').forEach(b=>b.onclick=()=>openGoalEditor(b.dataset.goalOpen));
 }
-let geState={id:'',icon:'target',color:'blue',photo:''};
+let geState={id:'',icon:'target',color:'blue',photo:'',photoBlob:undefined};
 function renderGoalEditorCover(){renderGoalPreview();const cover=$('geCover');if(!cover)return;const color=GOAL_COLORS[geState.color]||GOAL_COLORS.blue;cover.style.setProperty('--gc',color);$('viewGoalEdit').style.setProperty('--gc',color);const g=geState.id?goalById(geState.id):null;cover.innerHTML=geState.photo?`<img src="${esc(geState.photo)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`:coverHTML({icon:geState.icon},'');$$('[data-ge-icon]').forEach(b=>b.classList.toggle('active',b.dataset.geIcon===geState.icon));$$('[data-ge-color]').forEach(b=>b.classList.toggle('active',b.dataset.geColor===geState.color))}
 const GOAL_IDEAS=[['🏠','Своя квартира','home2'],['🚗','Машина','car'],['🛡️','Финансовая подушка','bank'],['💳','Закрыть долги','briefcase'],['🎓','Учёба','graduation'],['💍','Свадьба','heart'],['✈️','Путешествие','plane'],['💻','Ноутбук','laptop']];
 function renderGoalPreview(){
@@ -5995,7 +5995,7 @@ function renderGoalPreview(){
 }
 function openGoalEditor(id=''){
   const g=id?goalById(id):null,isMain=!!g?.main,f=state.goal.finance||{};
-  geState={id:g?g.id:'',icon:g?.icon||'target',color:g?.color||'blue',photo:goalPhoto(g)};renderGoalPhotoEdit();
+  geState={id:g?g.id:'',icon:g?.icon||'target',color:g?.color||'blue',photo:goalPhoto(g),photoBlob:undefined};renderGoalPhotoEdit();
   setText('geHeading',g?'Цель':'Новая цель');setText('geCurrency',currencyLabel());
   $('geName').value=g?(isMain?state.goal.title:g.title):'';
   $('geAmount').value=g?(isMain?(f.targetAmount||''):(g.targetAmount||'')):'';
@@ -6018,31 +6018,107 @@ function openGoalEditor(id=''){
   $('geMakeMain').hidden=!g||isMain;$('geDelete').hidden=!g||isMain;$('geTopUp').hidden=!g;
   showView('viewGoalEdit');
 }
-/* 74.5: a photo of the goal. Made small on the device (≤ 900 px, JPEG) so it travels with the goal through the cloud;
-   it lives on the goal's entry in goals[] (the main goal too), the AI never gets it. */
+/* 74.6: the goal photo lives apart from the data — Supabase Storage, private bucket goal-photos, <user_id>/<goal_id>.jpg
+   (RLS: own folder only). The goal keeps only photoPath + photoAt; the picture is cached on the device (IndexedDB «state»,
+   id photo:<goal id>) and shown from there, offline too; another device downloads it once by a signed link.
+   A new photo that is not uploaded yet (no network) waits in the cache as «pending» and goes up after the next sync.
+   74.5 kept the photo inside the data (g.photo, a data: URL): normalize() keeps it, migrateGoalPhotos() uploads it once
+   and only then removes it from the data — a failed upload keeps it for the next try, the photo is never lost. */
+const PHOTO_BUCKET='goal-photos',PHOTO_DEL_KEY='JL_PHOTO_DELETE_V746';
+const _photoSrc={},_photoTry={};
 function goalPhotoOk(v){return typeof v==='string'&&v.length<=GOAL_PHOTO_MAX&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v)}
-function goalPhoto(g){return g&&goalPhotoOk(g.photo)?g.photo:''}
-function setGoalPhoto(g,v){if(!g)return;if(goalPhotoOk(v))g.photo=v;else delete g.photo}
+function photoPathOk(v){return typeof v==='string'&&/^[0-9a-f-]{36}\/[A-Za-z0-9_-]{1,80}\.jpg$/.test(v)}
+function photoCacheGet(id){return openLifeDB().then(db=>db?new Promise(res=>{try{const r=db.transaction('state','readonly').objectStore('state').get('photo:'+id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null)}catch(e){res(null)}}):null).catch(()=>null)}
+function photoCachePut(id,rec){return openLifeDB().then(db=>db&&new Promise(res=>{try{const tx=db.transaction('state','readwrite');tx.objectStore('state').put({...rec,id:'photo:'+id});tx.oncomplete=()=>res(true);tx.onerror=tx.onabort=()=>res(false)}catch(e){res(false)}})).catch(()=>false)}
+function photoCacheDrop(id){delete _photoSrc[id];return openLifeDB().then(db=>db&&new Promise(res=>{try{const tx=db.transaction('state','readwrite');tx.objectStore('state').delete('photo:'+id);tx.oncomplete=tx.onerror=tx.onabort=()=>res()}catch(e){res()}})).catch(()=>{})}
+function showPhotoBlob(id,at,blob){const old=_photoSrc[id];if(old?.url?.startsWith('blob:')&&old.at!==at)try{URL.revokeObjectURL(old.url)}catch(e){}_photoSrc[id]={at,url:URL.createObjectURL(blob)};clearTimeout(showPhotoBlob.t);showPhotoBlob.t=setTimeout(()=>{try{renderGoal();renderGoals()}catch(e){}},30)}
+/* the picture to show: inline (not moved yet) › this device's cache › download (async, shows when ready) */
+function goalPhoto(g){
+  if(!g)return '';if(goalPhotoOk(g.photo))return g.photo;if(!g.photoAt)return '';
+  const c=_photoSrc[g.id];if(c?.at!==g.photoAt)loadGoalPhoto(g);return c?.url||'';
+}
+async function loadGoalPhoto(g){
+  const id=g.id,at=g.photoAt,k=id+'|'+at;if(_photoTry[k]&&Date.now()-_photoTry[k]<60000)return;_photoTry[k]=Date.now();
+  const rec=await photoCacheGet(id);
+  if(rec?.blob&&rec.at===at){showPhotoBlob(id,at,rec.blob);return}
+  if(rec?.blob&&!_photoSrc[id])showPhotoBlob(id,rec.at,rec.blob); // an older picture until the new one arrives
+  if(!photoPathOk(g.photoPath)||!cloudAuth())return;
+  try{
+    const sign=await supaFetch('/storage/v1/object/sign/'+PHOTO_BUCKET+'/'+g.photoPath,{method:'POST',body:JSON.stringify({expiresIn:600})});
+    const link=sign?.signedURL||sign?.signedUrl;if(!link)return;
+    const r=await fetch(SUPABASE_CONFIG.url+'/storage/v1'+(link.startsWith('/')?link:'/'+link),{cache:'no-store'});if(!r.ok)return;
+    const blob=await r.blob();if(!blob.size)return;
+    await photoCachePut(id,{at,path:g.photoPath,blob,pending:false});
+    if(goalById(id)?.photoAt===at)showPhotoBlob(id,at,blob);
+  }catch(e){}
+}
+async function photoUserId(){try{return (await cloudUser())?.id||''}catch(e){return ''}}
+/* geState.photoBlob = a new picture from the editor; '' = removed; undefined = unchanged */
+async function setGoalPhoto(g,blob){
+  if(!g||blob===undefined)return;
+  if(!blob){const path=g.photoPath;delete g.photo;delete g.photoPath;delete g.photoAt;photoCacheDrop(g.id);if(photoPathOk(path))queuePhotoDelete(path);return}
+  const at=new Date().toISOString();delete g.photo;g.photoAt=at;
+  const uidNow=jwtPayload(cloudAuth()?.access_token)?.sub||'';if(uidNow)g.photoPath=uidNow+'/'+g.id+'.jpg';
+  showPhotoBlob(g.id,at,blob);await photoCachePut(g.id,{at,path:g.photoPath||'',blob,pending:true});
+  setTimeout(()=>migrateGoalPhotos(),0);
+}
+function queuePhotoDelete(path){try{const l=JSON.parse(localStorage.getItem(PHOTO_DEL_KEY)||'[]');if(!l.includes(path))l.push(path);localStorage.setItem(PHOTO_DEL_KEY,JSON.stringify(l.slice(-50)))}catch(e){}setTimeout(()=>migrateGoalPhotos(),0)}
+function dataUrlBlob(u){const [h,b]=String(u).split(',');const bin=atob(b),a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:(h.match(/data:([^;]+)/)||[])[1]||'image/jpeg'})}
+async function uploadPhoto(path,blob){return supaFetch('/storage/v1/object/'+PHOTO_BUCKET+'/'+path,{method:'POST',headers:{'Content-Type':'image/jpeg','x-upsert':'true','cache-control':'3600'},body:blob})}
+/* uploads pending photos, moves 74.5 photos out of the data, deletes photos of removed goals; runs after each good sync */
+let _photoRun=null;
+function migrateGoalPhotos(){
+  if(_photoRun||!cloudAuth())return _photoRun;
+  _photoRun=(async()=>{
+    const uid=await photoUserId();if(!uid)return;let changed=false;
+    for(const g of (state.goals||[]).slice()){
+      if(!g?.id)continue;const path=uid+'/'+g.id+'.jpg';
+      try{
+        if(goalPhotoOk(g.photo)){
+          let blob=dataUrlBlob(g.photo);if(!/jpeg/.test(blob.type))blob=await shrinkPhoto(blob);
+          await uploadPhoto(path,blob);const at=new Date().toISOString();
+          await photoCachePut(g.id,{at,path,blob,pending:false});
+          const cur=goalById(g.id);if(cur&&cur.photo===g.photo){delete cur.photo;cur.photoPath=path;cur.photoAt=at;showPhotoBlob(g.id,at,blob);changed=true}
+          continue;
+        }
+        if(!g.photoAt)continue;
+        const rec=await photoCacheGet(g.id);
+        if(rec?.pending&&rec.at===g.photoAt&&rec.blob){
+          await uploadPhoto(path,rec.blob);await photoCachePut(g.id,{...rec,path,pending:false});
+          const cur=goalById(g.id);if(cur&&cur.photoAt===rec.at&&cur.photoPath!==path){cur.photoPath=path;changed=true}
+        }
+      }catch(e){/* no network or the bucket is not ready — the photo stays where it is and goes next time */}
+    }
+    let del=[];try{del=JSON.parse(localStorage.getItem(PHOTO_DEL_KEY)||'[]')}catch(e){}
+    const left=[];for(const p of del){if(!photoPathOk(p)||!p.startsWith(uid+'/'))continue;
+      if((state.goals||[]).some(g=>g.photoPath===p))continue; // the same goal got a new photo at that path
+      try{await supaFetch('/storage/v1/object/'+PHOTO_BUCKET+'/'+p,{method:'DELETE'})}catch(e){if(e?.status!==404&&e?.status!==400)left.push(p)}}
+    try{left.length?localStorage.setItem(PHOTO_DEL_KEY,JSON.stringify(left)):localStorage.removeItem(PHOTO_DEL_KEY)}catch(e){}
+    if(changed)saveState();
+  })().finally(()=>{_photoRun=null});
+  return _photoRun;
+}
 function renderGoalPhotoEdit(){const img=$('gePhotoImg'),has=!!geState.photo;if(!img)return;img.hidden=!has;if(has&&img.getAttribute('src')!==geState.photo)img.src=geState.photo;if(!has)img.removeAttribute('src');$('gePhotoDrop').hidden=!has;setText('gePhotoPickLabel',has?'Заменить фото':'Добавить фото')}
-function shrinkPhoto(file){return new Promise((ok,bad)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{try{let out='';for(const [side,q] of [[900,.74],[720,.62],[560,.55]]){const k=Math.min(1,side/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<=GOAL_PHOTO_MAX)break}URL.revokeObjectURL(url);goalPhotoOk(out)?ok(out):bad(new Error('big'))}catch(e){URL.revokeObjectURL(url);bad(e)}};im.onerror=()=>{URL.revokeObjectURL(url);bad(new Error('read'))};im.src=url})}
+/* 74.6: the long side up to 1280 px, JPEG ~0.8 — sharp on a phone, a few hundred KB in the Storage */
+function shrinkPhoto(file){return new Promise((ok,bad)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{try{const k=Math.min(1,1280/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);c.toBlob(b=>b&&b.size?ok(b):bad(new Error('empty')),'image/jpeg',.8)}catch(e){URL.revokeObjectURL(url);bad(e)}};im.onerror=()=>{URL.revokeObjectURL(url);bad(new Error('read'))};im.src=url})}
 async function pickGoalPhoto(file){if(!file)return;if(!/^image\//.test(file.type||'')){toast('Это не фото','Выбери картинку');return}
-  try{geState.photo=await shrinkPhoto(file);renderGoalPhotoEdit();renderGoalEditorCover();haptic(8);toast('Фото добавлено','Сохрани цель — фото останется с ней')}catch(e){toast('Фото не получилось открыть','Попробуй другое')}}
+  try{const blob=await shrinkPhoto(file);geState.photoBlob=blob;geState.photo=URL.createObjectURL(blob);renderGoalPhotoEdit();renderGoalEditorCover();haptic(8);toast('Фото добавлено','Сохрани цель — фото останется с ней')}catch(e){toast('Фото не получилось открыть','Попробуй другое')}}
 function saveGoalEditor(){
   const title=$('geName').value.trim(),amount=Math.max(0,Number($('geAmount').value)||0),date=$('geDate').value||'',desc=$('geDesc').value.trim();
   if(!title){toast('Укажи название цели');$('geName').focus();return}
   const g=geState.id?goalById(geState.id):null;
   if(g?.main){
-    state.goal.title=title;state.goal.why=desc;state.goal.finance.targetAmount=amount;state.goal.finance.targetDate=date;g.icon=geState.icon;g.color=geState.color;setGoalPhoto(g,geState.photo);
+    state.goal.title=title;state.goal.why=desc;state.goal.finance.targetAmount=amount;state.goal.finance.targetDate=date;g.icon=geState.icon;g.color=geState.color;setGoalPhoto(g,geState.photoBlob);
     syncGoalFinanceCompletion();syncMainGoalMirror();saveState();renderAll();toast('Главная цель сохранена');setTimeout(()=>requestGoalAI(false),80);
-  }else if(g){Object.assign(g,{title,description:desc,targetAmount:amount,targetDate:date,icon:geState.icon,color:geState.color});setGoalPhoto(g,geState.photo);syncOtherGoalCompletion(g);saveState();renderAll();toast('Цель сохранена')}
-  else{const ng={id:uid(),title,description:desc,icon:geState.icon,color:geState.color,targetAmount:amount,targetDate:date,manualSaved:0,contributions:[],createdAt:new Date().toISOString(),completedAt:'',main:false};setGoalPhoto(ng,geState.photo);state.goals.push(ng);saveState();renderAll();toast('Цель создана','Пополняй её переводом из кошелька.')}
+  }else if(g){Object.assign(g,{title,description:desc,targetAmount:amount,targetDate:date,icon:geState.icon,color:geState.color});setGoalPhoto(g,geState.photoBlob);syncOtherGoalCompletion(g);saveState();renderAll();toast('Цель сохранена')}
+  else{const ng={id:uid(),title,description:desc,icon:geState.icon,color:geState.color,targetAmount:amount,targetDate:date,manualSaved:0,contributions:[],createdAt:new Date().toISOString(),completedAt:'',main:false};setGoalPhoto(ng,geState.photoBlob);state.goals.push(ng);saveState();renderAll();toast('Цель создана','Пополняй её переводом из кошелька.')}
   showView('viewGoal');
 }
 function syncOtherGoalCompletion(g){const p=goalProgress(g);if(p.done&&!g.completedAt){g.completedAt=new Date().toISOString();notify('Цель достигнута',g.title,'goals')}else if(!p.done)g.completedAt=''}
 function deleteGoal(id){
   const g=goalById(id);if(!g||g.main)return;const saved=goalSavedOf(g);
   if(!confirm(`Удалить цель «${g.title}»?${saved>0?`\nОтложенные ${fmtMoney(saved)} вернутся в кошелёк.`:''}`))return;
-  state.goals=state.goals.filter(x=>x.id!==id);saveState();renderAll();showView('viewGoal');toast('Цель удалена',saved>0?'Деньги вернулись в кошелёк.':'');
+  setGoalPhoto(g,'');state.goals=state.goals.filter(x=>x.id!==id);saveState();renderAll();showView('viewGoal');toast('Цель удалена',saved>0?'Деньги вернулись в кошелёк.':'');
 }
 // Swap which goal lives in state.goal. Savings travel with their goal, so the wallet total does not change.
 function makeGoalMain(id){
@@ -6342,7 +6418,7 @@ function bindV57(){
   $$('[data-ring]').forEach(b=>b.onclick=()=>{const r=b.dataset.ring;if(r==='goal')showView('viewGoal');else if(r==='finance')showView('viewMoney');else openMetricDetail(r)});
   const tg=$('tgCard');tg.onclick=()=>{const g=mainGoal();if(g)openGoalEditor(g.id)};tg.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tg.click()}};
   $('tmOpenMoney').onclick=()=>showView('viewMoney');$('addTaskBtn').onclick=openTaskForm;$('todayFreedom').onclick=openFreedomPath;$('toast').onclick=()=>{const f=_toastAct;if(!f)return;_toastAct=null;$('toast').classList.remove('show','tappable');f()};$('syncWarnBtn').onclick=syncWarnSend;$('todaySalaryBtn').onclick=()=>salaryPaid(keyDay().slice(0,7));
-  $('addGoalBtn').onclick=()=>openGoalEditor('');$('gePhotoPick').onclick=()=>$('gePhotoFile').click();$('gePhotoFile').onchange=e=>{const f=e.target.files?.[0];e.target.value='';pickGoalPhoto(f)};$('gePhotoDrop').onclick=()=>{geState.photo='';renderGoalPhotoEdit();renderGoalEditorCover()};$('geSave').onclick=saveGoalEditor;$('geSaveTop').onclick=saveGoalEditor;$('geDelete').onclick=()=>deleteGoal(geState.id);$('geMakeMain').onclick=()=>makeGoalMain(geState.id);$('geTopUp').onclick=()=>openTransferForm({goalId:geState.id,dir:'to-goal'});
+  $('addGoalBtn').onclick=()=>openGoalEditor('');$('gePhotoPick').onclick=()=>$('gePhotoFile').click();$('gePhotoFile').onchange=e=>{const f=e.target.files?.[0];e.target.value='';pickGoalPhoto(f)};$('gePhotoDrop').onclick=()=>{geState.photo='';geState.photoBlob='';renderGoalPhotoEdit();renderGoalEditorCover()};$('geSave').onclick=saveGoalEditor;$('geSaveTop').onclick=saveGoalEditor;$('geDelete').onclick=()=>deleteGoal(geState.id);$('geMakeMain').onclick=()=>makeGoalMain(geState.id);$('geTopUp').onclick=()=>openTransferForm({goalId:geState.id,dir:'to-goal'});
   $$('[data-money-tab]').forEach(b=>b.onclick=()=>setMoneyTab(b.dataset.moneyTab));$$('[data-money-tab-go]').forEach(b=>b.onclick=()=>setMoneyTab(b.dataset.moneyTabGo));
   $$('[data-mv-period]').forEach(b=>b.onclick=()=>{mvPeriod=Number(b.dataset.mvPeriod)||7;renderMoneyOverview()});
   $('qIncome').onclick=()=>openMoneyForm('profit','',null,keyDay());$('qExpense').onclick=()=>openMoneyForm('expense','',null,keyDay());$('qTransfer').onclick=()=>openTransferForm({});$('moneyAddBtn').onclick=()=>openTxTypePicker(moneyTab==='cal'?mcSelected:keyDay());
