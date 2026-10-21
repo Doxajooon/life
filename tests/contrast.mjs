@@ -24,6 +24,9 @@ async function pixelContrast(page, v) {
       let op = 1; for (let e = el; e; e = e.parentElement) op *= Number(getComputedStyle(e).opacity);
       const range = document.createRange(); range.selectNodeContents(el); const r = range.getBoundingClientRect();
       if (r.width < 2 || r.height < 2 || r.bottom <= 0 || r.top >= H || el.closest("[aria-hidden=true]")) continue;
+      // 74.5: text partly under the fixed top bar or the bottom tabs is measured at the next scroll step, not through the bar
+      { const bar = document.querySelector(".bottom"), top = document.querySelector("header"), bt = bar && getComputedStyle(bar).display !== "none" ? bar.getBoundingClientRect().top : H, hb = top && getComputedStyle(top).position.match(/fixed|sticky/) ? top.getBoundingClientRect().bottom : 0;
+        if (r.bottom > bt || r.top < hb) continue; }
       { const cx = r.left + r.width / 2, cy = Math.min(Math.max(r.top + r.height / 2, 1), H - 1), hit = document.elementFromPoint(cx, cy); if (!hit || !(el.contains(hit) || hit.contains(el))) continue; }
       const fs = parseFloat(cs.fontSize), fw = Number(cs.fontWeight) || 400, c = parse(cs.color);
       if (c.a * op < 0.05) continue;
@@ -70,7 +73,9 @@ for (const time of ["06:50", "13:30", "17:40", "21:30"]) {
     state.tasks.push({ id: "t1", title: "Позвонить", time: "23:00", date: k, createdAt: at }, { id: "t2", title: "Отчёт по работе", time: "09:00", date: k, createdAt: at });
     state.habits = [{ id: "h1", title: "Спорт", kind: "weekly", target: 3 }]; state.goal.finance.targetAmount = 50000; state.goal.finance.savedAmount = 12000;
     state.goal.title = "Купить квартиру"; state.goal.milestones = [{ id: "m1", title: "Накопить взнос", done: true, doneAt: at }, { id: "m2", title: "Закрыть кредит", done: false }, { id: "m3", title: "Ипотека", done: false }];
-    if (typeof syncMainGoalMirror === "function") syncMainGoalMirror(); ensureDebtHistory(); state.settings.theme = t; setTheme(); saveState(); renderAll(); if (typeof setSky === "function") setSky(); }, theme);
+    if (typeof syncMainGoalMirror === "function") syncMainGoalMirror(); ensureDebtHistory();
+    // 74.5: the salary line on «Сегодня» and the month summary on «Деньги» are measured too
+    state.debts.salaryAsk = k.slice(0, 7); state.debts.monthSum = { month: "2026-09", paid: 4500, days: 30, left: 100000, text: "В сентябре погашено 4 500 сомони. Свобода ближе на 30 дней. Осталось 100 000 сомони", at }; state.settings.theme = t; setTheme(); saveState(); renderAll(); if (typeof setSky === "function") setSky(); }, theme);
   
   for (const v of ["viewToday", "viewGoal", "viewMoney", "viewSettings"]) {
     await page.evaluate(v => { closeModal?.(); showView(v); window.scrollTo(0, 0); }, v); await page.waitForTimeout(400);

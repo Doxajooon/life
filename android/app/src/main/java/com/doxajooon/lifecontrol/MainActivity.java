@@ -368,6 +368,8 @@ public class MainActivity extends AppCompatActivity {
         BiometricPrompt p = new BiometricPrompt(this, ContextCompat.getMainExecutor(this), new BiometricPrompt.AuthenticationCallback() {
             @Override public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult r) {
                 prompting = false; promptEndedAt = SystemClock.elapsedRealtime(); unlocked = true; stoppedAt = 0; hideLockView();
+                // 74.5: straight to the main screen — no «Открыто / Подтвердить» step in between
+                if (webView != null) webView.evaluateJavascript("window.__jlUnlocked&&window.__jlUnlocked()", null);
             }
             @Override public void onAuthenticationError(int code, CharSequence msg) {
                 prompting = false; promptEndedAt = SystemClock.elapsedRealtime();
@@ -377,6 +379,7 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle(getString(R.string.app_name))
                 .setSubtitle("Приложи палец")
                 .setAllowedAuthenticators(AUTH)
+                .setConfirmationRequired(false) // 74.5: the finger opens the app at once (no extra «Открыто» confirmation)
                 .build();
         try { p.authenticate(info); } catch (Exception e) { prompting = false; unlocked = true; hideLockView(); }
     }

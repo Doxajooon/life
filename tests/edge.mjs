@@ -6,7 +6,8 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const db = { usage: 0, state: null, user: { id: "u1" } };
+// usage = answered requests (rows at «now»), failed = failed attempts (74.5: rows moved back ten years)
+const db = { usage: 0, failed: 0, state: null, user: { id: "u1" } };
 const env = { GEMINI_API_KEY: "test-key", SUPABASE_URL: "https://x.supabase.co", SUPABASE_ANON_KEY: "anon" };
 let handler = null;
 globalThis.Deno = { env: { get: k => env[k] }, serve: fn => { handler = fn; } };
@@ -14,9 +15,10 @@ globalThis.Deno = { env: { get: k => env[k] }, serve: fn => { handler = fn; } };
 globalThis.__mockCreateClient = () => ({
   auth: { getUser: async t => t === "good" ? { data: { user: db.user }, error: null } : { data: null, error: { message: "bad jwt" } } },
   from: table => {
-    const q = { single: false, then: (ok, bad) => Promise.resolve(table === "ai_usage" ? { count: db.usage, error: null } : { data: db.state ? { state: db.state, schema_version: 58, updated_at: "x" } : null, error: null }).then(ok, bad) };
+    const q = { single: false, upper: null, then: (ok, bad) => Promise.resolve(table === "ai_usage" ? { count: q.upper && Date.parse(q.upper) < Date.now() - 365 * 86400e3 ? db.failed : db.usage, error: null } : { data: db.state ? { state: db.state, schema_version: 58, updated_at: "x" } : null, error: null }).then(ok, bad) };
     for (const m of ["select", "eq", "gte"]) q[m] = () => q;
-    q.maybeSingle = () => q; q.insert = async () => { db.usage++; return { error: null }; };
+    q.lt = (_, v) => { q.upper = v; return q; };
+    q.maybeSingle = () => q; q.insert = async row => { db.inserts = [...(db.inserts || []), row]; if (row.at && Date.parse(row.at) < Date.now() - 365 * 86400e3) db.failed++; else db.usage++; return { error: null }; };
     return q;
   },
 });
@@ -41,7 +43,7 @@ const call = async (method, body, token = "good") => {
   return { status: r.status, body: method === "OPTIONS" ? await r.text() : await r.json(), cors: r.headers.get("access-control-allow-origin") };
 };
 const results = []; let failed = 0;
-async function test(name, fn) { db.usage = 0; gem.calls = []; gem.plan = () => ({ status: 200 }); env.GEMINI_API_KEY = "test-key";
+async function test(name, fn) { db.usage = 0; db.failed = 0; db.inserts = []; gem.calls = []; gem.plan = () => ({ status: 200 }); env.GEMINI_API_KEY = "test-key";
   try { await fn(); results.push(name); console.log("PASS", name); } catch (e) { failed++; console.log("FAIL", name, "\n   ", e.message.split("\n").slice(0, 4).join(" ")); } }
 const ru = s => /[а-яё]/i.test(s);
 
@@ -112,6 +114,21 @@ await test("Лимит 10 запросов в час", async () => {
   db.usage = 10; const r = await call("POST", { mode: "life" });
   assert.equal(r.status, 429); assert.match(r.body.error, /лимит 10/); assert.equal(gem.calls.length, 0);
 });
+await test("74.5: ошибка Google (503, тайм-аут) не тратит лимит — пишется только попытка; успешный ответ пишет строку", async () => {
+  gem.plan = () => ({ status: 503, message: "This model is currently experiencing high demand." });
+  for (let i = 0; i < 5; i++) { const r = await call("POST", { mode: "life" }); assert.equal(r.status, 503); assert.equal(r.body.reason, "gemini_overloaded"); }
+  assert.equal(db.usage, 0, "Google's 503 must not count as an answer");
+  assert.equal(db.failed, 5, "every failed attempt is still counted (30 per hour)");
+  assert.ok(db.inserts.every(x => x.user_id === "u1" && (!x.at || Date.parse(x.at) < Date.now() - 3000 * 86400e3)), "attempt rows are moved far back: " + JSON.stringify(db.inserts));
+  gem.plan = () => ({ status: 200 });
+  const ok = await call("POST", { mode: "life" }); assert.equal(ok.status, 200); assert.equal(db.usage, 1, "a real answer is counted once");
+  assert.ok(!db.inserts.at(-1).at, "an answer is written at «now»");
+});
+await test("74.5: не больше 30 попыток в час — дальше Google не вызывается", async () => {
+  db.usage = 3; db.failed = 27; const r = await call("POST", { mode: "life" });
+  assert.equal(r.status, 429); assert.equal(r.body.reason, "app_limit"); assert.match(r.body.error, /30/); assert.equal(gem.calls.length, 0);
+  db.failed = 26; const r2 = await call("POST", { mode: "life" }); assert.equal(r2.status, 200, "29 attempts — still allowed");
+});
 await test("Ключ не настроен → 503 по-русски", async () => {
   env.GEMINI_API_KEY = ""; const r = await call("POST", { mode: "life" }); assert.equal(r.status, 503); assert.ok(ru(r.body.error));
 });
@@ -129,7 +146,7 @@ await test("74.2: каждая ошибка пишет причину в лог�
       ["limit", () => { db.usage = 10; }, { mode: "life" }, "good", "app_limit"],
       ["nokey", () => { env.GEMINI_API_KEY = ""; }, { mode: "life" }, "good", "no_key"],
     ]) {
-      db.usage = 0; gem.plan = () => ({ status: 200 }); env.GEMINI_API_KEY = "test-key"; prep(); logs.length = 0;
+      db.usage = 0; db.failed = 0; gem.plan = () => ({ status: 200 }); env.GEMINI_API_KEY = "test-key"; prep(); logs.length = 0;
       const r = await call("POST", body, token);
       cases.push(name);
       assert.ok(r.status >= 400, name + " status " + r.status);
