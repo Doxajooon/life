@@ -11,7 +11,7 @@ import org.json.JSONObject;
 
 /**
  * Exact alarms for reminders, so they ring even when the app is closed.
- *  - daily:  repeats every day at HH:MM (stages of the day)
+ *  - daily:  repeats every day at HH:MM (stages of the day); with "days" (Mon..Sun, "1" = on) it rings only on those weekdays
  *  - once:   a single moment in epoch millis (tasks)
  * Everything is persisted (JSON, safe for any title text) and restored after reboot / app update.
  */
@@ -43,7 +43,16 @@ public final class AlarmScheduler {
         return at.getTimeInMillis();
     }
 
-    static void schedule(Context ctx, String id, String time, String title, String body) {
+    static void schedule(Context ctx, String id, String time, String title, String body) { schedule(ctx, id, time, "", title, body); }
+
+    /** true when the alarm may ring today: no mask, or today's weekday is "1" in the Mon..Sun mask */
+    static boolean ringsToday(String days) {
+        if (days == null || days.length() != 7) return true;
+        int dow = Calendar.getInstance().get(Calendar.DAY_OF_WEEK); // Sunday = 1 … Saturday = 7
+        return days.charAt((dow + 5) % 7) == '1';
+    }
+
+    static void schedule(Context ctx, String id, String time, String days, String title, String body) {
         String[] p = String.valueOf(time).split(":");
         if (p.length < 2) return;
         int hh, mm;
@@ -51,9 +60,9 @@ public final class AlarmScheduler {
         if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return;
         Intent x = new Intent();
         x.putExtra("id", id); x.putExtra("kind", "daily"); x.putExtra("time", String.format(java.util.Locale.US, "%02d:%02d", hh, mm));
-        x.putExtra("title", title); x.putExtra("body", body);
+        x.putExtra("title", title); x.putExtra("body", body); x.putExtra("days", days == null ? "" : days);
         setExact(ctx, nextDaily(hh, mm), pending(ctx, id, x));
-        save(ctx, id, "daily", x.getStringExtra("time"), 0, title, body);
+        save(ctx, id, "daily", x.getStringExtra("time"), 0, title, body, 0, days);
     }
 
     static void scheduleOnce(Context ctx, String id, double atMillis, String title, String body) { scheduleOnce(ctx, id, atMillis, title, body, 0); }
@@ -79,10 +88,12 @@ public final class AlarmScheduler {
 
     private static void save(Context ctx, String id, String kind, String time, long at, String title, String body) { save(ctx, id, kind, time, at, title, body, 0); }
 
-    private static void save(Context ctx, String id, String kind, String time, long at, String title, String body, long due) {
+    private static void save(Context ctx, String id, String kind, String time, long at, String title, String body, long due) { save(ctx, id, kind, time, at, title, body, due, ""); }
+
+    private static void save(Context ctx, String id, String kind, String time, long at, String title, String body, long due, String days) {
         try {
             JSONObject o = new JSONObject();
-            o.put("kind", kind); o.put("time", time); o.put("at", at); o.put("due", due);
+            o.put("kind", kind); o.put("time", time); o.put("at", at); o.put("due", due); o.put("days", days == null ? "" : days);
             o.put("title", title == null ? "" : title); o.put("body", body == null ? "" : body);
             prefs(ctx).edit().putString(id, o.toString()).apply();
         } catch (Exception ignored) {}
@@ -110,7 +121,7 @@ public final class AlarmScheduler {
             try {
                 JSONObject o = new JSONObject(prefs(ctx).getString(id, "{}"));
                 if ("once".equals(o.optString("kind"))) scheduleOnce(ctx, id, o.optLong("at"), o.optString("title"), o.optString("body"), o.optLong("due"));
-                else schedule(ctx, id, o.optString("time"), o.optString("title"), o.optString("body"));
+                else schedule(ctx, id, o.optString("time"), o.optString("days"), o.optString("title"), o.optString("body"));
             } catch (Exception ignored) {}
         }
     }

@@ -447,6 +447,11 @@ public class MainActivity extends AppCompatActivity {
             AlarmScheduler.schedule(ctx, id, time, title, body);
         }
 
+        /** 74.2: a daily alarm only on some weekdays — days is 7 chars Mon..Sun, "1" = ring (the schedule by weekday). */
+        @JavascriptInterface public void scheduleDailyDays(String id, String time, String days, String title, String body) {
+            AlarmScheduler.schedule(ctx, id, time, days, title, body);
+        }
+
         @JavascriptInterface public void cancelDaily(String id) {
             AlarmScheduler.cancel(ctx, id);
         }
@@ -508,6 +513,6 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface public boolean isLoudReminders() { return NotificationUtil.isLoud(ctx); }
 
-        @JavascriptInterface public int bridgeVersion() { return 6; }
+        @JavascriptInterface public int bridgeVersion() { return 7; }
     }
 }

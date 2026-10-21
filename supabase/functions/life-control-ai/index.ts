@@ -27,6 +27,15 @@ const CORS = {
 const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: CORS });
 const clip = (v: unknown, n = 900) => String(v ?? "").trim().slice(0, n);
 const configured = () => Boolean(Deno.env.get("GEMINI_API_KEY"));
+// 74.2: every failed answer leaves one line in the function logs with its reason.
+// Never the key, the token, the e-mail or the user's data: Google's text is cut, and anything key-like is masked.
+const safe = (v: unknown, n = 200) => String(v ?? "").replace(/AIza[0-9A-Za-z_-]{10,}/g, "AIza***").replace(/(key|token|bearer)[=: ]+[^\s,"]+/gi, "$1=***").replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "***@***").replace(/\s+/g, " ").slice(0, n);
+function fail(reason: string, status: number, error: string, extra: Record<string, unknown> = {}) {
+  const info: Record<string, unknown> = { reason, status };
+  for (const k in extra) info[k] = typeof extra[k] === "number" ? extra[k] : safe(extra[k]);
+  console.error("ai fail", JSON.stringify(info));
+  return json({ error, reason }, status);
+}
 
 // the visible name of the app (the same as APP_NAME in index.html)
 const APP_NAME = "Life";
@@ -103,14 +112,14 @@ function context(s: any, c: any): any {
 
 async function getUser(req: Request) {
   const h = req.headers.get("Authorization") || "";
-  if (!h.startsWith("Bearer ")) return null;
+  if (!h.startsWith("Bearer ")) return { bad: "no token" };
   let k = "";
   try { k = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") || "{}").default || ""; } catch { /* ignore */ }
   k = k || Deno.env.get("SUPABASE_ANON_KEY") || "";
   if (!k) throw new Error("Supabase publishable key unavailable.");
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, k, { global: { headers: { Authorization: h } } });
   const { data, error } = await sb.auth.getUser(h.replace(/^Bearer\s+/i, ""));
-  if (error || !data?.user) return null;
+  if (error || !data?.user) return { bad: error?.message || "no user" };
   return { sb, user: data.user };
 }
 
@@ -152,12 +161,26 @@ function ruError(status: number, raw: string) {
   if (status === 400 && /api key|API_KEY_INVALID/i.test(raw)) return "Ключ Gemini недействителен. Создай новый ключ в Google AI Studio и замени GEMINI_API_KEY в Supabase → Edge Functions → Secrets.";
   if (status === 403) return "Ключ Gemini не имеет доступа к модели. Проверь ключ в Google AI Studio.";
   if (status === 503 || status === 504) return "Google сейчас перегружен — все модели Gemini заняты. Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
-  return "Gemini сейчас не отвечает (" + status + "). Попробуй через минуту.";
+  if (raw === "network") return "Сервер AI не смог связаться с Google. Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
+  if (/^empty/.test(raw)) return "Gemini прислал пустой ответ. Нажми ещё раз — обычно со второго раза приходит. Пока работает «Полный разбор» без AI.";
+  return "Google ответил ошибкой " + status + ". Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
+}
+
+// a short code for the logs and the app: what exactly went wrong at Google
+function geminiReason(status: number, raw: string) {
+  if (status === 429 || /quota|rate.?limit|exhausted/i.test(raw)) return "gemini_quota";
+  if (status === 400 && /api key|API_KEY_INVALID/i.test(raw)) return "gemini_bad_key";
+  if (status === 403) return "gemini_forbidden";
+  if (status === 504 || raw === "timeout") return "gemini_timeout";
+  if (status === 503) return "gemini_overloaded";
+  if (raw === "network") return "gemini_network";
+  if (/^empty/.test(raw)) return "gemini_empty";
+  return "gemini_http_" + status;
 }
 
 async function gemini(input: string, useSearch: boolean, system = promptRules()) {
   const key = Deno.env.get("GEMINI_API_KEY") || "";
-  if (!key) return { error: "GEMINI_API_KEY не настроен в Supabase Secrets.", status: 503 };
+  if (!key) return { error: "GEMINI_API_KEY не настроен в Supabase Secrets.", status: 503, reason: "no_key" };
   const body: any = {
     systemInstruction: { parts: [{ text: system }] },
     contents: [{ role: "user", parts: [{ text: input }] }],
@@ -177,12 +200,12 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
       raw = await r.text();
     } catch {
       const slow = ac.signal.aborted; lastStatus = slow ? 504 : 502; lastRaw = slow ? "timeout" : "network";
-      console.error("gemini error", m, lastStatus, lastRaw, Date.now() - t0); if (slow) busyUntil[m] = Date.now() + BUSY_MS; continue;
+      console.error("gemini error", m, lastStatus, lastRaw, Date.now() - t0 + "ms"); if (slow) busyUntil[m] = Date.now() + BUSY_MS; continue;
     } finally { clearTimeout(timer); }
     let d: any = {};
     try { d = JSON.parse(raw || "{}"); } catch { /* ignore */ }
     if (!r.ok) {
-      console.error("gemini error", m, r.status, raw.slice(0, 300));
+      console.error("gemini error", m, r.status, safe(d?.error?.status || ""), safe(d?.error?.message || raw, 200));
       lastStatus = r.status; lastRaw = raw;
       if (r.status === 503) busyUntil[m] = Date.now() + BUSY_MS;
       if (r.status === 400 && /api key|API_KEY_INVALID/i.test(raw)) break; // a bad key fails on every model
@@ -200,27 +223,28 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
     console.log("gemini ok", m, Date.now() - t0 + "ms");
     return { output_text: out, sources: useSearch ? sources.slice(0, 8) : [], model: m };
   }
-  return { error: ruError(lastStatus, lastRaw), status: lastStatus === 429 ? 429 : lastStatus === 503 || lastStatus === 504 ? 503 : 502 };
+  const status = lastStatus === 429 ? 429 : lastStatus === 503 || lastStatus === 504 ? 503 : 502;
+  return { error: ruError(lastStatus, lastRaw), status, reason: geminiReason(lastStatus, lastRaw), tried: order.length, ms: Date.now() - t0 };
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   try {
     const a = await getUser(req);
-    if (!a) return json({ error: "Требуется вход в " + APP_NAME + "." }, 401);
+    if ("bad" in a) return fail("auth", 401, "Вход в " + APP_NAME + " устарел. Выйди из аккаунта и войди снова, потом повтори.", { method: req.method, detail: a.bad });
     // Health check: answers instantly and costs nothing (no Gemini call, no rate limit).
     if (req.method === "GET") return json({ ok: true, configured: configured(), model: MODEL });
-    if (req.method !== "POST") return json({ error: "Method not allowed." }, 405);
+    if (req.method !== "POST") return fail("method", 405, "Неверный запрос к AI. Обнови приложение.", { method: req.method });
     const body = await req.json().catch(() => ({}));
-    if (!configured()) return json({ error: "GEMINI_API_KEY не настроен в Supabase Secrets." }, 503);
-    if (!(await allowRequest(a.sb, a.user.id))) return json({ error: "Слишком много запросов AI за час (лимит 10). Попробуй позже." }, 429);
+    if (!configured()) return fail("no_key", 503, "AI ещё не настроен: на сервере нет ключа Gemini (GEMINI_API_KEY в Supabase → Edge Functions → Secrets). Пока работает «Полный разбор» без AI.");
+    if (!(await allowRequest(a.sb, a.user.id))) return fail("app_limit", 429, "Слишком много запросов AI за час (лимит 10). Попробуй через час — пока работает «Полный разбор» без AI.");
     if (body?.ping === true) {
       const t = await gemini("Ответь ровно двумя словами: «AI работает».", false, "Ты отвечаешь коротко по-русски.");
-      return "error" in t ? json({ error: t.error }, t.status) : json({ ok: true, model: t.model, output_text: "Подключение работает · модель " + t.model, sources: [] });
+      return "error" in t ? fail(t.reason, t.status, t.error, { mode: "ping", tried: t.tried ?? 0, ms: t.ms ?? 0 }) : json({ ok: true, model: t.model, output_text: "Подключение работает · модель " + t.model, sources: [] });
     }
     const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
-    if (error) return json({ error: "Не удалось прочитать данные " + APP_NAME + " из Supabase." }, 500);
+    if (error) return fail("state_read", 500, "Не удалось прочитать твои данные из облака. Проверь синхронизацию («Настройки → Аккаунт») и повтори через минуту.", { code: error.code || "", msg: error.message || "" });
     const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
     const p = mode === "deep"
       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
@@ -230,9 +254,9 @@ Deno.serve(async (req) => {
       ? promptRules() + "\n\nРЕЖИМ: GOAL. Проанализируй именно главную цель пользователя. Ответь в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — 2–3 подтверждённых факта.\n2) ЧТО УЖЕ ДОСТИГНУТО — только закрытые этапы и реальные результаты из данных.\n3) ЧТО УЖЕ ЕСТЬ — капитал в цели, свободная касса, доходы/расходы и другие подтверждённые ресурсы.\n4) ГЛАВНАЯ ПРОБЛЕМА — один главный ограничитель.\n5) ГЛАВНЫЙ ФОКУС — один приоритет на ближайшие 7 дней.\n6) ПЛАН ДЕЙСТВИЙ — 3–5 строк в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n7) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — ровно одно действие.\n\nНе выдумывай отсутствующие данные. Если цель не имеет суммы или срока, прямо укажи это и дай ближайшее измеримое действие без выдуманной цифры.\n\nДанные:\n" + JSON.stringify(ctx)
       : promptRules() + "\n\nРЕЖИМ: LIFE. Сделай самый полезный честный разбор жизни пользователя. Ответь ровно восемью блоками, каждый с новой строки, название ЗАГЛАВНЫМИ буквами и тире:\nГДЕ Я СЕЙЧАС — 3 главных факта с цифрами (деньги, долг, цель, дисциплина).\nПЛЮСЫ — 2–4 реальные сильные стороны, каждая с цифрой из данных.\nМИНУСЫ — 2–4 слабых места и утечки: где теряются деньги (категории, мелкие траты, перерасход банков), что проседает в дисциплине (незакрытые дни, привычки, задачи). С цифрами.\nКУДА Я ИДУ — прогноз при текущем темпе, с арифметикой: когда будет достигнута цель, когда закроется долг (используй app_numbers.debtFreeLine, если есть), что будет через 3 месяца, если ничего не менять, и что изменится, если исправить главный минус.\nГЛАВНЫЙ РИСК — одна вещь, которая сильнее всего угрожает цели.\nПЛАН НА 7 ДНЕЙ — 3–5 строк: P1/P2/P3 | действие | срок | измеримый результат.\nШАГ НА СЕГОДНЯ — ровно одно действие на сегодня.\nКАК ЛУЧШЕ ИСПОЛЬЗОВАТЬ ПРИЛОЖЕНИЕ — 1–2 конкретных совета, если из данных видно, что чего-то не хватает (не записываются расходы, нет банков, нет привычек, дни не закрываются). Если всего хватает — напиши это одной строкой.\nБез markdown, без звёздочек и решёток. app_numbers — точные расчёты приложения, используй их: dayReport — отчёт сегодняшнего дня (заработал, потратил, куда ушло, что сделано для цели), avoidHabits — привычки-отказы и их серии, wins — победы, goalStage — текущий этап цели и что нужно, чтобы его закрыть. Не выдумывай данные; если чего-то нет, так и скажи.\n\nДанные:\n" + JSON.stringify(ctx);
     const r = mode === "week" ? await gemini(p, false, weekRules()) : mode === "deep" ? await gemini(p, false, deepRules()) : await gemini(p, sc.webSearch);
-    if ("error" in r) return json({ error: r.error }, r.status);
+    if ("error" in r) return fail(r.reason, r.status, r.error, { mode, tried: r.tried ?? 0, ms: r.ms ?? 0 });
     return json({ ok: true, model: r.model || MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
   } catch (e) {
-    return json({ error: e instanceof Error ? e.message : "Неизвестная ошибка функции." }, 500);
+    return fail("exception", 500, "Ошибка на сервере AI. Попробуй через минуту; если повторяется — напиши разработчику, причина записана в логах.", { name: e instanceof Error ? e.name : typeof e, msg: e instanceof Error ? e.message : String(e) });
   }
 });

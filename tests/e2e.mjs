@@ -73,6 +73,8 @@ function makeCloud() {
       if (!ok(req.headers().authorization)) return send(401, { error: "auth" });
       const b = JSON.parse(req.postData() || "{}"); cloud.aiBodies = [...(cloud.aiBodies || []), b];
       if (cloud.aiDelay) await new Promise(r => setTimeout(r, cloud.aiDelay));
+      if (cloud.aiReply === "abort") return route.abort("connectionreset");
+      if (cloud.aiReply) return route.fulfill({ status: cloud.aiReply.status, headers: cors, contentType: cloud.aiReply.type || "application/json", body: cloud.aiReply.body });
       if (cloud.aiFail) return send(429, { error: "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей." });
       if (b.mode === "week") return send(200, { ok: true, model: "mock", output_text: "СИЛЬНАЯ СТОРОНА — закрыл 5 дней.\nСЛАБОЕ МЕСТО — **телефон** <img src=x onerror=window.__xss=1>\nШАГ НА НЕДЕЛЮ — после 21:00 телефон на зарядку.", sources: [] });
       return send(200, { ok: true, model: "mock", output_text: "Ответ <img src=x onerror=window.__xss=1>", sources: [] });
@@ -2276,6 +2278,170 @@ await test("74.1: «Через 15 мин» — напоминание повто
   assert.equal(w.sent.length, 1); assert.equal(w.sent[0].sound, true, "the host is asked to play the sound"); assert.equal(w.played, 0, "no double sound from the page");
   const cs = fs.readFileSync(path.join(ROOT, "desktop/MainWindow.xaml.cs"), "utf8");
   assert.ok(cs.includes("PlayChime()") && cs.includes('"sounds", "jamal-dawn.wav"'), "Windows plays Web/sounds/jamal-dawn.wav");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.2: AI — ответ не пришёл: на любой сбой понятное «что случилось и что делать» по-русски, и разбор без AI", async () => {
+  const cloud = makeCloud();
+  const { ctx, page } = await device(cloud);
+  const msg = () => page.evaluate(() => callAI({ mode: "life" }).then(() => "OK", e => String(e.message)));
+  const cases = [
+    ["шлюз 504 (HTML)", { status: 504, type: "text/html", body: "<html>Gateway Timeout</html>" }, /не отвечает \(504\).*Попробуй через минуту/],
+    ["лимит ресурсов 546", { status: 546, body: JSON.stringify({ code: "WORKER_LIMIT", message: "Function failed due to not having enough compute resources" }) }, /перегружен.*через минуту/],
+    ["500 по-английски", { status: 500, body: JSON.stringify({ message: "Internal Server Error" }) }, /Ошибка на сервере AI \(500\)/],
+    ["404 нет функции", { status: 404, body: JSON.stringify({ message: "Requested function was not found" }) }, /не найден/],
+    ["пустой ответ", { status: 200, body: JSON.stringify({ ok: true, output_text: "" }) }, /пустой ответ.*ещё раз/],
+    ["своя причина сервера", { status: 503, body: JSON.stringify({ error: "Google сейчас перегружен — все модели Gemini заняты. Попробуй через минуту.", reason: "gemini_overloaded" }) }, /Google сейчас перегружен/],
+    ["обрыв связи", "abort", /Нет связи с сервером AI.*интернет/],
+  ];
+  for (const [name, reply, re] of cases) {
+    cloud.aiReply = reply; const m = await msg();
+    assert.match(m, re, name + ": " + m);
+    assert.ok(/[а-яё]/i.test(m) && !/HTTP|undefined|null|Failed to fetch|\[object/i.test(m), name + ": not understandable: " + m);
+  }
+  // in the window: the reason, and the full review without AI one tap away
+  cloud.aiReply = { status: 504, type: "text/html", body: "<html>Gateway Timeout</html>" };
+  await page.evaluate(() => openGeminiAnalysis()); await page.click("#aiRunBtn");
+  await page.waitForSelector("#aiResult .jl-ai-fail", { timeout: 8000 });
+  const box = await page.textContent("#aiResult");
+  assert.match(box, /Ответ AI не пришёл/); assert.match(box, /Попробуй через минуту/); assert.ok(await page.isVisible("#localFallbackBtn"));
+  await page.evaluate(() => closeModal());
+  // the week card keeps the review without AI and says why
+  await page.evaluate(() => { showView("viewToday"); return runWeekReview(); });
+  assert.match(await page.textContent("#wkText"), /СИЛЬНАЯ СТОРОНА[\s\S]*не отвечает \(504\)/);
+  // the server: every failure writes its reason to the logs (no key, no token, no e-mail)
+  const ts = fs.readFileSync(path.join(ROOT, "supabase/functions/life-control-ai/index.ts"), "utf8");
+  assert.ok(/console\.error\("ai fail", JSON\.stringify\(info\)\)/.test(ts) && (ts.match(/return fail\(/g) || []).length >= 7, "every error answer goes through fail() with a reason");
+  // the session expired and cannot be refreshed → «войди снова», not a code (last: the app then asks to log in)
+  cloud.aiReply = { status: 401, body: JSON.stringify({ msg: "Invalid JWT" }) }; cloud.failRefresh = true;
+  assert.match(await msg(), /Выйди из аккаунта и войди снова/);
+  page.errors = page.errors.filter(e => !/401|Supabase 400/.test(e));
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.2: график по дням недели — свои часы и выходной; Android получает будильники по дням (маска Пн..Вс), без графика всё как раньше", async () => {
+  const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 7 : k === "takeActions" ? "[]" : undefined; } }); };
+  // 2026-10-16 is a Friday
+  const { ctx, page } = await device(makeCloud(), { init, clock: new Date("2026-10-16T08:58:00+05:00") });
+  const plain = await page.evaluate(() => { __calls.length = 0; scheduleNative(); return { days: __calls.filter(c => c[0] === "scheduleDailyDays").length, daily: __calls.filter(c => c[0] === "scheduleDaily").map(c => c[1] + "@" + c[2]) }; });
+  assert.equal(plain.days, 0, "no weekday schedule → the same daily alarms as before");
+  assert.ok(plain.daily.includes("s1@09:00"), JSON.stringify(plain.daily));
+  const r = await page.evaluate(() => {
+    state.day.week = { "5": { off: true }, "6": { t: [["11:00", "15:00"], ["15:00", "20:00"], ["20:00", "20:30"]] }, "2": { t: [["09:00", "08:00"], ["x", "y"], ["1", "2"]] } };
+    state.day.week = normalize(clone(state)).day.week; saveState(); renderAll();
+    __calls.length = 0; scheduleNative();
+    const masks = __calls.filter(c => c[0] === "scheduleDailyDays").map(c => c[1] + " " + c[2] + " " + c[3]), daily = __calls.filter(c => c[0] === "scheduleDaily").map(c => c[1] + " " + c[2]);
+    const sat = new Date("2026-10-17T12:00:00+05:00");
+    return { week: state.day.week, off: dayOff(), sub: document.getElementById("rhythmSub").textContent, masks, daily, sat: daySteps(sat).map(s => s.time + "-" + s.end), base: state.day.steps.map(s => s.time), same: daySteps() === daySteps() };
+  });
+  assert.deepEqual(Object.keys(r.week).sort(), ["5", "6"], "a broken weekday (Tuesday) is dropped, the others are kept");
+  assert.ok(r.off && /выходной/.test(r.sub), "Friday is a day off: " + r.sub);
+  assert.deepEqual(r.sat, ["11:00-15:00", "15:00-20:00", "20:00-20:30"], "Saturday has its own times");
+  assert.deepEqual(r.base, ["09:00", "18:00", "21:30"], "the usual day is not changed");
+  assert.ok(r.same, "daySteps() gives the same objects while nothing changes");
+  assert.ok(r.masks.some(m => /^s1(@\d)? 09:00 1111001$/.test(m)) && r.masks.some(m => /^s1(@\d)? 11:00 0000010$/.test(m)), "Mon–Thu + Sun at 09:00, Saturday at 11:00, Friday silent: " + r.masks.join(" | "));
+  assert.ok(!r.masks.some(m => / \d{7}$/.test(m) && m.endsWith("1111111")), "full weeks go as plain daily alarms");
+  // the web side: no stage reminder on the day off
+  await page.clock.runFor(3 * 60 * 1000);
+  const n = await page.evaluate(() => { state.notificationsLog = []; runScheduler(); return state.notificationsLog.map(x => x.title); });
+  assert.ok(!n.some(t => /Работа/.test(t)), "no stage reminders on the day off: " + n.join(" | "));
+  // the editor
+  await page.evaluate(() => { showView("viewSettings"); openWeekSchedule(); });
+  assert.equal(await page.inputValue("#wkMode5"), "off"); assert.equal(await page.inputValue("#wkMode6"), "own");
+  await page.selectOption("#wkMode1", "own"); await page.fill("#wkE1_0", "08:00"); await page.click("#wkSave");
+  assert.match(await page.textContent("#wkErr"), /Пн: проверь время/);
+  await page.fill("#wkE1_0", "13:00"); await page.fill("#wkS1_1", "13:00"); await page.click("#wkSave");
+  assert.deepEqual(await page.evaluate(() => state.day.week["1"].t[0]), ["09:00", "13:00"]);
+  assert.match(await page.textContent("#setWeekSub"), /Пт выходной/);
+  // the Android side knows the mask and strips «@n» for the «Да / Перенести» buttons
+  const j = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java"), "utf8"), m = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java"), "utf8");
+  assert.ok(j.includes("AlarmScheduler.ringsToday(days)") && j.includes("indexOf('@')") && m.includes("scheduleDailyDays(String id, String time, String days"), "Android: weekday masks");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.2: время намаза — пять намазов на «Сегодня» с хадисами, напоминание в каждое время, город и мазхаб в настройках", async () => {
+  const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 7 : k === "takeActions" ? "[]" : undefined; } }); };
+  const { ctx, page } = await device(makeCloud(), { init, clock: new Date("2026-10-21T15:00:00+05:00") });
+  const r = await page.evaluate(() => { showView("viewToday"); renderToday(); const t = prayerTimes(); const f = m => fmtMin(m);
+    return { on: prayerOn(), shown: !document.getElementById("prayerBox").hidden, cells: [...document.querySelectorAll("#prayerTimes > div")].map(d => d.textContent), next: document.getElementById("prayerNext").textContent, t: { fajr: f(t.fajr), dhuhr: f(t.dhuhr), asr: f(t.asr), maghrib: f(t.maghrib), isha: f(t.isha) } }; });
+  assert.ok(r.on && r.shown, "on with the hadiths");
+  assert.equal(r.cells.length, 5); assert.match(r.cells.join(" "), /Фаджр.*Зухр.*Аср.*Магриб.*Иша/);
+  // Dushanbe, 21 October: sunrise ≈ 06:40, noon ≈ 12:10, sunset ≈ 17:40 (a few minutes of tolerance)
+  const mm = s => { const [h, m] = s.split(":").map(Number); return h * 60 + m; }, near = (a, b, d = 6) => Math.abs(mm(a) - mm(b)) <= d;
+  assert.ok(near(r.t.dhuhr, "12:10") && near(r.t.maghrib, "17:40") && near(r.t.fajr, "05:11", 10) && near(r.t.asr, "15:55", 10) && near(r.t.isha, "19:02", 10), JSON.stringify(r.t));
+  assert.match(r.next, /^Аср в \d\d:\d\d · через \d+ мин · Душанбе$/, r.next);
+  const alarms = await page.evaluate(() => { __calls.length = 0; scheduleNativeTasks(); return __calls.filter(c => c[0] === "scheduleOnce" && /^pray_/.test(c[1])).map(c => c[1]); });
+  assert.ok(alarms.includes("pray_asr_0") && alarms.includes("pray_fajr_1") && !alarms.includes("pray_fajr_0"), "today's coming prayers and tomorrow's on Android: " + alarms.join(","));
+  await page.clock.setSystemTime(new Date(`2026-10-21T${r.t.asr}:20+05:00`));
+  const n = await page.evaluate(() => { state.notificationsLog = []; runScheduler(); return state.notificationsLog.map(x => x.title); });
+  assert.ok(n.includes("🕌 Время намаза: Аср"), n.join(" | "));
+  // settings: the city, the madhab, off
+  await page.evaluate(() => showView("viewSettings"));
+  await page.selectOption("#setPrayerAsr", "shafii");
+  const shafii = await page.evaluate(() => fmtMin(prayerTimes().asr)); assert.ok(mm(shafii) < mm(r.t.asr) - 30, "Shafi'i Asr is earlier: " + shafii);
+  await page.selectOption("#setPrayerCity", "khujand"); assert.match(await page.evaluate(() => { showView("viewToday"); renderToday(); return document.getElementById("prayerNext").textContent; }), /Худжанд/);
+  await page.evaluate(() => showView("viewSettings")); await page.click("label:has(#setPrayerOn) .v-switch");
+  assert.ok(await page.evaluate(() => { showView("viewToday"); renderToday(); return document.getElementById("prayerBox").hidden && state.settings.prayerOn === false && prayerReminders().length === 0; }), "switched off");
+  // «Мотивация» or no quotes: prayers are not shown unless switched on by hand
+  assert.deepEqual(await page.evaluate(() => { delete state.settings.prayerOn; state.settings.quoteSet = "general"; const a = prayerOn(); state.settings.prayerOn = true; return [a, prayerOn()]; }), [false, true]);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.2: новый доход спрашивает, куда разложить — долг, банк, на руки; без долгов и банков не спрашивает", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => openMoneyForm("profit")); await page.fill("#moneyAmount", "2000"); await page.click("#saveMoneyBtn");
+  await page.waitForTimeout(150);
+  assert.ok(!(await page.evaluate(() => document.getElementById("modalBack").classList.contains("open"))), "nothing to split → no question");
+  await page.evaluate(() => { state.debts.bank = 9000; state.debts.labels = { bank: "Эсхата", firms: "Брат" }; state.debts.monthlyPayment = 1500; ensureDebtHistory();
+    state.budgets = [{ id: "b1", name: "Еда", emoji: "🍞", planned: 1000, tops: [] }]; saveState(); renderAll(); });
+  await page.evaluate(() => openMoneyForm("profit")); await page.fill("#moneyAmount", "5000"); await page.click("#saveMoneyBtn");
+  await page.waitForSelector("#splSave", { timeout: 4000 });
+  const ask = await page.evaluate(() => ({ title: document.querySelector("#modal h2").textContent, rows: [...document.querySelectorAll(".jl-split-row b")].map(b => b.textContent), debt: document.getElementById("spl0").value, hand: document.getElementById("splHand").textContent }));
+  assert.equal(ask.title, "Куда разложить деньги?"); assert.deepEqual(ask.rows, ["Эсхата", "Еда", "На руки"], "debts by their own names, the banks, in hand");
+  assert.equal(ask.debt, "1500", "the monthly payment is suggested"); assert.match(ask.hand, /3\s500/);
+  await page.fill("#spl1", "4000"); assert.ok(await page.isDisabled("#splSave"), "more than came in"); assert.match(await page.textContent("#splHint"), /Больше, чем пришло/);
+  await page.fill("#spl1", "1000"); await page.click("#splSave");
+  const r = await page.evaluate(() => ({ debt: state.debts.bank, pay: state.expenses.filter(e => e.debtPayment === "bank").map(e => e.amount), tops: state.budgets[0].tops.map(t => t.amount), cash: walletMetrics().cash, spend: monthSum(spendOnly(state.expenses)) }));
+  assert.equal(r.debt, 7500); assert.deepEqual(r.pay, [1500]); assert.deepEqual(r.tops, [1000]);
+  assert.equal(r.cash, 2000 + 5000 - 1500, "the debt part leaves the wallet, the bank part is a plan of spending"); assert.equal(r.spend, 0, "a debt payment is not «Расход»");
+  // «Всё на руки» changes nothing
+  await page.evaluate(() => openIncomeSplit(300)); await page.click("#splAllHand");
+  assert.equal(await page.evaluate(() => state.debts.bank), 7500);
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("74.2: «Путь к свободе» и праздник за победу; долги своими именами; вечер за 30 секунд", async () => {
+  const { ctx, page } = await device(makeCloud());
+  // the migration: stops passed before 74.2 count as won (no confetti for the past)
+  assert.deepEqual(await page.evaluate(() => [normalize({ version: 58, debts: { bank: 4000, firms: 0 }, debtBaseline: 10000 }).debts.freedomWon, normalize({ version: 58, debts: { bank: 0, firms: 0 }, debtBaseline: 10000 }).debts.freedomWon, normalize({ version: 58, debts: { bank: 0, firms: 0 } }).debts.freedomWon]), [[25, 50], [25, 50, 75, 100], []]);
+  await page.evaluate(() => { state.debts.bank = 10000; state.debts.firms = 0; state.debtBaseline = 10000; state.debts.freedomWon = []; state.debts.monthlyPayment = 1000; ensureDebtHistory(); saveState(); window.__party = 0; const c = celebrate; window.celebrate = () => { window.__party++; c(); }; renderAll(); showView("viewMoney"); renderMoney(); });
+  let p = await page.evaluate(() => ({ head: document.querySelector("#freedomPath .jl-fpath-head")?.textContent, stops: document.querySelectorAll("#freedomPath .jl-fpath-stops li").length, foot: document.querySelector("#freedomPath .jl-fpath-foot").textContent }));
+  assert.match(p.head, /Путь к свободе.*выплачено 0%/); assert.equal(p.stops, 5); assert.match(p.foot, /До победы «25%» — 2\s500.*Свободен от долга/);
+  await page.evaluate(() => openTransferForm({ dir: "to-debt", debt: "bank" })); await page.fill("#trAmount", "2600"); await page.click("#trSave"); await page.waitForTimeout(1200);
+  p = await page.evaluate(() => ({ won: state.debts.freedomWon, party: __party, toast: document.getElementById("toast").textContent, log: state.notificationsLog.some(n => /Победа: выплачено 25% долга/.test(n.title)), on: document.querySelectorAll("#freedomPath li.on").length }));
+  assert.deepEqual(p.won, [25]); assert.equal(p.party, 1, "confetti once"); assert.match(p.toast, /Победа: выплачено 25% долга/); assert.ok(p.log); assert.equal(p.on, 2);
+  await page.evaluate(() => renderAll()); await page.waitForTimeout(1100); assert.equal(await page.evaluate(() => __party), 1, "a win is celebrated only once");
+  await page.evaluate(() => { openTransferForm({ dir: "to-debt", debt: "bank" }); }); await page.fill("#trAmount", "7400"); await page.click("#trSave"); await page.waitForTimeout(1200);
+  p = await page.evaluate(() => ({ won: state.debts.freedomWon, toast: document.getElementById("toast").textContent, head: document.querySelector("#freedomPath .jl-fpath-head").textContent }));
+  assert.deepEqual(p.won, [25, 50, 75, 100]); assert.match(p.toast, /Ты свободен от долга/); assert.match(p.head, /ты свободен от долга/);
+  // debts by their own names: a placeholder name asks for the real one, the editor starts empty
+  await page.evaluate(() => { state.debts.labels = { bank: "Долг 1", firms: "Долг 2" }; state.debts.bank = 500; saveState(); renderMoney(); });
+  assert.match(await page.textContent('[data-debt-open="bank"]'), /назови: кому должен/);
+  await page.click('[data-debt-open="bank"]'); await page.waitForSelector("#dhEdit"); assert.match(await page.textContent("#dhEdit"), /Назвать и изменить/);
+  await page.click("#dhEdit"); await page.waitForSelector("#dnb");
+  assert.equal(await page.inputValue("#dnb"), ""); await page.fill("#dnb", "Алиф Банк"); await page.click("#saveDebtBtn");
+  assert.deepEqual(await page.evaluate(() => [debtLabel("bank"), debtNamed("bank"), debtLabel("firms")]), ["Алиф Банк", true, "Долг 2"]);
+  assert.match(await page.textContent('[data-debt-open="bank"]'), /Алиф Банк[\s\S]*платежи и история/);
+  // the evening in 30 seconds: one tap on what got in the way, one tap to close — the day's facts are written by themselves
+  await page.evaluate(() => { state.tasks.push({ id: "q1", title: "Отчёт клиенту", date: keyDay(), time: "10:00", done: true }, { id: "q2", title: "Позвонить в банк", date: keyDay(), time: "", done: false }); saveState(); showView("viewToday"); renderToday(); });
+  await page.click('[data-qblock="Телефон и соцсети"]'); await page.click("#quickCloseBtn");
+  const rep = await page.evaluate(() => state.reports[keyDay()]);
+  assert.ok(rep.closedAt, "the day is closed"); assert.match(rep.done, /задачи 1\/2/); assert.equal(rep.block, "Телефон и соцсети"); assert.equal(rep.tomorrow, "Позвонить в банк");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
