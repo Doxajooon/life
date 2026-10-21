@@ -2746,6 +2746,36 @@ await test("74.5: отпечаток — после пальца сразу гл
   await ctx.close();
 });
 
+// ================= 74.6 =================
+await test("74.6: одно напоминание — один звук: веб играет 1 раз; на Android приложение не играет звук (звонит будильник или канал уведомления — один раз)", async () => {
+  const wrap = () => { window.__snd = 0; const orig = playNotificationSound; playNotificationSound = function (...a) { window.__snd++; return orig.apply(this, a); }; };
+  // the web: one reminder → one sound, even if the scheduler runs again in the same minute
+  { const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-21T09:00:10+05:00") });
+    const r = await page.evaluate(w => { eval("(" + w + ")()"); state.settings.sound = true; state.notificationsLog = [];
+      state.tasks.push({ id: "s1", title: "Позвонить", date: keyDay(), time: "09:00", createdAt: new Date().toISOString() }); saveState();
+      runScheduler(); runScheduler(); notify("Ещё раз", "то же мгновение"); return { snd: __snd, log: state.notificationsLog.filter(n => /Позвонить/.test(n.title + n.body)).length }; }, wrap.toString());
+    assert.equal(r.log, 1, "one notice for one reminder"); assert.equal(r.snd, 2, "playNotificationSound is called once per notice (the second notice is the extra notify)");
+    const once = await page.evaluate(() => { let n = 0; const c = window.AudioContext; _lastChimeAt = 0; const orig = audioCtx; audioCtx = () => { n++; return null; }; playNotificationSound(); playNotificationSound(); audioCtx = orig; return n; });
+    assert.equal(once, 1, "two notices in the same moment give one sound");
+    assert.deepEqual(page.errors, []); await ctx.close(); }
+  // Android (bridge stub): an alarm reminder — the alarm rings, the app neither notifies nor plays;
+  // a reminder without an alarm (snoozed in the app) — exactly one notify and no sound from the app
+  { const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 7 : k === "takeActions" ? "[]" : undefined; } }); };
+    const { ctx, page } = await device(makeCloud(), { init, clock: new Date("2026-10-21T09:00:10+05:00") });
+    const r = await page.evaluate(w => { eval("(" + w + ")()"); state.settings.sound = true;
+      state.tasks.push({ id: "a1", title: "Отчёт", date: keyDay(), time: "09:00", createdAt: new Date().toISOString() }); saveState();
+      __calls.length = 0; runScheduler(); const alarm = { notifies: __calls.filter(c => /^notify/.test(c[0])).length, snd: __snd };
+      state.tasks[state.tasks.length - 1].snoozeAt = new Date(Date.now() - 1000).toISOString(); __calls.length = 0; runScheduler(); runScheduler();
+      return { alarm, snooze: { notifies: __calls.filter(c => /^notify/.test(c[0])).map(c => c[0]), snd: __snd } }; }, wrap.toString());
+    assert.deepEqual(r.alarm, { notifies: 0, snd: 0 }, "the native alarm already rang — no second notice, no second sound");
+    assert.deepEqual(r.snooze, { notifies: ["notifyTask"], snd: 0 }, "«Через 15 мин»: one notice in the new time, the sound is the channel's");
+    assert.deepEqual(page.errors, []); await ctx.close(); }
+  // Android code: the loud channel never repeats its sound, «Через 15 мин» is one alarm
+  const nu = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8"), ar = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/ActionReceiver.java"), "utf8");
+  assert.ok(!/FLAG_INSISTENT|setOngoing\(true\)/.test(nu), "the sound is not repeated in a loop");
+  assert.equal((ar.match(/AlarmScheduler\.scheduleOnce\(/g) || []).length, 1, "«Через 15 мин» schedules one alarm");
+});
+
 await browser.close(); server.close();
 console.log(`\n${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

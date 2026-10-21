@@ -191,8 +191,17 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const secs = len / (rate * ch * 2);
   let sq = 0; for (let i = data + 8; i < data + 8 + len; i += 2) sq += (wav.readInt16LE(i) / 32768) ** 2;
   const rmsDb = 10 * Math.log10(sq / (len / 2));
-  assert.ok(rmsDb >= -10, `the reminder sound is loud on average (${rmsDb.toFixed(1)} dBFS ≥ −10; 74.0 had −18.7)`);
-  assert.ok(peak / 32768 >= 0.9 && secs >= 3, `the reminder sound is louder and longer (peak ${(peak / 32768).toFixed(2)} ≥ 0.9, ${secs.toFixed(2)} s ≥ 3 s)`);
+  // 74.6: ONE short phrase (74.4 played it twice — heard as two signals): 1.5–2.2 s, peak ≤ −1 dB, average −16…−10 dBFS
+  const peakDb = 20 * Math.log10(peak / 32768);
+  assert.ok(secs >= 1.5 && secs <= 2.2, `the reminder sound is one short phrase (${secs.toFixed(2)} s, 1.5–2.2 s)`);
+  assert.ok(peakDb <= -1 && peakDb >= -3, `the peak is ≤ −1 dB (${peakDb.toFixed(2)} dB)`);
+  assert.ok(rmsDb >= -16 && rmsDb <= -10, `heard but not harsh: average ${rmsDb.toFixed(1)} dBFS (−16…−10)`);
+  { // one phrase: after the loudest moment the level (50 ms windows) only fades — no second phrase, no answer
+    const w = Math.round(rate * 0.05), env = [];
+    for (let i = data + 8; i + w * 2 <= data + 8 + len; i += w * 2) { let q = 0; for (let k = 0; k < w; k++) q += (wav.readInt16LE(i + k * 2) / 32768) ** 2; env.push(10 * Math.log10(q / w + 1e-12)); }
+    const top = env.indexOf(Math.max(...env)), rises = env.slice(top + 1).filter((v, i) => v > env[top + i] + 3).length;
+    assert.ok(top * 0.05 < 0.8 && rises === 0, `one phrase: the loudest part is at the start (${(top * 0.05).toFixed(2)} s) and the sound only fades after it (${rises} rises)`);
+    assert.ok(env.at(-1) < -40, "it fades to silence (no click at the end)"); }
   assert.ok(notif.includes('CHANNEL = "jamal_life_dawn2"') && notif.includes("AudioAttributes.USAGE_ALARM") && notif.includes("AudioAttributes.USAGE_NOTIFICATION_EVENT") && notif.includes('CHANNEL_SOFT = "jamal_life_dawn2_soft"'), "loud channel on the alarm stream, quiet channel on the notification stream");
   assert.ok(/OLD_CHANNELS = \{"jamal_life_dawn",/.test(notif), "the 74.0 channel jamal_life_dawn is deleted (new sound = new channel)");
   assert.ok(notif.includes("enableVibration(true)") && notif.includes('getBoolean("loud", true)') && notif.includes("setOnlyAlertOnce(false)"), "reminders vibrate, loud is the default, a snoozed reminder rings again");

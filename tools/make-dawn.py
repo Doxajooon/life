@@ -1,10 +1,10 @@
-"""Life «Утро» — the notification sound of Life (74.4, original, generated from scratch).
+"""Life «Утро» — the notification sound of Life (74.6, original, generated from scratch).
 
-Short and clean like a phone chime, natural like a morning outside:
-four soft glass-bell notes going up a major pentatonic step (C6 → E6 → G6 → C7, the last one quiet and high),
-a quiet stream under them and one small bird call at the end. About 3.1 s: the phrase and its softer answer.
-No saturating limiter (74.1 used one for loudness and the loud notes sounded «warm» / rough):
-the level comes from a slow, smooth compressor that keeps the waveform clean.
+ONE short phrase, like a phone chime (74.4 played the phrase and its softer answer — it was heard as two signals):
+four soft glass-bell notes going up a major pentatonic step (C6 → E6 → G6 → C7, the last one quiet and high)
+over a quiet stream, no bird. About 1.8 s, a smooth start and a long natural fade, no clicks.
+No saturating limiter: the level comes from a slow, smooth look-ahead compressor that keeps the waveform clean;
+the peak stays at −1.2 dB and the average is set to about −13 dBFS (heard, not harsh).
 The file names stay the same (res/raw/jamal_dawn.wav, sounds/jamal-dawn.wav), so the Android notification
 channels keep working without being recreated.  Run:  python3 tools/make-dawn.py
 """
@@ -13,7 +13,7 @@ from scipy.io import wavfile
 from scipy.signal import butter, sosfilt
 
 SR = 44100
-DUR = 3.1
+DUR = 1.8
 t = np.arange(int(SR * DUR)) / SR
 out = np.zeros_like(t)
 rng = np.random.default_rng(74)  # fixed seed: the same sound on every build
@@ -35,34 +35,20 @@ def bell(freq, start, amp, decay=3.2):
     out[n0:] += amp * attack * body * tone
 
 
-def bird(start, amp):
-    """One small bird call: two quick upward chirps, the second a little higher."""
-    for k, (s, f0, f1, d) in enumerate([(0.0, 3100, 4300, 0.07), (0.11, 3400, 4800, 0.08)]):
-        n0, tt = at(start + s)
-        n = int(d * SR)
-        tt = tt[:n]
-        f = f0 + (f1 - f0) * np.clip(tt / d, 0, 1) ** 0.7
-        phase = 2 * np.pi * np.cumsum(f) / SR
-        env = np.sin(np.pi * np.clip(tt / d, 0, 1)) ** 2
-        out[n0:n0 + n] += amp * (0.8 + 0.2 * k) * env * np.sin(phase)
-
-
-# the melody: C6 E6 G6 C7 — calm, going up («a good start»); it answers once more, a little softer, so a reminder is not missed
-for again, gain in [(0.0, 1.0), (1.2, 0.9)]:
-    for freq, start, amp in [(1046.5, 0.00, 0.55), (1318.5, 0.16, 0.50), (1568.0, 0.32, 0.50), (2093.0, 0.52, 0.26)]:
-        bell(freq, again + start, amp * gain, decay=1.1)
+# the melody: C6 E6 G6 C7 — calm, going up («a good start»), played once
+for freq, start, amp in [(1046.5, 0.03, 0.55), (1318.5, 0.17, 0.50), (1568.0, 0.31, 0.50), (2093.0, 0.49, 0.28)]:
+    bell(freq, start, amp, decay=2.4)
 
 # a quiet stream: noise shaped into soft «water» (band 600–3500 Hz) with a slow ripple, swelling in and out
 water = sosfilt(butter(2, [600, 3500], "bandpass", fs=SR, output="sos"), rng.standard_normal(t.size))
 ripple = 0.65 + 0.35 * np.sin(2 * np.pi * 3.1 * t + 1.3 * np.sin(2 * np.pi * 0.7 * t))
-swell = np.clip(t / 0.35, 0, 1) * np.clip((DUR - t) / 0.9, 0, 1)
-out += 0.09 * water * ripple * swell / np.max(np.abs(water))
-
-bird(2.45, 0.1)
+swell = np.clip(t / 0.25, 0, 1) * np.clip((DUR - t) / 0.7, 0, 1)
+out += 0.07 * water * ripple * swell / np.max(np.abs(water))
 
 out = sosfilt(butter(1, 140, "highpass", fs=SR, output="sos"), out)
-fade = int(0.18 * SR)
-out[-fade:] *= np.linspace(1, 0, fade) ** 2
+fade_in, fade = int(0.012 * SR), int(0.45 * SR)
+out[:fade_in] *= np.linspace(0, 1, fade_in) ** 2   # no click at the start
+out[-fade:] *= np.linspace(1, 0, fade) ** 2        # a long, natural fade
 out = out / np.max(np.abs(out))
 
 
@@ -84,11 +70,21 @@ def level(x, threshold_db=-42.0, ratio=10.0, release=0.12, look=0.004):
     return x * 10 ** (-over * (1 - 1 / ratio) / 20)
 
 
-out = level(out)
-out = out / np.max(np.abs(out)) * 0.93  # −0.6 dB peak
+PEAK = 10 ** (-1.2 / 20)  # −1.2 dB peak (≤ −1 dB)
+TARGET_RMS = -13.0         # dBFS: heard, not harsh
+rms_db = lambda x: 20 * np.log10(np.sqrt(np.mean(x ** 2)))
+# pick the compressor threshold that gives the target average level (the peak is set the same way every time)
+lo, hi = -60.0, 0.0
+for _ in range(18):
+    mid = (lo + hi) / 2
+    y = level(out, threshold_db=mid, ratio=4.0)
+    y = y / np.max(np.abs(y)) * PEAK
+    lo, hi = (lo, mid) if rms_db(y) < TARGET_RMS else (mid, hi)
+out = level(out, threshold_db=(lo + hi) / 2, ratio=4.0)
+out = out / np.max(np.abs(out)) * PEAK
 
 pcm = (out * 32767).astype(np.int16)
 for path in ["android/app/src/main/res/raw/jamal_dawn.wav", "sounds/jamal-dawn.wav"]:
     wavfile.write(path, SR, pcm)
 rms = 20 * np.log10(np.sqrt(np.mean(out ** 2)))
-print(f"Life «Утро»: {DUR:.1f} s, peak {20*np.log10(np.max(np.abs(out))):.1f} dB, rms {rms:.1f} dB")
+print(f"Life «Утро» (one phrase): {DUR:.1f} s, peak {20*np.log10(np.max(np.abs(out))):.1f} dB, rms {rms:.1f} dB")

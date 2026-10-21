@@ -3773,14 +3773,14 @@ function playNotificationSound(force=false){
   const now=Date.now();if(now-_lastChimeAt<1200)return;_lastChimeAt=now;
   try{
     const ctx=audioCtx();if(!ctx)return;
-    // «Dawn» — the same nature tone as on Android (sounds/jamal-dawn.wav: a water drop, kalimba, a breath of wind; 74.1: twice, louder)
+    // «Утро» — the same sound as on Android (sounds/jamal-dawn.wav; 74.6: one short phrase, 1.8 s)
     if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=1;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
     loadGlass();
     const t0=ctx.currentTime+.03,out=ctx.createGain(),echo=ctx.createDelay(),fb=ctx.createGain();
-    out.gain.value=.5;echo.delayTime.value=.13;fb.gain.value=.2;
+    out.gain.value=.5;echo.delayTime.value=.13;fb.gain.value=.12;
     out.connect(ctx.destination);out.connect(echo);echo.connect(fb);fb.connect(ctx.destination);
-    // «Glow»: bright marimba arpeggio C6–E6–G6–C7 and a soft rebound, like modern phone tones
-    [[1046.5,0,1],[1318.51,.085,.95],[1567.98,.17,.9],[2093,.255,1],[1567.98,.52,.42],[2093,.6,.38]].forEach(([f,dt,amp])=>{
+    // until the file is loaded: the same C6–E6–G6–C7 phrase, once (74.6: no rebound — one notice, one sound)
+    [[1046.5,0,1],[1318.51,.085,.95],[1567.98,.17,.9],[2093,.255,1]].forEach(([f,dt,amp])=>{
       [[1,1,5.5],[3.93,.26,14],[9.2,.05,32]].forEach(([r,pa,decay])=>{
         const o=ctx.createOscillator(),g=ctx.createGain(),t=t0+dt,end=t+Math.min(1.8,4.6/decay+.2);
         o.type='sine';o.frequency.value=f*r;
