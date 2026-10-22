@@ -896,6 +896,21 @@ await test("74.6: политика конфиденциальности чита
   await A.ctx.close();
 });
 
+await test("74.6.1: очистка устройства не оживает — запись копий, начатая до выхода, не возвращает личные данные в базу браузера", async () => {
+  const A = await device(makeCloud());
+  const left = await A.page.evaluate(async () => {
+    for (let i = 0; i < 12; i++) { state.notes.push({ id: "q" + i, title: "Личное " + i, body: "пин от домофона " + i, at: new Date().toISOString(), category: "personal" }); saveState(); }
+    await wipeLocalData();            // a queue of unfinished IndexedDB writes is still running here
+    await new Promise(r => setTimeout(r, 1500));
+    const db = await openLifeDB();
+    const all = await Promise.all(["state", "backups"].map(n => new Promise(res => { const q = db.transaction(n, "readonly").objectStore(n).getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => res([]); })));
+    return { idb: all.flat().filter(r => JSON.stringify(r).includes("пин от домофона")).length, ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")) };
+  });
+  assert.equal(left.idb, 0, "personal data came back into IndexedDB after the wipe");
+  assert.deepEqual(left.ls, [], "personal data came back into localStorage after the wipe");
+  await A.ctx.close();
+});
+
 await test("Выход из аккаунта: телефон очищается, после входа всё возвращается", async () => {
   const cloud = makeCloud();
   const A = await device(cloud);
