@@ -2672,8 +2672,9 @@ function loadCloudBase(){
   return openLifeDB().then(db=>db?new Promise(resolve=>{try{const r=db.transaction('state','readonly').objectStore('state').get(CLOUD_BASE_STATE_ID);r.onsuccess=()=>resolve(r.result?.state||null);r.onerror=()=>resolve(null)}catch(e){resolve(null)}}):null).then(s=>{if(s&&!_cloudBaseState)_cloudBaseState=s;return _cloudBaseState}).catch(()=>null);
 }
 function storeCloudBase(s){
+  if(_wipingDevice)return;
   _cloudBaseState=clone(s);
-  openLifeDB().then(db=>{if(!db)return;try{db.transaction('state','readwrite').objectStore('state').put({id:CLOUD_BASE_STATE_ID,savedAt:new Date().toISOString(),state:_cloudBaseState})}catch(e){}}).catch(()=>{});
+  openLifeDB().then(db=>{if(!db||_wipingDevice)return;try{db.transaction('state','readwrite').objectStore('state').put({id:CLOUD_BASE_STATE_ID,savedAt:new Date().toISOString(),state:_cloudBaseState})}catch(e){}}).catch(()=>{});
 }
 const SYNC_META_KEYS=['_lastSavedAt','_persistentStorageRequestedAt','_persistentStorageGranted',CLOUD_BASE_KEY,'_sent'];
 const sameJSON=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -2877,8 +2878,10 @@ function setDeviceOwner(id){try{if(id)localStorage.setItem(OWNER_KEY,id)}catch(e
 /* Another account signed in on this device: its data must never be mixed with the previous owner's records. */
 function resetForNewOwner(){rememberBaseStamp('');try{localStorage.removeItem(FIRST_PUSH_KEY)}catch(e){}state=normalize(clone(DEFAULT));state[CLOUD_BASE_KEY]='';_cloudBaseState=null;_cloudBaseFingerprint='';_persistFingerprint='';clearCloudDirty();saveState()}
 async function wipeLocalData(){
-  _wipingDevice=true;
+  _wipingDevice=true;_cloudBaseState=null;
   try{[KEY,BACKUP_KEY,BACKUP2_KEY,CLOUD_DIRTY_KEY,OWNER_KEY,BASE_STAMP_KEY,FIRST_PUSH_KEY,'JL_PENDING_ACTIONS_V1'].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  // 74.6.1: copies queued before the exit finish first (they skip themselves now), so nothing is written after the clear below
+  try{await idbWriteChain}catch(e){}
   try{const db=await openLifeDB();if(db)await new Promise(res=>{try{const tx=db.transaction(['state','backups'],'readwrite');tx.objectStore('state').clear();tx.objectStore('backups').clear();tx.oncomplete=res;tx.onerror=res;tx.onabort=res}catch(e){res()}})}catch(e){}
   try{window.AndroidBridge?.updateWidget?.('{}')}catch(e){}
 }
@@ -3249,7 +3252,8 @@ function openLifeDB(){
 function openLegacyDB(){return new Promise(resolve=>{if(!('indexedDB' in window)){resolve(null);return}try{const req=indexedDB.open('LifeControlV26DB');req.onsuccess=()=>resolve(req.result);req.onerror=()=>resolve(null)}catch(e){resolve(null)}})}
 function mirrorToIndexedDB(payload,savedAt){
   idbWriteChain=idbWriteChain.then(async()=>{
-    const db=await openLifeDB();if(!db)return false;
+    if(_wipingDevice)return false;
+    const db=await openLifeDB();if(!db||_wipingDevice)return false;
     try{
       await new Promise(resolve=>{
         const tx=db.transaction(['state','backups'],'readwrite');
