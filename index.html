@@ -1873,6 +1873,17 @@ html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
 /* 74.5.1: контраст — подпись валюты под суммами на «Сегодня» в светлой теме темнее (было 3,97:1, нужно ≥ 4,5:1) */
 html[data-theme="light"] .v-kpi b small,html[data-theme="light"] .jl-money-today small{color:color-mix(in srgb,var(--muted) 40%,var(--text))}
 .jl-app-ver{font-size:.75rem}
+/* 74.6: политика конфиденциальности и удаление аккаунта */
+.jl-policy{display:grid;gap:10px;margin-top:12px;font-size:.9rem;line-height:1.55;color:var(--text)}
+.jl-policy h3{margin:6px 0 0;font-size:1rem}.jl-policy p,.jl-policy ul{margin:0}.jl-policy ul{padding-left:1.1rem;display:grid;gap:4px}
+.jl-policy .jl-policy-date{color:var(--muted);font-size:.8rem}
+.auth-policy{max-height:42vh;overflow:auto;margin-top:10px;padding:12px;border-radius:14px;background:rgba(255,255,255,.08);color:#e8f0fa;text-align:left}
+.auth-policy .jl-policy{margin-top:0;color:#e8f0fa}.auth-policy .jl-policy .jl-policy-date{color:#c6d2e3}
+.auth-note{margin-top:8px;font-size:.78rem;line-height:1.4;color:#c6d2e3;text-align:center}
+.btn.jl-delacc{margin-top:10px;background:transparent;border:1px solid #b42318;color:#b42318;font-weight:700}
+html[data-theme="dark"] .btn.jl-delacc{border-color:#fca5a5;color:#fca5a5}
+.jl-del-input{width:100%;box-sizing:border-box;min-height:46px;font-size:1rem;font-weight:700;text-align:center;letter-spacing:.08em}
+.btn.red.jl-del-go[disabled]{opacity:.45;cursor:not-allowed}
 
 /* ===== 74 · живой «Сегодня»: чёткое окно «Сейчас», светлее небо с картинкой раздела, живые иконки, пульс с графиком ===== */
 html[data-theme="dark"]{--bg:#132848;--panel:#1b3156;--soft:#172b4d;--line:#2f4a75;--muted:#c6d2e3} /* 74.1: lighter muted text for the glass cards */
@@ -2163,6 +2174,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <div class="auth-row"><label class="auth-remember"><input type="checkbox" id="gateRemember" checked> Запомнить меня</label></div>
     <div class="auth-actions"><button class="btn primary" id="gateLoginBtn" type="button"><span>Войти</span></button></div>
     <div class="auth-links"><button type="button" class="auth-link" id="gateResetBtn"><span>Забыли пароль?</span></button><button type="button" class="auth-link" id="gateSignupBtn"><span>Создать аккаунт</span></button></div>
+    <div class="auth-note">Создавая аккаунт, вы соглашаетесь с <button type="button" class="auth-link" id="gatePolicyBtn"><span>политикой конфиденциальности</span></button></div><div class="auth-policy" id="gatePolicy" hidden></div>
     <div class="auth-progress"><span>●</span><span id="authProgressText">Готово к входу</span></div><div class="auth-progress-bar"><i id="authProgressBar"></i></div><div class="auth-msg" id="gateMsg" aria-live="polite"></div>
   </div>
 </div>
@@ -2536,8 +2548,10 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <button class="v-row" type="button" id="pfExport"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-download"></use></svg></span><span class="v-row-main"><b>Экспорт данных</b><small>Скачать всё в JSON</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="pfBackup"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервная копия</b><small id="pfBackupSub">Копия на этом устройстве</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <label class="v-row" style="cursor:pointer"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-upload"></use></svg></span><span class="v-row-main"><b>Импорт из файла</b><small>Восстановить из JSON-копии</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span><input id="pfImport" type="file" accept="application/json" hidden></label>
+    <button class="v-row" type="button" id="pfPrivacy"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>Политика конфиденциальности</b><small>Что хранится и как удалить свои данные</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
   </div>
   <button class="btn red v-wide" type="button" id="pfLogout"><svg class="ui-icon" aria-hidden="true"><use href="#i-logout"></use></svg> Выйти из аккаунта</button>
+  <button class="btn v-wide jl-delacc" type="button" id="pfDeleteAccount">Удалить аккаунт и данные</button>
 </section>
 </main>
 <nav class="bottom" id="bottomNav" aria-label="Основная навигация"><button type="button" data-view="viewToday" class="active" aria-label="Сегодня" onclick="showView('viewToday')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-home"></use></svg></b><span>Сегодня</span></button><button type="button" data-view="viewGoal" aria-label="Цель" onclick="showView('viewGoal')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-target"></use></svg></b><span>Цель</span></button><button type="button" data-view="viewMoney" aria-label="Деньги" onclick="showView('viewMoney')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-wallet"></use></svg></b><span>Деньги</span></button><button type="button" data-view="viewNotes" aria-label="Заметки" onclick="showView('viewNotes')"><b><svg class="ui-icon" aria-hidden="true"><use href="#i-note"></use></svg></b><span>Заметки</span></button></nav>
@@ -2867,6 +2881,42 @@ async function wipeLocalData(){
   try{[KEY,BACKUP_KEY,BACKUP2_KEY,CLOUD_DIRTY_KEY,OWNER_KEY,BASE_STAMP_KEY,FIRST_PUSH_KEY,'JL_PENDING_ACTIONS_V1'].forEach(k=>localStorage.removeItem(k))}catch(e){}
   try{const db=await openLifeDB();if(db)await new Promise(res=>{try{const tx=db.transaction(['state','backups'],'readwrite');tx.objectStore('state').clear();tx.objectStore('backups').clear();tx.oncomplete=res;tx.onerror=res;tx.onabort=res}catch(e){res()}})}catch(e){}
   try{window.AndroidBridge?.updateWidget?.('{}')}catch(e){}
+}
+/* 74.6: политика конфиденциальности + удаление аккаунта (функция delete_my_account в Supabase) */
+function privacyHTML(){
+  return `<div class="jl-policy"><p class="jl-policy-date">Действует с 22 октября 2026</p>
+<h3>Что это за приложение</h3><p><b>${esc(APP_NAME)}</b> — личное приложение для задач, финансов, долгов, привычек и целей. Проект ведёт его владелец, GitHub: Doxajooon/life.</p>
+<h3>Что мы храним</h3><ul><li>Email и пароль для входа. Пароль хранится только в зашифрованном виде, мы его не видим.</li><li>Данные, которые вы вводите: задачи, доходы и расходы, долги, цели, привычки, заметки, настройки.</li><li>Ежедневные резервные копии ваших данных за последние 30 дней.</li><li>Служебный журнал обращений к AI: только время и вид запроса, без текста.</li></ul>
+<h3>Где это хранится</h3><p>На вашем устройстве и в облаке Supabase (вход и база данных). Доступ к строкам базы защищён: каждый пользователь видит только свои данные. Как администратор базы, владелец проекта технически имеет к ней доступ.</p>
+<h3>AI-разбор</h3><p>Когда вы сами просите AI разобрать день, неделю или жизнь, нужные для ответа данные из приложения отправляются через серверную функцию в Google Gemini. Google обрабатывает их по своим правилам. Без вашего запроса данные в AI не уходят.</p>
+<h3>Чего мы не делаем</h3><ul><li>Не продаём данные и не показываем рекламу.</li><li>Не передаём данные никому, кроме Supabase (хранение) и Google (только по вашему запросу AI).</li></ul>
+<h3>Ваши права</h3><ul><li>Скачать все данные: Профиль → «Экспорт данных».</li><li>Выйти: данные останутся в облаке, а с этого устройства будут стёрты.</li><li>Удалить аккаунт и все данные навсегда: Профиль → «Удалить аккаунт и данные». Это необратимо.</li></ul>
+<h3>Вопросы</h3><p>Напишите в разделе Issues на странице проекта: github.com/Doxajooon/life. При изменении правил дата выше обновится.</p></div>`;
+}
+function openPrivacy(){
+  openModal(`<div class="close-row"><div><div class="eyebrow">Документы</div><h2>Политика конфиденциальности</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>${privacyHTML()}`);
+  $('closeModalBtn').onclick=closeModal;
+}
+function openDeleteAccount(){
+  openModal(`<div class="close-row"><div><div class="eyebrow">Аккаунт</div><h2>Удалить аккаунт и данные</h2></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div><div class="stack" style="margin-top:12px"><div class="sub">Будут навсегда удалены аккаунт, все данные в облаке, резервные копии и данные на этом устройстве. Вернуть их будет нельзя. Если нужна копия, сначала нажмите «Экспорт данных».</div><label class="sub" for="delConfirm">Чтобы подтвердить, введите слово <b>УДАЛИТЬ</b></label><input id="delConfirm" class="jl-del-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="УДАЛИТЬ"><button class="btn red v-wide jl-del-go" type="button" id="delGo" disabled>Удалить навсегда</button><div class="sub" id="delMsg" role="status" aria-live="polite"></div></div>`);
+  $('closeModalBtn').onclick=closeModal;
+  const inp=$('delConfirm'),go=$('delGo');
+  inp.oninput=()=>{go.disabled=inp.value.trim().toUpperCase()!=='УДАЛИТЬ'};
+  go.onclick=()=>{if(inp.value.trim().toUpperCase()==='УДАЛИТЬ')deleteAccount()};
+}
+async function deleteAccount(){
+  const go=$('delGo'),msg=$('delMsg');
+  if(go)go.disabled=true;if(msg)msg.textContent='Удаляю…';
+  try{await supaFetch('/rest/v1/rpc/delete_my_account',{method:'POST',body:'{}'})}
+  catch(e){
+    if(go)go.disabled=false;
+    const offline=!navigator.onLine||/failed to fetch|network|load failed/i.test(String(e?.message||e));
+    if(msg)msg.textContent=offline?'Нет сети. Аккаунт не удалён, попробуйте ещё раз с интернетом.':'Не удалось удалить: '+String(e?.message||e).slice(0,120);
+    return;
+  }
+  clearCloudDirty();setCloudAuth(null);try{localStorage.removeItem(CLOUD_BASE_KEY)}catch(e){}
+  await wipeLocalData();
+  location.reload();
 }
 async function cloudLogout(){
   let synced=!isCloudDirty();
@@ -6368,6 +6418,7 @@ function bindV57(){
   $('setLoudReminders').onchange=e=>{state.settings.loudReminders=e.target.checked;saveState();syncLoudReminders();toast(e.target.checked?'Громкие напоминания включены':'Обычная громкость напоминаний',e.target.checked?'Звучат громкостью будильника.':'Звучат громкостью уведомлений.')};
   $('setNotifyPermission').onclick=requestNotifications;$('setTestSound').onclick=()=>notify(APP_NAME,'Так звучат напоминания. Хорошего дня!','tasks');$('setAdvancedRow').onclick=openSettings;$('setWeekRow').onclick=openWeekSchedule;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;
+  $('pfPrivacy').onclick=openPrivacy;$('pfDeleteAccount').onclick=openDeleteAccount;
   $('pfLogout').onclick=()=>{if(confirm('Выйти из '+APP_NAME+'? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};
   $$('[data-layout-mode]').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>setText('setModeVal',layoutChoice()==='auto'?'Авто':document.body.dataset.layout==='desktop'?'ПК':'Мобильный'),0)));
   // Android «Назад» walks this history: first closes an open sheet, then returns to the previous screen.
@@ -6423,6 +6474,7 @@ async function requireAuth(){
   const eye=$('gateEyeBtn');if(eye)eye.onclick=()=>{const show=pass.type==='password';pass.type=show?'text':'password';eye.setAttribute('aria-label',show?'Скрыть пароль':'Показать пароль');eye.innerHTML=`<svg class="ui-icon" aria-hidden="true"><use href="#${show?'i-eye-off':'i-eye'}"></use></svg>`;pass.focus()};
   if(!email.dataset.enterBound){email.dataset.enterBound='1';[email,pass].forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('gateLoginBtn').click()}}))}
    $('gateLoginBtn').onclick=async()=>{keepChoice();setAuthBusy('gateLoginBtn',true,'Вход…');setAuthProgress('Проверяю аккаунт…',20);say('');try{const d=await cloudSignIn(email.value.trim(),pass.value);setAuthProgress('Сессия подтверждена…',45);if(!d?.access_token)throw new Error(d?.msg||d?.error_description||d?.message||'Неверный email или пароль.');const u=await cloudUser();setAuthProgress('Загружаю личные данные…',65);setCloudAuth({...d,user:u||d.user});unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();toast('Вход выполнен',APP_NAME+' открыт.')}catch(e){say(String(e.message||e));setAuthProgress('Вход не выполнен',0)}finally{setAuthBusy('gateLoginBtn',false,'Войти')}};
+   $('gatePolicyBtn').onclick=()=>{const b=$('gatePolicy');if(b.hidden){b.innerHTML=privacyHTML();b.hidden=false;b.scrollIntoView({block:'nearest',behavior:'smooth'})}else b.hidden=true};
    $('gateSignupBtn').onclick=async()=>{keepChoice();setAuthBusy('gateSignupBtn',true,'Создаю аккаунт…');setAuthProgress('Создаю защищённый профиль…',25);say('');try{const d=await cloudSignUp(email.value.trim(),pass.value);setAuthProgress('Профиль создан…',55);if(d?.session?.access_token){setCloudAuth(d.session);unlockApp();bind();lastDay=keyDay();await cloudPullIntoLocal();setAuthProgress('Готово',100);renderAll();refreshCloudUI();say('');toast('Аккаунт создан',APP_NAME+' открыт.')}else{say('Аккаунт создан. Проверь почту и подтверди адрес, затем войди.');setAuthProgress('Проверь почту',65)}}catch(e){say(String(e.message||e));setAuthProgress('Создание не завершено',0)}finally{setAuthBusy('gateSignupBtn',false,'Создать аккаунт')}};
    $('gateResetBtn').onclick=async()=>{setAuthBusy('gateResetBtn',true,'Отправляю…');setAuthProgress('Отправляю письмо восстановления…',35);try{const em=email.value.trim();if(!/^\S+@\S+\.\S+$/.test(em))throw new Error('Введи корректный email.');await cloudRecover(em);setAuthProgress('Письмо отправлено',100);say('Письмо восстановления отправлено.')}catch(e){say(String(e.message||e));setAuthProgress('Не удалось отправить',0)}finally{setAuthBusy('gateResetBtn',false,'Забыли пароль?')}};
   return false;
