@@ -1870,6 +1870,8 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .jl-ob-step .field:first-child{grid-column:1/-1}
 .jl-ob-debt summary{cursor:pointer;font-weight:650;padding:6px 0}
 html[data-theme="light"] .v-task.overdue .v-task-meta{color:#b42318}
+/* 74.5.1: контраст — подпись валюты под суммами на «Сегодня» в светлой теме темнее (было 3,97:1, нужно ≥ 4,5:1) */
+html[data-theme="light"] .v-kpi b small,html[data-theme="light"] .jl-money-today small{color:color-mix(in srgb,var(--muted) 40%,var(--text))}
 .jl-app-ver{font-size:.75rem}
 
 /* ===== 74 · живой «Сегодня»: чёткое окно «Сейчас», светлее небо с картинкой раздела, живые иконки, пульс с графиком ===== */
