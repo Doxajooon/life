@@ -64,3 +64,21 @@ create policy "life_state_history_insert_own" on public.life_state_history for i
 drop policy if exists "life_state_history_delete_own" on public.life_state_history;
 create policy "life_state_history_delete_own" on public.life_state_history for delete to authenticated using (user_id = (select auth.uid()));
 grant select, insert, delete on public.life_state_history to authenticated;
+
+-- 74.6: the signed-in user can delete their own account (button «Удалить аккаунт и данные»).
+-- ON DELETE CASCADE removes life_state, life_state_history and ai_usage together with the user.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated' using errcode = '28000';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
