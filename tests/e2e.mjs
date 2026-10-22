@@ -45,6 +45,11 @@ function makeCloud() {
     const req = route.request(), url = new URL(req.url()), m = req.method(), cors = { "access-control-allow-origin": "*" };
     const send = (status, body) => route.fulfill({ status, headers: cors, contentType: "application/json", body: JSON.stringify(body) });
     if (cloud.down) return route.abort("internetdisconnected");
+    // 74.6: delete_my_account — removes the user's cloud rows (signed-in users only)
+    if (url.pathname === "/rest/v1/rpc/delete_my_account") {
+      if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
+      cloud.deleted = true; cloud.row = null; return route.fulfill({ status: 204, headers: cors });
+    }
     // V72: daily cloud copies (life_state_history): one row per user and day, own rows only
     if (url.pathname === "/rest/v1/life_state_history") {
       if (m === "OPTIONS") return route.fulfill({ status: 200, headers: { ...cors, "access-control-allow-headers": "*", "access-control-allow-methods": "*" } });
@@ -857,6 +862,37 @@ await test("Безопасность: другой аккаунт на этом 
   assert.equal(r.owner, UID);
   assert.ok(!JSON.stringify(cloud.row.state).includes("foreign"), "foreign records were uploaded");
   assert.deepEqual(A.page.errors, []);
+  await A.ctx.close();
+});
+
+await test("74.6: политика конфиденциальности читается; удаление аккаунта — по слову «УДАЛИТЬ», стирает облако и телефон, без сети ничего не теряет", async () => {
+  const cloud = makeCloud();
+  const A = await device(cloud);
+  await A.page.evaluate(() => { state.notes.push({ id: "secret", title: "Личное", body: "пин от домофона", at: new Date().toISOString(), category: "personal" }); saveState(); showView("viewProfile"); });
+  await sync(A.page);
+  // the policy opens from the profile and says how to delete the data
+  await A.page.click("#pfPrivacy");
+  const pol = await A.page.evaluate(() => document.getElementById("modal").innerText);
+  assert.ok(/Политика конфиденциальности/.test(pol) && /Google Gemini/.test(pol) && /Удалить аккаунт и данные/.test(pol), "the policy is not readable");
+  await A.page.click("#closeModalBtn");
+  // the confirmation word is required
+  await A.page.click("#pfDeleteAccount");
+  assert.equal(await A.page.evaluate(() => document.getElementById("delGo").disabled), true, "delete must be locked until the word is typed");
+  await A.page.fill("#delConfirm", "нет");
+  assert.equal(await A.page.evaluate(() => document.getElementById("delGo").disabled), true);
+  // no network: nothing is deleted, nothing is lost, the reason is shown
+  cloud.down = true;
+  await A.page.fill("#delConfirm", "удалить");
+  assert.equal(await A.page.evaluate(() => document.getElementById("delGo").disabled), false);
+  await A.page.click("#delGo");
+  await A.page.waitForFunction(() => /Нет сети|Не удалось/.test(document.getElementById("delMsg").textContent));
+  assert.ok(!cloud.deleted && await A.page.evaluate(() => state.notes.some(n => n.id === "secret") && !!cloudAuth()), "offline delete must change nothing");
+  // online: the account is deleted, the phone is wiped, the user is signed out
+  cloud.down = false;
+  await Promise.all([A.page.waitForEvent("load"), A.page.click("#delGo")]);
+  assert.ok(cloud.deleted && cloud.row === null, "the cloud account was not deleted");
+  const after = await A.page.evaluate(() => ({ ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")), auth: localStorage.getItem("LIFE_CONTROL_AUTH") }));
+  assert.deepEqual(after.ls, [], "personal data stayed on the device after deleting the account");
   await A.ctx.close();
 });
 
