@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read   # 74.6: build and test jobs only read; the release job below gets write
 
 concurrency:
   group: jamal-life-release-${{ github.ref }}
@@ -123,6 +123,8 @@ jobs:
     needs: [android, windows]
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
