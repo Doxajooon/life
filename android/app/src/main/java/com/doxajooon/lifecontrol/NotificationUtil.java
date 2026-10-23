@@ -26,9 +26,9 @@ import androidx.core.app.NotificationManagerCompat;
  * A channel's sound and usage can't be changed after creation, so each mode has its own channel id.
  */
 public final class NotificationUtil {
-    static final String CHANNEL = "jamal_life_dawn2";        // loud: alarm volume
-    static final String CHANNEL_SOFT = "jamal_life_dawn2_soft"; // quiet: notification volume
-    private static final String[] OLD_CHANNELS = {"jamal_life_dawn", "jamal_life_glass", "jamal_life_glow", "jamal_life_reminders", "life_control_v2", "life_control"};
+    static final String CHANNEL = "jamal_life_dawn3";        // loud: alarm volume (74.6: the short soft chime, rings once)
+    static final String CHANNEL_SOFT = "jamal_life_dawn3_soft"; // quiet: notification volume
+    private static final String[] OLD_CHANNELS = {"jamal_life_dawn", "jamal_life_dawn2", "jamal_life_dawn2_soft", "jamal_life_glass", "jamal_life_glow", "jamal_life_reminders", "life_control_v2", "life_control"};
     private static final long[] VIBRATION = {0, 180, 120, 180};
     private NotificationUtil() {}
 

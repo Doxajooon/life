@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.5.0");
-assert.match(gradle, /versionCode 745\b/); assert.match(gradle, /versionName '74\.5'/);
-assert.match(csproj, /<Version>74\.5\.0<\/Version>/);
+assert.equal(pkg.version, "74.6.0");
+assert.match(gradle, /versionCode 746\b/); assert.match(gradle, /versionName '74\.6'/);
+assert.match(csproj, /<Version>74\.6\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.5'") && html.includes('id="appVersion">74.5</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.6'") && html.includes('id="appVersion">74.6</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-5'"), "service worker cache must be life-v74-5");
+assert.ok(sw.includes("'life-v74-6'"), "service worker cache must be life-v74-6");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -191,9 +191,12 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const secs = len / (rate * ch * 2);
   let sq = 0; for (let i = data + 8; i < data + 8 + len; i += 2) sq += (wav.readInt16LE(i) / 32768) ** 2;
   const rmsDb = 10 * Math.log10(sq / (len / 2));
-  assert.ok(rmsDb >= -10, `the reminder sound is loud on average (${rmsDb.toFixed(1)} dBFS ≥ −10; 74.0 had −18.7)`);
-  assert.ok(peak / 32768 >= 0.9 && secs >= 3, `the reminder sound is louder and longer (peak ${(peak / 32768).toFixed(2)} ≥ 0.9, ${secs.toFixed(2)} s ≥ 3 s)`);
-  assert.ok(notif.includes('CHANNEL = "jamal_life_dawn2"') && notif.includes("AudioAttributes.USAGE_ALARM") && notif.includes("AudioAttributes.USAGE_NOTIFICATION_EVENT") && notif.includes('CHANNEL_SOFT = "jamal_life_dawn2_soft"'), "loud channel on the alarm stream, quiet channel on the notification stream");
+  // 74.6: ONE short pleasant chime — not a long loud tone: 1–2.5 s, clear but not harsh, and it dies away to silence by itself
+  assert.ok(secs >= 1 && secs <= 2.5, `the reminder sound is short, rings once (${secs.toFixed(2)} s, 1–2.5 s)`);
+  assert.ok(peak / 32768 >= 0.4 && peak / 32768 <= 0.8 && rmsDb >= -26 && rmsDb <= -12, `the chime is clear but not harsh (peak ${(peak / 32768).toFixed(2)}, ${rmsDb.toFixed(1)} dBFS)`);
+  let tail = 0; for (let i = data + 8 + len - 2 * Math.round(rate * 0.1); i < data + 8 + len; i += 2) tail = Math.max(tail, Math.abs(wav.readInt16LE(i)));
+  assert.ok(tail / 32768 < 0.01, "the chime fades to silence before it ends (no click)");
+  assert.ok(notif.includes('CHANNEL = "jamal_life_dawn3"') && notif.includes("AudioAttributes.USAGE_ALARM") && notif.includes("AudioAttributes.USAGE_NOTIFICATION_EVENT") && notif.includes('CHANNEL_SOFT = "jamal_life_dawn3_soft"') && notif.includes('"jamal_life_dawn2", "jamal_life_dawn2_soft"'), "loud channel on the alarm stream, quiet channel on the notification stream");
   assert.ok(/OLD_CHANNELS = \{"jamal_life_dawn",/.test(notif), "the 74.0 channel jamal_life_dawn is deleted (new sound = new channel)");
   assert.ok(notif.includes("enableVibration(true)") && notif.includes('getBoolean("loud", true)') && notif.includes("setOnlyAlertOnce(false)"), "reminders vibrate, loud is the default, a snoozed reminder rings again");
   assert.ok(activity.includes("public void setLoudReminders(boolean on)") && html.includes("window.AndroidBridge?.setLoudReminders?.(state.settings?.loudReminders!==false)") && html.includes("if(typeof s.settings.loudReminders!=='boolean')s.settings.loudReminders=true;"), "the switch «Громкие напоминания» reaches Android and is on by default");
@@ -223,4 +226,11 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(html.indexOf("const GOAL_PHOTO_MAX") < html.indexOf("let state=load()") && html.indexOf("const DIRTY_SINCE_KEY") < html.indexOf("let state=load()"), "74.5 constants exist before the first load()");
   assert.ok(html.includes("return PRAYER_CITIES[c]?c:'khujand'"), "Khujand by default");
   assert.ok(act.includes(".setConfirmationRequired(false)"), "the finger opens the app at once"); }
+// 74.6: security hardening
+{
+  const manifest = readFileSync(new URL("android/app/src/main/AndroidManifest.xml", root), "utf8"), wf = readFileSync(new URL(".github/workflows/release.yml", root), "utf8");
+  assert.ok(manifest.includes('android:allowBackup="false"'), "app data is not copied to Google backup (logout/delete must really remove it)");
+  assert.ok(/^permissions:\s*\n\s+contents: read/m.test(wf) && /release:[\s\S]*?permissions:\s*\n\s+contents: write/.test(wf), "CI: read-only by default, write only for the release job");
+  assert.ok(html.includes("privacyHTML()") && html.includes("delete_my_account") && html.includes("await idbWriteChain"), "privacy policy, account deletion and the wipe order are in the app");
+}
 console.log("LIFE_V73_STATIC_QA_OK");

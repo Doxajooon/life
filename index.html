@@ -2506,7 +2506,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, копия в файл</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.5</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.6</span></div>
   </div>
 </section>
 
@@ -2559,7 +2559,7 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.5';
+const APP_NAME='Life',APP_VERSION='74.6';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -3829,7 +3829,7 @@ function playNotificationSound(force=false){
   const now=Date.now();if(now-_lastChimeAt<1200)return;_lastChimeAt=now;
   try{
     const ctx=audioCtx();if(!ctx)return;
-    // «Dawn» — the same nature tone as on Android (sounds/jamal-dawn.wav: a water drop, kalimba, a breath of wind; 74.1: twice, louder)
+    // «Dawn» — the same nature tone as on Android (sounds/jamal-dawn.wav; 74.6: one short soft bell chime, 1.9 s, rings once)
     if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=1;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
     loadGlass();
     const t0=ctx.currentTime+.03,out=ctx.createGain(),echo=ctx.createDelay(),fb=ctx.createGain();

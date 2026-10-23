@@ -2315,7 +2315,7 @@ await test("74.1: без повторов — ритм не дублирует �
   await ctx.close();
 });
 
-await test("74.1: «Громкие напоминания» — по умолчанию ВКЛ (канал jamal_life_dawn2, USAGE_ALARM), выключение доходит до Android и переживает перезапуск", async () => {
+await test("74.1: «Громкие напоминания» — по умолчанию ВКЛ (канал jamal_life_dawn3, USAGE_ALARM), выключение доходит до Android и переживает перезапуск", async () => {
   const cloud = makeCloud();
   const init = () => { window.__calls = []; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { window.__calls.push([k, ...a]); return k === "bridgeVersion" ? 6 : k === "takeActions" ? "[]" : undefined; } }); };
   const { ctx, page } = await device(cloud, { init });
@@ -2339,9 +2339,9 @@ await test("74.1: «Громкие напоминания» — по умолч�
   // an account from before 74.1 (no value yet) gets loud reminders; a saved choice is kept
   const mig = await page.evaluate(() => [normalize({ version: 58, settings: {} }).settings.loudReminders, normalize({ version: 58, settings: { loudReminders: false } }).settings.loudReminders]);
   assert.deepEqual(mig, [true, false]);
-  // the Android side: loud = channel jamal_life_dawn2 on the alarm stream, quiet = its own channel on the notification stream, both vibrate
+  // the Android side: loud = channel jamal_life_dawn3 on the alarm stream, quiet = its own channel on the notification stream, both vibrate
   const java = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8");
-  assert.ok(/make\(ctx, nm, CHANNEL, "[^"]+", about, AudioAttributes\.USAGE_ALARM\)/.test(java) && java.includes('CHANNEL = "jamal_life_dawn2"'), "loud channel jamal_life_dawn2 uses USAGE_ALARM");
+  assert.ok(/make\(ctx, nm, CHANNEL, "[^"]+", about, AudioAttributes\.USAGE_ALARM\)/.test(java) && java.includes('CHANNEL = "jamal_life_dawn3"'), "loud channel jamal_life_dawn3 uses USAGE_ALARM");
   assert.ok(/make\(ctx, nm, CHANNEL_SOFT, "[^"]+", about, AudioAttributes\.USAGE_NOTIFICATION_EVENT\)/.test(java) && java.includes("isLoud(ctx) ? CHANNEL : CHANNEL_SOFT"), "quiet channel keeps the old notification stream");
   assert.ok(java.includes("ch.enableVibration(true)") && /OLD_CHANNELS = \{"jamal_life_dawn",/.test(java), "vibration on; the old 74.0 channel is removed");
   assert.deepEqual(page.errors, []);
