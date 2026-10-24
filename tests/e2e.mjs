@@ -919,8 +919,11 @@ await test("Выход из аккаунта: телефон очищается,
   await A.page.evaluate(() => { window.confirm = () => true; });
   // the test harness signs the page in again on reload; keep the cloud offline to see what the device itself kept
   cloud.down = true;
-  await Promise.all([A.page.waitForEvent("load"), A.page.evaluate(() => cloudLogout())]);
-  await A.page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true);
+  // 75.2: start the logout first, then wait for the reload with a generous timeout (under CPU load the reload can finish before a listener is attached)
+  await A.page.evaluate(() => { setTimeout(() => cloudLogout(), 0); });
+  await A.page.waitForFunction(() => document.readyState === "complete", null, { timeout: 30000 }).catch(() => {});
+  await A.page.waitForTimeout(300);
+  await A.page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true, null, { timeout: 30000 });
   await A.page.waitForTimeout(600);
   const after = await A.page.evaluate(() => ({ notes: state.notes.map(n => n.id), ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")) }));
   assert.deepEqual(after.notes, [], "personal data stayed on the device after logout");

@@ -18,6 +18,12 @@ android {
         debug {
             signingConfig signingConfigs.debug
         }
+        // 75.2: release build for the store: not debuggable; the CI step re-signs it with the persistent keystore
+        release {
+            debuggable false
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
     }
 
 }
