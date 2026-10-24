@@ -698,7 +698,7 @@ await test("Виджет Android и резервные копии", async () => 
     await mirrorToIndexedDB(JSON.stringify(state), new Date().toISOString());
     const rows = await listDailyBackups(); const before = state.notes.length;
     state.notes.push({ id: "late", title: "после копии", body: "x", at: new Date().toISOString(), category: "personal" }); saveState();
-    window.confirm = () => true; await openBackups(); document.querySelector("[data-bk]").click(); await new Promise(r => setTimeout(r, 400));
+    window.confirm = () => true; await openBackups(); document.querySelector("[data-bk]").click(); for (let i = 0; i < 40 && !(state.notes.length === before && !state.notes.some(n => n.id === "late")); i++) await new Promise(r => setTimeout(r, 100));
     return { rows: rows.length, restored: state.notes.length === before && !state.notes.some(n => n.id === "late") };
   });
   assert.deepEqual(b, { rows: 1, restored: true });
@@ -1325,7 +1325,17 @@ await test("Назад: экран возвращается на то же ме�
   await ctx.close();
 });
 
-await test("V71: пульс-шкала, отчёт дня, привычка-отказ, победы с благодарностью, напоминания о цели каждые 2 часа", async () => {
+await test("75.0: тихие часы 19:00–06:30 — ни вывода, ни звука; днём работают как раньше", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T12:00:00+05:00") });
+  const r = await page.evaluate(() => ({
+    m1900: isQuietMin(19 * 60), m2330: isQuietMin(23 * 60 + 30), m0300: isQuietMin(3 * 60), m0629: isQuietMin(6 * 60 + 29),
+    m0630: isQuietMin(6 * 60 + 30), m1200: isQuietMin(12 * 60), m1859: isQuietMin(18 * 60 + 59),
+  }));
+  assert.deepEqual(r, { m1900: true, m2330: true, m0300: true, m0629: true, m0630: false, m1200: false, m1859: false }, "quiet window is exactly 19:00–06:30");
+  await ctx.close();
+});
+
+await test("V71: пульс-шкала, отчёт дня, привычка-отказ, победы с благодарностью, напоминания о цели каждый час", async () => {
   const { ctx, page } = await device(makeCloud());
   await page.evaluate(seedGoal);
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -1346,11 +1356,12 @@ await test("V71: пульс-шкала, отчёт дня, привычка-от
   assert.equal(r.L.inc, 1500); assert.equal(r.L.out, 300); assert.equal(r.L.debt, 1000); assert.equal(r.L.net, 200);
   assert.ok(r.ledger.includes("Куда ушло") && r.ledger.includes("Еда"), "the report shows where the money went");
   assert.match(String(r.gauge), /^\d+$/, "the pulse gauge has a value");
-  // free time after work: every 2 hours a reminder about the goal (not a generic tip); during work — a short pause
-  const free = r.slots.filter(s => s.min >= 18 * 60), work = r.slots.filter(s => s.min < 18 * 60);
-  assert.deepEqual(free.map(s => s.time), ["20:00", "22:00"]);
+  // free time after work: every hour a reminder about the goal (not a generic tip); during work — a short pause
+  const free = r.slots.filter(s => s.min >= 18 * 60), work = r.slots.filter(s => s.min >= 8 * 60 && s.min < 18 * 60), morning = r.slots.filter(s => s.min < 8 * 60);
+  assert.deepEqual(free.map(s => s.time), ["19:00", "20:00", "21:00", "22:00"]);
   assert.ok(free.every(s => s.body.includes("🎯") && s.body.includes("до цели")), "free-time reminders talk about the goal: " + free.map(s => s.body).join(" | "));
-  assert.ok(work.length && work.every(s => s.title.includes("пауза")), "work reminders are short pauses");
+  assert.ok(work.length && work.every(s => s.title.includes("пауза")), "work reminders are short pauses: " + work.map(s => s.time + " " + s.title).join(" | "));
+  assert.ok(morning.every(s => s.title.includes("главное")), "the morning reminder is a normal tip, not a pause: " + morning.map(s => s.time).join(","));
   // the closed stage is a win with a thank-you
   assert.ok(r.wins.includes("Этап 1 закрыт") && /Спасибо|Браво|Горжусь|справился|упорство/.test(r.wins), "a closed stage shows up in «Достигнуто» with thanks");
   // a «отказ» habit: made in the editor, ticked when held, survives a reload

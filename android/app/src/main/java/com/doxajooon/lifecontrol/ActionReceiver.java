@@ -21,7 +21,14 @@ public class ActionReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context ctx, Intent i) {
         String task = i.getStringExtra("task");
         if (task == null || task.isEmpty()) return;
-        NotificationManagerCompat.from(ctx).cancel(i.getIntExtra("nid", 0));
+        NotificationManagerCompat nm = NotificationManagerCompat.from(ctx);
+        nm.cancel(i.getIntExtra("nid", 0));
+        // 75.0: a task can have several notifications (the time, the 15-minute warning, the snooze) — the button clears all of them
+        if (!task.startsWith("stage:") && !task.startsWith("debtpay:")) {
+            nm.cancel(("task_" + task).hashCode());
+            nm.cancel(("taskpre_" + task).hashCode());
+            nm.cancel(("tasksnz_" + task).hashCode());
+        }
         if (task.startsWith("stage:") || task.startsWith("debtpay:")) {
             // a stage of the day: «Да» marks its main action done, «Перенести» moves it on — the web app does both on start/resume
             PendingActions.add(ctx, SNOOZE.equals(i.getAction()) ? "snooze" : "done", task);

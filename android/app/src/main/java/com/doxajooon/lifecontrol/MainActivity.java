@@ -466,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
 
         /** Short preview of the reminder sound (settings → «Проверить звук»). */
         @JavascriptInterface public void previewSound() {
-            NotificationUtil.show(ctx, ctx.getString(R.string.app_name), "Так звучат напоминания ✨", 4242, null, 0);
+            NotificationUtil.show(ctx, ctx.getString(R.string.app_name), "Так звучат напоминания ✨", 4242, null, 0, false, true);
         }
 
         @JavascriptInterface public void cancel(String id) {

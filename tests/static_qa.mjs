@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.6.0");
-assert.match(gradle, /versionCode 746\b/); assert.match(gradle, /versionName '74\.6'/);
-assert.match(csproj, /<Version>74\.6\.0<\/Version>/);
+assert.equal(pkg.version, "74.7.0");
+assert.match(gradle, /versionCode 747\b/); assert.match(gradle, /versionName '74\.7'/);
+assert.match(csproj, /<Version>74\.7\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.6'") && html.includes('id="appVersion">74.6</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.7'") && html.includes('id="appVersion">74.7</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-6'"), "service worker cache must be life-v74-6");
+assert.ok(sw.includes("'life-v74-7'"), "service worker cache must be life-v74-7");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -232,5 +232,39 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(manifest.includes('android:allowBackup="false"'), "app data is not copied to Google backup (logout/delete must really remove it)");
   assert.ok(/^permissions:\s*\n\s+contents: read/m.test(wf) && /release:[\s\S]*?permissions:\s*\n\s+contents: write/.test(wf), "CI: read-only by default, write only for the release job");
   assert.ok(html.includes("privacyHTML()") && html.includes("delete_my_account") && html.includes("await idbWriteChain"), "privacy policy, account deletion and the wipe order are in the app");
+}
+// 74.7: hourly nature reminder, one ring per moment
+{
+  const nat = readFileSync(new URL("sounds/jamal-nature.wav", root)), natRes = readFileSync(new URL("android/app/src/main/res/raw/jamal_nature.wav", root));
+  assert.ok(nat.equals(natRes), "the nature sound is the same file for the web and the Android resource");
+  const durNat = (nat.length - 44) / 2 / 44100;
+  assert.ok(durNat >= 2 && durNat <= 3.5, `the nature sound is a short, soft sound (${durNat.toFixed(2)} s)`);
+  const nUtil = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java", root), "utf8");
+  const nRcv = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java", root), "utf8");
+  assert.ok(nUtil.includes('CHANNEL_NATURE = "jamal_life_nature1"') && nUtil.includes("R.raw.jamal_nature") && nUtil.includes("IMPORTANCE_DEFAULT"), "Android: the hourly reminder has its own quiet channel with the nature sound");
+  assert.ok(nRcv.includes('key.startsWith("every1h_")') && nRcv.includes("jl_rang") && nRcv.includes("120_000L"), "Android: the hourly alarm plays the nature sound, and a repeated delivery within 2 minutes does not ring twice");
+  assert.ok(html.includes("'every1h_'+x.time") && !html.includes("'every2h_'+x.time") && html.includes("mm+=60)"), "the reminder happens every hour (not every 2 hours)");
+  assert.ok(html.includes("sound:'nature'") && html.includes("function loadNature(") && html.includes("kind==='nature'"), "the web app plays the nature sound for the hourly reminder");
+  assert.ok(html.includes("Каждый час · звук природы"), "the settings say what the reminder is");
+}
+// 75.0: quiet hours, silent phone, one button clears the reminder
+{
+  const nu = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java", root), "utf8");
+  const nr = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java", root), "utf8");
+  const na = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/ActionReceiver.java", root), "utf8");
+  assert.ok(nu.includes("QUIET_FROM_MIN = 19 * 60") && nu.includes("QUIET_TO_MIN = 6 * 60 + 30") && nu.includes("static boolean blocked("), "Android: quiet hours 19:00–06:30 are defined");
+  assert.ok(nu.includes("RINGER_MODE_NORMAL") && nu.includes("getRingerMode()"), "Android: a silent or vibrating phone shows no reminder");
+  assert.ok(nr.includes("!NotificationUtil.blocked(ctx)"), "Android: alarms that ring at night or on silent are not shown");
+  assert.ok(nu.includes("(act + taskId + ':' + nid)"), "Android: each notification button has its own request code");
+  assert.ok(na.includes('nm.cancel(("tasksnz_" + task).hashCode())') && na.includes('nm.cancel(("taskpre_" + task).hashCode())'), "Android: a button clears all of the task's notifications");
+  const h = readFileSync(new URL("index.html", root), "utf8");
+  assert.ok(h.includes("function isQuietMin(m){return m>=QUIET_FROM_MIN||m<QUIET_TO_MIN}") && h.includes("if(quietNow())return;toast("), "web: no toast and no notification in quiet hours");
+  assert.ok(h.includes("if(!force&&quietNow())return;"), "web: no sound in quiet hours");
+}
+// 75.1: animations stop in the background
+{
+  const h2 = readFileSync(new URL("index.html", root), "utf8");
+  assert.ok(h2.includes("html.app-hidden *{animation-play-state:paused!important}") || h2.includes("html.app-hidden *,html.app-hidden *::before"), "background: animations are paused");
+  assert.ok(h2.includes("document.documentElement.classList.toggle('app-hidden',document.visibilityState==='hidden')"), "background: the app-hidden class follows the page visibility");
 }
 console.log("LIFE_V73_STATIC_QA_OK");
