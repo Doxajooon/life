@@ -2861,7 +2861,7 @@ async function cloudAutoSync(){
   try{return await cloudSyncInFlight}finally{cloudSyncInFlight=null}
 }
 
-async function cloudSignIn(email,password){const data=await supaFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});setCloudAuth(data);return data}
+async function cloudSignIn(email,password){try{localStorage.removeItem('JL_WIPED_GUARD_V75')}catch(e){}const data=await supaFetch('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});setCloudAuth(data);return data}
 async function cloudSignUp(email,password){const data=await supaFetch('/auth/v1/signup?redirect_to='+encodeURIComponent(AUTH_REDIRECT_URL),{method:'POST',body:JSON.stringify({email,password})});if(data?.session)setCloudAuth(data.session);return data}
 async function cloudRecover(email){return await supaFetch('/auth/v1/recover?redirect_to='+encodeURIComponent(AUTH_REDIRECT_URL),{method:'POST',body:JSON.stringify({email})})}
 async function cloudUpdatePassword(password){const a=cloudAuth();if(!a?.access_token)throw new Error('Ссылка восстановления недействительна или истекла. Запроси новое письмо.');return await supaFetch('/auth/v1/user',{method:'PUT',headers:{Authorization:'Bearer '+a.access_token},body:JSON.stringify({password})})}
@@ -2888,6 +2888,13 @@ async function wipeLocalData(){
   try{await idbWriteChain}catch(e){}
   try{const db=await openLifeDB();if(db)await new Promise(res=>{try{const tx=db.transaction(['state','backups'],'readwrite');tx.objectStore('state').clear();tx.objectStore('backups').clear();tx.oncomplete=res;tx.onerror=res;tx.onabort=res}catch(e){res()}})}catch(e){}
   try{window.AndroidBridge?.updateWidget?.('{}')}catch(e){}
+  // 75.3: this page still holds the old data in memory; any write that happens after the wipe (a backup snapshot, a sync) would bring it back.
+  // So the in-memory state is emptied too: whatever is written later is empty.
+  try{state=normalize({})}catch(e){}
+  // 75.3: the old database (from versions before 57) is also erased: the startup restore falls back to it, so without this the old personal data came back after logout
+  try{await new Promise(res=>{if(!('indexedDB' in window))return res();const r=indexedDB.deleteDatabase('LifeControlV26DB');r.onsuccess=res;r.onerror=res;r.onblocked=res})}catch(e){}
+  // 75.3: guard — after logout the device must not restore anything from local databases until the user signs in again
+  try{localStorage.setItem('JL_WIPED_GUARD_V75','1')}catch(e){}
 }
 /* 74.6: политика конфиденциальности + удаление аккаунта (функция delete_my_account в Supabase) */
 function privacyHTML(){
@@ -3286,6 +3293,7 @@ function mirrorToIndexedDB(payload,savedAt){
 }
 
 async function restoreFromIndexedDB(options={render:true}){
+  try{if(localStorage.getItem('JL_WIPED_GUARD_V75'))return false}catch(e){}
   const readCurrent=async db=>db?await new Promise(resolve=>{try{const tx=db.transaction('state','readonly');const req=tx.objectStore('state').get('current');req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>resolve(null)}catch(e){resolve(null)}}):null;
   const readBackups=async db=>db?await new Promise(resolve=>{try{const tx=db.transaction('backups','readonly');const req=tx.objectStore('backups').getAll();req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>Date.parse(b.savedAt)-Date.parse(a.savedAt)));req.onerror=()=>resolve([])}catch(e){resolve([])}}):[];
   try{

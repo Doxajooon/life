@@ -267,4 +267,9 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(h2.includes("html.app-hidden *{animation-play-state:paused!important}") || h2.includes("html.app-hidden *,html.app-hidden *::before"), "background: animations are paused");
   assert.ok(h2.includes("document.documentElement.classList.toggle('app-hidden',document.visibilityState==='hidden')"), "background: the app-hidden class follows the page visibility");
 }
+// 75.3: every sound the web app plays must be copied into the Android and Windows builds
+{
+  const sync = readFileSync(new URL("tools/sync-platforms.mjs", root), "utf8");
+  for (const snd of ["sounds/jamal-dawn.wav", "sounds/jamal-nature.wav"]) assert.ok(sync.includes(`"${snd}"`), `the sync list copies ${snd} into the apps`);
+}
 console.log("LIFE_V73_STATIC_QA_OK");

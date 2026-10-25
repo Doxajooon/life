@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url)); // works on Windows too (no "/D:/" paths)
-const files = ["index.html", "sw.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "icon-maskable.png", "fonts/inter-cyrillic.woff2", "fonts/inter-latin.woff2", "fonts/manrope-cyrillic.woff2", "fonts/manrope-latin.woff2", "fonts/nunito-cyrillic.woff2", "fonts/nunito-latin.woff2", "sounds/jamal-dawn.wav", "images/bg-kaaba.jpg"];
+const files = ["index.html", "sw.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png", "icon-maskable.png", "fonts/inter-cyrillic.woff2", "fonts/inter-latin.woff2", "fonts/manrope-cyrillic.woff2", "fonts/manrope-latin.woff2", "fonts/nunito-cyrillic.woff2", "fonts/nunito-latin.woff2", "sounds/jamal-dawn.wav", "sounds/jamal-nature.wav", "images/bg-kaaba.jpg"];
 const targets = ["android/app/src/main/assets", "desktop/Web"];
 
 for (const dir of targets) {
