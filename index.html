@@ -3988,7 +3988,8 @@ function scheduleNativeTasks(){
       const wk=nextWeekReviewAt();if(wk){br.scheduleOnce('weekreview',wk,'✨ Разбор недели','Воскресенье: AI подведёт итог недели и даст один шаг.');ids.push('weekreview')}
     }
     // 74.2: prayer times move a little every day — today's and tomorrow's are set as single alarms (renewed whenever the app runs)
-    for(let i=0;i<2;i++){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+i);for(const p of prayerReminders(d)){const at=d.getTime()+p.min*60000;if(at>now){const id='pray_'+p.k+'_'+i;br.scheduleOnce(id,at,p.title,p.body);ids.push(id)}}}
+    // 75.4: a week ahead, so the prayer reminders still ring when the app has not been opened for a few days
+    for(let i=0;i<7;i++){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+i);for(const p of prayerReminders(d)){const at=d.getTime()+p.min*60000;if(at>now){const id='pray_'+p.k+'_'+i;br.scheduleOnce(id,at,p.title,p.body);ids.push(id)}}}
     for(const id of prev)if(!ids.includes(id))try{br.cancel?.(id)}catch(e){}
     localStorage.setItem(NATIVE_TASK_KEY,JSON.stringify(ids));
   }catch(e){}

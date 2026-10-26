@@ -272,4 +272,9 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const sync = readFileSync(new URL("tools/sync-platforms.mjs", root), "utf8");
   for (const snd of ["sounds/jamal-dawn.wav", "sounds/jamal-nature.wav"]) assert.ok(sync.includes(`"${snd}"`), `the sync list copies ${snd} into the apps`);
 }
+// 75.4: prayer alarms are planned a week ahead
+{
+  const h = readFileSync(new URL("index.html", root), "utf8");
+  assert.ok(h.includes("for(let i=0;i<7;i++){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+i);"), "prayer alarms are set for 7 days ahead");
+}
 console.log("LIFE_V73_STATIC_QA_OK");
