@@ -231,7 +231,7 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const manifest = readFileSync(new URL("android/app/src/main/AndroidManifest.xml", root), "utf8"), wf = readFileSync(new URL(".github/workflows/release.yml", root), "utf8");
   assert.ok(manifest.includes('android:allowBackup="false"'), "app data is not copied to Google backup (logout/delete must really remove it)");
   assert.ok(/^permissions:\s*\n\s+contents: read/m.test(wf) && /release:[\s\S]*?permissions:\s*\n\s+contents: write/.test(wf), "CI: read-only by default, write only for the release job");
-  assert.ok(html.includes("privacyHTML()") && html.includes("delete_my_account") && html.includes("await idbWriteChain"), "privacy policy, account deletion and the wipe order are in the app");
+  assert.ok(html.includes("privacyHTML()") && html.includes("delete_my_account") && html.includes("const pending=idbWriteChain"), "privacy policy, account deletion and the wipe order are in the app");
 }
 // 74.7: hourly nature reminder, one ring per moment
 {

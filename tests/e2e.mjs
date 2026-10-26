@@ -920,11 +920,15 @@ await test("Выход из аккаунта: телефон очищается,
   // the test harness signs the page in again on reload; keep the cloud offline to see what the device itself kept
   cloud.down = true;
   // 75.2: start the logout first, then wait for the reload with a generous timeout (under CPU load the reload can finish before a listener is attached)
+  // 75.3: listen for the navigation BEFORE the logout starts, then wait for the new page (the old page is still "ready" until the reload)
+  const navigated = A.page.waitForEvent("framenavigated", { timeout: 30000 }).catch(() => null);
   await A.page.evaluate(() => { setTimeout(() => cloudLogout(), 0); });
-  await A.page.waitForFunction(() => document.readyState === "complete", null, { timeout: 30000 }).catch(() => {});
-  await A.page.waitForTimeout(300);
+  await navigated;
   await A.page.waitForFunction(() => typeof appReadyForSync !== "undefined" && appReadyForSync === true, null, { timeout: 30000 });
   await A.page.waitForTimeout(600);
+  // 75.5: wait until the reloaded page has finished its startup writes before reading its state (the check was racing them under load)
+  await A.page.waitForFunction(async () => { try { await idbWriteChain; } catch (e) {} return true; }, null, { timeout: 30000, polling: 200 }).catch(() => {});
+  await A.page.waitForTimeout(400);
   const after = await A.page.evaluate(() => ({ notes: state.notes.map(n => n.id), ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")) }));
   assert.deepEqual(after.notes, [], "personal data stayed on the device after logout");
   assert.deepEqual(after.ls, []);

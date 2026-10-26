@@ -2894,7 +2894,8 @@ async function wipeLocalData(){
   _wipingDevice=true;_cloudBaseState=null;
   try{[KEY,BACKUP_KEY,BACKUP2_KEY,CLOUD_DIRTY_KEY,OWNER_KEY,BASE_STAMP_KEY,FIRST_PUSH_KEY,'JL_PENDING_ACTIONS_V1'].forEach(k=>localStorage.removeItem(k))}catch(e){}
   // 74.6.1: copies queued before the exit finish first (they skip themselves now), so nothing is written after the clear below
-  try{await idbWriteChain}catch(e){}
+  // 75.5: wait until the write queue is really empty (writes queued while we wait are waited for too), then clear
+  for(let k=0;k<5;k++){const pending=idbWriteChain;try{await pending}catch(e){}if(pending===idbWriteChain)break}
   try{const db=await openLifeDB();if(db)await new Promise(res=>{try{const tx=db.transaction(['state','backups'],'readwrite');tx.objectStore('state').clear();tx.objectStore('backups').clear();tx.oncomplete=res;tx.onerror=res;tx.onabort=res}catch(e){res()}})}catch(e){}
   try{window.AndroidBridge?.updateWidget?.('{}')}catch(e){}
   // 75.3: this page still holds the old data in memory; any write that happens after the wipe (a backup snapshot, a sync) would bring it back.
