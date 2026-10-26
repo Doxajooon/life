@@ -2092,6 +2092,15 @@ button:active,[role="button"]:active,.jl-pill:active{scale:.97;opacity:.88;trans
 .v-row-main b,.v-row-main small{overflow-wrap:normal;word-break:normal;hyphens:manual}
 /* 75.1: when the app is in the background, every animation stops (battery and CPU); it resumes when the app is back */
 html.app-hidden *,html.app-hidden *::before,html.app-hidden *::after{animation-play-state:paused!important}
+/* 75.5 calm: visual only. Same layout, same behaviour; less noise. */
+.jl-sky{background:linear-gradient(rgba(7,18,38,.86),rgba(7,18,38,.94)),url("images/bg-kaaba.jpg") no-repeat 50% 100%/auto max(64vh,100vw),#0b1a33!important}
+*:not(.runner-runner):not(.auth-spinner):not(.runner-runner *):not(.auth-spinner *){animation:none!important;transition-duration:.15s!important}
+.runner-runner,.auth-spinner{animation-iteration-count:infinite!important}
+*{text-shadow:none!important}
+.card,.v-task,.jl-habit,.jl-free-goal,.ring-item{box-shadow:0 1px 0 rgba(255,255,255,.05)!important}
+.card{border-radius:16px!important}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #7cc4ff!important;outline-offset:2px}
+
 </style>
 
 
