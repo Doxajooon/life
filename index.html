@@ -1224,6 +1224,8 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-bank-name{all:unset;cursor:pointer;min-width:0;display:block}
 .jl-bank-name:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
 .jl-bank-empty{display:grid;justify-items:center;text-align:center;gap:6px;padding:14px 8px}
+/* 75.6: the bottom navigation covered the «Создать банк» button on an empty «Деньги» screen; keep the end of the list above it */
+#viewMoney{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
 .jl-bank-empty .jl-emo{font-size:2.4rem;margin:0}.jl-bank-empty small{color:var(--muted);max-width:30ch}
 
 .dp-slider input{width:100%;accent-color:#e3b04b;min-height:32px;height:36px;cursor:pointer}
