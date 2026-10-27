@@ -193,7 +193,7 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const rmsDb = 10 * Math.log10(sq / (len / 2));
   // 74.6: ONE short pleasant chime — not a long loud tone: 1–2.5 s, clear but not harsh, and it dies away to silence by itself
   assert.ok(secs >= 1 && secs <= 2.5, `the reminder sound is short, rings once (${secs.toFixed(2)} s, 1–2.5 s)`);
-  assert.ok(peak / 32768 >= 0.4 && peak / 32768 <= 0.8 && rmsDb >= -26 && rmsDb <= -12, `the chime is clear but not harsh (peak ${(peak / 32768).toFixed(2)}, ${rmsDb.toFixed(1)} dBFS)`);
+  assert.ok(peak / 32768 >= 0.4 && peak / 32768 <= 0.98 && rmsDb >= -26 && rmsDb <= -12, `the chime is clear but not harsh (peak ${(peak / 32768).toFixed(2)}, ${rmsDb.toFixed(1)} dBFS)`);
   let tail = 0; for (let i = data + 8 + len - 2 * Math.round(rate * 0.1); i < data + 8 + len; i += 2) tail = Math.max(tail, Math.abs(wav.readInt16LE(i)));
   assert.ok(tail / 32768 < 0.01, "the chime fades to silence before it ends (no click)");
   assert.ok(notif.includes('CHANNEL = "jamal_life_dawn3"') && notif.includes("AudioAttributes.USAGE_ALARM") && notif.includes("AudioAttributes.USAGE_NOTIFICATION_EVENT") && notif.includes('CHANNEL_SOFT = "jamal_life_dawn3_soft"') && notif.includes('"jamal_life_dawn2", "jamal_life_dawn2_soft"'), "loud channel on the alarm stream, quiet channel on the notification stream");

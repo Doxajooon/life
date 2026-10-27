@@ -1226,6 +1226,9 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-bank-empty{display:grid;justify-items:center;text-align:center;gap:6px;padding:14px 8px}
 /* 75.6: the bottom navigation covered the «Создать банк» button on an empty «Деньги» screen; keep the end of the list above it */
 #viewMoney{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+/* 75.8: clear space between the sections of «Сегодня» (the stage card and the rhythm card touched) */
+#viewToday>.card{margin-top:22px!important;margin-bottom:0!important}
+#viewToday>.card:first-child{margin-top:12px!important}
 .jl-bank-empty .jl-emo{font-size:2.4rem;margin:0}.jl-bank-empty small{color:var(--muted);max-width:30ch}
 
 .dp-slider input{width:100%;accent-color:#e3b04b;min-height:32px;height:36px;cursor:pointer}
@@ -2041,9 +2044,9 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
 .jl-split-row label small{grid-column:2}
 .jl-split-row input{width:7.5rem;flex:none}
 .jl-split-row output{font-weight:800}
-.jl-pray{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:8px}
+.jl-pray{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px;padding:0 4px}
 /* the hero is dark in both themes, so the prayer block keeps the colours of «Сейчас» and the quote (≥ 4.5:1 on the photo) */
-.jl-pray div{display:grid;justify-items:center;gap:1px;padding:7px 2px;border-radius:12px;background:#0f2546;border:1px solid rgba(155,196,255,.22);color:#f4efe3}
+.jl-pray div{display:grid;justify-items:center;gap:3px;padding:9px 4px;border-radius:12px;background:#0f2546;border:1px solid rgba(155,196,255,.22);color:#f4efe3}
 .jl-pray small{color:#c6d2e3;font-size:11px}
 .jl-pray div.next{border-color:#34d399;box-shadow:inset 0 0 0 1px #34d399}
 .jl-pray div.next small{color:#7ee8bd}
@@ -6114,7 +6117,8 @@ function openGoalEditor(id=''){
 function goalPhotoOk(v){return typeof v==='string'&&v.length<=GOAL_PHOTO_MAX&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v)}
 function goalPhoto(g){return g&&goalPhotoOk(g.photo)?g.photo:''}
 function setGoalPhoto(g,v){if(!g)return;if(goalPhotoOk(v))g.photo=v;else delete g.photo}
-function renderGoalPhotoEdit(){const img=$('gePhotoImg'),has=!!geState.photo;if(!img)return;img.hidden=!has;if(has&&img.getAttribute('src')!==geState.photo)img.src=geState.photo;if(!has)img.removeAttribute('src');$('gePhotoDrop').hidden=!has;setText('gePhotoPickLabel',has?'Заменить фото':'Добавить фото')}
+function ensureGoalPhotoQuick(){const pv=$('gePreview');if(!pv||$('geQuickPhoto'))return;const bt=document.createElement('button');bt.type='button';bt.id='geQuickPhoto';bt.className='btn small';bt.style.cssText='margin:10px auto 0;display:block';bt.onclick=()=>$('gePhotoFile')?.click();pv.insertAdjacentElement('afterend',bt);const cv=$('geCover');if(cv){cv.style.cursor='pointer';cv.onclick=()=>$('gePhotoFile')?.click()}}
+function renderGoalPhotoEdit(){ensureGoalPhotoQuick();const qb=$('geQuickPhoto');if(qb)qb.textContent=geState.photo?'Заменить фото цели':'Добавить фото цели';const img=$('gePhotoImg'),has=!!geState.photo;if(!img)return;img.hidden=!has;if(has&&img.getAttribute('src')!==geState.photo)img.src=geState.photo;if(!has)img.removeAttribute('src');$('gePhotoDrop').hidden=!has;setText('gePhotoPickLabel',has?'Заменить фото':'Добавить фото')}
 function shrinkPhoto(file){return new Promise((ok,bad)=>{const url=URL.createObjectURL(file),im=new Image();im.onload=()=>{try{let out='';for(const [side,q] of [[900,.74],[720,.62],[560,.55]]){const k=Math.min(1,side/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<=GOAL_PHOTO_MAX)break}URL.revokeObjectURL(url);goalPhotoOk(out)?ok(out):bad(new Error('big'))}catch(e){URL.revokeObjectURL(url);bad(e)}};im.onerror=()=>{URL.revokeObjectURL(url);bad(new Error('read'))};im.src=url})}
 async function pickGoalPhoto(file){if(!file)return;if(!/^image\//.test(file.type||'')){toast('Это не фото','Выбери картинку');return}
   try{geState.photo=await shrinkPhoto(file);renderGoalPhotoEdit();renderGoalEditorCover();haptic(8);toast('Фото добавлено','Сохрани цель — фото останется с ней')}catch(e){toast('Фото не получилось открыть','Попробуй другое')}}
