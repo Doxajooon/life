@@ -1,0 +1,311 @@
+// @ts-nocheck — compact JSON shaping code; runtime is covered by the app tests.
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+// Life AI — analysis of the user's own data with Gemini (generateContent).
+// The Gemini key lives only in Supabase Secrets (GEMINI_API_KEY).
+// Free-tier quotas are per model, so when one model answers 429 (quota) or is not available
+// for this key, the next model is tried automatically. The first model that answers is remembered.
+const PREFERRED = ["gemini-flash-latest", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-2.5-flash", "gemini-3.6-flash", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-2.5-flash-lite"];
+let MODEL = PREFERRED[0];
+let goodModel = "";
+let modelList: string[] = [];
+let modelListAt = 0;
+const MAX_REQUESTS_PER_HOUR = 10;
+// Google's 503 «high demand» can hold a request for many seconds: each model gets a time limit, the whole answer
+// comes within ~19 s, and a model that just answered 503 waits at the end of the queue for 3 minutes.
+const DEADLINE_MS = () => Number(Deno.env.get("AI_DEADLINE_MS")) || 19000;
+const ATTEMPT_MS = () => Number(Deno.env.get("AI_ATTEMPT_MS")) || 12000;
+const BUSY_MS = 180_000;
+const busyUntil: Record<string, number> = {};
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info, x-life-control",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Content-Type": "application/json; charset=utf-8",
+  "Cache-Control": "no-store",
+};
+const json = (d: unknown, s = 200) => new Response(JSON.stringify(d), { status: s, headers: CORS });
+const clip = (v: unknown, n = 900) => String(v ?? "").trim().slice(0, n);
+const configured = () => Boolean(Deno.env.get("GEMINI_API_KEY"));
+// 74.2: every failed answer leaves one line in the function logs with its reason.
+// Never the key, the token, the e-mail or the user's data: Google's text is cut, and anything key-like is masked.
+const safe = (v: unknown, n = 200) => String(v ?? "").replace(/AIza[0-9A-Za-z_-]{10,}/g, "AIza***").replace(/(key|token|bearer)[=: ]+[^\s,"]+/gi, "$1=***").replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, "***@***").replace(/\s+/g, " ").slice(0, n);
+function fail(reason: string, status: number, error: string, extra: Record<string, unknown> = {}) {
+  const info: Record<string, unknown> = { reason, status };
+  for (const k in extra) info[k] = typeof extra[k] === "number" ? extra[k] : safe(extra[k]);
+  console.error("ai fail", JSON.stringify(info));
+  return json({ error, reason }, status);
+}
+
+// the visible name of the app (the same as APP_NAME in index.html)
+const APP_NAME = "Life";
+
+function scope(s: any) {
+  return { goal: s?.goal !== false, money: s?.money !== false, reports: s?.reports !== false, notes: s?.notes === true, webSearch: s?.webSearch === true };
+}
+
+function promptRules() {
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", персональный аналитический агент.","Работай только с фактами из переданных данных приложения. Не придумывай суммы, даты, достижения, события или причины.","all_data — все разделы приложения (долги своими именами и их история, все цели, привычки с отметками за 30 дней, задачи, банки, распорядок и график по дням недели, деньги по месяцам, победы): опирайся на них, называй долги и цели их именами.","Отделяй факт от предположения.","Если цель, доход или долги не заданы (пусто или 0) — не придумывай их; скажи, что их стоит добавить в приложении, и дай совет по тому, что есть.","Не давай мелких общих советов вроде «будь дисциплинированнее», «отдыхай больше», «продолжай работать» без конкретного действия.","Каждый вывод должен приводить к практическому решению.","Дай короткий управленческий разбор и затем КОНКРЕТНЫЙ ПЛАН ДЕЙСТВИЙ.","План должен содержать 3–5 действий с приоритетом P1/P2/P3, конкретным сроком, измеримым результатом и основанием из данных.","P1 — действие, которое нужно сделать первым и которое сильнее всего влияет на текущую проблему.","Если есть долги или финансовое давление, отдельно укажи конкретное действие по деньгам: сумму/лимит, срок или правило, только если это можно вывести из данных. Не придумывай возможность платить больше, чем позволяют данные.","Если есть цель, свяжи действия с ближайшим измеримым этапом цели.","Для режима goal обязательно отдельно покажи: ЧТО УЖЕ ДОСТИГНУТО — закрытые этапы и реальные результаты; ЧТО УЖЕ ЕСТЬ — собранный капитал, доступная касса и другие подтверждённые ресурсы; ЧТО МЕШАЕТ — один главный ограничитель; ЗАТЕМ ПЛАН — 3–5 конкретных действий.","Если есть незавершённые задачи или препятствия из отчётов, преврати наиболее существенное препятствие в конкретное действие.","Заверши блоком «ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ» — ровно одно действие, которое пользователь может выполнить сразу.","Не предлагай десять действий. Отсекай второстепенное.","Для денег показывай арифметику; не обещай гарантированный результат.","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов.","Пиши по-русски, прямо, серьёзно и без мотивационной воды.","Не изменяй данные пользователя."].join("\n");
+}
+
+// WEEK mode: short Sunday review of the last 7 days (strong side, weak spot, one step).
+function weekRules() {
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", личный наставник по итогам недели.","Работай только с фактами из переданных данных за последние 7 дней. Не придумывай суммы, события и причины.","all_data — все разделы приложения: используй их, называй долги и цели их именами.","Пиши по-русски, коротко, прямо, по-человечески, без воды и без markdown (#, **, списков).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
+}
+// deno-lint-ignore no-explicit-any
+function weekContext(s: any, today: string): any {
+  const since = Date.now() - 7 * 86400000, inWeek = (x: any) => Date.parse(x?.at || "") >= since, amt = (x: any) => Math.max(0, Number(x?.amount) || 0);
+  const p = (Array.isArray(s?.profits) ? s.profits : []).filter(inWeek), all = (Array.isArray(s?.expenses) ? s.expenses : []).filter(inWeek);
+  // spending = no transfers, no debt payments; a debt payment (stored with transfer:true) goes to money.debtPaid
+  const e = all.filter((x: any) => !x?.transfer && !x?.debtPayment), dp = all.filter((x: any) => x?.debtPayment);
+  const cat: Record<string, number> = {}; for (const x of e) { const k = clip(x?.category || "Другое", 60); cat[k] = (cat[k] || 0) + amt(x); }
+  // Report keys are the user's local dates, so the app sends its own "today".
+  const days: any[] = []; const d = new Date((/^\d{4}-\d{2}-\d{2}$/.test(today) ? today : new Date().toISOString().slice(0, 10)) + "T12:00:00Z");
+  for (let i = 0; i < 7; i++) { const k = d.toISOString().slice(0, 10), r = s?.reports?.[k]; days.push({ day: k, closed: !!(r?.closedAt || String(r?.done || "").trim()), done: clip(r?.done, 500), block: clip(r?.block, 500), tomorrow: clip(r?.tomorrow, 300) }); d.setUTCDate(d.getUTCDate() - 1); }
+  const tasks = (Array.isArray(s?.tasks) ? s.tasks : []).filter((t: any) => Date.parse((t?.date || "") + "T12:00:00") >= since - 86400000);
+  const budgets = (Array.isArray(s?.budgets) ? s.budgets : []).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthLimit: Number(b?.planned) || 0 }));
+  return { currency: String(s?.profile?.currency || "сомони"), goal: clip(s?.goal?.title, 200), days, closedDays: days.filter((x) => x.closed).length,
+    money: { income: p.reduce((a: number, x: any) => a + amt(x), 0), spent: e.reduce((a: number, x: any) => a + amt(x), 0), byCategory: cat, debtPaid: dp.reduce((a: number, x: any) => a + amt(x), 0), debt: (Number(s?.debts?.bank) || 0) + (Number(s?.debts?.firms) || 0), monthlyPayment: Number(s?.debts?.monthlyPayment) || 0, limits: budgets },
+    tasks: { total: tasks.length, done: tasks.filter((t: any) => t?.done).length, open: tasks.filter((t: any) => !t?.done).slice(0, 10).map((t: any) => clip(t?.title, 120)) } };
+}
+
+// DEEP mode: honest money leaks + weak/strong side, from the whole state and the app's own numbers.
+function deepRules() {
+  return ["Ты — AI-помощник приложения " + APP_NAME + ", честный личный аналитик денег и дисциплины.","Опирайся только на переданные данные и цифры. Не придумывай суммы и события.","all_data — все разделы приложения: используй их, называй долги и цели их именами.","Говори прямо, по-человечески, коротко, с конкретными цифрами из данных. Без воды, без markdown (#, **, списков со звёздочками).","Ставки и азартные игры не выдавай за надёжный доход и не советуй их для закрытия долгов."].join("\n");
+}
+// deno-lint-ignore no-explicit-any
+function deepContext(s: any, facts: any): any {
+  const c = context(s, { goal: true, money: true, reports: true, notes: false });
+  const habits = (Array.isArray(s?.habits) ? s.habits : []).slice(0, 12).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind }));
+  const banks = (Array.isArray(s?.budgets) ? s.budgets : []).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthly: Number(b?.planned) || 0 }));
+  let f = "";
+  try { f = JSON.stringify(facts ?? {}); if (f.length > 24000) f = ""; } catch { f = ""; } // too big → no numbers rather than broken JSON
+  return { ...c, habits, banks, app_numbers: f ? JSON.parse(f.endsWith("}") ? f : "{}") : {} };
+}
+
+// LIFE mode: the ticked sections + habits, banks, open tasks and the app's own exact numbers.
+// deno-lint-ignore no-explicit-any
+function lifeContext(s: any, sc: any, facts: any): any {
+  const c = context(s, sc);
+  if (sc.money) c.banks = (Array.isArray(s?.budgets) ? s.budgets : []).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthly: Number(b?.planned) || 0 }));
+  if (sc.reports) {
+    c.habits = (Array.isArray(s?.habits) ? s.habits : []).slice(0, 12).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind }));
+    const tasks = Array.isArray(s?.tasks) ? s.tasks : [];
+    c.tasks = { total: tasks.length, done: tasks.filter((t: any) => t?.done).length, open: tasks.filter((t: any) => !t?.done).slice(0, 10).map((t: any) => clip(t?.title, 120)) };
+  }
+  let f = "";
+  try { f = JSON.stringify(facts ?? {}); if (f.length > 24000) f = ""; } catch { f = ""; } // too big → no numbers rather than broken JSON
+  c.app_numbers = f && f.endsWith("}") ? JSON.parse(f) : {};
+  return c;
+}
+
+// Only the sections the user ticked are sent to the model, trimmed to sane sizes.
+// deno-lint-ignore no-explicit-any
+function context(s: any, c: any): any {
+ const o={generated_at:new Date().toISOString(),currency:String(s?.profile?.currency||"сомони")};
+ if(c.goal){const g=s?.goal||{},f=g?.finance||{},target=Number(f.targetAmount)||0,saved=Number(f.savedAmount)||0;o.goal={title:clip(g.title,300),why:clip(g.why,900),next:clip(g.next,900),milestones:Array.isArray(g.milestones)?g.milestones.slice(0,20).map(m=>({title:clip(m?.title,300),done:!!m?.done})):[],achievements:Array.isArray(s?.achievements)?s.achievements.slice().sort((a,b)=>String(b?.at||"").localeCompare(String(a?.at||""))).slice(0,20).map(a=>({at:a?.at||"",text:clip(a?.text,500)})):[],finance:{target,saved,remaining:Math.max(0,target-saved),pct:target?Math.min(100,Math.round(saved/target*100)):0,targetDate:clip(f.targetDate,40)}}}
+ if(c.money){const p=Array.isArray(s?.profits)?s.profits:[],e=Array.isArray(s?.expenses)?s.expenses:[],cut=Date.now()-30*86400000,p30=p.filter(x=>Date.parse(x?.at||"")>=cut),e30=e.filter(x=>Date.parse(x?.at||"")>=cut&&!x?.transfer&&!x?.debtPayment),dp30=e.filter(x=>Date.parse(x?.at||"")>=cut&&x?.debtPayment).reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),inc=p30.reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),out=e30.reduce((a,x)=>a+Math.max(0,Number(x?.amount)||0),0),src={},cat={};for(const x of p30){const v=String(x?.sourceGroup||x?.source||"Другое"),k=["Зарплата","Фриланс","Бизнес","Спортивная аналитика"].includes(v)?v:"Другое";src[k]=(src[k]||0)+Math.max(0,Number(x?.amount)||0)}for(const x of e30){const k=clip(x?.category||"Другое",80);cat[k]=(cat[k]||0)+Math.max(0,Number(x?.amount)||0)}o.money={cash:Number(s?.wallet?.openingBalance)||0,goalCapital:Number(s?.goal?.finance?.savedAmount)||0,debt:(Number(s?.debts?.bank)||0)+(Number(s?.debts?.firms)||0),bankDebt:Number(s?.debts?.bank)||0,firmsDebt:Number(s?.debts?.firms)||0,monthlyPayment:Number(s?.debts?.monthlyPayment)||0,last30Days:{income:inc,spent:out,debtPaid:dp30,net:inc-out-dp30},sources:src,expenses_by_category:cat}}
+ if(c.reports){const rs=s?.reports&&typeof s.reports==="object"?s.reports:{},r=Object.entries(rs).filter(([d,v])=>v&&new Date(d+"T23:59:59").getTime()>=Date.now()-30*86400000).sort((a,b)=>String(b[0]).localeCompare(String(a[0]))).slice(0,30);o.reports=r.map(([day,v])=>({day,done:clip(v?.done,800),block:clip(v?.block,800),future:clip(v?.future,800),tomorrow:clip(v?.tomorrow,800),steps:v?.steps||{}}))}
+ if(c.notes){const ns=Array.isArray(s?.notes)?s.notes:[];o.notes=ns.slice().sort((a,b)=>String(b?.at||"").localeCompare(String(a?.at||""))).slice(0,15).map(n=>({createdAt:n?.at||"",title:clip(n?.title,180),body:clip(n?.body,900)}))}
+ return o;
+}
+
+// 74.4: every part of the user's data, compact — the AI sees the whole picture whatever mode was asked
+// (debts by their own names and their history, all goals, habits with marks, tasks, banks, the day and the weekday schedule,
+// money by month for half a year, wins). Notes go only when the user ticked them.
+// deno-lint-ignore no-explicit-any
+function allData(s: any, withNotes: boolean): any {
+  const num = (v: unknown) => Number(v) || 0, arr = (v: any) => (Array.isArray(v) ? v : []);
+  const labels = s?.debts?.labels || {};
+  const debts = { [clip(labels.bank || "Долг 1", 60)]: num(s?.debts?.bank), [clip(labels.firms || "Долг 2", 60)]: num(s?.debts?.firms),
+    monthlyPayment: num(s?.debts?.monthlyPayment), startedFrom: num(s?.debtBaseline),
+    history: arr(s?.debtHistory).slice(-12).map((h: any) => ({ day: clip(h?.day, 12), total: num(h?.total) })) };
+  const goals = arr(s?.goals).slice(0, 12).map((g: any) => ({ title: clip(g?.title, 120), main: !!g?.main, target: num(g?.targetAmount), date: clip(g?.targetDate, 12),
+    saved: num(g?.manualSaved) + arr(g?.contributions).reduce((a: number, c: any) => a + num(c?.amount), 0), done: !!g?.completedAt }));
+  const since = Date.now() - 30 * 86400000, log = s?.habitLog || {};
+  const habits = arr(s?.habits).slice(0, 15).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind, avoid: !!h?.avoid,
+    marksLast30: Object.keys(log?.[h?.id] || {}).filter((d) => log[h.id][d] && Date.parse(d + "T12:00:00") >= since).length }));
+  const tasks = arr(s?.tasks), today = new Date().toISOString().slice(0, 10);
+  const taskInfo = { total: tasks.length, done: tasks.filter((t: any) => t?.done).length,
+    overdue: tasks.filter((t: any) => !t?.done && t?.date && t.date < today).slice(0, 10).map((t: any) => clip(t?.title, 100) + " (" + t.date + ")"),
+    upcoming: tasks.filter((t: any) => !t?.done && (!t?.date || t.date >= today)).slice(0, 12).map((t: any) => clip(t?.title, 100) + (t?.date ? " · " + t.date + (t?.time ? " " + t.time : "") : "")) };
+  const banks = arr(s?.budgets).slice(0, 12).map((b: any) => ({ name: clip(b?.name, 60), monthly: num(b?.planned), topups: arr(b?.tops).length }));
+  const months: Record<string, { income: number; spent: number; debtPaid: number }> = {};
+  const m = (x: any) => String(x?.dateKey || x?.at || "").slice(0, 7), cut = new Date(); cut.setMonth(cut.getMonth() - 6);
+  for (const x of arr(s?.profits)) { const k = m(x); if (k >= cut.toISOString().slice(0, 7)) (months[k] ||= { income: 0, spent: 0, debtPaid: 0 }).income += num(x?.amount); }
+  for (const x of arr(s?.expenses)) { const k = m(x); if (k < cut.toISOString().slice(0, 7)) continue; const o = (months[k] ||= { income: 0, spent: 0, debtPaid: 0 });
+    if (x?.debtPayment) o.debtPaid += num(x?.amount); else if (!x?.transfer) o.spent += num(x?.amount); }
+  const steps = arr(s?.day?.steps).slice(0, 6).map((x: any) => ({ title: clip(x?.title, 60), from: clip(x?.time, 5), to: clip(x?.end, 5), main: arr(x?.details).slice(0, 3).map((d: any) => clip(d, 80)) }));
+  const week = s?.day?.week && typeof s.day.week === "object" ? Object.fromEntries(Object.entries(s.day.week).slice(0, 7).map(([d, v]: any) => [d, v?.off ? "выходной" : "свои часы"])) : null;
+  const out: any = { name: clip(s?.profile?.name, 60), currency: clip(s?.profile?.currency || "сомони", 20), cash: num(s?.wallet?.openingBalance), debts, goals, habits, tasks: taskInfo, banks,
+    moneyByMonth: months, day: { steps, week, mode: clip(s?.dayMode, 20) }, wins: arr(s?.achievements).slice(-10).map((a: any) => clip(a?.text, 160)),
+    closedDaysLast30: Object.entries(s?.reports || {}).filter(([d, v]: any) => v && Date.parse(d + "T12:00:00") >= since && (v?.closedAt || String(v?.done || "").trim())).length };
+  if (withNotes) out.notes = arr(s?.notes).slice(-15).map((n: any) => ({ title: clip(n?.title, 120), body: clip(n?.body, 400) }));
+  return out;
+}
+
+async function getUser(req: Request) {
+  const h = req.headers.get("Authorization") || "";
+  if (!h.startsWith("Bearer ")) return { bad: "no token" };
+  let k = "";
+  try { k = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") || "{}").default || ""; } catch { /* ignore */ }
+  k = k || Deno.env.get("SUPABASE_ANON_KEY") || "";
+  if (!k) throw new Error("Supabase publishable key unavailable.");
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, k, { global: { headers: { Authorization: h } } });
+  const { data, error } = await sb.auth.getUser(h.replace(/^Bearer\s+/i, ""));
+  if (error || !data?.user) return { bad: error?.message || "no user" };
+  return { sb, user: data.user };
+}
+
+// Rate limit stored in the database (public.ai_usage), so it survives cold starts of the function.
+// 74.5: a row is written only AFTER Google answered — Google's own 503/timeouts no longer eat the limit.
+// Failed attempts are still counted (no new table, no migration): their row is stored with `at` moved back
+// exactly ATTEMPT_SHIFT_MS, so it never counts as an answer, and «attempts in the last hour» reads that shifted window.
+const MAX_ATTEMPTS_PER_HOUR = 30;
+const ATTEMPT_SHIFT_MS = 3650 * 86400_000;
+// deno-lint-ignore no-explicit-any
+async function allowRequest(sb: any, userId: string): Promise<"" | "answers" | "attempts"> {
+  const now = Date.now(), iso = (t: number) => new Date(t).toISOString();
+  const ok = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - 3600_000));
+  if (ok.error) return ""; // never block the user because of the counter itself
+  if ((ok.count ?? 0) >= MAX_REQUESTS_PER_HOUR) return "answers";
+  const bad = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - ATTEMPT_SHIFT_MS - 3600_000)).lt("at", iso(now - ATTEMPT_SHIFT_MS + 60_000));
+  if (!bad.error && (ok.count ?? 0) + (bad.count ?? 0) >= MAX_ATTEMPTS_PER_HOUR) return "attempts";
+  return "";
+}
+// deno-lint-ignore no-explicit-any
+async function countUse(sb: any, userId: string, answered: boolean) {
+  try { await sb.from("ai_usage").insert(answered ? { user_id: userId } : { user_id: userId, at: new Date(Date.now() - ATTEMPT_SHIFT_MS).toISOString() }); } catch { /* the counter never breaks an answer */ }
+}
+
+const API = "https://generativelanguage.googleapis.com/v1beta";
+
+// Models this key can really use (cached for an hour), ordered by preference.
+async function candidates(key: string): Promise<string[]> {
+  if (!modelList.length || Date.now() - modelListAt > 3600_000) {
+    try {
+      const r = await fetch(API + "/models?pageSize=200", { headers: { "x-goog-api-key": key } });
+      const d = await r.json().catch(() => ({}));
+      const names = (Array.isArray(d?.models) ? d.models : [])
+        .filter((m: any) => (m?.supportedGenerationMethods || []).includes("generateContent"))
+        .map((m: any) => String(m?.name || "").replace(/^models\//, ""))
+        .filter((n: string) => /^gemini-.*flash/.test(n) && !/(image|tts|audio|live|embedding|vision|computer|robotics|thinking-exp)/.test(n));
+      if (names.length) { modelList = names; modelListAt = Date.now(); }
+    } catch { /* fall back to the static list */ }
+  }
+  const avail = modelList.length ? modelList : PREFERRED;
+  const rank = (n: string) => { const i = PREFERRED.indexOf(n); if (i >= 0) return i; const v = Number((n.match(/gemini-(\d+(?:\.\d+)?)/) || [])[1] || 0); return 100 - v * 10 + (/lite/.test(n) ? 5 : 0) + (/preview|exp/.test(n) ? 3 : 0); };
+  const list = [...new Set(avail)].sort((a, b) => rank(a) - rank(b));
+  if (goodModel && list.includes(goodModel)) list.unshift(...list.splice(list.indexOf(goodModel), 1));
+  return list.slice(0, 6);
+}
+
+function ruError(status: number, raw: string) {
+  if (status === 429 || /quota|rate.?limit|exhausted/i.test(raw)) return "Бесплатный лимит Gemini на сегодня исчерпан у всех доступных моделей. Он обновится примерно через сутки (у Google — в полночь по тихоокеанскому времени). Пока работает «Полный разбор» на телефоне — он считает всё сам, без интернета. Чтобы лимита не было совсем, включи оплату ключа в Google AI Studio (aistudio.google.com → Billing).";
+  if (status === 400 && /api key|API_KEY_INVALID/i.test(raw)) return "Ключ Gemini недействителен. Создай новый ключ в Google AI Studio и замени GEMINI_API_KEY в Supabase → Edge Functions → Secrets.";
+  if (status === 403) return "Ключ Gemini не имеет доступа к модели. Проверь ключ в Google AI Studio.";
+  if (status === 503 || status === 504) return "Google сейчас перегружен — все модели Gemini заняты. Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
+  if (raw === "network") return "Сервер AI не смог связаться с Google. Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
+  if (/^empty/.test(raw)) return "Gemini прислал пустой ответ. Нажми ещё раз — обычно со второго раза приходит. Пока работает «Полный разбор» без AI.";
+  return "Google ответил ошибкой " + status + ". Попробуй через минуту. Пока работает «Полный разбор» на телефоне — без AI.";
+}
+
+// a short code for the logs and the app: what exactly went wrong at Google
+function geminiReason(status: number, raw: string) {
+  if (status === 429 || /quota|rate.?limit|exhausted/i.test(raw)) return "gemini_quota";
+  if (status === 400 && /api key|API_KEY_INVALID/i.test(raw)) return "gemini_bad_key";
+  if (status === 403) return "gemini_forbidden";
+  if (status === 504 || raw === "timeout") return "gemini_timeout";
+  if (status === 503) return "gemini_overloaded";
+  if (raw === "network") return "gemini_network";
+  if (/^empty/.test(raw)) return "gemini_empty";
+  return "gemini_http_" + status;
+}
+
+async function gemini(input: string, useSearch: boolean, system = promptRules()) {
+  const key = Deno.env.get("GEMINI_API_KEY") || "";
+  if (!key) return { error: "GEMINI_API_KEY не настроен в Supabase Secrets.", status: 503, reason: "no_key" };
+  const body: any = {
+    systemInstruction: { parts: [{ text: system }] },
+    contents: [{ role: "user", parts: [{ text: input }] }],
+    generationConfig: { maxOutputTokens: 4096, temperature: 0.6 },
+  };
+  if (useSearch) body.tools = [{ google_search: {} }];
+  let lastStatus = 502, lastRaw = "";
+  const t0 = Date.now(), now = Date.now(), all = await candidates(key);
+  const order = [...all.filter((m) => !(busyUntil[m] > now)), ...all.filter((m) => busyUntil[m] > now)];
+  for (const m of order) {
+    const left = DEADLINE_MS() - (Date.now() - t0);
+    if (left < Math.min(1500, DEADLINE_MS() / 6)) { console.error("gemini deadline", Date.now() - t0); lastStatus = lastStatus === 429 ? 429 : 503; break; }
+    const ac = new AbortController(), timer = setTimeout(() => ac.abort(), Math.min(ATTEMPT_MS(), left));
+    let r: Response, raw = "";
+    try {
+      r = await fetch(`${API}/models/${m}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body), signal: ac.signal });
+      raw = await r.text();
+    } catch {
+      const slow = ac.signal.aborted; lastStatus = slow ? 504 : 502; lastRaw = slow ? "timeout" : "network";
+      console.error("gemini error", m, lastStatus, lastRaw, Date.now() - t0 + "ms"); if (slow) busyUntil[m] = Date.now() + BUSY_MS; continue;
+    } finally { clearTimeout(timer); }
+    let d: any = {};
+    try { d = JSON.parse(raw || "{}"); } catch { /* ignore */ }
+    if (!r.ok) {
+      console.error("gemini error", m, r.status, safe(d?.error?.status || ""), safe(d?.error?.message || raw, 200));
+      lastStatus = r.status; lastRaw = raw;
+      if (r.status === 503) busyUntil[m] = Date.now() + BUSY_MS;
+      if (r.status === 400 && /api key|API_KEY_INVALID/i.test(raw)) break; // a bad key fails on every model
+      if (goodModel === m) goodModel = "";
+      continue; // 429 quota, 404 unknown model, 403, 5xx → next model
+    }
+    const cand = d?.candidates?.[0];
+    const out = (Array.isArray(cand?.content?.parts) ? cand.content.parts : []).filter((p: any) => typeof p?.text === "string" && !p?.thought).map((p: any) => p.text).join("").trim();
+    if (!out) { lastStatus = 502; lastRaw = "empty " + (cand?.finishReason || ""); console.error("gemini empty", m, cand?.finishReason); continue; }
+    const sources: { title: string; url: string }[] = [];
+    for (const ch of Array.isArray(cand?.groundingMetadata?.groundingChunks) ? cand.groundingMetadata.groundingChunks : []) {
+      const u = ch?.web?.uri; if (u && !sources.some((x) => x.url === u)) sources.push({ title: clip(ch?.web?.title || u, 180), url: u });
+    }
+    goodModel = m; MODEL = m; delete busyUntil[m];
+    console.log("gemini ok", m, Date.now() - t0 + "ms");
+    return { output_text: out, sources: useSearch ? sources.slice(0, 8) : [], model: m };
+  }
+  const status = lastStatus === 429 ? 429 : lastStatus === 503 || lastStatus === 504 ? 503 : 502;
+  return { error: ruError(lastStatus, lastRaw), status, reason: geminiReason(lastStatus, lastRaw), tried: order.length, ms: Date.now() - t0 };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  try {
+    const a = await getUser(req);
+    if ("bad" in a) return fail("auth", 401, "Вход в " + APP_NAME + " устарел. Выйди из аккаунта и войди снова, потом повтори.", { method: req.method, detail: a.bad });
+    // Health check: answers instantly and costs nothing (no Gemini call, no rate limit).
+    if (req.method === "GET") return json({ ok: true, configured: configured(), model: MODEL });
+    if (req.method !== "POST") return fail("method", 405, "Неверный запрос к AI. Обнови приложение.", { method: req.method });
+    const body = await req.json().catch(() => ({}));
+    if (!configured()) return fail("no_key", 503, "AI ещё не настроен: на сервере нет ключа Gemini (GEMINI_API_KEY в Supabase → Edge Functions → Secrets). Пока работает «Полный разбор» без AI.");
+    const limit = await allowRequest(a.sb, a.user.id);
+    if (limit === "answers") return fail("app_limit", 429, "Слишком много запросов AI за час (лимит 10). Попробуй через час — пока работает «Полный разбор» без AI.");
+    if (limit === "attempts") return fail("app_limit", 429, "Слишком много попыток AI за час (лимит 30). Попробуй через час — пока работает «Полный разбор» без AI.", { attempts: true });
+    if (body?.ping === true) {
+      const t = await gemini("Ответь ровно двумя словами: «AI работает».", false, "Ты отвечаешь коротко по-русски.");
+      await countUse(a.sb, a.user.id, !("error" in t));
+      return "error" in t ? fail(t.reason, t.status, t.error, { mode: "ping", tried: t.tried ?? 0, ms: t.ms ?? 0 }) : json({ ok: true, model: t.model, output_text: "Подключение работает · модель " + t.model, sources: [] });
+    }
+    const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
+    const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
+    if (error) return fail("state_read", 500, "Не удалось прочитать твои данные из облака. Проверь синхронизацию («Настройки → Аккаунт») и повтори через минуту.", { code: error.code || "", msg: error.message || "" });
+    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
+    ctx.all_data = allData(row?.state || {}, sc.notes);
+    const p = mode === "deep"
+      ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
+      : mode === "week"
+      ? weekRules() + "\n\nРЕЖИМ: WEEK. Подведи итог последних 7 дней ровно тремя блоками, каждый с новой строки и начинается с названия заглавными буквами:\nСИЛЬНАЯ СТОРОНА — 1–2 предложения: что реально получилось, с цифрой или фактом из данных.\nСЛАБОЕ МЕСТО — 1–2 предложения: что чаще всего мешало (смотри block в днях, траты, незакрытые дни и задачи).\nШАГ НА НЕДЕЛЮ — ровно одно конкретное действие на следующие 7 дней, которое можно проверить (время, сумма или количество).\nНичего кроме этих трёх блоков. Если данных почти нет, честно скажи это в СЛАБОМ МЕСТЕ и дай шаг: закрывать день каждый вечер.\n\nДанные:\n" + JSON.stringify(ctx)
+      : mode === "goal"
+      ? promptRules() + "\n\nРЕЖИМ: GOAL. Проанализируй именно главную цель пользователя. Ответь в строгой структуре:\n\n1) ТЕКУЩЕЕ СОСТОЯНИЕ — 2–3 подтверждённых факта.\n2) ЧТО УЖЕ ДОСТИГНУТО — только закрытые этапы и реальные результаты из данных.\n3) ЧТО УЖЕ ЕСТЬ — капитал в цели, свободная касса, доходы/расходы и другие подтверждённые ресурсы.\n4) ГЛАВНАЯ ПРОБЛЕМА — один главный ограничитель.\n5) ГЛАВНЫЙ ФОКУС — один приоритет на ближайшие 7 дней.\n6) ПЛАН ДЕЙСТВИЙ — 3–5 строк в формате: P1/P2/P3 | действие | срок | измеримый результат | основание.\n7) ПЕРВОЕ ДЕЙСТВИЕ СЕГОДНЯ — ровно одно действие.\n\nНе выдумывай отсутствующие данные. Если цель не имеет суммы или срока, прямо укажи это и дай ближайшее измеримое действие без выдуманной цифры.\n\nДанные:\n" + JSON.stringify(ctx)
+      : promptRules() + "\n\nРЕЖИМ: LIFE. Сделай самый полезный честный разбор жизни пользователя. Ответь ровно восемью блоками, каждый с новой строки, название ЗАГЛАВНЫМИ буквами и тире:\nГДЕ Я СЕЙЧАС — 3 главных факта с цифрами (деньги, долг, цель, дисциплина).\nПЛЮСЫ — 2–4 реальные сильные стороны, каждая с цифрой из данных.\nМИНУСЫ — 2–4 слабых места и утечки: где теряются деньги (категории, мелкие траты, перерасход банков), что проседает в дисциплине (незакрытые дни, привычки, задачи). С цифрами.\nКУДА Я ИДУ — прогноз при текущем темпе, с арифметикой: когда будет достигнута цель, когда закроется долг (используй app_numbers.debtFreeLine, если есть), что будет через 3 месяца, если ничего не менять, и что изменится, если исправить главный минус.\nГЛАВНЫЙ РИСК — одна вещь, которая сильнее всего угрожает цели.\nПЛАН НА 7 ДНЕЙ — 3–5 строк: P1/P2/P3 | действие | срок | измеримый результат.\nШАГ НА СЕГОДНЯ — ровно одно действие на сегодня.\nКАК ЛУЧШЕ ИСПОЛЬЗОВАТЬ ПРИЛОЖЕНИЕ — 1–2 конкретных совета, если из данных видно, что чего-то не хватает (не записываются расходы, нет банков, нет привычек, дни не закрываются). Если всего хватает — напиши это одной строкой.\nБез markdown, без звёздочек и решёток. app_numbers — точные расчёты приложения, используй их: dayReport — отчёт сегодняшнего дня (заработал, потратил, куда ушло, что сделано для цели), avoidHabits — привычки-отказы и их серии, wins — победы, goalStage — текущий этап цели и что нужно, чтобы его закрыть. Не выдумывай данные; если чего-то нет, так и скажи.\n\nДанные:\n" + JSON.stringify(ctx);
+    const r = mode === "week" ? await gemini(p, false, weekRules()) : mode === "deep" ? await gemini(p, false, deepRules()) : await gemini(p, sc.webSearch);
+    await countUse(a.sb, a.user.id, !("error" in r));
+    if ("error" in r) return fail(r.reason, r.status, r.error, { mode, tried: r.tried ?? 0, ms: r.ms ?? 0 });
+    return json({ ok: true, model: r.model || MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
+  } catch (e) {
+    return fail("exception", 500, "Ошибка на сервере AI. Попробуй через минуту; если повторяется — напиши разработчику, причина записана в логах.", { name: e instanceof Error ? e.name : typeof e, msg: e instanceof Error ? e.message : String(e) });
+  }
+});

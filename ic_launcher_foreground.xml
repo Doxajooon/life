@@ -1,0 +1,94 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Life mark (icon.svg): a green sprout in a turquoise → gold ring. The 512-unit artwork is scaled to 0.175
+         around its centre (256,256): the ring's outer edge (168 + 11 = 179 units) lands 31.3dp from the centre,
+         inside the 66dp adaptive-icon safe circle. Background: @color/ic_launcher_background (#0F2236). -->
+    <group android:scaleX="0.175" android:scaleY="0.175" android:translateX="9.2" android:translateY="9.2">
+        <!-- soft green glow behind the sprout -->
+        <path android:pathData="M66,256 A190,190 0 1,1 446,256 A190,190 0 1,1 66,256 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="radial" android:centerX="256" android:centerY="248" android:gradientRadius="171">
+                    <item android:offset="0" android:color="#4734D399"/>
+                    <item android:offset="1" android:color="#0034D399"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <!-- ring track + the progress arc (turquoise → gold) with its round head -->
+        <path android:pathData="M88,256 A168,168 0 1,1 424,256 A168,168 0 1,1 88,256 Z" android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF" android:strokeAlpha="0.07" android:strokeWidth="22"/>
+        <path android:pathData="M256,88 A168,168 0 1,1 101,191" android:fillColor="#00000000"
+            android:strokeWidth="22" android:strokeLineCap="round">
+            <aapt:attr name="android:strokeColor">
+                <gradient android:type="linear" android:startX="88" android:startY="88" android:endX="424" android:endY="424">
+                    <item android:offset="0" android:color="#FF6EE7B7"/>
+                    <item android:offset="0.55" android:color="#FF22C3A0"/>
+                    <item android:offset="1" android:color="#FFE3B04B"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M84,191 A17,17 0 1,1 118,191 A17,17 0 1,1 84,191 Z" android:fillColor="#FF6EE7B7"/>
+        <!-- shadow under the sprout (the SVG uses a drop-shadow filter; vectors have none) -->
+        <group android:translateY="10">
+            <path android:pathData="M258,356 C254,320 252,290 256,252" android:fillColor="#00000000"
+                android:strokeColor="#020A12" android:strokeAlpha="0.35" android:strokeWidth="26" android:strokeLineCap="round"/>
+            <path android:pathData="M252,262 C214,270 168,252 150,200 C146,188 146,180 148,174 C196,168 240,192 252,262 Z
+                M262,240 C262,182 300,142 366,138 C372,138 376,140 378,142 C376,210 330,246 262,240 Z"
+                android:fillColor="#020A12" android:fillAlpha="0.35"/>
+        </group>
+        <!-- stem -->
+        <path android:pathData="M258,356 C254,320 252,290 256,252" android:fillColor="#00000000"
+            android:strokeWidth="26" android:strokeLineCap="round">
+            <aapt:attr name="android:strokeColor">
+                <gradient android:type="linear" android:startX="243" android:startY="0" android:endX="271" android:endY="0">
+                    <item android:offset="0" android:color="#FF4ADE80"/>
+                    <item android:offset="0.5" android:color="#FF22A55A"/>
+                    <item android:offset="1" android:color="#FF15703B"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <!-- left leaf, its vein, side veins and highlight -->
+        <path android:pathData="M252,262 C214,270 168,252 150,200 C146,188 146,180 148,174 C196,168 240,192 252,262 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="252" android:startY="268" android:endX="146" android:endY="170">
+                    <item android:offset="0" android:color="#FF166534"/>
+                    <item android:offset="0.45" android:color="#FF22C55E"/>
+                    <item android:offset="1" android:color="#FFA7F3C4"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M249,256 C224,232 196,206 158,182" android:fillColor="#00000000"
+            android:strokeColor="#0F5132" android:strokeAlpha="0.55" android:strokeWidth="5" android:strokeLineCap="round"/>
+        <path android:pathData="M216,228 L200,236 M196,210 L178,214 M232,244 L222,254" android:fillColor="#00000000"
+            android:strokeColor="#0F5132" android:strokeAlpha="0.3" android:strokeWidth="3" android:strokeLineCap="round"/>
+        <path android:pathData="M160,186 C186,184 214,196 232,220" android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF" android:strokeAlpha="0.35" android:strokeWidth="5" android:strokeLineCap="round"/>
+        <!-- right leaf, its vein, side veins and highlight -->
+        <path android:pathData="M262,240 C262,182 300,142 366,138 C372,138 376,140 378,142 C376,210 330,246 262,240 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="262" android:startY="246" android:endX="378" android:endY="138">
+                    <item android:offset="0" android:color="#FF14532D"/>
+                    <item android:offset="0.45" android:color="#FF16A34A"/>
+                    <item android:offset="1" android:color="#FF86EFAC"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M266,236 C300,210 336,178 370,146" android:fillColor="#00000000"
+            android:strokeColor="#0F5132" android:strokeAlpha="0.55" android:strokeWidth="5" android:strokeLineCap="round"/>
+        <path android:pathData="M300,208 L316,218 M326,184 L344,190 M284,224 L292,236" android:fillColor="#00000000"
+            android:strokeColor="#0F5132" android:strokeAlpha="0.3" android:strokeWidth="3" android:strokeLineCap="round"/>
+        <path android:pathData="M280,196 C296,168 324,150 356,146" android:fillColor="#00000000"
+            android:strokeColor="#FFFFFF" android:strokeAlpha="0.4" android:strokeWidth="5" android:strokeLineCap="round"/>
+        <!-- the dew drop -->
+        <path android:pathData="M309,200 A9,11 0 1,1 327,200 A9,11 0 1,1 309,200 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="radial" android:centerX="315.3" android:centerY="195.6" android:gradientRadius="14">
+                    <item android:offset="0" android:color="#FFFFFFFF"/>
+                    <item android:offset="0.5" android:color="#D9D9FBE9"/>
+                    <item android:offset="1" android:color="#809AE6B4"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M312,196 A3,3 0 1,1 318,196 A3,3 0 1,1 312,196 Z" android:fillColor="#FFFFFFFF"/>
+    </group>
+</vector>
