@@ -1223,7 +1223,9 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-snack button{border:0;background:transparent;color:#f6d58a;font:inherit;font-weight:700;cursor:pointer;min-height:40px}
 .jl-bank-name{all:unset;cursor:pointer;min-width:0;display:block}
 .jl-bank-name:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:8px}
-.jl-bank-empty{display:grid;justify-items:center;text-align:center;gap:6px;padding:14px 8px}
+.jl-bank-empty{display:grid;justify-items:center;text-align:center;gap:4px;padding:6px 8px}
+/* 75.11: the empty state is compact, so the «Создать банк» button stays above the bottom navigation at the top of the screen */
+.jl-bank-empty .jl-emo{display:none}
 /* 75.6: the bottom navigation covered the «Создать банк» button on an empty «Деньги» screen; keep the end of the list above it */
 #viewMoney{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
 /* 75.8: clear space between the sections of «Сегодня» (the stage card and the rhythm card touched) */
