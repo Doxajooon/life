@@ -891,7 +891,8 @@ await test("74.6: политика конфиденциальности чита
   cloud.down = false;
   // 75.12: start the deletion, then wait for the reload with a generous timeout (a fast reload can finish before a listener is attached under load)
   await A.page.waitForFunction(() => !document.getElementById("delGo").disabled, null, { timeout: 30000 });
-  await A.page.click("#delGo");
+  // 75.13: the confirm sheet is still animating in; the button is enabled (checked above), so skip the stability wait
+  await A.page.click("#delGo", { force: true });
   await A.page.waitForFunction(() => document.readyState === "complete", null, { timeout: 30000 }).catch(() => {});
   await A.page.waitForTimeout(300);
   assert.ok(cloud.deleted && cloud.row === null, "the cloud account was not deleted");
