@@ -1,0 +1,6 @@
+<resources>
+    <!-- the visible name of the app: change it here (web: APP_NAME in index.html, Windows: <Product> in the .csproj) -->
+    <string name="app_name">Life</string>
+    <string name="widget_open">Открой приложение</string>
+    <string name="widget_desc">Текущий этап дня, следующая задача и быстрое добавление</string>
+</resources>

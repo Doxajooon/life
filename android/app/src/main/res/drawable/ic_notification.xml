@@ -1,0 +1,12 @@
+<!-- Life notification icon: a solid white sprout (stem + two leaves, the brand mark without the ring) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- the icon.svg sprout (x 146…378, y 138…369 of 512) scaled to 0.094 and centred -->
+    <group android:scaleX="0.094" android:scaleY="0.094" android:translateX="-12.63" android:translateY="-11.83">
+        <path android:pathData="M258,356 C254,320 252,290 256,252" android:fillColor="#00000000"
+            android:strokeColor="#FFFFFFFF" android:strokeWidth="28" android:strokeLineCap="round"/>
+        <path android:fillColor="#FFFFFFFF"
+            android:pathData="M252,262 C214,270 168,252 150,200 C146,188 146,180 148,174 C196,168 240,192 252,262 Z
+                              M262,240 C262,182 300,142 366,138 C372,138 376,140 378,142 C376,210 330,246 262,240 Z"/>
+    </group>
+</vector>

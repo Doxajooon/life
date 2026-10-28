@@ -1,0 +1,49 @@
+package com.doxajooon.lifecontrol;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import androidx.core.app.NotificationManagerCompat;
+
+/**
+ * Buttons on a task reminder:
+ *  «Готово»        — remembered until the app opens (the web app marks the task done and syncs it),
+ *                    all remaining alarms of that task are cancelled right away;
+ *  «Через 15 мин»  — the same reminder rings again in 15 minutes, even if the app is closed.
+ * On a stage reminder (task «stage:<id>») the buttons are «Да» / «Перенести» and both go to the web app;
+ * on the salary-day notice (task «debtpay:<month>», 74.5) the one button «Отложил» goes to the web app too.
+ */
+public class ActionReceiver extends BroadcastReceiver {
+    static final String DONE = "com.doxajooon.lifecontrol.TASK_DONE";
+    static final String SNOOZE = "com.doxajooon.lifecontrol.TASK_SNOOZE";
+    static final long SNOOZE_MS = 15 * 60_000L;
+
+    @Override public void onReceive(Context ctx, Intent i) {
+        String task = i.getStringExtra("task");
+        if (task == null || task.isEmpty()) return;
+        NotificationManagerCompat nm = NotificationManagerCompat.from(ctx);
+        nm.cancel(i.getIntExtra("nid", 0));
+        // 75.0: a task can have several notifications (the time, the 15-minute warning, the snooze) — the button clears all of them
+        if (!task.startsWith("stage:") && !task.startsWith("debtpay:")) {
+            nm.cancel(("task_" + task).hashCode());
+            nm.cancel(("taskpre_" + task).hashCode());
+            nm.cancel(("tasksnz_" + task).hashCode());
+        }
+        if (task.startsWith("stage:") || task.startsWith("debtpay:")) {
+            // a stage of the day: «Да» marks its main action done, «Перенести» moves it on — the web app does both on start/resume
+            PendingActions.add(ctx, SNOOZE.equals(i.getAction()) ? "snooze" : "done", task);
+            MainActivity.deliverActions();
+            return;
+        }
+        if (DONE.equals(i.getAction())) {
+            PendingActions.add(ctx, "done", task);
+            AlarmScheduler.cancelTask(ctx, task);
+            JamalWidget.markDone(ctx, task);
+            MainActivity.deliverActions();
+        } else if (SNOOZE.equals(i.getAction())) {
+            String title = i.getStringExtra("title"), body = i.getStringExtra("body");
+            AlarmScheduler.scheduleOnce(ctx, "tasksnz_" + task, System.currentTimeMillis() + SNOOZE_MS,
+                    title == null ? "Напоминание" : title, "Отложено на 15 минут" + (body == null || body.isEmpty() ? "" : " · " + body), i.getLongExtra("due", 0));
+        }
+    }
+}
