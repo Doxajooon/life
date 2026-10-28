@@ -18,6 +18,7 @@ import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.ServiceWorkerClient;
+import android.webkit.ValueCallback;
 import android.webkit.ServiceWorkerController;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -48,6 +49,9 @@ import androidx.webkit.WebViewAssetLoader;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQ_NOTIFICATIONS = 42;
+    /** 75.12: the photo picker for the goal photo (file input) */
+    private static final int REQ_FILE_CHOOSER = 43;
+    private ValueCallback<Uri[]> filePathCallback;
     private static final String ASSET_HOST = "appassets.androidplatform.net";
     private static final String APP_URL = "https://" + ASSET_HOST + "/assets/index.html";
     // Supabase Auth/REST/Edge Functions are reached over HTTPS from the WebView; the browser session stays in WebView cookies/storage.
@@ -193,7 +197,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        webView.setWebChromeClient(new WebChromeClient());
+        // 75.12: without this the «Добавить фото» file input does nothing in the APK — the gallery never opens
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, WebChromeClient.FileChooserParams params) {
+                if (filePathCallback != null) filePathCallback.onReceiveValue(null);
+                filePathCallback = callback;
+                try {
+                    startActivityForResult(params.createIntent(), REQ_FILE_CHOOSER);
+                } catch (Exception e) {
+                    filePathCallback.onReceiveValue(null);
+                    filePathCallback = null;
+                    return false;
+                }
+                return true;
+            }
+        });
 
         if (Build.VERSION.SDK_INT >= 24) {
             ServiceWorkerController sw = ServiceWorkerController.getInstance();
@@ -508,5 +527,18 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface public boolean isLoudReminders() { return NotificationUtil.isLoud(ctx); }
 
         @JavascriptInterface public int bridgeVersion() { return 7; }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_FILE_CHOOSER && filePathCallback != null) {
+            Uri[] results = null;
+            if (resultCode == RESULT_OK && data != null && data.getDataString() != null) {
+                results = new Uri[]{Uri.parse(data.getDataString())};
+            }
+            filePathCallback.onReceiveValue(results);
+            filePathCallback = null;
+        }
     }
 }

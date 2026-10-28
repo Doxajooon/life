@@ -456,7 +456,8 @@ h1{margin:0;line-height:1.05;letter-spacing:-.04em;font-size:2.125rem;font-weigh
 .bottom button.active{box-shadow:var(--shadow);background:linear-gradient(180deg,var(--blue-soft),var(--panel));border-color:color-mix(in srgb,var(--blue) 28%,var(--line));color:var(--blue-dark);box-shadow:0 8px 24px color-mix(in srgb,var(--blue) 10%,transparent)}
 .bottom button b{font-size:1.1875rem;line-height:1;color:var(--text);display:grid;place-items:center;border-radius:9px;transition:transform .16s ease,background .16s ease,box-shadow .16s ease,color .16s ease;width:38px;height:30px}
 .modal-back{background:rgba(2,8,14,.72)}
-.modal{overscroll-behavior:contain;border-radius:20px;background:var(--panel);border-color:var(--line);box-shadow:0 28px 90px rgba(0,0,0,.42)}
+.modal .close-row{position:sticky;top:0;z-index:4;background:var(--panel);padding-bottom:8px}
+.modal{contain:paint;overscroll-behavior:contain;border-radius:20px;background:var(--panel);border-color:var(--line);box-shadow:0 28px 90px rgba(0,0,0,.42)}
 @media (min-width:900px){body[data-layout="desktop"] .shell{max-width:none;margin-left:226px;margin-right:18px;padding:28px 18px 40px;max-width:1120px}
 body[data-layout="desktop"] .bottom{left:14px;right:auto;bottom:14px;width:196px;transform:none;display:flex;flex-direction:column;padding:14px 10px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--panel) 94%,transparent);box-shadow:var(--shadow)}
 body[data-layout="desktop"] .bottom button{width:100%;min-height:54px;display:grid;grid-template-columns:38px 1fr;justify-content:start;place-items:center start;text-align:left;padding:7px 10px;gap:8px;font-size:0.7812rem}
@@ -865,7 +866,8 @@ html[data-theme="light"] .auth-stars{display:block}
 .debt-bar-wrap:nth-child(8) .debt-bar{animation-delay:.35s}
 .debt-chart:empty,.debt-chart:empty+.debt-chart-note:empty{display:none}
 .modal-back.open{overflow-y:auto;-webkit-overflow-scrolling:touch;animation:lcBackIn .2s ease-out}
-.modal-back.open .modal{animation:lcSheetIn .28s cubic-bezier(.2,.8,.2,1)}
+.modal-back.open .modal{animation:lcSheetIn .28s cubic-bezier(.2,.8,.2,1) both}
+.modal-back.open .modal:focus-within{animation:none}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 .jl-logo{display:grid;place-items:center;box-shadow:0 6px 18px rgba(8,18,30,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
 /* 74.1: the live sprout — the ring appears, the sprout sways from its root, the dew drop glints (transform/opacity only) */
@@ -2544,7 +2546,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 </section>
 
 <section id="viewNotifications" class="view">
-  <div class="v-topline"><button class="v-back" type="button" data-back aria-label="Назад"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button><h1 class="v-h1">Уведомления</h1><button class="v-icon-btn" type="button" id="notifReadAll" aria-label="Отметить все прочитанными" title="Отметить все прочитанными"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg></button></div>
+  <div class="v-topline"><button class="v-back" type="button" data-back aria-label="Назад"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-left"></use></svg></button><h1 class="v-h1">Уведомления</h1><button class="v-icon-btn" type="button" id="notifClearAll" aria-label="Очистить все уведомления" title="Очистить все уведомления"><svg class="ui-icon" aria-hidden="true"><use href="#i-trash"></use></svg></button><button class="v-icon-btn" type="button" id="notifReadAll" aria-label="Отметить все прочитанными" title="Отметить все прочитанными"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg></button></div>
   <div class="v-seg chips" id="notifFilters"><button type="button" data-notif-filter="all" class="active">Все</button><button type="button" data-notif-filter="tasks">Задачи</button><button type="button" data-notif-filter="finance">Финансы</button><button type="button" data-notif-filter="goals">Цели</button></div>
   <div class="v-sub" id="notifSummary" style="margin-top:.6rem">—</div>
   <div class="v-notif-list" id="notifList"></div>
@@ -6353,6 +6355,7 @@ function renderNotifications(){
   $$('[data-notif-filter]').forEach(b=>b.classList.toggle('active',b.dataset.notifFilter===notifFilter));
   $$('[data-notif]').forEach(b=>b.onclick=()=>{const n=all.find(x=>x.id===b.dataset.notif);if(n&&!n.read){n.read=true;saveState();updateBell();renderNotifications()}});
 }
+function clearAllNotices(){state.notificationsLog=[];saveState();updateBell();renderNotifications();toast('Уведомления очищены')}
 function markAllNoticesRead(){(state.notificationsLog||[]).forEach(n=>n.read=true);state.lastReadAt=new Date().toISOString();saveState();updateBell();renderNotifications();toast('Все уведомления прочитаны')}
 
 /* ---- Settings / display / profile ---- */
@@ -6452,7 +6455,7 @@ function bindV57(){
   $$('[data-fmt]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>noteFormat(b.dataset.fmt)});
   ['neTitle','neBody'].forEach(id=>$(id).addEventListener('input',noteEditorSync));$('nePinned').addEventListener('change',noteEditorSync);$('neSave').onclick=noteEditorSave;
   $('neTrash').onclick=()=>{if(noteEditId){const id=noteEditId;noteEditId='';showView('viewNotes');moveToTrash(id)}else{clearDraft('note');showView('viewNotes');toast('Черновик удалён')}};
-  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify&&!(hostPlaysSound()&&state.settings?.notifications!==false))playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 '+APP_NAME,'Так звучат напоминания 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:APP_NAME,body:'Так звучат напоминания.',sound:hostPlaysSound()});return}}catch(e){}showWebNotification(APP_NAME,'Так звучат напоминания.');toast(APP_NAME,'Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
+  $$('[data-notif-filter]').forEach(b=>b.onclick=()=>{notifFilter=b.dataset.notifFilter;renderNotifications()});$('notifReadAll').onclick=markAllNoticesRead;$('notifClearAll').onclick=clearAllNotices;$('notifPermBtn').onclick=requestNotifications;{const qa=$('quickAddBtn');if(qa)qa.onclick=openQuickAdd;}{const tb=$('notifTestBtn');if(tb)tb.onclick=()=>{if(!window.AndroidBridge?.notify&&!(hostPlaysSound()&&state.settings?.notifications!==false))playNotificationSound(true);const allowed=state.settings?.notifications!==false;try{if(window.AndroidBridge?.notify&&allowed){window.AndroidBridge.notify('🔔 '+APP_NAME,'Так звучат напоминания 🌿');return}}catch(e){}try{if(window.chrome?.webview?.postMessage&&allowed){window.chrome.webview.postMessage({type:'notify',title:APP_NAME,body:'Так звучат напоминания.',sound:hostPlaysSound()});return}}catch(e){}showWebNotification(APP_NAME,'Так звучат напоминания.');toast(APP_NAME,'Так звучат напоминания.')}}$('notifSyncBtn').onclick=()=>{scheduleNative();toast('Расписание обновлено')};
   $('setProfileRow').onclick=()=>showView('viewProfile');$('setSecurityRow').onclick=openSecurity;$('setSyncRow').onclick=()=>{cloudAutoSync().then(ok=>toast(ok?'Синхронизировано':'Синхронизация отложена',ok?'Данные совпадают с облаком.':'Повтор при подключении к сети.')).catch(()=>{})};
   $('setTheme').onchange=e=>{state.settings.theme=['light','dark','auto'].includes(e.target.value)?e.target.value:'dark';saveState();setTheme()};
   $('setLangRow').onclick=()=>toast('Язык интерфейса','Сейчас доступен русский язык.');$('setModeRow').onclick=()=>showView('viewDisplay');

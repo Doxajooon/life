@@ -889,7 +889,11 @@ await test("74.6: политика конфиденциальности чита
   assert.ok(!cloud.deleted && await A.page.evaluate(() => state.notes.some(n => n.id === "secret") && !!cloudAuth()), "offline delete must change nothing");
   // online: the account is deleted, the phone is wiped, the user is signed out
   cloud.down = false;
-  await Promise.all([A.page.waitForEvent("load"), A.page.click("#delGo")]);
+  // 75.12: start the deletion, then wait for the reload with a generous timeout (a fast reload can finish before a listener is attached under load)
+  await A.page.waitForFunction(() => !document.getElementById("delGo").disabled, null, { timeout: 30000 });
+  await A.page.click("#delGo");
+  await A.page.waitForFunction(() => document.readyState === "complete", null, { timeout: 30000 }).catch(() => {});
+  await A.page.waitForTimeout(300);
   assert.ok(cloud.deleted && cloud.row === null, "the cloud account was not deleted");
   const after = await A.page.evaluate(() => ({ ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")), auth: localStorage.getItem("LIFE_CONTROL_AUTH") }));
   assert.deepEqual(after.ls, [], "personal data stayed on the device after deleting the account");
