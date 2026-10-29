@@ -456,8 +456,7 @@ h1{margin:0;line-height:1.05;letter-spacing:-.04em;font-size:2.125rem;font-weigh
 .bottom button.active{box-shadow:var(--shadow);background:linear-gradient(180deg,var(--blue-soft),var(--panel));border-color:color-mix(in srgb,var(--blue) 28%,var(--line));color:var(--blue-dark);box-shadow:0 8px 24px color-mix(in srgb,var(--blue) 10%,transparent)}
 .bottom button b{font-size:1.1875rem;line-height:1;color:var(--text);display:grid;place-items:center;border-radius:9px;transition:transform .16s ease,background .16s ease,box-shadow .16s ease,color .16s ease;width:38px;height:30px}
 .modal-back{background:rgba(2,8,14,.72)}
-.modal .close-row{position:sticky;top:0;z-index:4;background:var(--panel);padding-bottom:8px}
-.modal{contain:paint;overscroll-behavior:contain;border-radius:20px;background:var(--panel);border-color:var(--line);box-shadow:0 28px 90px rgba(0,0,0,.42)}
+.modal{overscroll-behavior:contain;border-radius:20px;background:var(--panel);border-color:var(--line);box-shadow:0 28px 90px rgba(0,0,0,.42)}
 @media (min-width:900px){body[data-layout="desktop"] .shell{max-width:none;margin-left:226px;margin-right:18px;padding:28px 18px 40px;max-width:1120px}
 body[data-layout="desktop"] .bottom{left:14px;right:auto;bottom:14px;width:196px;transform:none;display:flex;flex-direction:column;padding:14px 10px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--panel) 94%,transparent);box-shadow:var(--shadow)}
 body[data-layout="desktop"] .bottom button{width:100%;min-height:54px;display:grid;grid-template-columns:38px 1fr;justify-content:start;place-items:center start;text-align:left;padding:7px 10px;gap:8px;font-size:0.7812rem}
@@ -866,7 +865,7 @@ html[data-theme="light"] .auth-stars{display:block}
 .debt-bar-wrap:nth-child(8) .debt-bar{animation-delay:.35s}
 .debt-chart:empty,.debt-chart:empty+.debt-chart-note:empty{display:none}
 .modal-back.open{overflow-y:auto;-webkit-overflow-scrolling:touch;animation:lcBackIn .2s ease-out}
-.modal-back.open .modal{animation:lcSheetIn .28s cubic-bezier(.2,.8,.2,1) both}
+.modal-back.open .modal{animation:lcSheetIn .28s cubic-bezier(.2,.8,.2,1)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
 .jl-logo{display:grid;place-items:center;box-shadow:0 6px 18px rgba(8,18,30,.45),inset 0 0 0 1px rgba(255,255,255,.06)}
 /* 74.1: the live sprout — the ring appears, the sprout sways from its root, the dew drop glints (transform/opacity only) */
