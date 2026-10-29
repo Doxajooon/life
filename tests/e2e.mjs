@@ -889,15 +889,18 @@ await test("74.6: политика конфиденциальности чита
   assert.ok(!cloud.deleted && await A.page.evaluate(() => state.notes.some(n => n.id === "secret") && !!cloudAuth()), "offline delete must change nothing");
   // online: the account is deleted, the phone is wiped, the user is signed out
   cloud.down = false;
-  // 75.12: start the deletion, then wait for the reload with a generous timeout (a fast reload can finish before a listener is attached under load)
-  await A.page.waitForFunction(() => !document.getElementById("delGo").disabled, null, { timeout: 30000 });
-  // 75.13: the confirm sheet is still animating in; the button is enabled (checked above), so skip the stability wait
-  await A.page.click("#delGo", { force: true });
-  await A.page.waitForFunction(() => document.readyState === "complete", null, { timeout: 30000 }).catch(() => {});
-  await A.page.waitForTimeout(300);
+    await A.page.click("#delGo");
+  // wait for the real outcome: the cloud answers first, then the app wipes the phone and reloads
+  for (let i = 0; i < 300 && !(cloud.deleted && cloud.row === null); i++) await new Promise(r => setTimeout(r, 100));
   assert.ok(cloud.deleted && cloud.row === null, "the cloud account was not deleted");
-  const after = await A.page.evaluate(() => ({ ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")), auth: localStorage.getItem("LIFE_CONTROL_AUTH") }));
-  assert.deepEqual(after.ls, [], "personal data stayed on the device after deleting the account");
+  let after = null;
+  for (let i = 0; i < 300; i++) {
+    try {
+      after = await A.page.evaluate(() => ({ ls: Object.keys(localStorage).filter(k => (localStorage.getItem(k) || "").includes("пин от домофона")), auth: localStorage.getItem("LIFE_CONTROL_AUTH") }));
+      if (!after.ls.length) break;
+    } catch (e) { /* the page is reloading right now */ }
+    await new Promise(r => setTimeout(r, 100));
+  }   assert.deepEqual(after.ls, [], "personal data stayed on the device after deleting the account");
   await A.ctx.close();
 });
 
