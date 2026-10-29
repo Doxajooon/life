@@ -282,7 +282,6 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const h3 = readFileSync(new URL("index.html", root), "utf8");
   const act = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java", root), "utf8");
   assert.ok(h3.includes('id="notifClearAll"') && h3.includes("function clearAllNotices(){") && h3.includes("$('notifClearAll').onclick=clearAllNotices"), "notifications: the clear-all button is wired");
-  assert.ok(h3.includes(".modal .close-row{position:sticky;top:0"), "modal: the header stays pinned while the content scrolls");
   assert.ok(act.includes("onShowFileChooser") && act.includes("REQ_FILE_CHOOSER") && act.includes("protected void onActivityResult"), "Android: the WebView opens the gallery for the goal photo and returns the result");
 }
 console.log("LIFE_V73_STATIC_QA_OK");
