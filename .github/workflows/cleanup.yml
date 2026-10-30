@@ -1,0 +1,73 @@
+name: Cleanup duplicates (one-off)
+
+# Одноразовая уборка: удаляет лишние копии файлов из корня репозитория и
+# переименовывает файл "download" в ".gitignore". Запуск вручную: Actions → Cleanup duplicates → Run workflow.
+# После запуска этот файл можно удалить.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Remove duplicates
+        shell: bash
+        run: |
+          set -euo pipefail
+          # safety: the real copies must exist before anything is removed
+          for must in index.html tests/e2e.mjs tests/static_qa.mjs tools/sync-platforms.mjs docs/TZ.md \
+                      supabase/functions/life-control-ai/index.ts desktop/JamalLife.Desktop.csproj \
+                      fonts/inter-latin.woff2 sounds/jamal-dawn.wav images/bg-kaaba.jpg \
+                      android/gradle.properties .github/workflows/release.yml; do
+            test -e "$must" || { echo "::error::missing $must — stop"; exit 1; }
+          done
+          FILES=(
+          "App.xaml"
+          "App.xaml.cs"
+          "JamalLife.Desktop.csproj"
+          "MainWindow.xaml"
+          "MainWindow.xaml.cs"
+          "TZ.md"
+          "app.ico"
+          "app.manifest"
+          "bg-kaaba.jpg"
+          "config.toml"
+          "contrast.mjs"
+          "deno.jsonc"
+          "desktop/desktop/JamalLife.Desktop.csproj"
+          "docs/docs/TZ.md"
+          "e2e-ispravlen.mjs"
+          "e2e.mjs"
+          "edge.mjs"
+          "gradle.properties"
+          "index.ts"
+          "inter-cyrillic.woff2"
+          "inter-latin.woff2"
+          "jamal-dawn.wav"
+          "jamal-nature.wav"
+          "jamal_dawn.wav"
+          "jamal_nature.wav"
+          "make-dawn.py"
+          "make-icons.mjs"
+          "manrope-cyrillic.woff2"
+          "manrope-latin.woff2"
+          "nunito-cyrillic.woff2"
+          "nunito-latin.woff2"
+          "release (4).yml"
+          "release.yml"
+          "setup.sql"
+          "static_qa.mjs"
+          "sync-platforms.mjs"
+          "visual.mjs"
+          )
+          for f in "${FILES[@]}"; do git rm -q -r --ignore-unmatch -- "$f"; done
+          if [ -f download ] && [ ! -e .gitignore ]; then git mv download .gitignore; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Cleanup: remove duplicate root files, rename download to .gitignore" || echo "nothing to commit"
+          git push
