@@ -17,7 +17,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         long nowMs = System.currentTimeMillis();
         boolean twice = nowMs - last.getLong(key, 0L) < 120_000L;
         last.edit().putLong(key, nowMs).apply();
-        // 75.0: quiet hours (19:00–06:30) and silent / vibrate mode: nothing is shown or heard
+        // 75.14: only the optional «Тихие часы» (19:00–06:30) hold a reminder back; silent / vibrate mode no longer hides it
         boolean ring = (!"daily".equals(kind) || AlarmScheduler.ringsToday(days)) && !twice && !NotificationUtil.blocked(ctx);
         // 74.7: the hourly reminder («every1h_HH00») plays the nature sound
         boolean nature = key.startsWith("every1h_");

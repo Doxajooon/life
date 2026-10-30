@@ -526,6 +526,9 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface public boolean isLoudReminders() { return NotificationUtil.isLoud(ctx); }
 
+        /** 75.14: «Тихие часы» (19:00–06:30), off by default. */
+        @JavascriptInterface public void setQuietHours(boolean on) { NotificationUtil.setQuietEnabled(ctx, on); }
+
         @JavascriptInterface public int bridgeVersion() { return 7; }
     }
 

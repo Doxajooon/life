@@ -253,13 +253,14 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const nr = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java", root), "utf8");
   const na = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/ActionReceiver.java", root), "utf8");
   assert.ok(nu.includes("QUIET_FROM_MIN = 19 * 60") && nu.includes("QUIET_TO_MIN = 6 * 60 + 30") && nu.includes("static boolean blocked("), "Android: quiet hours 19:00–06:30 are defined");
-  assert.ok(nu.includes("RINGER_MODE_NORMAL") && nu.includes("getRingerMode()"), "Android: a silent or vibrating phone shows no reminder");
-  assert.ok(nr.includes("!NotificationUtil.blocked(ctx)"), "Android: alarms that ring at night or on silent are not shown");
+  assert.ok(!nu.includes("getRingerMode()") && nu.includes("isQuietEnabled(ctx) && quietNow()"), "75.14 Android: a silent phone no longer hides a reminder; quiet hours hold it back only when switched on");
+  assert.ok(nr.includes("!NotificationUtil.blocked(ctx)"), "Android: alarms inside the optional quiet hours are not shown");
   assert.ok(nu.includes("(act + taskId + ':' + nid)"), "Android: each notification button has its own request code");
   assert.ok(na.includes('nm.cancel(("tasksnz_" + task).hashCode())') && na.includes('nm.cancel(("taskpre_" + task).hashCode())'), "Android: a button clears all of the task's notifications");
   const h = readFileSync(new URL("index.html", root), "utf8");
   assert.ok(h.includes("function isQuietMin(m){return m>=QUIET_FROM_MIN||m<QUIET_TO_MIN}") && h.includes("if(quietNow())return;toast("), "web: no toast and no notification in quiet hours");
   assert.ok(h.includes("if(!force&&quietNow())return;"), "web: no sound in quiet hours");
+  assert.ok(h.includes("function quietNow(){return state.settings?.quietHours===true&&isQuietMin(nowMin())}") && h.includes("id=\"setQuietHours\"") && h.includes("setQuietHours?.(state.settings?.quietHours===true)"), "75.14 web: quiet hours are OFF by default, have their own switch and are passed to Android");
 }
 // 75.1: animations stop in the background
 {

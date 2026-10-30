@@ -153,13 +153,20 @@ public final class NotificationUtil {
         return m >= QUIET_FROM_MIN || m < QUIET_TO_MIN;
     }
 
-    /** 75.0: the phone is on silent or vibrate — the reminder is not shown (USAGE_ALARM would otherwise ring through silent). */
-    static boolean silentNow(Context ctx) {
-        android.media.AudioManager am = (android.media.AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
-        return am != null && am.getRingerMode() != android.media.AudioManager.RINGER_MODE_NORMAL;
+    /** 75.14: quiet hours are OFF unless the owner switches «Тихие часы» on (kept on the device so alarms know it with the app closed). */
+    static boolean isQuietEnabled(Context ctx) {
+        return ctx.getSharedPreferences("lc_ui", Context.MODE_PRIVATE).getBoolean("quiet", false);
     }
 
-    static boolean blocked(Context ctx) { return quietNow() || silentNow(ctx); }
+    static void setQuietEnabled(Context ctx, boolean on) {
+        ctx.getSharedPreferences("lc_ui", Context.MODE_PRIVATE).edit().putBoolean("quiet", on).apply();
+    }
+
+    /**
+     * 75.14: a reminder is held back ONLY inside the quiet hours the owner switched on. A silent or vibrating phone no longer hides it:
+     * the loud channel (alarm volume) is meant to be heard anyway, the soft channel follows the phone's own silent mode.
+     */
+    static boolean blocked(Context ctx) { return isQuietEnabled(ctx) && quietNow(); }
 
     static void show(Context ctx, String title, String body, int id, String taskId, long dueAt, boolean nature) {
         show(ctx, title, body, id, taskId, dueAt, nature, false);

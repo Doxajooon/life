@@ -2520,6 +2520,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <label class="v-row"><span class="v-row-ico" style="--c:var(--purple)"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock"></use></svg></span><span class="v-row-main"><b>Каждый час · звук природы</b><small>Совет, чем заняться для успеха, и пауза в работе</small></span><span class="v-switch"><input type="checkbox" id="setEvery2h"><i></i></span></label>
     <label class="v-row"><span class="v-row-ico" style="--c:var(--orange)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Звук</b><small>Короткий сигнал при уведомлении</small></span><span class="v-switch"><input type="checkbox" id="setNotifySound"><i></i></span></label>
     <label class="v-row" id="loudRow"><span class="v-row-ico" style="--c:var(--red)"><svg class="ui-icon" aria-hidden="true"><use href="#i-volume"></use></svg></span><span class="v-row-main"><b>Громкие напоминания (как будильник)</b><small>Задачи и этапы звучат громкостью будильника — слышно даже при тихом звонке</small></span><span class="v-switch"><input type="checkbox" id="setLoudReminders"><i></i></span></label>
+    <label class="v-row" id="quietRow"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg></span><span class="v-row-main"><b>Тихие часы (19:00–06:30)</b><small>Выключено: напоминания приходят всегда. Включено: ночью без звука и уведомлений</small></span><span class="v-switch"><input type="checkbox" id="setQuietHours"><i></i></span></label>
     <button class="v-row" type="button" id="setTestSound"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-bell"></use></svg></span><span class="v-row-main"><b>Проверить звук</b><small>Так звучат напоминания</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setNotifyPermission"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield"></use></svg></span><span class="v-row-main"><b>Разрешить системные уведомления</b><small>Запросить доступ у устройства</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
   </div>
@@ -3901,10 +3902,11 @@ function showWebNotification(title,body,taskId){
 function haptic(ms=12){try{if(_motionOK()&&navigator.vibrate)navigator.vibrate(ms)}catch(e){}}
 document.addEventListener('change',e=>{if(e.target?.matches?.('.v-check,input[type=checkbox]'))haptic(e.target.checked?14:8)},true);
 document.addEventListener('click',e=>{if(e.target.closest?.('#saveMoneyBtn,#saveTaskBtn,#neSave,#saveReportBtn,#quickAddBtn,[data-quick]'))haptic(10)},true);
-// 75.0: quiet hours — from 19:00 to 06:30 nothing is shown, heard or vibrated (the notice stays in the list)
+// 75.0: quiet hours — from 19:00 to 06:30 nothing is shown, heard or vibrated (the notice stays in the list).
+// 75.14: OFF by default — a reminder must never be swallowed unless the owner switches «Тихие часы» on in the settings
 const QUIET_FROM_MIN=19*60,QUIET_TO_MIN=6*60+30;
 function isQuietMin(m){return m>=QUIET_FROM_MIN||m<QUIET_TO_MIN}
-function quietNow(){return isQuietMin(nowMin())}
+function quietNow(){return state.settings?.quietHours===true&&isQuietMin(nowMin())}
 function notify(title,body,kind='tasks',opts={}){
   logNotice(title,body,kind);if(quietNow())return;toast(title,body);
   const allowed=state.settings?.notifications!==false&&noticeAllowed(kind);
@@ -3958,7 +3960,7 @@ function handleActionLink(){
 if(navigator.serviceWorker){navigator.serviceWorker.addEventListener('message',e=>{const d=e.data||{};if(d.type==='jl-action'&&appReadyForSync)applyReminderAction(d.a,String(d.task||''))});try{navigator.serviceWorker.startMessages?.()}catch(e){}}
 function requestNotifications(){try{if(window.AndroidBridge?.requestNotifications){state.settings.notifications=true;saveState();window.AndroidBridge.requestNotifications();scheduleNative();toast('Запрос уведомлений отправлен');return}}catch(e){}if(!('Notification'in window)){toast('Системные уведомления недоступны','История уведомлений всё равно работает внутри приложения.');return}if(Notification.permission==='denied'){toast('Уведомления запрещены','Разреши их в настройках браузера для этого сайта.');return}if(Notification.permission==='granted'){state.settings.notifications=true;saveState();scheduleNative();toast('Уведомления уже разрешены');return}toast('Запрашиваю разрешение…');Notification.requestPermission().then(p=>{if(p==='granted'){state.settings.notifications=true;saveState();scheduleNative();toast('Уведомления разрешены')}else toast('Уведомления не разрешены')}).catch(()=>toast('Не удалось запросить разрешение'))}
 /* 74.1: «Громкие напоминания» live on the device too (Android alarms ring with the app closed): alarm volume or notification volume */
-function syncLoudReminders(){try{window.AndroidBridge?.setLoudReminders?.(state.settings?.loudReminders!==false)}catch(e){}}
+function syncLoudReminders(){try{window.AndroidBridge?.setLoudReminders?.(state.settings?.loudReminders!==false)}catch(e){}try{window.AndroidBridge?.setQuietHours?.(state.settings?.quietHours===true)}catch(e){}}
 function scheduleNative(){
   syncLoudReminders();
   scheduleNativeTasks();
@@ -6362,7 +6364,7 @@ function renderSettingsView(){renderSyncWarn();
   if(!$('viewSettings'))return;const a=cloudAuth();
   setText('setProfileSub',[state.profile.name,a?.user?.email].filter(Boolean).join(' · ')||'Имя не указано');
   const set=(id,v)=>{const el=$(id);if(el)el.checked=!!v};
-  {const tp=$('setTheme');if(tp)tp.value=themeChoice()}set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setLoudReminders',state.settings.loudReminders!==false);{const lr=$('loudRow');if(lr)lr.style.display=window.AndroidBridge?.setLoudReminders?'':'none'}set('setEvery2h',state.settings.every2h!==false);
+  {const tp=$('setTheme');if(tp)tp.value=themeChoice()}set('setNotifyAll',state.settings.notifications);set('setNotifyTasks',state.settings.notifyTasks!==false);set('setNotifyFinance',state.settings.notifyFinance!==false);set('setNotifyGoals',state.settings.notifyGoals!==false);set('setNotifySound',state.settings.sound!==false);set('setLoudReminders',state.settings.loudReminders!==false);set('setQuietHours',state.settings.quietHours===true);{const lr=$('loudRow');if(lr)lr.style.display=window.AndroidBridge?.setLoudReminders?'':'none'}set('setEvery2h',state.settings.every2h!==false);
   const sf=$('setFont');if(sf)sf.value=state.settings.font||'manrope';const qs=$('setQuoteSet');if(qs)qs.value=quoteSet();
   {const pc=$('setPrayerCity');if(pc&&!pc.options.length)pc.innerHTML=Object.entries(PRAYER_CITIES).map(([k,c])=>`<option value="${k}">${esc(c[0])}</option>`).join('');if(pc)pc.value=prayerCity();
    const po=$('setPrayerOn');if(po)po.checked=prayerOn();if($('setPrayerAsr'))$('setPrayerAsr').value=state.settings.prayerAsr==='shafii'?'shafii':'hanafi';
@@ -6464,7 +6466,7 @@ function bindV57(){
   $('setFont')&&($('setFont').onchange=e=>{state.settings.font=['manrope','nunito','inter'].includes(e.target.value)?e.target.value:'manrope';saveState();applyFont();toast('Шрифт изменён',e.target.selectedOptions[0]?.textContent||'')});$('setFontScale').onchange=e=>{state.settings.fontScale=clamp(Number(e.target.value)||1.1,1,1.22);saveState();setTheme()};
   [['setNotifyAll','notifications'],['setNotifyTasks','notifyTasks'],['setNotifyFinance','notifyFinance'],['setNotifyGoals','notifyGoals'],['setNotifySound','sound']].forEach(([id,key])=>$(id).onchange=e=>{state.settings[key]=e.target.checked;saveState();if(key==='notifications'||key==='notifyTasks')scheduleNative()});
   $('setLoudReminders').onchange=e=>{state.settings.loudReminders=e.target.checked;saveState();syncLoudReminders();toast(e.target.checked?'Громкие напоминания включены':'Обычная громкость напоминаний',e.target.checked?'Звучат громкостью будильника.':'Звучат громкостью уведомлений.')};
-  $('setNotifyPermission').onclick=requestNotifications;$('setTestSound').onclick=()=>notify(APP_NAME,'Так звучат напоминания. Хорошего дня!','tasks');$('setAdvancedRow').onclick=openSettings;$('setWeekRow').onclick=openWeekSchedule;
+  $('setQuietHours').onchange=e=>{state.settings.quietHours=e.target.checked;saveState();syncLoudReminders();toast(e.target.checked?'Тихие часы включены':'Тихие часы выключены',e.target.checked?'С 19:00 до 06:30 без звука.':'Напоминания приходят в любое время.')};   $('setNotifyPermission').onclick=requestNotifications;$('setTestSound').onclick=()=>notify(APP_NAME,'Так звучат напоминания. Хорошего дня!','tasks');$('setAdvancedRow').onclick=openSettings;$('setWeekRow').onclick=openWeekSchedule;
   $('pfSettingsBtn').onclick=()=>showView('viewSettings');$('pfEditBtn').onclick=openProfileEdit;$('pfExport').onclick=exportJSON;$('pfBackup').onclick=openBackupDialog;$('pfImport').onchange=importJSON;
   $('pfPrivacy').onclick=openPrivacy;$('pfDeleteAccount').onclick=openDeleteAccount;
   $('pfLogout').onclick=()=>{if(confirm('Выйти из '+APP_NAME+'? Все данные сохранены в облаке и вернутся после входа — на этом телефоне они будут удалены.'))cloudLogout()};

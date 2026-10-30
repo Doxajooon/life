@@ -1350,6 +1350,21 @@ await test("75.0: тихие часы 19:00–06:30 — ни вывода, ни 
   await ctx.close();
 });
 
+await test("75.14: тихие часы по умолчанию ВЫКЛЮЧЕНЫ — ночью напоминание не гасится; включил — гасится; значение уходит в Android", async () => {
+  const { ctx, page } = await device(makeCloud(), { clock: new Date("2026-10-16T23:00:00+05:00") });
+  const r = await page.evaluate(() => {
+    window.__q = null; window.AndroidBridge = { setQuietHours: v => { window.__q = v; } };
+    const off = quietNow();                                  // 23:00, nothing switched on
+    state.settings.quietHours = true; const on = quietNow();   // the owner switched «Тихие часы» on
+    syncLoudReminders(); const sent = window.__q;
+    state.settings.quietHours = false; syncLoudReminders();
+    return { off, on, sent, back: window.__q, row: !!document.getElementById("setQuietHours") };
+  });
+  assert.deepEqual(r, { off: false, on: true, sent: true, back: false, row: true }, "quiet hours: off by default, on only by the switch, sent to Android");
+  assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
 await test("V71: пульс-шкала, отчёт дня, привычка-отказ, победы с благодарностью, напоминания о цели каждый час", async () => {
   const { ctx, page } = await device(makeCloud());
   await page.evaluate(seedGoal);
