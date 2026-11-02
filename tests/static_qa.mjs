@@ -254,6 +254,27 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   const na = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/ActionReceiver.java", root), "utf8");
   assert.ok(nu.includes("QUIET_FROM_MIN = 19 * 60") && nu.includes("QUIET_TO_MIN = 6 * 60 + 30") && nu.includes("static boolean blocked("), "Android: quiet hours 19:00–06:30 are defined");
   assert.ok(!nu.includes("getRingerMode()") && nu.includes("isQuietEnabled(ctx) && quietNow()"), "75.14 Android: a silent phone no longer hides a reminder; quiet hours hold it back only when switched on");
+  // 75.15: quick entry from outside the app — long-press shortcuts and the «Быстрый ввод» widget
+  {
+    const man = read("android/app/src/main/AndroidManifest.xml"), jw = read("android/app/src/main/java/com/doxajooon/lifecontrol/JamalWidget.java"),
+      qw = read("android/app/src/main/java/com/doxajooon/lifecontrol/QuickWidget.java"), main = read("android/app/src/main/java/com/doxajooon/lifecontrol/MainActivity.java"),
+      sc = read("android/app/src/main/res/xml/shortcuts.xml"), lay = read("android/app/src/main/res/layout/widget_quick.xml"), str = read("android/app/src/main/res/values/strings.xml");
+    assert.ok(man.includes('android:name="android.app.shortcuts" android:resource="@xml/shortcuts"') && man.includes('android:name=".QuickWidget"') && man.includes("@xml/quick_widget_info"), "75.15: manifest registers the shortcuts and the quick widget");
+    assert.ok(!man.includes("Jamal Life"), "the widget is not called «Jamal Life» in the launcher's widget list");
+    for (const [a, w] of [["QUICK_ADD", "quickadd"], ["QUICK_EXPENSE", "expense"], ["QUICK_PROFIT", "profit"], ["QUICK_TASK", "task"]])
+      assert.ok(jw.includes(`if (${a}.equals(action)) return "${w}";`), "75.15: " + a + " → " + w);
+    assert.ok(main.includes("JamalWidget.launchFor(getIntent().getAction())") && main.includes("JamalWidget.launchFor(intent.getAction())"), "75.15: MainActivity takes every quick action both on a cold start and when already open");
+    assert.equal((sc.match(/<shortcut\b/g) || []).length, 3, "75.15: three shortcuts: expense, income, task");
+    for (const a of ["QUICK_EXPENSE", "QUICK_PROFIT", "QUICK_TASK"]) {
+      assert.ok(sc.includes(`android:action="com.doxajooon.lifecontrol.${a}"`) && qw.includes(`JamalWidget.${a}`), "75.15: shortcut and widget share the action " + a);
+      assert.ok(jw.includes(`"com.doxajooon.lifecontrol.${a}"`), a + " is declared");
+    }
+    assert.ok(sc.split("targetClass=\"com.doxajooon.lifecontrol.MainActivity\"").length === 4, "75.15: every shortcut targets MainActivity");
+    for (const id of ["q_expense", "q_profit", "q_task"]) assert.ok(lay.includes(`@+id/${id}`) && qw.includes(`R.id.${id}`), "75.15: quick widget button " + id);
+    for (const n of ["quick_widget_label", "quick_widget_desc", "sc_expense", "sc_expense_long", "sc_profit", "sc_profit_long", "sc_task", "sc_task_long"]) assert.ok(str.includes(`name="${n}"`), "75.15: string " + n);
+    for (const n of ["ic_shortcut_expense", "ic_shortcut_profit", "ic_shortcut_task", "quick_btn_expense", "quick_btn_profit", "quick_btn_task"]) assert.ok(existsSync(new URL(`android/app/src/main/res/drawable/${n}.xml`, root)), "75.15: drawable " + n);
+    assert.ok(html.includes("function quickOpen(k)") && html.includes("else if(a==='expense'||a==='profit'||a==='task')setTimeout(()=>{showView('viewToday');quickOpen(a)},150)"), "75.15: the web app opens the form named by the launch word");
+  }
   assert.ok(nr.includes("!NotificationUtil.blocked(ctx)"), "Android: alarms inside the optional quiet hours are not shown");
   assert.ok(nu.includes("(act + taskId + ':' + nid)"), "Android: each notification button has its own request code");
   assert.ok(na.includes('nm.cancel(("tasksnz_" + task).hashCode())') && na.includes('nm.cancel(("taskpre_" + task).hashCode())'), "Android: a button clears all of the task's notifications");

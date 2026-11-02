@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
             webView.loadUrl(APP_URL);
         }
 
-        if (JamalWidget.QUICK_ADD.equals(getIntent().getAction())) launchAction = "quickadd";
+        { String quickLaunch = JamalWidget.launchFor(getIntent().getAction()); if (quickLaunch != null) launchAction = quickLaunch; }
         requestNotificationPermission();
         AlarmScheduler.dropLegacy(getApplicationContext());
         NotificationUtil.ensureChannel(getApplicationContext());
@@ -317,8 +317,9 @@ public class MainActivity extends AppCompatActivity {
     @Override protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if (JamalWidget.QUICK_ADD.equals(intent.getAction()) && webView != null) {
-            launchAction = "quickadd";
+        String quickLaunch = JamalWidget.launchFor(intent.getAction());
+        if (quickLaunch != null && webView != null) {
+            launchAction = quickLaunch;
             webView.evaluateJavascript("window.__jlLaunch&&window.__jlLaunch()", null);
         }
     }

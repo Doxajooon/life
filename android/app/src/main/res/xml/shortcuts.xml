@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="quick_expense"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_expense"
+        android:shortcutShortLabel="@string/sc_expense"
+        android:shortcutLongLabel="@string/sc_expense_long">
+        <intent
+            android:action="com.doxajooon.lifecontrol.QUICK_EXPENSE"
+            android:targetPackage="com.doxajooon.lifecontrol"
+            android:targetClass="com.doxajooon.lifecontrol.MainActivity"/>
+    </shortcut>
+    <shortcut
+        android:shortcutId="quick_profit"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_profit"
+        android:shortcutShortLabel="@string/sc_profit"
+        android:shortcutLongLabel="@string/sc_profit_long">
+        <intent
+            android:action="com.doxajooon.lifecontrol.QUICK_PROFIT"
+            android:targetPackage="com.doxajooon.lifecontrol"
+            android:targetClass="com.doxajooon.lifecontrol.MainActivity"/>
+    </shortcut>
+    <shortcut
+        android:shortcutId="quick_task"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_task"
+        android:shortcutShortLabel="@string/sc_task"
+        android:shortcutLongLabel="@string/sc_task_long">
+        <intent
+            android:action="com.doxajooon.lifecontrol.QUICK_TASK"
+            android:targetPackage="com.doxajooon.lifecontrol"
+            android:targetClass="com.doxajooon.lifecontrol.MainActivity"/>
+    </shortcut>
+</shortcuts>

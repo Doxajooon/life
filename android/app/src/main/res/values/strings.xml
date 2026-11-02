@@ -3,4 +3,12 @@
     <string name="app_name">Life</string>
     <string name="widget_open">Открой приложение</string>
     <string name="widget_desc">Текущий этап дня, следующая задача и быстрое добавление</string>
+    <string name="quick_widget_label">Быстрый ввод</string>
+    <string name="quick_widget_desc">Расход, доход и задача — одним касанием</string>
+    <string name="sc_expense">Расход</string>
+    <string name="sc_expense_long">Добавить расход</string>
+    <string name="sc_profit">Доход</string>
+    <string name="sc_profit_long">Добавить доход</string>
+    <string name="sc_task">Задача</string>
+    <string name="sc_task_long">Новая задача</string>
 </resources>

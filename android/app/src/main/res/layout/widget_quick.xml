@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/q_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="8dp"
+    android:background="@drawable/widget_bg">
+
+    <TextView android:id="@+id/q_expense" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:layout_margin="3dp" android:gravity="center"
+        android:background="@drawable/quick_btn_expense" android:text="−  Расход"
+        android:textColor="#FFFFFFFF" android:textSize="14sp" android:textStyle="bold"
+        android:maxLines="1" android:contentDescription="Добавить расход"/>
+
+    <TextView android:id="@+id/q_profit" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:layout_margin="3dp" android:gravity="center"
+        android:background="@drawable/quick_btn_profit" android:text="+  Доход"
+        android:textColor="#FFFFFFFF" android:textSize="14sp" android:textStyle="bold"
+        android:maxLines="1" android:contentDescription="Добавить доход"/>
+
+    <TextView android:id="@+id/q_task" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:layout_margin="3dp" android:gravity="center"
+        android:background="@drawable/quick_btn_task" android:text="✓  Задача"
+        android:textColor="#FF21170A" android:textSize="14sp" android:textStyle="bold"
+        android:maxLines="1" android:contentDescription="Новая задача"/>
+</LinearLayout>

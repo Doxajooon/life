@@ -1,4 +1,4 @@
--- Jamal Life: cloud storage for project riqmwueobjazfnhvvumy. Safe to re-run in the SQL Editor.
+-- Life: cloud storage for project riqmwueobjazfnhvvumy. Safe to re-run in the SQL Editor.
 
 create table if not exists public.life_state (
   user_id uuid primary key references auth.users(id) on delete cascade,

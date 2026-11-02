@@ -684,6 +684,23 @@ await test("Экраны «Деньги» и «Цель»: всё видно с�
   await ctx.close();
 });
 
+await test("75.15: ярлыки иконки и виджет «Быстрый ввод» открывают нужную форму сразу (расход, доход, задача), пустая команда — ничего", async () => {
+  const seen = {};
+  for (const word of ["expense", "profit", "task", "quickadd", ""]) {
+    const init = `window.__launch = ${JSON.stringify(word)}; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { if (k === "takeLaunch") { const v = window.__launch; window.__launch = ""; return v; } return k === "isLoudReminders" ? true : undefined; } });`;
+    const { ctx, page } = await device(makeCloud(), { init });
+    await page.waitForTimeout(900);
+    seen[word || "none"] = await page.evaluate(() => ({ modal: document.body.classList.contains("modal-open"), h2: document.querySelector("#modal h2")?.textContent || "", money: !!document.getElementById("saveMoneyBtn"), task: !!document.getElementById("saveTaskBtn"), sheet: !!document.querySelector("[data-quick]") }));
+    assert.deepEqual(page.errors, [], "launch " + word);
+    await ctx.close();
+  }
+  assert.deepEqual(seen.expense, { modal: true, h2: "Добавить расход", money: true, task: false, sheet: false }, "expense shortcut opens the expense form");
+  assert.deepEqual(seen.profit, { modal: true, h2: "Добавить прибыль", money: true, task: false, sheet: false }, "income shortcut opens the income form");
+  assert.deepEqual(seen.task, { modal: true, h2: "Что нужно сделать?", money: false, task: true, sheet: false }, "task shortcut opens the task form");
+  assert.deepEqual(seen.quickadd, { modal: true, h2: "Добавить", money: false, task: false, sheet: true }, "the widget «+» still opens the «what to add» sheet");
+  assert.deepEqual(seen.none, { modal: false, h2: "", money: false, task: false, sheet: false }, "no command — nothing opens");
+});
+
 await test("Виджет Android и резервные копии", async () => {
   const { ctx, page } = await device(makeCloud(), {
     init: () => { window.__w = []; window.__launch = "quickadd"; window.AndroidBridge = new Proxy({}, { get: (_, k) => (...a) => { if (k === "updateWidget") window.__w.push(JSON.parse(a[0])); if (k === "takeLaunch") { const v = window.__launch; window.__launch = ""; return v; } return k === "bridgeVersion" ? 4 : undefined; } }); },

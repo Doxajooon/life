@@ -21,6 +21,19 @@ import org.json.JSONObject;
 public class JamalWidget extends AppWidgetProvider {
     static final String PREF = "jl_widget_v1";
     static final String QUICK_ADD = "com.doxajooon.lifecontrol.QUICK_ADD";
+    // 75.15: straight into a form — launcher shortcuts (long-press the icon) and the «Быстрый ввод» widget
+    static final String QUICK_EXPENSE = "com.doxajooon.lifecontrol.QUICK_EXPENSE";
+    static final String QUICK_PROFIT = "com.doxajooon.lifecontrol.QUICK_PROFIT";
+    static final String QUICK_TASK = "com.doxajooon.lifecontrol.QUICK_TASK";
+
+    /** The word the web app understands for an intent action, or null when the action is not a quick-entry one. */
+    static String launchFor(String action) {
+        if (QUICK_ADD.equals(action)) return "quickadd";
+        if (QUICK_EXPENSE.equals(action)) return "expense";
+        if (QUICK_PROFIT.equals(action)) return "profit";
+        if (QUICK_TASK.equals(action)) return "task";
+        return null;
+    }
 
     @Override public void onUpdate(Context ctx, AppWidgetManager mgr, int[] ids) { render(ctx, mgr, ids); }
 

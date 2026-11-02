@@ -5552,7 +5552,7 @@ function pushWidget(){
   const data={steps:daySteps().map(s=>({t:s.time,e:s.end,title:String(s.title||'').slice(0,40)})),tasks:(state.tasks||[]).filter(x=>x.date===t||x.date===t2).slice(0,60).map(x=>({id:x.id,date:x.date,time:x.time||'',title:String(x.title||'').slice(0,80),done:!!x.done}))};
   const sig=JSON.stringify(data);if(sig===_widgetSig)return;_widgetSig=sig;try{br.updateWidget(sig)}catch(e){}
 }
-function handleLaunch(){try{const a=window.AndroidBridge?.takeLaunch?.();if(a==='quickadd')setTimeout(()=>{showView('viewToday');openQuickAdd()},150)}catch(e){}}
+function handleLaunch(){try{const a=window.AndroidBridge?.takeLaunch?.();if(a==='quickadd')setTimeout(()=>{showView('viewToday');openQuickAdd()},150);else if(a==='expense'||a==='profit'||a==='task')setTimeout(()=>{showView('viewToday');quickOpen(a)},150)}catch(e){}}  // 75.15: shortcuts / quick widget open the form straight away
 window.__jlLaunch=()=>{if(appReadyForSync)handleLaunch()};
 // 74.5: after the fingerprint the app opens on the main screen (an open window or form is left as it was)
 window.__jlUnlocked=()=>{try{if(!document.body.classList.contains('modal-open')&&currentView!=='viewToday'&&!/Edit$/.test(currentView||''))showView('viewToday')}catch(e){}};
@@ -6044,8 +6044,10 @@ function openQuickAdd(){
     <button type="button" data-quick="note" style="--qc:var(--gold)">${svgIcon('i-note')}<b>Заметка</b><small>мысль, идея</small></button>
   </div>`);
   $('closeModalBtn').onclick=closeModal;
-  $$('[data-quick]').forEach(b=>b.onclick=()=>{const k=b.dataset.quick;closeModal();if(k==='task')openTaskForm();else if(k==='note'){showView('viewNotes');openNoteEditor()}else openMoneyForm(k)});
+  $$('[data-quick]').forEach(b=>b.onclick=()=>{const k=b.dataset.quick;closeModal();quickOpen(k)});
 }
+/* 75.15: one place that opens a form for «task | profit | expense | note» — the «+» sheet, the launcher shortcuts and the quick widget all use it */
+function quickOpen(k){if(k==='task')openTaskForm();else if(k==='note'){showView('viewNotes');openNoteEditor()}else openMoneyForm(k)}
 function openTaskForm(preMs){
   const ms=(state.goal?.milestones||[]),cm=currentMilestone(),gt=String(state.goal?.title||'Главная цель').slice(0,28);
   const goalOpts=[['Без цели','',''],[`🎯 ${gt}`+(cm?` · этап ${cm.i+1}`:''),'main',cm?.m.id||''],...ms.map((m,i)=>[m,i]).filter(([m,i])=>!m.done&&i!==cm?.i).slice(0,3).map(([m,i])=>[`🏁 Этап ${i+1}: ${String(m.title).slice(0,26)}`,'main',m.id])];
