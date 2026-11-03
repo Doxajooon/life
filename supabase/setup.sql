@@ -82,3 +82,44 @@ end;
 $$;
 revoke all on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- 74.6: every ai_usage row says what it is: 'ok' = an answer, 'try' = a failed attempt; rows older than 30 days are removed by the function
+alter table public.ai_usage add column if not exists kind text not null default 'ok' check (kind in ('ok', 'try'));
+drop policy if exists "ai_usage_delete_old_own" on public.ai_usage;
+create policy "ai_usage_delete_old_own" on public.ai_usage for delete to authenticated using (user_id = (select auth.uid()) and at < now() - interval '30 days');
+grant delete on public.ai_usage to authenticated;
+
+-- 74.8: (1) one number for the whole service — AI answers in the last 24 h (the Gemini key is one for all users); the function stops at AI_GLOBAL_PER_DAY (default 400)
+create or replace function public.ai_global_used()
+returns integer
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select count(*)::int from public.ai_usage where kind = 'ok' and at >= now() - interval '24 hours';
+$$;
+revoke execute on function public.ai_global_used() from public, anon;
+grant execute on function public.ai_global_used() to authenticated;
+create index if not exists ai_usage_ok_at on public.ai_usage (at) where kind = 'ok';
+
+-- 74.8: (2) nobody can store more than ~8 MB of state (12 goal photos of <= 350 000 characters fit with a large margin)
+alter table public.life_state drop constraint if exists life_state_size_ck;
+alter table public.life_state add constraint life_state_size_ck check (octet_length(state::text) <= 8000000);
+alter table public.life_state_history drop constraint if exists life_state_history_size_ck;
+alter table public.life_state_history add constraint life_state_history_size_ck check (octet_length(state::text) <= 8000000);
+
+-- 74.8: (3) the app keeps 30 days of cloud copies; the database also drops a person's own copies older than 45 days at every new snapshot
+create or replace function public.life_state_history_prune()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  delete from public.life_state_history where user_id = new.user_id and day < new.day - 45;
+  return null;
+end;
+$$;
+drop trigger if exists life_state_history_prune_t on public.life_state_history;
+create trigger life_state_history_prune_t after insert on public.life_state_history
+  for each row execute function public.life_state_history_prune();

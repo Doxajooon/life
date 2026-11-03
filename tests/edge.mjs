@@ -7,18 +7,19 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 // usage = answered requests (rows at «now»), failed = failed attempts (74.5: rows moved back ten years)
-const db = { usage: 0, failed: 0, state: null, user: { id: "u1" } };
+const db = { usage: 0, failed: 0, global: 0, state: null, user: { id: "u1" } };
 const env = { GEMINI_API_KEY: "test-key", SUPABASE_URL: "https://x.supabase.co", SUPABASE_ANON_KEY: "anon" };
 let handler = null;
 globalThis.Deno = { env: { get: k => env[k] }, serve: fn => { handler = fn; } };
 // a tiny thenable query builder: from(table).select().eq().gte() / .maybeSingle() / .insert()
 globalThis.__mockCreateClient = () => ({
   auth: { getUser: async t => t === "good" ? { data: { user: db.user }, error: null } : { data: null, error: { message: "bad jwt" } } },
+  rpc: async name => name === "ai_global_used" ? { data: db.global, error: null } : { data: null, error: { message: "no such function" } },
   from: table => {
-    const q = { single: false, upper: null, then: (ok, bad) => Promise.resolve(table === "ai_usage" ? { count: q.upper && Date.parse(q.upper) < Date.now() - 365 * 86400e3 ? db.failed : db.usage, error: null } : { data: db.state ? { state: db.state, schema_version: 58, updated_at: "x" } : null, error: null }).then(ok, bad) };
-    for (const m of ["select", "eq", "gte"]) q[m] = () => q;
-    q.lt = (_, v) => { q.upper = v; return q; };
-    q.maybeSingle = () => q; q.insert = async row => { db.inserts = [...(db.inserts || []), row]; if (row.at && Date.parse(row.at) < Date.now() - 365 * 86400e3) db.failed++; else db.usage++; return { error: null }; };
+    const q = { kind: null, then: (ok, bad) => Promise.resolve(table === "ai_usage" ? { count: q.kind === "ok" ? db.usage : db.usage + db.failed, error: null } : { data: db.state ? { state: db.state, schema_version: 58, updated_at: "x" } : null, error: null }).then(ok, bad) };
+    q.eq = (c, v) => { if (c === "kind") q.kind = v; return q; };
+    for (const m of ["select", "gte", "lt", "delete"]) q[m] = () => q;
+    q.maybeSingle = () => q; q.insert = async row => { db.inserts = [...(db.inserts || []), row]; if (row.kind === "try") db.failed++; else db.usage++; return { error: null }; };
     return q;
   },
 });
@@ -43,7 +44,7 @@ const call = async (method, body, token = "good") => {
   return { status: r.status, body: method === "OPTIONS" ? await r.text() : await r.json(), cors: r.headers.get("access-control-allow-origin") };
 };
 const results = []; let failed = 0;
-async function test(name, fn) { db.usage = 0; db.failed = 0; db.inserts = []; gem.calls = []; gem.plan = () => ({ status: 200 }); env.GEMINI_API_KEY = "test-key";
+async function test(name, fn) { db.usage = 0; db.failed = 0; db.global = 0; db.inserts = []; gem.calls = []; gem.plan = () => ({ status: 200 }); env.GEMINI_API_KEY = "test-key";
   try { await fn(); results.push(name); console.log("PASS", name); } catch (e) { failed++; console.log("FAIL", name, "\n   ", e.message.split("\n").slice(0, 4).join(" ")); } }
 const ru = s => /[а-яё]/i.test(s);
 
@@ -114,15 +115,15 @@ await test("Лимит 10 запросов в час", async () => {
   db.usage = 10; const r = await call("POST", { mode: "life" });
   assert.equal(r.status, 429); assert.match(r.body.error, /лимит 10/); assert.equal(gem.calls.length, 0);
 });
-await test("74.5: ошибка Google (503, тайм-аут) не тратит лимит — пишется только попытка; успешный ответ пишет строку", async () => {
+await test("74.5: ошибка Google (503, тайм-аут) не тратит лимит ответов — пишется только попытка; успешный ответ пишет строку", async () => {
   gem.plan = () => ({ status: 503, message: "This model is currently experiencing high demand." });
   for (let i = 0; i < 5; i++) { const r = await call("POST", { mode: "life" }); assert.equal(r.status, 503); assert.equal(r.body.reason, "gemini_overloaded"); }
   assert.equal(db.usage, 0, "Google's 503 must not count as an answer");
   assert.equal(db.failed, 5, "every failed attempt is still counted (30 per hour)");
-  assert.ok(db.inserts.every(x => x.user_id === "u1" && (!x.at || Date.parse(x.at) < Date.now() - 3000 * 86400e3)), "attempt rows are moved far back: " + JSON.stringify(db.inserts));
+  assert.ok(db.inserts.every(x => x.user_id === "u1" && x.kind === "try"), "failed attempts are kind try: " + JSON.stringify(db.inserts));
   gem.plan = () => ({ status: 200 });
   const ok = await call("POST", { mode: "life" }); assert.equal(ok.status, 200); assert.equal(db.usage, 1, "a real answer is counted once");
-  assert.ok(!db.inserts.at(-1).at, "an answer is written at «now»");
+  assert.equal(db.inserts.at(-1).kind, "ok", "an answer is kind ok");
 });
 await test("74.5: не больше 30 попыток в час — дальше Google не вызывается", async () => {
   db.usage = 3; db.failed = 27; const r = await call("POST", { mode: "life" });
@@ -158,6 +159,45 @@ await test("74.2: каждая ошибка пишет причину в лог�
       assert.ok(!/AIzaSy|test-key|owner@mail|abc\.def|Квартира|9000/.test(all), name + ": a secret or user data leaked into the logs: " + all);
     }
   } finally { console.error = orig; }
+});
+await test("74.8: общий дневной лимит на всех — Google не вызывается", async () => {
+  db.global = 400; const r = await call("POST", { mode: "life" });
+  assert.equal(r.status, 429); assert.equal(r.body.reason, "app_limit_global"); assert.ok(ru(r.body.error)); assert.equal(gem.calls.length, 0);
+  db.global = 399; assert.equal((await call("POST", { mode: "life" })).status, 200, "399 of 400 — still allowed");
+  env.AI_GLOBAL_PER_DAY = "5"; db.global = 5; assert.equal((await call("POST", { mode: "life" })).status, 429, "the cap comes from AI_GLOBAL_PER_DAY"); delete env.AI_GLOBAL_PER_DAY;
+});
+await test("74.8: у одного человека не больше двух запросов одновременно", async () => {
+  gem.hang = true; env.AI_DEADLINE_MS = "700"; env.AI_ATTEMPT_MS = "600";
+  const p1 = call("POST", { mode: "life" }), p2 = call("POST", { mode: "week" });
+  await new Promise(r => setTimeout(r, 120));
+  const third = await call("POST", { mode: "goal" });
+  assert.equal(third.status, 429); assert.equal(third.body.reason, "busy"); assert.ok(ru(third.body.error));
+  await Promise.all([p1, p2]); gem.hang = false; delete env.AI_DEADLINE_MS; delete env.AI_ATTEMPT_MS;
+  assert.equal((await call("POST", { mode: "life" })).status, 200, "the marks are released after the answers");
+});
+await test("74.8: слишком большой запрос отклоняется до обращения к Google", async () => {
+  const r = await call("POST", { mode: "life", facts: { x: "я".repeat(250_000) } });
+  assert.equal(r.status, 413); assert.equal(r.body.reason, "too_big"); assert.ok(ru(r.body.error)); assert.equal(gem.calls.length, 0);
+});
+await test("74.8: размышления модели ограничены; модель, не знающая поле, спрашивается ещё раз без него", async () => {
+  await call("POST", { mode: "life" });
+  assert.deepEqual(gem.calls[0].body.generationConfig.thinkingConfig, { thinkingLevel: "low" }, "gemini-flash-latest → lowest level");
+  assert.ok(gem.calls[0].body.generationConfig.maxOutputTokens >= 6144);
+  gem.calls = []; gem.plan = m => m === "gemini-flash-latest" && gem.calls.filter(c => c.model === m).length === 1 ? { status: 400, message: "Unknown name thinkingLevel: Cannot find field." } : { status: 200 };
+  const r = await call("POST", { mode: "life" });
+  assert.equal(r.status, 200); assert.equal(r.body.model, "gemini-flash-latest", "same model answered on the second try");
+  const mine = gem.calls.filter(c => c.model === "gemini-flash-latest");
+  assert.ok(mine[0].body.generationConfig.thinkingConfig && !mine[1].body.generationConfig.thinkingConfig, "second try is without the thinking field");
+  gem.calls = []; await call("POST", { mode: "life" });
+  assert.ok(!gem.calls[0].body.generationConfig.thinkingConfig, "the refusal is remembered");
+});
+await test("74.8: «сегодня» берётся у человека, а не по UTC; два долга с одним именем не затирают друг друга; фото цели не уходит в Google", async () => {
+  const keep = db.state; db.state = { ...keep, debts: { bank: 100, firms: 200, labels: { bank: "Банк", firms: "Банк" } }, goals: [{ id: "g", title: "Дом", main: true, photo: "data:image/jpeg;base64,SECRETPHOTO" }], tasks: [{ id: "t1", title: "Задача А", date: "2026-10-16", time: "08:00" }] };
+  await call("POST", { mode: "life", today: "2026-10-17" });
+  const sent = JSON.stringify(gem.calls[0].body);
+  assert.ok(!sent.includes("SECRETPHOTO"), "the photo went to Google");
+  assert.ok(/Банк\\?":100/.test(sent) && /Банк \(2\)\\?":200/.test(sent), "same-name debts: " + (sent.match(/Банк[^,]*,/g) || []).join(" "));
+  db.state = keep;
 });
 console.log(`\n${results.length}/${results.length + failed} passed`);
 process.exit(failed ? 1 : 0);

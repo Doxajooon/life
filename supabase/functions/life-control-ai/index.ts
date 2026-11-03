@@ -12,9 +12,17 @@ let modelList: string[] = [];
 let modelListAt = 0;
 const MAX_REQUESTS_PER_HOUR = 10;
 // Google's 503 «high demand» can hold a request for many seconds: each model gets a time limit, the whole answer
-// comes within ~19 s, and a model that just answered 503 waits at the end of the queue for 3 minutes.
-const DEADLINE_MS = () => Number(Deno.env.get("AI_DEADLINE_MS")) || 19000;
-const ATTEMPT_MS = () => Number(Deno.env.get("AI_ATTEMPT_MS")) || 12000;
+// comes within ~40 s (the app gives up at 50 s), and a model that just answered 503 waits at the end of the queue for 3 minutes.
+// 74.8: AI_DEADLINE_MS / AI_ATTEMPT_MS in Secrets still win; thinking is limited (see thinkingFor), so an answer takes seconds, not tens of seconds.
+const DEADLINE_MS = () => Number(Deno.env.get("AI_DEADLINE_MS")) || 40000;
+const ATTEMPT_MS = () => Number(Deno.env.get("AI_ATTEMPT_MS")) || 20000;
+// 74.8: the app is open to everybody and the Gemini key is one for all — three guards against one user (or a script) draining it:
+// a request body larger than the app ever sends is refused, one user has at most MAX_INFLIGHT requests running at a time,
+// and the whole service answers at most AI_GLOBAL_PER_DAY times per 24 h (counted by public.ai_global_used()).
+const MAX_BODY_CHARS = 200_000;
+const MAX_INFLIGHT = 2;
+const GLOBAL_PER_DAY = () => Number(Deno.env.get("AI_GLOBAL_PER_DAY")) || 400;
+const inflight = new Map<string, number>();
 const BUSY_MS = 180_000;
 const busyUntil: Record<string, number> = {};
 const CORS = {
@@ -117,7 +125,8 @@ function context(s: any, c: any): any {
 function allData(s: any, withNotes: boolean, localToday = ""): any {
   const num = (v: unknown) => Number(v) || 0, arr = (v: any) => (Array.isArray(v) ? v : []);
   const labels = s?.debts?.labels || {};
-  const debts = { [clip(labels.bank || "Долг 1", 60)]: num(s?.debts?.bank), [clip(labels.firms || "Долг 2", 60)]: num(s?.debts?.firms),
+  const n1 = clip(labels.bank || "Долг 1", 60), n2raw = clip(labels.firms || "Долг 2", 60), n2 = n2raw === n1 ? n2raw + " (2)" : n2raw;
+  const debts = { [n1]: num(s?.debts?.bank), [n2]: num(s?.debts?.firms),
     monthlyPayment: num(s?.debts?.monthlyPayment), startedFrom: num(s?.debtBaseline),
     history: arr(s?.debtHistory).slice(-12).map((h: any) => ({ day: clip(h?.day, 12), total: num(h?.total) })) };
   const goals = arr(s?.goals).slice(0, 12).map((g: any) => ({ title: clip(g?.title, 120), main: !!g?.main, target: num(g?.targetAmount), date: clip(g?.targetDate, 12),
@@ -145,6 +154,13 @@ function allData(s: any, withNotes: boolean, localToday = ""): any {
   return out;
 }
 
+// 74.6: the goal photo is not data for the AI — a picture left inside the data (g.photo) never goes to Google
+// deno-lint-ignore no-explicit-any
+function noPhotos(s: any): any {
+  if (!Array.isArray(s?.goals)) return s;
+  return { ...s, goals: s.goals.map((g: any) => { if (!g || typeof g !== "object") return g; const { photo: _p, photoPath: _q, ...rest } = g; return rest; }) };
+}
+
 async function getUser(req: Request) {
   const h = req.headers.get("Authorization") || "";
   if (!h.startsWith("Bearer ")) return { bad: "no token" };
@@ -159,24 +175,38 @@ async function getUser(req: Request) {
 }
 
 // Rate limit stored in the database (public.ai_usage), so it survives cold starts of the function.
-// 74.5: a row is written only AFTER Google answered — Google's own 503/timeouts no longer eat the limit.
-// Failed attempts are still counted (no new table, no migration): their row is stored with `at` moved back
-// exactly ATTEMPT_SHIFT_MS, so it never counts as an answer, and «attempts in the last hour» reads that shifted window.
+// A row is written only AFTER Google answered or failed — Google's own 503/timeouts never eat the limit of answers.
+// Every row says what it is: kind 'ok' (an answer, 10 per hour) or 'try' (a failed attempt, 30 per hour together with the answers).
+// Rows older than 30 days are removed here (the user's own rows, at most once an hour per function copy; RLS lets a user delete only own rows older than 30 days).
 const MAX_ATTEMPTS_PER_HOUR = 30;
-const ATTEMPT_SHIFT_MS = 3650 * 86400_000;
+const KEEP_DAYS = 30;
+const cleaned: Record<string, number> = {};
 // deno-lint-ignore no-explicit-any
 async function allowRequest(sb: any, userId: string): Promise<"" | "answers" | "attempts"> {
-  const now = Date.now(), iso = (t: number) => new Date(t).toISOString();
-  const ok = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - 3600_000));
+  const since = new Date(Date.now() - 3600_000).toISOString();
+  const ok = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).eq("kind", "ok").gte("at", since);
   if (ok.error) return ""; // never block the user because of the counter itself
   if ((ok.count ?? 0) >= MAX_REQUESTS_PER_HOUR) return "answers";
-  const bad = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", iso(now - ATTEMPT_SHIFT_MS - 3600_000)).lt("at", iso(now - ATTEMPT_SHIFT_MS + 60_000));
-  if (!bad.error && (ok.count ?? 0) + (bad.count ?? 0) >= MAX_ATTEMPTS_PER_HOUR) return "attempts";
+  const all = await sb.from("ai_usage").select("at", { count: "exact", head: true }).eq("user_id", userId).gte("at", since);
+  if (!all.error && (all.count ?? 0) >= MAX_ATTEMPTS_PER_HOUR) return "attempts";
   return "";
+}
+// 74.8: answers of everybody in the last 24 h (security definer function — a user cannot read other people's rows, only this number).
+// If the counter is unavailable the service keeps working (the per-user limits still apply).
+// deno-lint-ignore no-explicit-any
+async function globalFull(sb: any): Promise<boolean> {
+  try {
+    const { data, error } = await sb.rpc("ai_global_used");
+    if (error) { console.error("ai global counter", safe(error.message)); return false; }
+    return Number(data) >= GLOBAL_PER_DAY();
+  } catch { return false; }
 }
 // deno-lint-ignore no-explicit-any
 async function countUse(sb: any, userId: string, answered: boolean) {
-  try { await sb.from("ai_usage").insert(answered ? { user_id: userId } : { user_id: userId, at: new Date(Date.now() - ATTEMPT_SHIFT_MS).toISOString() }); } catch { /* the counter never breaks an answer */ }
+  try { await sb.from("ai_usage").insert({ user_id: userId, kind: answered ? "ok" : "try" }); } catch { /* the counter never breaks an answer */ }
+  if (Date.now() - (cleaned[userId] || 0) < 3600_000) return;
+  cleaned[userId] = Date.now();
+  try { await sb.from("ai_usage").delete().eq("user_id", userId).lt("at", new Date(Date.now() - KEEP_DAYS * 86400_000).toISOString()); } catch { /* cleaning never breaks an answer */ }
 }
 
 const API = "https://generativelanguage.googleapis.com/v1beta";
@@ -223,13 +253,23 @@ function geminiReason(status: number, raw: string) {
   return "gemini_http_" + status;
 }
 
+// 74.8: «thinking» made flash models answer in 25–45 s and eat the answer's tokens. 2.5 models: thinking off; 3.x and the *-latest aliases:
+// the lowest level. A model that refuses the field (400 «thinking…») is asked again without it, and remembered.
+const thinkOff: Record<string, boolean> = {};
+function thinkingFor(m: string): Record<string, unknown> | null {
+  if (thinkOff[m]) return null;
+  if (/^gemini-2\.5-flash(-lite)?(-|$)/.test(m)) return { thinkingBudget: 0 };
+  if (/^gemini-(flash|flash-lite)-latest$/.test(m) || /^gemini-[3-9]/.test(m)) return { thinkingLevel: "low" };
+  return null;
+}
+
 async function gemini(input: string, useSearch: boolean, system = promptRules()) {
   const key = Deno.env.get("GEMINI_API_KEY") || "";
   if (!key) return { error: "GEMINI_API_KEY не настроен в Supabase Secrets.", status: 503, reason: "no_key" };
   const body: any = {
     systemInstruction: { parts: [{ text: system }] },
     contents: [{ role: "user", parts: [{ text: input }] }],
-    generationConfig: { maxOutputTokens: 4096, temperature: 0.6 },
+    generationConfig: { maxOutputTokens: 6144, temperature: 0.6 },
   };
   if (useSearch) body.tools = [{ google_search: {} }];
   let lastStatus = 502, lastRaw = "";
@@ -239,9 +279,10 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
     const left = DEADLINE_MS() - (Date.now() - t0);
     if (left < Math.min(1500, DEADLINE_MS() / 6)) { console.error("gemini deadline", Date.now() - t0); lastStatus = lastStatus === 429 ? 429 : 503; break; }
     const ac = new AbortController(), timer = setTimeout(() => ac.abort(), Math.min(ATTEMPT_MS(), left));
+    const tc = thinkingFor(m), sendBody = tc ? { ...body, generationConfig: { ...body.generationConfig, thinkingConfig: tc } } : body;
     let r: Response, raw = "";
     try {
-      r = await fetch(`${API}/models/${m}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(body), signal: ac.signal });
+      r = await fetch(`${API}/models/${m}:generateContent`, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": key }, body: JSON.stringify(sendBody), signal: ac.signal });
       raw = await r.text();
     } catch {
       const slow = ac.signal.aborted; lastStatus = slow ? 504 : 502; lastRaw = slow ? "timeout" : "network";
@@ -251,6 +292,7 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
     try { d = JSON.parse(raw || "{}"); } catch { /* ignore */ }
     if (!r.ok) {
       console.error("gemini error", m, r.status, safe(d?.error?.status || ""), safe(d?.error?.message || raw, 200));
+      if (r.status === 400 && tc && /think/i.test(raw) && !/api key|API_KEY_INVALID/i.test(raw)) { thinkOff[m] = true; order.splice(order.indexOf(m) + 1, 0, m); continue; } // same model again, without the thinking field
       lastStatus = r.status; lastRaw = raw;
       if (r.status === 503) busyUntil[m] = Date.now() + BUSY_MS;
       if (r.status === 400 && /api key|API_KEY_INVALID/i.test(raw)) break; // a bad key fails on every model
@@ -274,17 +316,23 @@ async function gemini(input: string, useSearch: boolean, system = promptRules())
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  let held = ""; // the user whose «request in progress» mark is released at the end
   try {
     const a = await getUser(req);
     if ("bad" in a) return fail("auth", 401, "Вход в " + APP_NAME + " устарел. Выйди из аккаунта и войди снова, потом повтори.", { method: req.method, detail: a.bad });
     // Health check: answers instantly and costs nothing (no Gemini call, no rate limit).
     if (req.method === "GET") return json({ ok: true, configured: configured(), model: MODEL });
     if (req.method !== "POST") return fail("method", 405, "Неверный запрос к AI. Обнови приложение.", { method: req.method });
-    const body = await req.json().catch(() => ({}));
+    const rawBody = await req.text().catch(() => "");
+    if (rawBody.length > MAX_BODY_CHARS) return fail("too_big", 413, "Запрос к AI слишком большой. Обнови приложение и повтори.", { size: rawBody.length });
+    let body: any = {}; try { body = JSON.parse(rawBody || "{}"); } catch { body = {}; }
     if (!configured()) return fail("no_key", 503, "AI ещё не настроен: на сервере нет ключа Gemini (GEMINI_API_KEY в Supabase → Edge Functions → Secrets). Пока работает «Полный разбор» без AI.");
     const limit = await allowRequest(a.sb, a.user.id);
     if (limit === "answers") return fail("app_limit", 429, "Слишком много запросов AI за час (лимит 10). Попробуй через час — пока работает «Полный разбор» без AI.");
     if (limit === "attempts") return fail("app_limit", 429, "Слишком много попыток AI за час (лимит 30). Попробуй через час — пока работает «Полный разбор» без AI.", { attempts: true });
+    if ((inflight.get(a.user.id) || 0) >= MAX_INFLIGHT) return fail("busy", 429, "Предыдущие запросы AI ещё обрабатываются. Подожди ответа и повтори — пока работает «Полный разбор» без AI.");
+    if (await globalFull(a.sb)) return fail("app_limit_global", 429, "AI сегодня исчерпал общий дневной лимит на всех пользователей. Он обновится в течение суток — пока работает «Полный разбор» без AI.");
+    inflight.set(a.user.id, (inflight.get(a.user.id) || 0) + 1); held = a.user.id;
     if (body?.ping === true) {
       const t = await gemini("Ответь ровно двумя словами: «AI работает».", false, "Ты отвечаешь коротко по-русски.");
       await countUse(a.sb, a.user.id, !("error" in t));
@@ -293,8 +341,9 @@ Deno.serve(async (req) => {
     const sc = scope(body?.scope), mode = body?.mode === "goal" ? "goal" : body?.mode === "week" ? "week" : body?.mode === "deep" ? "deep" : "life";
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return fail("state_read", 500, "Не удалось прочитать твои данные из облака. Проверь синхронизацию («Настройки → Аккаунт») и повтори через минуту.", { code: error.code || "", msg: error.message || "" });
-    const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
-    ctx.all_data = allData(row?.state || {}, sc.notes, String(body?.today || ""));
+    const st = noPhotos(row?.state || {});
+    const ctx = mode === "week" ? weekContext(st, String(body?.today || "")) : mode === "deep" ? deepContext(st, body?.facts) : mode === "life" ? lifeContext(st, sc, body?.facts) : context(st, sc);
+    ctx.all_data = allData(st, sc.notes, String(body?.today || ""));
     const p = mode === "deep"
       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "week"
@@ -308,5 +357,7 @@ Deno.serve(async (req) => {
     return json({ ok: true, model: r.model || MODEL, output_text: r.output_text, sources: r.sources || [], generated_at: new Date().toISOString(), schema_version: row?.schema_version ?? null });
   } catch (e) {
     return fail("exception", 500, "Ошибка на сервере AI. Попробуй через минуту; если повторяется — напиши разработчику, причина записана в логах.", { name: e instanceof Error ? e.name : typeof e, msg: e instanceof Error ? e.message : String(e) });
+  } finally {
+    if (held) { const n = (inflight.get(held) || 1) - 1; if (n > 0) inflight.set(held, n); else inflight.delete(held); }
   }
 });
