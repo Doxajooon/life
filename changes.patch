@@ -1,0 +1,123 @@
+diff --git a/index.html b/index.html
+index 09dc9da..cf82dec 100644
+--- a/index.html
++++ b/index.html
+@@ -1290,7 +1290,20 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
+ @keyframes jlRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+ .jl-hero .clock-time{align-items:flex-start;justify-content:flex-end;letter-spacing:-.045em;text-shadow:0 2px 24px rgba(120,170,255,.18);transition:opacity .2s}
+ .num{font-variant-numeric:tabular-nums}
+-@media (prefers-reduced-motion:reduce){.view.active>*{animation:none}.ring circle,.v-bar i,.jl-track .auto-fill{transition:none}}
++@media (prefers-reduced-motion:reduce){.view.active>*{animation:none}.ring circle,.v-bar i,.jl-track .auto-fill{transition:none}
++/* 75.1: «Сейчас» — живое кольцо этапа вместо полоски (полоска остаётся в разметке для совместимости, но скрыта) */
++.jl-now-main{display:flex;align-items:center;justify-content:space-between;gap:12px}
++.jl-now-txt{min-width:0;flex:1}
++.jl-now-ring{position:relative;flex:0 0 64px;width:64px;height:64px;display:grid;place-items:center}
++.jl-now-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
++.jl-now-ring circle{fill:none;stroke-width:7;stroke-linecap:round}
++.jl-now-ring .bg{stroke:rgba(255,255,255,.12)}
++.jl-now-ring .fg{stroke:var(--gold-2);stroke-dasharray:0 100;transition:stroke-dasharray .8s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 5px rgba(240,190,90,.55));animation:jlRingGlow 3.2s ease-in-out infinite}
++.jl-now-ring b{position:relative;color:#fff;font-size:.8125rem;font-weight:800;font-variant-numeric:tabular-nums}
++.jl-now .jl-track{display:none}
++@keyframes jlRingGlow{50%{opacity:.72}}
++@media (prefers-reduced-motion:reduce){.jl-now-ring .fg{animation:none;transition:none}}
++}
+ 
+ .jl-hweek{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+ .jl-hweek:empty{display:none}
+@@ -2221,8 +2234,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
+     </div>
+     <div class="jl-now">
+       <div class="jl-now-head"><span class="jl-now-label"><svg class="ui-icon" aria-hidden="true"><use href="#i-play"></use></svg>Сейчас</span><span class="jl-now-status" id="currentStatus">—</span></div>
+-      <div class="jl-now-title" id="currentAction">—</div>
+-      <div class="jl-now-meta" id="currentWindow">—</div>
++      <div class="jl-now-main"><div class="jl-now-txt"><div class="jl-now-title" id="currentAction">—</div>
++      <div class="jl-now-meta" id="currentWindow">—</div></div>
++      <div class="jl-now-ring" aria-hidden="true"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="32" class="bg"/><circle cx="40" cy="40" r="32" class="fg" id="nowRingFg" pathLength="100"/></svg><b id="nowRingPct">0%</b></div></div>
+       <div class="jl-track"><i class="auto-fill" id="autoProgress"></i></div>
+       <div class="jl-now-foot"><span id="currentProgressText">—</span><span id="nextAlertText">—</span></div>
+       <div class="detail-list jl-now-details" id="currentDetails"></div>
+@@ -4089,7 +4103,7 @@ function renderStagePercents(info=getStageInfo()){
+     el.textContent=done?'100% завершено':(info.kind==='active'&&info.i===i?`${pct}% времени прошло`:now>=en?'100% завершено':'0% времени прошло');
+   });
+ }
+-function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${daySteps().length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');const future=daySteps().map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info);renderNowFocus(info)}
++function renderAuto(info=getStageInfo()){let action,meta,status,pct=info.kind==='active'?info.pct:info.kind==='after'?100:0;if(info.kind==='active'){const details=info.s.details||[];action=`${stageEmoji(info.s,info.i)} ${info.s.title}`;meta=`${info.s.time}–${info.s.end} · этап ${info.i+1} из ${daySteps().length}`;status='СЕЙЧАС';const remain=Math.max(0,info.end-info.now);setText('currentProgressText',`${Math.round(info.pct)}% этапа · осталось ${fmtDuration(remain)}`);const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}else if(info.kind==='between'){action=`☕ Перерыв · дальше ${info.next.title}`;meta=`Следующий этап в ${info.next.time} · можно спокойно завершить текущее`;status='ПЕРЕХОД';const remain=Math.max(0,timeToMin(info.next.time)-info.now);setText('currentProgressText',`До следующего этапа · ${fmtDuration(remain)}`);setText('currentDetails','');}else{action='🌙 Отдых и сон';meta='Основные этапы дня завершены';status='ЗАКРЫТО';setText('currentProgressText','День завершён · 100% этапов по расписанию');const cur=$('currentDetails');if(cur&&cur.innerHTML!=='')cur.innerHTML=''}$('currentAction').textContent!==action&&setText('currentAction',action);setText('currentWindow',meta);setText('currentStatus',status);setWidth('autoProgress',pct+'%');{const rg=$('nowRingFg'),rp=Math.max(0,Math.min(100,Math.round(pct)));if(rg)rg.style.strokeDasharray=rp+' 100';setText('nowRingPct',rp+'%')}const future=daySteps().map((s,i)=>({s,i})).filter(x=>timeToMin(x.s.time)>nowMin());setText('nextAlertText',future[0]?`Далее: ${future[0].s.time} · ${future[0].s.title}`:'Дальше нет — отдых');renderStagePercents(info);renderNowFocus(info)}
+ // the day of a record: its dateKey, or for old records without one, the local day of «at»
+ function txDay(x){return x?.dateKey||(validDate(x?.at)?keyDay(validDate(x.at)):'')}
+ function daySum(arr,key=keyDay()){return (arr||[]).filter(x=>x&&txDay(x)===key).reduce((a,x)=>a+Math.max(0,Number(x.amount)||0),0)}
+@@ -4840,7 +4854,7 @@ function openGoalSaving(){
+ }
+ 
+ function openGoalFinanceEdit(){
+-  syncGoalFinanceCompletion();const f=state.goal.finance||{targetAmount:0,savedAmount:0,manualSavedAmount:0,targetDate:'',startedAt:'',completedAt:'',contributions:[]},d=state.drafts?.goalFinance||{},started=f.startedAt?new Date(f.startedAt):null,startValue=started&&!Number.isNaN(started.getTime())?started.toISOString().slice(0,10):'';
++  syncGoalFinanceCompletion();const f=state.goal.finance||{targetAmount:0,savedAmount:0,manualSavedAmount:0,targetDate:'',startedAt:'',completedAt:'',contributions:[]},d=state.drafts?.goalFinance||{},started=f.startedAt?new Date(f.startedAt):null,startValue=started&&!Number.isNaN(started.getTime())?dateKeyFromDate(started):'';
+   openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Финансовая цель</div><h2>Сумма и срок цели</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px">${goalPreviewHTML()}<div class="jl-chips">${[10000,50000,100000,500000].map(v=>`<button type="button" class="jl-chip" data-gf-sum="${v}">${v.toLocaleString('ru-RU')}</button>`).join('')}</div><div class="grid g2"><div class="field"><label>Нужная сумма</label><input id="gfTarget" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(d.target??f.targetAmount)}"></div><div class="field"><label>Уже собрано всего</label><input id="gfSaved" type="number" min="0" step="0.01" inputmode="decimal" value="${esc(d.saved??f.savedAmount)}"></div></div><div class="grid g2"><div class="field"><label>Начало накопления</label><input id="gfStart" type="date" value="${esc(d.start??startValue)}"></div><div class="field"><label>Плановая дата</label><input id="gfDate" type="date" value="${esc((d.date??f.targetDate)||'')}"></div></div><div class="jl-chips">${[[3,'3 месяца'],[6,'полгода'],[12,'1 год'],[24,'2 года']].map(([m,l])=>`<button type="button" class="jl-chip" data-gf-months="${m}">⏳ ${l}</button>`).join('')}</div><div class="sub">Поля сохраняются автоматически. Добавленные пополнения сохраняются отдельно.</div><div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn primary" id="saveGoalFinanceBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Сохранить</button></div></div>`);$('closeModalBtn').onclick=closeModal;
+   const autosave=()=>saveDraft('goalFinance',{target:$('gfTarget').value,saved:$('gfSaved').value,start:$('gfStart').value,date:$('gfDate').value});['gfTarget','gfSaved','gfStart','gfDate'].forEach(id=>{$(id).addEventListener('input',autosave);$(id).addEventListener('change',autosave)});
+   {const live=()=>{const t=Math.max(0,Number($('gfTarget').value)||0),sv=Math.max(0,Number($('gfSaved').value)||0);goalPreviewUpdate(t,sv,sv,$('gfDate').value||'')};['gfTarget','gfSaved','gfDate'].forEach(id=>{$(id).addEventListener('input',live);$(id).addEventListener('change',live)});live();
+diff --git a/supabase/functions/life-control-ai/index.ts b/supabase/functions/life-control-ai/index.ts
+index 93c7ee8..7c0e467 100644
+--- a/supabase/functions/life-control-ai/index.ts
++++ b/supabase/functions/life-control-ai/index.ts
+@@ -114,7 +114,7 @@ function context(s: any, c: any): any {
+ // (debts by their own names and their history, all goals, habits with marks, tasks, banks, the day and the weekday schedule,
+ // money by month for half a year, wins). Notes go only when the user ticked them.
+ // deno-lint-ignore no-explicit-any
+-function allData(s: any, withNotes: boolean): any {
++function allData(s: any, withNotes: boolean, localToday = ""): any {
+   const num = (v: unknown) => Number(v) || 0, arr = (v: any) => (Array.isArray(v) ? v : []);
+   const labels = s?.debts?.labels || {};
+   const debts = { [clip(labels.bank || "Долг 1", 60)]: num(s?.debts?.bank), [clip(labels.firms || "Долг 2", 60)]: num(s?.debts?.firms),
+@@ -125,7 +125,8 @@ function allData(s: any, withNotes: boolean): any {
+   const since = Date.now() - 30 * 86400000, log = s?.habitLog || {};
+   const habits = arr(s?.habits).slice(0, 15).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind, avoid: !!h?.avoid,
+     marksLast30: Object.keys(log?.[h?.id] || {}).filter((d) => log[h.id][d] && Date.parse(d + "T12:00:00") >= since).length }));
+-  const tasks = arr(s?.tasks), today = new Date().toISOString().slice(0, 10);
++  // 75.0: «сегодня» — по местной дате пользователя (её присылает приложение), а не по UTC: иначе ночью (UTC+5) вчерашние задачи не считались просроченными
++  const tasks = arr(s?.tasks), today = /^\d{4}-\d{2}-\d{2}$/.test(localToday) ? localToday : new Date().toISOString().slice(0, 10);
+   const taskInfo = { total: tasks.length, done: tasks.filter((t: any) => t?.done).length,
+     overdue: tasks.filter((t: any) => !t?.done && t?.date && t.date < today).slice(0, 10).map((t: any) => clip(t?.title, 100) + " (" + t.date + ")"),
+     upcoming: tasks.filter((t: any) => !t?.done && (!t?.date || t.date >= today)).slice(0, 12).map((t: any) => clip(t?.title, 100) + (t?.date ? " · " + t.date + (t?.time ? " " + t.time : "") : "")) };
+@@ -293,7 +294,7 @@ Deno.serve(async (req) => {
+     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
+     if (error) return fail("state_read", 500, "Не удалось прочитать твои данные из облака. Проверь синхронизацию («Настройки → Аккаунт») и повтори через минуту.", { code: error.code || "", msg: error.message || "" });
+     const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
+-    ctx.all_data = allData(row?.state || {}, sc.notes);
++    ctx.all_data = allData(row?.state || {}, sc.notes, String(body?.today || ""));
+     const p = mode === "deep"
+       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
+       : mode === "week"
+diff --git a/tests/e2e.mjs b/tests/e2e.mjs
+index 8a9b6b8..d10d8aa 100644
+--- a/tests/e2e.mjs
++++ b/tests/e2e.mjs
+@@ -187,7 +187,7 @@ await test("Все окна и диалоги открываются без ош
+   const { ctx, page } = await device(makeCloud());
+   const bad = await page.evaluate(async () => {
+     const out = [];
+-    const names = Object.keys(window).filter(k => /^open[A-Z]/.test(k) && typeof window[k] === "function" && !["openLifeDB", "openLegacyDB"].includes(k));
++    const names = Object.keys(window).filter(k => /^open[A-Z]/.test(k) && typeof window[k] === "function" && !/\[native code\]/.test(Function.prototype.toString.call(window[k])) && !["openLifeDB", "openLegacyDB"].includes(k));
+     for (const f of names) { try { await window[f](...(f === "openMetricDetail" ? ["cash"] : f === "openMoneyForm" ? ["expense"] : [])); } catch (e) { out.push(f + ": " + e.message); } try { closeModal(); showView("viewToday"); } catch (e) {} }
+     return { out, n: names.length };
+   });
+@@ -196,6 +196,21 @@ await test("Все окна и диалоги открываются без ош
+   await ctx.close();
+ });
+ 
++await test("75.0: дата начала накопления в окне цели не сдвигается на день назад (UTC+5)", async () => {
++  const { ctx, page } = await device(makeCloud());
++  const shown = await page.evaluate(() => {
++    state.goal.finance.targetAmount = 50000;
++    state.goal.finance.startedAt = new Date("2026-10-10T00:00:00").toISOString();   // местная полночь 10 октября
++    saveState(); openGoalFinanceEdit();
++    return document.getElementById("gfStart").value;
++  });
++  assert.equal(shown, "2026-10-10");
++  // сохранение без изменений не двигает дату
++  const kept = await page.evaluate(() => { document.getElementById("gfStart").dispatchEvent(new Event("input", { bubbles: true })); const v = document.getElementById("gfStart").value; closeModal(); return v; });
++  assert.equal(kept, "2026-10-10"); assert.deepEqual(page.errors, []);
++  await ctx.close();
++});
++
+ await test("«Сегодня»: всё в одном потоке, без вкладок и дублей; кнопка «+» работает", async () => {
+   const { ctx, page } = await device(makeCloud());
+   const info = await page.evaluate(() => ({

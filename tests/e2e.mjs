@@ -187,12 +187,27 @@ await test("Все окна и диалоги открываются без ош
   const { ctx, page } = await device(makeCloud());
   const bad = await page.evaluate(async () => {
     const out = [];
-    const names = Object.keys(window).filter(k => /^open[A-Z]/.test(k) && typeof window[k] === "function" && !["openLifeDB", "openLegacyDB"].includes(k));
+    const names = Object.keys(window).filter(k => /^open[A-Z]/.test(k) && typeof window[k] === "function" && !/\[native code\]/.test(Function.prototype.toString.call(window[k])) && !["openLifeDB", "openLegacyDB"].includes(k));
     for (const f of names) { try { await window[f](...(f === "openMetricDetail" ? ["cash"] : f === "openMoneyForm" ? ["expense"] : [])); } catch (e) { out.push(f + ": " + e.message); } try { closeModal(); showView("viewToday"); } catch (e) {} }
     return { out, n: names.length };
   });
   assert.ok(bad.n >= 25, "only " + bad.n + " dialogs found");
   assert.deepEqual(bad.out, []); assert.deepEqual(page.errors, []);
+  await ctx.close();
+});
+
+await test("75.0: дата начала накопления в окне цели не сдвигается на день назад (UTC+5)", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const shown = await page.evaluate(() => {
+    state.goal.finance.targetAmount = 50000;
+    state.goal.finance.startedAt = new Date("2026-10-10T00:00:00").toISOString();   // местная полночь 10 октября
+    saveState(); openGoalFinanceEdit();
+    return document.getElementById("gfStart").value;
+  });
+  assert.equal(shown, "2026-10-10");
+  // сохранение без изменений не двигает дату
+  const kept = await page.evaluate(() => { document.getElementById("gfStart").dispatchEvent(new Event("input", { bubbles: true })); const v = document.getElementById("gfStart").value; closeModal(); return v; });
+  assert.equal(kept, "2026-10-10"); assert.deepEqual(page.errors, []);
   await ctx.close();
 });
 

@@ -114,7 +114,7 @@ function context(s: any, c: any): any {
 // (debts by their own names and their history, all goals, habits with marks, tasks, banks, the day and the weekday schedule,
 // money by month for half a year, wins). Notes go only when the user ticked them.
 // deno-lint-ignore no-explicit-any
-function allData(s: any, withNotes: boolean): any {
+function allData(s: any, withNotes: boolean, localToday = ""): any {
   const num = (v: unknown) => Number(v) || 0, arr = (v: any) => (Array.isArray(v) ? v : []);
   const labels = s?.debts?.labels || {};
   const debts = { [clip(labels.bank || "Долг 1", 60)]: num(s?.debts?.bank), [clip(labels.firms || "Долг 2", 60)]: num(s?.debts?.firms),
@@ -125,7 +125,8 @@ function allData(s: any, withNotes: boolean): any {
   const since = Date.now() - 30 * 86400000, log = s?.habitLog || {};
   const habits = arr(s?.habits).slice(0, 15).map((h: any) => ({ title: clip(h?.title, 60), kind: h?.kind, avoid: !!h?.avoid,
     marksLast30: Object.keys(log?.[h?.id] || {}).filter((d) => log[h.id][d] && Date.parse(d + "T12:00:00") >= since).length }));
-  const tasks = arr(s?.tasks), today = new Date().toISOString().slice(0, 10);
+  // 75.0: «сегодня» — по местной дате пользователя (её присылает приложение), а не по UTC: иначе ночью (UTC+5) вчерашние задачи не считались просроченными
+  const tasks = arr(s?.tasks), today = /^\d{4}-\d{2}-\d{2}$/.test(localToday) ? localToday : new Date().toISOString().slice(0, 10);
   const taskInfo = { total: tasks.length, done: tasks.filter((t: any) => t?.done).length,
     overdue: tasks.filter((t: any) => !t?.done && t?.date && t.date < today).slice(0, 10).map((t: any) => clip(t?.title, 100) + " (" + t.date + ")"),
     upcoming: tasks.filter((t: any) => !t?.done && (!t?.date || t.date >= today)).slice(0, 12).map((t: any) => clip(t?.title, 100) + (t?.date ? " · " + t.date + (t?.time ? " " + t.time : "") : "")) };
@@ -293,7 +294,7 @@ Deno.serve(async (req) => {
     const { data: row, error } = await a.sb.from("life_state").select("state,schema_version,updated_at").eq("user_id", a.user.id).maybeSingle();
     if (error) return fail("state_read", 500, "Не удалось прочитать твои данные из облака. Проверь синхронизацию («Настройки → Аккаунт») и повтори через минуту.", { code: error.code || "", msg: error.message || "" });
     const ctx = mode === "week" ? weekContext(row?.state || {}, String(body?.today || "")) : mode === "deep" ? deepContext(row?.state || {}, body?.facts) : mode === "life" ? lifeContext(row?.state || {}, sc, body?.facts) : context(row?.state || {}, sc);
-    ctx.all_data = allData(row?.state || {}, sc.notes);
+    ctx.all_data = allData(row?.state || {}, sc.notes, String(body?.today || ""));
     const p = mode === "deep"
       ? deepRules() + "\n\nРЕЖИМ: DEEP. Сделай честный разбор ровно пятью блоками, каждый с новой строки, начиная с названия заглавными буквами:\nГДЕ Я ТЕРЯЮ ДЕНЬГИ — 2–3 конкретные утечки с суммами и долей (категории, мелкие траты, перерасход банков, рост расходов).\nСЛАБАЯ СТОРОНА — одна главная слабость с цифрой (привычки, задачи, закрытие дня, траты) и почему она мешает цели.\nСИЛЬНАЯ СТОРОНА — что реально получается, с цифрой.\nНАД ЧЕМ РАБОТАТЬ — три коротких измеримых действия на 7 дней (сумма, количество или время).\nШАГ НА СЕГОДНЯ — одно действие, которое можно сделать прямо сейчас.\nНичего кроме этих пяти блоков. app_numbers — точные расчёты приложения, используй их.\n\nДанные:\n" + JSON.stringify(ctx)
       : mode === "week"
