@@ -653,14 +653,17 @@ html[data-theme="light"] .v-seg button.active{box-shadow:0 3px 10px rgba(18,32,5
 .v-form .v-note-text{min-height:16rem!important}
 .v-pin input,.auth-remember input{min-height:0!important;width:1rem;height:1rem;margin:0}
 .ring .ring-fg.zero{stroke-opacity:0}
-.v-note-grid{display:grid;gap:.6rem}
-.v-note{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.75rem;padding:.85rem;text-align:left;cursor:pointer;color:inherit;font:inherit;width:100%}
+.v-note-grid{display:grid;gap:.75rem}
+.v-note-grp{grid-column:1/-1;margin:.9rem .15rem .1rem;display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.v-note-grp:first-child{margin-top:.1rem}
+.v-note-grp i{font-style:normal;font-weight:700;border:1px solid var(--line);background:var(--soft);border-radius:99px;padding:.05rem .55rem;font-size:.75rem}
+.v-note{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.9rem;padding:1rem;text-align:left;cursor:pointer;color:inherit;font:inherit;width:100%}
 .v-note-ico{width:2.5rem;height:2.5rem;border-radius:.8rem;display:grid;place-items:center;background:color-mix(in srgb,var(--nc) 18%,transparent);color:var(--nc)}
 .v-note-ico .ui-icon{width:1.1rem;height:1.1rem}
 .v-note-top{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
 .v-note-title{font-weight:700;font-size:.95rem}
 .v-note-date{font-size:0.7812rem;color:var(--muted);white-space:nowrap}
-.v-note-prev{font-size:.82rem;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.v-note-prev{display:block;margin-top:.35rem;font-size:.84rem;color:var(--muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 .v-note-prev b{color:var(--text)}
 .v-note-tag{display:inline-block;margin-top:.4rem;font-size:0.75rem;font-weight:700;color:var(--nc);background:color-mix(in srgb,var(--nc) 14%,transparent);padding:.1rem .45rem;border-radius:99px}
 .v-editor-bar{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;padding:.35rem;border:1px solid var(--line);border-radius:.8rem;background:var(--soft)}
@@ -1018,7 +1021,10 @@ html[data-theme="light"] #pfLogout{color:#b91c1c}
 .jl-streak.pop b{animation:jlPop .6s cubic-bezier(.34,1.56,.64,1)}
 @keyframes jlFlame{0%,100%{transform:scale(1) rotate(0)}30%{transform:scale(1.08,.95) rotate(-3deg)}60%{transform:scale(.96,1.06) rotate(2deg)}}
 @keyframes jlPop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
-.jl-close-fields{display:grid;gap:10px}
+.jl-close-fields{display:grid;gap:14px}
+.jl-close-how{margin:14px 0;padding:14px 16px;border-radius:14px;background:var(--soft);border:1px solid var(--line);font-size:.86rem;line-height:1.55}
+.jl-close-how b{display:block;margin-bottom:6px;font-size:.92rem}.jl-close-how p{margin:0;color:var(--muted)}
+.jl-report.closed .jl-close-how{border-color:color-mix(in srgb,var(--green) 55%,var(--line))}
 .jl-close-fields textarea{min-height:0;resize:vertical}
 .jl-close-btn{width:100%;min-height:50px;margin-top:12px;border-radius:16px;font-size:0.9375rem}
 .jl-report.closed .jl-close-btn{background:var(--green-soft);color:var(--text);border:1px solid color-mix(in srgb,var(--green) 40%,transparent)}
@@ -1290,7 +1296,7 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 @keyframes jlRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .jl-hero .clock-time{align-items:flex-start;justify-content:flex-end;letter-spacing:-.045em;text-shadow:0 2px 24px rgba(120,170,255,.18);transition:opacity .2s}
 .num{font-variant-numeric:tabular-nums}
-@media (prefers-reduced-motion:reduce){.view.active>*{animation:none}.ring circle,.v-bar i,.jl-track .auto-fill{transition:none}
+@media (prefers-reduced-motion:reduce){.view.active>*{animation:none}.ring circle,.v-bar i,.jl-track .auto-fill{transition:none}}
 /* 75.1: «Сейчас» — живое кольцо этапа вместо полоски (полоска остаётся в разметке для совместимости, но скрыта) */
 .jl-now-main{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .jl-now-txt{min-width:0;flex:1}
@@ -1303,7 +1309,6 @@ body[data-layout="mobile"] .shell{max-width:860px;margin-left:auto;margin-right:
 .jl-now .jl-track{display:none}
 @keyframes jlRingGlow{50%{opacity:.72}}
 @media (prefers-reduced-motion:reduce){.jl-now-ring .fg{animation:none;transition:none}}
-}
 
 .jl-hweek{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .jl-hweek:empty{display:none}
@@ -1581,12 +1586,18 @@ b,strong{font-weight:600}
 .jl-dh-top>div.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--soft))}
 .jl-dh-top small{display:block;color:var(--muted);font-size:.75rem}.jl-dh-top b{display:block;margin-top:5px;font-size:.92rem;font-variant-numeric:tabular-nums}
 .jl-dh-sec{margin-top:18px}.jl-dh-sec h3{margin:0 0 8px;font-size:.95rem}
-.jl-dh-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:10px 2px;border-top:1px solid var(--line);animation:jlRowIn .4s calc(var(--i)*30ms) cubic-bezier(.2,.8,.2,1) backwards}
+.jl-dh-row{display:grid;grid-template-columns:minmax(0,1fr) auto 36px;gap:4px 10px;align-items:center;padding:10px 2px;border-top:1px solid var(--line);animation:jlRowIn .4s calc(var(--i)*30ms) cubic-bezier(.2,.8,.2,1) backwards}
 .jl-dh-row span{font-size:.84rem;color:var(--muted);min-width:0}
 .jl-dh-row b{font-variant-numeric:tabular-nums}
 .jl-dh-row em{grid-column:1/-1;font-style:normal;font-size:.76rem;color:var(--muted)}
 .jl-dh-row em.down{color:var(--green)}.jl-dh-row em.up{color:var(--red)}
-.jl-dh-row.pay{grid-template-columns:minmax(0,1fr) auto}
+.jl-dh-row.pay{grid-template-columns:minmax(0,1fr) auto 36px}
+.jl-dh-del{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--red);display:grid;place-items:center;cursor:pointer;padding:0}
+.jl-dh-del .ui-icon{width:1rem;height:1rem}
+.jl-dh-base{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--soft)}
+.jl-dh-base small{display:block;color:var(--muted);font-size:.75rem}.jl-dh-base b{display:block;margin-top:5px;font-size:.95rem;font-variant-numeric:tabular-nums}
+.jl-dh-base .btn{grid-column:1/-1}
+.jl-dh-hint{margin:8px 2px 0;color:var(--muted);font-size:.8rem;line-height:1.5}
 .jl-dh-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
 /* living money forms */
 .jl-receipt{display:grid;align-items:center;border-radius:18px;border:1px solid var(--line);background:var(--soft)}
@@ -1730,7 +1741,7 @@ html[data-theme="dark"] .v-pulse{background:radial-gradient(120% 80% at 50% 0%,r
 .jl-lg-k b{display:block;font-size:1.12rem;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .jl-lg-k.in b{color:var(--green)}.jl-lg-k.out b,.jl-lg-k.debt b{color:var(--red)}.jl-lg-k.goal b{color:var(--purple)}
 .jl-lg-k.net{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center}
-.jl-lg-k.net b{font-size:1.4rem}.jl-lg-k.net.pos b{color:var(--green)}.jl-lg-k.net.neg b{color:var(--red)}.jl-lg-k.net i{font-style:normal;font-size:.6em;color:var(--muted)}
+.jl-lg-k.net b{font-size:1.4rem}.jl-lg-k.net.pos b{color:var(--green)}.jl-lg-k.net.neg b{color:var(--red)}.jl-lg-k.net i{font-style:normal;font-size:.6em;color:var(--text);opacity:.82}
 .jl-lg-where{margin-top:12px;display:grid;gap:7px}
 .jl-lg-bar{display:grid;grid-template-columns:minmax(0,9rem) 1fr auto;gap:8px;align-items:center;font-size:.82rem}
 .jl-lg-bar i{height:8px;border-radius:99px;background:color-mix(in srgb,var(--line) 70%,transparent);position:relative;overflow:hidden}
@@ -1761,7 +1772,7 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 #achievements{display:grid;gap:8px}
 @media (prefers-reduced-motion:no-preference){.jl-ach-ico{animation:achShine 3.6s ease-in-out infinite}.jl-ach:nth-child(2n) .jl-ach-ico{animation-delay:1.2s}}
 @keyframes achShine{0%,100%{transform:rotate(0) scale(1)}45%{transform:rotate(-6deg) scale(1.06)}}
-.jl-gprev{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;padding:14px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--purple) 18%,var(--soft)),color-mix(in srgb,var(--blue) 10%,var(--soft)));border:1px solid var(--line)}
+.jl-gprev{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;padding:18px;border-radius:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--purple) 18%,var(--soft)),color-mix(in srgb,var(--blue) 10%,var(--soft)));border:1px solid var(--line)}
 .jl-gprev-ring{position:relative;width:84px;height:84px;display:grid;place-items:center}
 .jl-gprev-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
 .jl-gprev-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
@@ -1769,7 +1780,13 @@ html[data-theme="light"] .jl-ach small{color:#7a5410}
 .jl-gprev-ring .now{stroke:var(--purple);stroke-dasharray:0 100;transition:stroke-dasharray .7s cubic-bezier(.2,.8,.2,1)}
 .jl-gprev-ring .add{stroke:var(--green);stroke-dasharray:0 100;transition:stroke-dasharray .5s cubic-bezier(.2,.8,.2,1),stroke-dashoffset .5s;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--green) 70%,transparent))}
 .jl-gprev-ring b{position:relative;font-size:1.1rem;font-weight:800;font-variant-numeric:tabular-nums}
-.jl-gprev-txt b{display:block;font-size:1rem}.jl-gprev-txt span{display:block;margin-top:3px;font-size:.85rem}.jl-gprev-txt small{display:block;margin-top:4px;color:var(--muted);font-size:.78rem}
+.jl-gprev-txt b{display:block;font-size:1.05rem}.jl-gprev-txt span{display:block;margin-top:8px;font-size:.88rem;line-height:1.6;white-space:pre-line}.jl-gprev-txt small{display:block;margin-top:10px;color:var(--muted);font-size:.8rem;line-height:1.5}
+.jl-amount{font-size:1.3rem!important;font-weight:800;letter-spacing:.02em;font-variant-numeric:tabular-nums;min-height:3.2rem}
+.stack>.jl-gprev{margin-bottom:6px}
+.stack>.field{margin-top:8px}
+.stack>.field>label{display:block;margin-bottom:10px}
+.stack>.jl-chips{gap:10px;margin:4px 0 10px}
+.stack>.sub{margin-top:6px;line-height:1.5}
 .jl-chips{display:flex;flex-wrap:wrap;gap:8px}
 .jl-chips .jl-chip{min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--soft);color:var(--text);font:inherit;font-weight:700;font-size:.85rem;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s}
 .jl-chips .jl-chip:active{transform:scale(.92)}
@@ -2071,6 +2088,9 @@ html[data-theme="light"] .jl-pc-dot{fill:#fff}
 .jl-pray b{font-variant-numeric:tabular-nums}
 /* 75.2: the floating «+» button sits over the right edge of the prayer times; keep the row clear of it */
 #prayerBox{padding-right:64px}
+.jl-pray-test{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:12px}
+.jl-pray-test small{color:#c6d2e3;font-size:12px;line-height:1.4;flex:1 1 180px}
+#prayerTest{background:#0f2546;border-color:rgba(155,196,255,.3);color:#f4efe3}
 .jl-pray-head{margin-top:12px;padding:7px 10px;border-radius:12px;background:#0f2546;color:#f4efe3;font-size:13px}
 .jl-pray-head small{text-align:right;color:#c6d2e3;font-size:12px}
 .jl-quick-close{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
@@ -2246,7 +2266,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <blockquote id="motivationText">—</blockquote>
       <figcaption id="motivationSource">—</figcaption>
     </figure>
-    <div id="prayerBox" hidden><div class="jl-pray-head"><b>🕌 Время намаза</b><small id="prayerNext">—</small></div><div class="jl-pray" id="prayerTimes"></div></div>
+    <div id="prayerBox" hidden><div class="jl-pray-head"><b>🕌 Время намаза</b><small id="prayerNext">—</small></div><div class="jl-pray" id="prayerTimes"></div><div class="jl-pray-test"><button class="jl-pill" id="prayerTest" type="button">🔔 Проверить звук</button><small id="prayerPerm"></small></div></div>
   </div>
 
   <div class="card">
@@ -2270,7 +2290,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   </div>
 
   <div class="card v-pulse">
-    <div class="v-pulse-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">⚡</span>Пульс жизни</h2></div>
+    <div class="v-pulse-head"><h2 class="v-title"><span class="jl-emo" aria-hidden="true">⚡</span>Пульс жизни</h2><div class="v-sub">Считает всё: этапы, задачи, привычки, деньги, цель, долг, заметки и итог дня</div></div>
     <div class="v-pulse-sub"><span class="v-sub" id="pulseStatus">—</span><div class="day-mood" id="dayMoodBadge" aria-live="polite"><span id="dayMoodEmoji">😔</span><strong id="dayMoodLabel">—</strong></div></div>
     <div class="pulse-gauge" id="pulseGauge"><svg viewBox="0 0 132 76" aria-hidden="true"><defs><linearGradient id="pgGrad" x1="0" x2="1"><stop offset="0" stop-color="#fb7185"/><stop offset=".45" stop-color="#fbbf4d"/><stop offset="1" stop-color="#34d399"/></linearGradient></defs><path class="pg-track" d="M10 66 A56 56 0 0 1 122 66" pathLength="100"/><path class="pg-arc" id="pgArc" d="M10 66 A56 56 0 0 1 122 66" pathLength="100"/><g class="pg-needle" id="pgNeedle"><line x1="66" y1="66" x2="66" y2="22"/><circle cx="66" cy="66" r="5"/></g></svg><div class="pg-text"><b id="pgValue">0<small>%</small></b><span id="pgLabel">—</span><em id="pgDeg">0° из 180°</em></div></div>
     <div class="jl-pchart" id="pulseChart"></div>
@@ -2323,7 +2343,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   </div>
 
   <div class="card jl-report">
-    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🌙</span>Итог дня</h2><div class="v-sub">30 секунд — и день закрыт</div></div>
+    <div class="row"><div><h2 class="v-title"><span class="jl-emo" aria-hidden="true">🌙</span>Итог дня</h2><div class="v-sub">Вечером: что получилось и один шаг на завтра</div></div>
       <button class="jl-pill" type="button" id="historyBtn"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg>История</button></div>
     <div class="jl-streak" id="streakBox"><span class="jl-flame" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2c1 4 5 5.5 5 10.5A5 5 0 0 1 7 12.5C7 10 8.5 8.5 9.5 7.5 10 10 11.5 10.5 12 10.5 12 7 11 4.5 12 2Z"/></svg></span><div><b><span id="streakDays">0</span> <span id="streakWord">дней</span> подряд</b><small id="streakBest">Закрой сегодняшний день — начнётся серия</small></div></div>
     <div class="jl-ledger" id="dayLedger" aria-live="polite"></div>
@@ -2331,11 +2351,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <button class="jl-pill" type="button" data-qblock="Телефон и соцсети" aria-pressed="false">📱 Телефон</button><button class="jl-pill" type="button" data-qblock="Усталость" aria-pressed="false">😴 Усталость</button><button class="jl-pill" type="button" data-qblock="Чужие дела и гости" aria-pressed="false">👥 Чужие дела</button><button class="jl-pill" type="button" data-qblock="Ничего не помешало" aria-pressed="false">💪 Ничего</button>
       <button class="jl-pill gold" type="button" id="quickCloseBtn"><span class="jl-emo" aria-hidden="true">⚡</span>Закрыть за 30 секунд</button>
     </div>
+    <div class="jl-close-how" id="closeHow"><b id="closeHowTitle">Что значит «закрыть день»</b><p id="closeHowText">Это короткий вечерний итог. Закрытый день засчитывается в серию «дней подряд» и в пульс жизни. Быстрее всего — кнопка «Закрыть за 30 секунд»: приложение само запишет, что ты сделал за день, и предложит шаг на завтра. Или впиши сам и нажми «Закрыть день».</p></div>
     <div class="report-shell">
       <div class="jl-close-fields">
-        <div class="field"><label for="rDone">Что сделал сегодня</label><textarea id="rDone" rows="2" placeholder="Коротко: главное, что реально сделано"></textarea></div>
-        <div class="field"><label for="rBlock">Что помешало</label><textarea id="rBlock" rows="1" placeholder="Без оправданий: что отвлекло"></textarea></div>
-        <div class="field"><label for="rTomorrow">Один шаг на завтра</label><textarea id="rTomorrow" rows="1" placeholder="Только одно главное действие"></textarea></div>
+        <div class="field"><label for="rDone">1. Что получилось сегодня</label><textarea id="rDone" rows="2" placeholder="Коротко: главное, что реально сделано"></textarea></div>
+        <div class="field"><label for="rBlock">2. Что помешало (можно пропустить)</label><textarea id="rBlock" rows="1" placeholder="Без оправданий: что отвлекло"></textarea></div>
+        <div class="field"><label for="rTomorrow">3. Один шаг на завтра</label><textarea id="rTomorrow" rows="1" placeholder="Только одно главное действие"></textarea></div>
       </div>
       <button class="btn primary jl-close-btn" id="saveReportBtn" type="button"><svg class="ui-icon" aria-hidden="true"><use href="#i-check"></use></svg> <span id="closeDayLabel">Закрыть день</span></button>
     </div>
@@ -2543,7 +2564,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, копия в файл</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.7</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.8</span></div>
   </div>
 </section>
 
@@ -2596,7 +2617,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.7';
+const APP_NAME='Life',APP_VERSION='74.8';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -3827,12 +3848,17 @@ function prayerTimes(date=new Date(),city=prayerCity(),asr=state?.settings?.pray
   const out={};for(const k in h){const v=h[k]+tz-lng/15;out[k]=Number.isFinite(v)?Math.round(fix(v,24)*60)%1440:null}
   return out;
 }
+// 75.15: the owner could not hear the prayer reminders — the box now says why (sound off, notifications not allowed) and has a test button
+function prayerPermText(){let p='';try{if(!window.AndroidBridge?.notify&&!window.chrome?.webview&&'Notification'in window){const s=Notification.permission;p=s==='granted'?'':s==='denied'?'Уведомления запрещены в браузере — разреши их в настройках сайта (значок замка в адресной строке).':'Нажми «Проверить звук» — браузер спросит разрешение на уведомления.'}}catch(e){}return (state.settings?.sound===false?'Звук выключен в настройках. ':'')+(state.settings?.notifications===false?'Уведомления выключены в настройках. ':'')+p}
+document.addEventListener('click',e=>{const b=e.target.closest?.('#prayerTest');if(!b)return;
+  try{audioCtx();loadGlass();if(!window.AndroidBridge?.notify&&'Notification'in window&&Notification.permission==='default')Notification.requestPermission().then(()=>renderPrayer()).catch(()=>{})}catch(_){}
+  playNotificationSound(true);notify('🕌 Проверка напоминания','Так прозвучит время намаза','tasks',{prayer:true});renderPrayer()});
 function renderPrayer(){
   const box=$('prayerBox');if(!box)return;const on=prayerOn();if(box.hidden===on)box.hidden=!on;if(!on)return;
   const t=prayerTimes(),m=Math.floor(nowMin()),list=PRAYER_NAMES.filter(([k])=>t[k]!==null),next=list.find(([k])=>t[k]>m);
   const tm=new Date();tm.setDate(tm.getDate()+1);const nt=next?t[next[0]]:prayerTimes(tm).fajr,left=next?nt-m:nt+1440-m;
   painter($('prayerTimes')).html=list.map(([k,n])=>`<div class="${next&&next[0]===k?'next':t[k]<=m?'past':''}"><small>${n}</small><b>${fmtMin(t[k])}</b></div>`).join('');
-  textOf($('prayerNext')).v=`${next?next[1]:'Фаджр'} в ${fmtMin(nt)} · через ${left>=60?Math.floor(left/60)+' ч '+left%60+' мин':left+' мин'} · ${PRAYER_CITIES[prayerCity()][0]}`;
+  textOf($('prayerPerm')).v=prayerPermText();textOf($('prayerNext')).v=`${next?next[1]:'Фаджр'} в ${fmtMin(nt)} · через ${left>=60?Math.floor(left/60)+' ч '+left%60+' мин':left+' мин'} · ${PRAYER_CITIES[prayerCity()][0]}`;
 }
 function prayerReminders(day=new Date()){if(!prayerOn()||state.settings?.notifications===false)return [];const t=prayerTimes(day);return PRAYER_NAMES.filter(([k])=>t[k]!==null).map(([k,n])=>({k,min:t[k],title:'🕌 Время намаза: '+n,body:fmtMin(t[k])+' · '+PRAYER_CITIES[prayerCity()][0]}))}
 const QUOTE_SETS={hadith:'Хадисы',general:'Мотивация',off:'Выключить'};
@@ -3923,7 +3949,7 @@ function isQuietMin(m){return m>=QUIET_FROM_MIN||m<QUIET_TO_MIN}
 function quietNow(){return state.settings?.quietHours===true&&isQuietMin(nowMin())}
 function notify(title,body,kind='tasks',opts={}){
   logNotice(title,body,kind);if(quietNow())return;toast(title,body);
-  const allowed=state.settings?.notifications!==false&&noticeAllowed(kind);
+  const allowed=state.settings?.notifications!==false&&(opts.prayer||noticeAllowed(kind));
   const android=!!window.AndroidBridge?.notify;
   if(allowed&&opts.native&&hasNativeAlarms())return;          // the alarm already rang with the chime
   const host=allowed&&!android&&hostPlaysSound();
@@ -4080,7 +4106,7 @@ function runScheduler(){
     if(isDue(m,tm))once('t|'+day+'|'+t.id,()=>{const n=taskNotice(t,'at');notify(n.title,n.body,'tasks',{native:true,taskId:t.id,due});if(currentView==='viewToday')renderTasks()});
   }
   for(const sl of twoHourSlots())if(isDue(m,sl.min))once('2h|'+day+'|'+sl.time,()=>notify(sl.title,sl.body,'tasks',{native:true,sound:'nature'}));
-  for(const p of prayerReminders())if(isDue(m,p.min))once('pr|'+day+'|'+p.k,()=>notify(p.title,p.body,'tasks',{native:true}));
+  for(const p of prayerReminders())if(isDue(m,p.min))once('pr|'+day+'|'+p.k,()=>notify(p.title,p.body,'tasks',{native:true,prayer:true}));
   if(m!==_lastMinute){_lastMinute=m;if(currentView==='viewToday'){updateTaskBars();renderRhythm(info);renderFreePlan();renderGoalDeadline();renderPrayer()}}
   const cdm=timeToMin(closeDayTime());
   if(isDue(m,cdm)&&!dayClosed(state.reports?.[day],day))once('cd|'+day,()=>notify('Закрой день','30 секунд: одно касание «Закрыть за 30 секунд» — итог запишется сам.','tasks',{native:true}));
@@ -4088,6 +4114,9 @@ function runScheduler(){
   if(autoDone)renderToday();else if(!hasTextSelection()){renderClock(info);renderAuto(info);renderTodayLight()}
 }
 window.__jlTick=()=>{try{runScheduler()}catch(e){}};
+// 75.15: after the tab or the phone was asleep the rhythm of the day (current stage, ticks, reminders) catches up at once
+const wakeUp=()=>{if(document.hidden)return;try{runScheduler();if(currentView==='viewToday')renderToday()}catch(e){}};
+document.addEventListener('visibilitychange',wakeUp);window.addEventListener('focus',wakeUp);window.addEventListener('pageshow',wakeUp);
 document.addEventListener('visibilitychange',()=>document.documentElement.classList.toggle('app-hidden',document.visibilityState==='hidden'));
  // the Windows host calls this even when the window is hidden
 // the clock: thin hours and minutes, small seconds; only the parts that change are touched (no flicker)
@@ -4122,7 +4151,14 @@ function ensureDebtHistory(){state.debtHistory=Array.isArray(state.debtHistory)?
 function debtPulse(){const base=Number(state.debtBaseline)||0,cur=debtTotal();if(base<=0)return 0;return clamp(Math.round((1-cur/base)*100),0,100)}
 
 function goalPulse(){const m=milestonePct(),f=goalFinanceMetrics();return f.target>0?f.pct:m}
-function getLifePulse(){const day=scheduleDayMetrics(),rep=dayReport(),steps=daySteps(),done=steps.filter(s=>!!rep.steps?.[s.id]).length;return {day:Math.round(day.pct),goal:goalPulse(),finance:financePulse(),debt:debtPulse(),discipline:steps.length?Math.round(done/steps.length*100):0}}
+// 75.15: discipline = stages of the day, habits, tasks and the closed day, together
+function disciplineNow(){const k=keyDay(),parts=[],st=daySteps(),rep=dayReport();
+  if(st.length)parts.push(st.filter(x=>!!rep.steps?.[x.id]).length/st.length);
+  const hb=state.habits||[];if(hb.length)parts.push(hb.filter(h=>habitDoneOn(h,k)).length/hb.length);
+  const tk=(state.tasks||[]).filter(t=>t.date===k);if(tk.length)parts.push(tk.filter(t=>t.done).length/tk.length);
+  if(dayClosed(state.reports?.[k],k))parts.push(1);
+  return parts.length?Math.round(parts.reduce((a,b)=>a+b,0)/parts.length*100):0}
+function getLifePulse(){const day=scheduleDayMetrics(),rep=dayReport(),steps=daySteps(),done=steps.filter(s=>!!rep.steps?.[s.id]).length;return {day:Math.round(day.pct),goal:goalPulse(),finance:financePulse(),debt:debtPulse(),discipline:disciplineNow()}}
 function effectiveDayMode(){const dow=new Date().getDay();if(dow===0||dow===6)return 'rest';const k=keyDay();const income=(state.profits||[]).filter(x=>x.dateKey===k).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);if(income>0)return 'normal';const m=nowMin(),start=timeToMin(daySteps()?.[0]?.time||'08:30'),end=timeToMin(daySteps()?.[daySteps().length-1]?.end||'22:00');return m>=start&&m<end?'heavy':'normal'}
 function applyAutoDayMode(){const d=dailyState(),mode=effectiveDayMode();if(d.mode!==mode){d.mode=mode;state.dayMode=mode;saveState()}return mode}
 function dayMood(){const mode=applyAutoDayMode(),income=(state.profits||[]).filter(x=>x.dateKey===keyDay()).reduce((s,x)=>s+Math.max(0,Number(x.amount)||0),0);return mode==='rest'?{emoji:'🏖️',label:'Выходной'}:income>0?{emoji:'😄',label:'Хороший день'}:{emoji:'😔',label:'Тяжёлый день'}}
@@ -4700,13 +4736,23 @@ function renderMoney(){
 function renderNotes(){
   purgeExpiredTrash(state);
   const q=(($('noteSearch')&&$('noteSearch').value)||'').trim().toLowerCase();
-  let notes=[...(state.notes||[])].sort((a,b)=>(Number(b.pinned)-Number(a.pinned))||(Date.parse(b.updatedAt||b.at||0)-Date.parse(a.updatedAt||a.at||0)));
+  let notes=[...(state.notes||[])].sort((a,b)=>(Number(!!b.pinned)-Number(!!a.pinned))||(Date.parse(b.updatedAt||b.at||0)-Date.parse(a.updatedAt||a.at||0)));
   if(noteFilter!=='all')notes=notes.filter(n=>(n.category||'personal')===noteFilter);
   if(q)notes=notes.filter(n=>((n.title||'')+' '+(n.body||'')).toLowerCase().includes(q));
   const trash=$('trashCount'); if(trash)textOf(trash).v=String((state.notesTrash||[]).length);
   $$('[data-note-filter]').forEach(b=>b.classList.toggle('active',b.dataset.noteFilter===noteFilter));
   const list=$('notesList'); if(!list)return;
-  painter(list).html=notes.length?notes.map(n=>{const c=NOTE_CATS[n.category]||NOTE_CATS.personal;return `<button class="card v-note" type="button" data-edit-note="${esc(n.id)}" style="--nc:${c.color}"><span class="v-note-ico">${svgIcon(c.icon)}</span><span style="min-width:0"><span class="v-note-top"><span class="v-note-title">${n.pinned?'📌 ':''}${esc(n.title||'Без заголовка')}</span><span class="v-note-date">${esc(fmtNoteDate(n.updatedAt||n.at))}</span></span><span class="v-note-prev">${notePreviewHTML(n.body)}</span><span class="v-note-tag">${esc(c.label)}</span></span></button>`}).join(''):`<div class="v-empty">${q||noteFilter!=='all'?'Ничего не найдено.':'Заметок пока нет. Нажми «+», чтобы создать.'}</div>`;
+  // 75.15: a note without a title is named by its first words; the list is grouped (pinned, today, yesterday, this week, this month, earlier)
+  const nParts=n=>{const t=String(n.title||'').trim(),body=String(n.body||'').trim();if(t)return {title:t,rest:body};if(!body)return {title:'Пустая заметка',rest:''};
+    const lines=body.split(/\n+/),first=lines[0].trim(),tail=lines.slice(1).join('\n').trim(),m=first.match(/^(.{6,60}?)[.!?](\s+|$)/);
+    if(m)return {title:m[1].trim(),rest:(first.slice(m[0].length).trim()+(tail?'\n'+tail:'')).trim()};
+    if(first.length<=60)return {title:first,rest:tail};
+    const cut=(first.slice(0,52).replace(/\s+\S*$/,'')||first.slice(0,52));return {title:cut+'…',rest:first.slice(cut.length).trim()+(tail?'\n'+tail:'')}};
+  const nGroup=n=>{if(n.pinned)return 0;const d=new Date(n.updatedAt||n.at||0);if(Number.isNaN(d.getTime()))return 5;const a=new Date();a.setHours(0,0,0,0);const diff=Math.round((a-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/DAY_MS);return diff<=0?1:diff===1?2:diff<7?3:diff<31?4:5};
+  const GR=['📌 Закреплённые','Сегодня','Вчера','На этой неделе','В этом месяце','Раньше'];
+  const card=n=>{const c=NOTE_CATS[n.category]||NOTE_CATS.personal,pt=nParts(n);return `<button class="card v-note" type="button" data-edit-note="${esc(n.id)}" style="--nc:${c.color}"><span class="v-note-ico">${svgIcon(c.icon)}</span><span style="min-width:0"><span class="v-note-top"><span class="v-note-title">${esc(pt.title)}</span><span class="v-note-date">${esc(fmtNoteDate(n.updatedAt||n.at))}</span></span>${pt.rest?`<span class="v-note-prev">${notePreviewHTML(pt.rest)}</span>`:''}<span class="v-note-tag">${esc(c.label)}</span></span></button>`};
+  let html='';if(notes.length){let g=-1;for(const n of notes){const k=nGroup(n);if(k!==g){g=k;html+=`<div class="v-note-grp">${GR[k]} <i>${notes.filter(x=>nGroup(x)===k).length}</i></div>`}html+=card(n)}}else html=`<div class="v-empty">${q||noteFilter!=='all'?'Ничего не найдено.':'Заметок пока нет. Нажми «+», чтобы создать.'}</div>`;
+  painter(list).html=html;
   $$('[data-edit-note]').forEach(b=>b.onclick=()=>openNote(b.dataset.editNote));
 }
 function renderTrashHTML(){
@@ -4846,9 +4892,9 @@ function goalPreviewUpdate(target,before,after,date,o={}){
 function openGoalSaving(){
   syncGoalFinanceCompletion();const f=state.goal.finance||{},draft=state.drafts?.goalSaving||{};
   if(!(Number(f.targetAmount)>0)){toast('Сначала задай сумму цели');openGoalFinanceEdit();return}
-  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><h2>Внести накопление</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px">${goalPreviewHTML()}<div class="field"><label>Сумма пополнения</label><input id="gsAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" value="${esc(draft.amount||'')}"></div><div class="jl-chips" id="gsChips">${[500,1000,2000,5000].map(v=>`<button type="button" class="jl-chip" data-gs="${v}">+${v.toLocaleString('ru-RU')}</button>`).join('')}<button type="button" class="jl-chip gold" data-gs="all">Всё свободное</button></div><div class="field"><label>Комментарий</label><input id="gsNote" placeholder="Например: отложил с зарплаты" value="${esc(draft.note||'')}"></div><div class="sub">Свободно в кассе: ${esc(fmtMoney(walletMetrics().cash))} · поля сохраняются сами</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveGoalSavingBtn"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Внести</button></div></div>`);
+  openModal(`<div class="close-row"><div><div class="eyebrow cell-head"><span class="section-title-icon"><svg class="ui-icon"><use href="#i-target"></use></svg></span>Цель</div><h2>Внести накопление</h2></div><button class="btn small" id="closeModalBtn"><svg class="ui-icon"><use href="#i-check"></use></svg> Закрыть</button></div><div class="stack" style="margin-top:12px">${goalPreviewHTML()}<div class="field"><label>Сумма пополнения</label><input id="gsAmount" class="jl-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0" value="${esc(draft.amount||'')}"></div><div class="jl-chips" id="gsChips">${[500,1000,2000,5000].map(v=>`<button type="button" class="jl-chip" data-gs="${v}">+${v.toLocaleString('ru-RU')}</button>`).join('')}<button type="button" class="jl-chip gold" data-gs="all">Всё свободное</button></div><div class="field"><label>Комментарий</label><input id="gsNote" placeholder="Например: отложил с зарплаты" value="${esc(draft.note||'')}"></div><div class="sub">Свободно в кассе: ${esc(fmtMoney(walletMetrics().cash))} · поля сохраняются сами</div><div style="display:flex;justify-content:flex-end"><button class="btn primary" id="saveGoalSavingBtn"><svg class="ui-icon"><use href="#i-arrow-up"></use></svg> Внести</button></div></div>`);
   $('closeModalBtn').onclick=closeModal;const autosave=()=>saveDraft('goalSaving',{amount:$('gsAmount').value,note:$('gsNote').value});['gsAmount','gsNote'].forEach(id=>$(id).addEventListener('input',autosave));
-  {const fm=goalFinanceMetrics(),live=()=>{const a=Math.max(0,Number($('gsAmount').value)||0);goalPreviewUpdate(fm.target,fm.saved,fm.saved+a,fm.targetDate,{label:'Отложено',remaining:fm.remaining,line:`В цели ${fmtMoney(fm.saved)}${a?' → '+fmtMoney(fm.saved+a):''} · с кассой ${fm.pct}%`})};$('gsAmount').addEventListener('input',live);live();
+  {const fm=goalFinanceMetrics(),live=()=>{const a=Math.max(0,Number($('gsAmount').value)||0);goalPreviewUpdate(fm.target,fm.saved,fm.saved+a,fm.targetDate,{label:'Отложено',remaining:fm.remaining,line:`В цели сейчас: ${fmtMoney(fm.saved)}${a?'\nПосле пополнения: '+fmtMoney(fm.saved+a):''}\nС кассой: ${fm.pct}%`})};$('gsAmount').addEventListener('input',live);live();
    $$('[data-gs]').forEach(b=>b.onclick=()=>{const v=b.dataset.gs==='all'?Math.max(0,Math.floor(walletMetrics().cash)):(Number($('gsAmount').value)||0)+Number(b.dataset.gs);$('gsAmount').value=String(v);autosave();live();haptic(8)})}
   $('saveGoalSavingBtn').onclick=()=>{const amount=Number($('gsAmount').value);if(!(amount>0)){toast('Укажи сумму');$('gsAmount').focus();return}syncGoalFinanceCompletion();const remaining=Math.max(0,Number(state.goal.finance.targetAmount||0)-Number(state.goal.finance.savedAmount||0));if(!(remaining>0)){toast('Капитал уже собран полностью');clearDraft('goalSaving');closeModal();return}const cashBefore=walletMetrics().cash;if(!(cashBefore>0)){toast('В кассе нет доступной суммы','Сначала добавь прибыль или уменьши расход.');return}const applied=Math.min(amount,remaining,cashBefore);if(!(applied>0)){toast('Недостаточно доступных денег','Сумма накопления не может превышать текущую кассу.');return}if(!state.goal.finance.startedAt)state.goal.finance.startedAt=new Date().toISOString();state.goal.finance.contributions=Array.isArray(state.goal.finance.contributions)?state.goal.finance.contributions:[];state.goal.finance.contributions.unshift({id:uid(),amount:applied,note:$('gsNote').value.trim(),at:new Date().toISOString()});syncGoalFinanceCompletion();clearDraft('goalSaving');saveState();closeModal();renderAll();toast('Накопление добавлено',`${fmtMoney(applied)} внесено в капитал цели. Все разделы обновлены.`)};focusSoon('gsAmount',50)
 }
@@ -4883,16 +4929,22 @@ function openDebtHistory(focus='all'){
   const pays=(state.expenses||[]).filter(e=>e.debtPayment&&(!who||e.debtPayment===who)).sort((a,b)=>String(b.at).localeCompare(String(a.at)));
   const paidSum=pays.reduce((a,e)=>a+(Number(e.amount)||0),0);
   const hist=state.debtHistory.slice().reverse().slice(0,30);
-  const histRows=hist.map((x,i)=>{const prev=hist[i+1],d=prev?(Number(x.total)||0)-(Number(prev.total)||0):0;return `<div class="jl-dh-row" style="--i:${i}"><span>${esc(new Date(x.day+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}))}</span><b>${esc(fmtMoney(x.total))}</b><em class="${d<0?'down':d>0?'up':''}">${d<0?'−'+esc(fmtMoney(-d)):d>0?'+'+esc(fmtMoney(d)):'без изменений'}</em></div>`}).join('');
-  const payRows=pays.slice(0,40).map((e,i)=>`<div class="jl-dh-row pay" style="--i:${i}"><span>${esc(new Date(e.at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'}))} · ${esc(name[e.debtPayment]||'Долг')}${e.note?' · '+esc(e.note):''}</span><b class="green-txt">−${esc(fmtMoney(e.amount))}</b></div>`).join('');
+  const histRows=hist.map((x,i)=>{const prev=hist[i+1],d=prev?(Number(x.total)||0)-(Number(prev.total)||0):0;return `<div class="jl-dh-row" style="--i:${i}"><span>${esc(new Date(x.day+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'}))}</span><b>${esc(fmtMoney(x.total))}</b>${x.day!==keyDay()?`<button class="jl-dh-del" type="button" data-dh-del-h="${esc(x.day)}" aria-label="Удалить эту запись истории">${svgIcon('i-trash')}</button>`:'<span></span>'}<em class="${d<0?'down':d>0?'up':''}">${d<0?'−'+esc(fmtMoney(-d)):d>0?'+'+esc(fmtMoney(d)):'без изменений'}</em></div>`}).join('');
+  const payRows=pays.slice(0,40).map((e,i)=>`<div class="jl-dh-row pay" style="--i:${i}"><span>${esc(new Date(e.at).toLocaleDateString('ru-RU',{day:'numeric',month:'short'}))} · ${esc(name[e.debtPayment]||'Долг')}${e.note?' · '+esc(e.note):''}</span><b class="green-txt">−${esc(fmtMoney(e.amount))}</b><button class="jl-dh-del" type="button" data-dh-del-pay="${esc(e.id)}" aria-label="Удалить платёж">${svgIcon('i-trash')}</button></div>`).join('');
   openModal(`<div class="close-row"><div><div class="eyebrow">Долг</div><h2>${who?esc(name[who]):'История долга'}</h2><div class="sub">${who?'Платежи и как менялся этот долг':'Все платежи и как менялся долг'}</div></div><button class="btn small" id="closeModalBtn">${svgIcon('i-x')} Закрыть</button></div>
   <div class="jl-dh-top"><div class="${focus==='bank'?'on':''}" data-dh="bank"><small>${esc(debtLabel('bank'))}</small><b>${esc(fmtMoney(state.debts.bank))}</b></div><div class="${focus==='firms'?'on':''}" data-dh="firms"><small>${esc(debtLabel('firms'))}</small><b>${esc(fmtMoney(state.debts.firms))}</b></div><div class="${!who?'on':''}" data-dh="all"><small>Всего</small><b>${esc(fmtMoney(debtTotal()))}</b></div></div>
+  <div class="jl-dh-base"><div><small>Стартовая сумма</small><b>${esc(fmtMoney(Math.max(Number(state.debtBaseline)||0,debtTotal())))}</b></div><div><small>Погашено с начала</small><b class="green-txt">${esc(fmtMoney(Math.max(0,(Number(state.debtBaseline)||0)-debtTotal())))}</b></div>${debtTotal()>0&&(Number(state.debtBaseline)||0)!==debtTotal()?`<button class="btn small" type="button" id="dhRebase">${svgIcon('i-calendar')} Начать отсчёт заново</button>`:''}</div><p class="jl-dh-hint">«Погашено» — это стартовая сумма минус долг сейчас. Не помнишь платежей — нажми «Начать отсчёт заново»: старт станет равен долгу сейчас. Любую запись можно удалить корзиной справа.</p>
   <section class="jl-dh-sec"><h3>💸 Платежи${pays.length?` · ${pays.length} на ${esc(fmtMoney(paidSum))}`:''}</h3>${payRows||'<div class="v-empty">Платежей по долгу ещё нет. Внеси первый — кнопкой ниже.</div>'}</section>
   <section class="jl-dh-sec"><h3>📉 Как менялся долг</h3>${histRows||'<div class="v-empty">История появится после первого изменения.</div>'}</section>
   <div class="jl-dh-actions"><button class="btn primary" type="button" id="dhPay">${svgIcon('i-transfer')} Внести платёж</button><button class="btn" type="button" id="dhEdit">${svgIcon('i-pencil')} ${(who?debtNamed(who):debtNamed('bank')&&debtNamed('firms'))?'Изменить суммы':'Назвать и изменить'}</button></div>`);
   $('closeModalBtn').onclick=closeModal;
   $$('[data-dh]').forEach(b=>b.onclick=()=>openDebtHistory(b.dataset.dh));
   $('dhPay').onclick=()=>{closeModal();openTransferForm({dir:'to-debt',debt:who||'bank'})};
+  // 75.15: any payment or history line can be deleted by hand; the start amount can be set to the debt of today
+  const reopen=()=>{closeModal();setTimeout(()=>openDebtHistory(focus),120)};
+  $$('[data-dh-del-pay]').forEach(b=>b.onclick=()=>{const id=b.dataset.dhDelPay;closeModal();setTimeout(()=>{deleteTx('debt',id);setTimeout(()=>openDebtHistory(focus),80)},120)});
+  $$('[data-dh-del-h]').forEach(b=>b.onclick=()=>{const day=b.dataset.dhDelH,i=state.debtHistory.findIndex(x=>x.day===day);if(i<0)return;const [it]=state.debtHistory.splice(i,1);saveState();haptic(14);snack('Запись истории удалена',()=>{state.debtHistory.push(it);state.debtHistory.sort((a,c)=>String(a.day).localeCompare(String(c.day)));saveState()});reopen()});
+  if($('dhRebase'))$('dhRebase').onclick=()=>{const old=state.debtBaseline,now=debtTotal();if(!(now>0)){toast('Долга нет','Отсчитывать нечего.');return}state.debtBaseline=now;saveState();renderAll();haptic(14);snack('Отсчёт начат заново: старт '+fmtMoney(now),()=>{state.debtBaseline=old;saveState();renderAll()});reopen()};
   $('dhEdit').onclick=()=>{closeModal();openDebtEdit()};
 }
 function openDebtEdit(){
@@ -5236,7 +5288,9 @@ function renderStreak(){
   setText('streakBest',st.cur?(st.todayClosed?'Сегодня закрыт':'Закрой сегодня — серия продолжится')+(st.best>st.cur?' · рекорд '+st.best:st.cur>1?' · это твой рекорд':''):(st.best?'Рекорд — '+st.best+' '+plural(st.best,'день','дня','дней')+'. Начни новую серию сегодня':'Закрой сегодняшний день — начнётся серия'));
   box.classList.toggle('hot',st.cur>=3);
   const card=box.closest('.jl-report');if(card)card.classList.toggle('closed',st.todayClosed);
-  setText('closeDayLabel',st.todayClosed?'День закрыт · обновить':'Закрыть день');
+  setText('closeDayLabel',st.todayClosed?'День закрыт ✓ · обновить итог':'Закрыть день');
+  setText('closeHowTitle',st.todayClosed?'День закрыт ✓':'Что значит «закрыть день»');
+  setText('closeHowText',st.todayClosed?'Итог сохранён и засчитан в серию. Можно дописать и нажать кнопку ещё раз — итог обновится.':'Это короткий вечерний итог. Закрытый день засчитывается в серию «дней подряд» и в пульс жизни. Быстрее всего — кнопка «Закрыть за 30 секунд»: приложение само запишет, что ты сделал за день, и предложит шаг на завтра. Или впиши сам и нажми «Закрыть день».');
 }
 
 // «Итог дня» as a full report: earned, spent and where it went, debt paid, put into the goal, the day's net; tasks, habits, rhythm
@@ -5984,7 +6038,13 @@ function pulseOn(k){const parts=[],today=k===keyDay(),now=Math.floor(nowMin()),r
   const tk=(state.tasks||[]).filter(t=>t.date===k);if(tk.length)parts.push(tk.filter(t=>t.done).length/tk.length);
   const hb=state.habits||[];if(hb.length)parts.push(hb.filter(h=>habitDoneOn(h,k)).length/hb.length);
   const st=daySteps();if(st.length&&(rep||today))parts.push(st.filter(s=>!!rep?.steps?.[s.id]||(today&&now>=timeToMin(s.end))).length/st.length);
-  if(!today)parts.push(rep?.savedAt?1:0);
+  // 75.15: every structure of the app counts — money notes, goal top-ups, debt payments, notes and the closed day
+  const dayOf=at=>{const d=new Date(at);return Number.isNaN(d.getTime())?'':keyDay(d)};
+  if([...(state.profits||[]),...(state.expenses||[])].some(x=>(x.dateKey||dayOf(x.at))===k))parts.push(1);
+  if((state.goal?.finance?.contributions||[]).some(c=>dayOf(c.at)===k)||(state.goals||[]).some(g=>(g.contributions||[]).some(c=>dayOf(c.at)===k)))parts.push(1);
+  if((state.expenses||[]).some(x=>x.debtPayment&&(x.dateKey||dayOf(x.at))===k))parts.push(1);
+  if((state.notes||[]).some(n=>dayOf(n.at)===k))parts.push(1);
+  if(!today)parts.push(rep?.savedAt?1:0);else if(dayClosed(rep,k))parts.push(1);
   return parts.length?Math.round(parts.reduce((a,b)=>a+b,0)/parts.length*100):0}
 function renderPulseChart(){
   const box=$('pulseChart');if(!box)return;const N=14,W=320,H=118,L=8,R=8,T=14,B=26,days=[];

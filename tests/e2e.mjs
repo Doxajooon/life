@@ -611,7 +611,7 @@ await test("Закрыть день: три вопроса и серия дне�
   await page.fill("#rDone", "Закрыл все заявки"); await page.fill("#rTomorrow", "Отложить 2 000 на долг");
   await page.click("#saveReportBtn");
   const after = await page.evaluate(() => ({ days: document.getElementById("streakDays").textContent, word: document.getElementById("streakWord").textContent, closed: !!state.reports[keyDay()].closedAt, label: document.getElementById("closeDayLabel").textContent }));
-  assert.deepEqual(after, { days: "4", word: "дня", closed: true, label: "День закрыт · обновить" });
+  assert.deepEqual(after, { days: "4", word: "дня", closed: true, label: "День закрыт ✓ · обновить итог" });
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -2868,6 +2868,81 @@ await test("74.5: отпечаток — после пальца сразу гл
   assert.equal(await page.evaluate(() => { showView("viewMoney"); openTaskForm(); window.__jlUnlocked(); const v = currentView; closeModal(); return v; }), "viewMoney", "an open window is left as it was");
   assert.deepEqual(page.errors, []);
   await ctx.close();
+});
+
+// ================= 75.15 (74.8) =================
+await test("75.15: кольцо «Сейчас» на широком экране не растягивается в чёрное пятно", async () => {
+  const { ctx, page } = await device(makeCloud(), { viewport: { width: 2500, height: 1260 } });
+  const r = await page.evaluate(() => { const el = document.querySelector(".jl-now-ring"), c = el.querySelector("circle"); return { w: el.getBoundingClientRect().width, h: el.getBoundingClientRect().height, fill: getComputedStyle(c).fill }; });
+  assert.ok(r.w <= 80 && r.h <= 80, "the ring is " + r.w + "x" + r.h);
+  assert.equal(r.fill, "none", "the ring circles must not be filled black");
+  assert.deepEqual(page.errors, []); await ctx.close();
+});
+await test("75.15: история долга — платёж и запись истории удаляются вручную, отсчёт можно начать заново", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => { state.debts.bank = 100000; state.debts.firms = 0; state.debtBaseline = 220000;
+    state.expenses.push({ id: "dp1", amount: 5000, at: new Date().toISOString(), dateKey: keyDay(), category: "Долг", note: "", transfer: true, debtPayment: "bank" });
+    state.debtHistory = [{ day: "2026-10-01", total: 220000, at: "2026-10-01T10:00:00Z" }, { day: "2026-10-02", total: 105000, at: "2026-10-02T10:00:00Z" }];
+    saveState(); openDebtHistory("all"); });
+  assert.equal(await page.locator("[data-dh-del-pay]").count(), 1, "a payment has a delete button");
+  assert.ok(await page.locator("[data-dh-del-h]").count() >= 2, "history lines have delete buttons");
+  await page.locator('[data-dh-del-h="2026-10-01"]').click(); await page.waitForTimeout(400);
+  assert.ok(!(await page.evaluate(() => state.debtHistory.some(x => x.day === "2026-10-01"))), "history line deleted");
+  await page.locator("[data-dh-del-pay]").click(); await page.waitForTimeout(500);
+  const after = await page.evaluate(() => ({ has: state.expenses.some(x => x.id === "dp1"), bank: state.debts.bank }));
+  assert.equal(after.has, false, "payment deleted"); assert.equal(after.bank, 105000, "the debt goes back up by the deleted payment");
+  await page.waitForTimeout(400);
+  await page.locator("#dhRebase").click(); await page.waitForTimeout(300);
+  assert.equal(await page.evaluate(() => state.debtBaseline), 105000, "the start amount becomes today's debt");
+  assert.deepEqual(page.errors, []); await ctx.close();
+});
+await test("75.15: «Итог дня» объясняет, что значит закрыть день, и поля пронумерованы", async () => {
+  const { ctx, page } = await device(makeCloud());
+  assert.ok((await page.locator("#closeHowText").textContent()).includes("серию"), "explanation is on the card");
+  assert.deepEqual(await page.locator(".jl-close-fields label").allTextContents(), ["1. Что получилось сегодня", "2. Что помешало (можно пропустить)", "3. Один шаг на завтра"]);
+  await page.fill("#rDone", "Сделал главное"); await page.click("#saveReportBtn"); await page.waitForTimeout(300);
+  assert.equal((await page.locator("#closeHowTitle").textContent()).trim(), "День закрыт ✓");
+  assert.deepEqual(page.errors, []); await ctx.close();
+});
+await test("75.15: пульс учитывает задачи, деньги, заметки, цель и долг, а не только этапы", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(() => { const k = keyDay(); state.tasks = [{ id: "t1", title: "А", date: k, done: false }, { id: "t2", title: "Б", date: k, done: false }]; const a = disciplineNow(); state.tasks[0].done = true; const b = disciplineNow(); state.tasks[1].done = true; const c = disciplineNow();
+    const p0 = pulseOn(k); state.notes.push({ id: "n1", title: "x", body: "y", at: new Date().toISOString(), category: "personal" }); const p1 = pulseOn(k);
+    state.profits.push({ id: "p1", amount: 100, at: new Date().toISOString(), dateKey: k, source: "Зарплата" }); const p2 = pulseOn(k); return { a, b, c, p0, p1, p2 }; });
+  assert.ok(r.a < r.b && r.b < r.c, "tasks move the discipline: " + JSON.stringify(r));
+  assert.ok(r.p1 >= r.p0 && r.p2 >= r.p1 && r.p2 > r.p0, "notes and money entries count in the pulse of the day: " + JSON.stringify(r));
+  assert.deepEqual(page.errors, []); await ctx.close();
+});
+await test("75.15: заметка без заголовка называется по первым словам, список сгруппирован по дням", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => { const now = new Date().toISOString(); state.notes = [{ id: "n1", title: "", body: "Купить молоко и хлеб завтра утром", at: now, updatedAt: now, category: "personal" }, { id: "n2", title: "Важное", body: "Текст", at: now, updatedAt: now, category: "work", pinned: true }]; saveState(); showView("viewNotes"); renderNotes(); });
+  await page.waitForTimeout(250);
+  const titles = await page.locator(".v-note-title").allTextContents(), groups = await page.locator(".v-note-grp").allTextContents();
+  assert.ok(titles.includes("Купить молоко и хлеб завтра утром"), "title from the first words: " + titles.join("|"));
+  assert.ok(!titles.includes("Без заголовка"), "no «Без заголовка»");
+  assert.ok(groups.some(g => g.includes("Закреплённые")) && groups.some(g => g.includes("Сегодня")), "groups: " + groups.join("|"));
+  assert.equal(await page.locator(".v-note-prev").count(), 1, "a note whose text is only its title shows no duplicate preview");
+  assert.deepEqual(page.errors, []); await ctx.close();
+});
+await test("75.15: время намаза — кнопка проверки звука и подсказка о разрешениях", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(() => { state.settings.prayerOn = true; saveState(); renderAll(); });
+  await page.waitForTimeout(300);
+  assert.ok(await page.locator("#prayerTest").isVisible(), "test button is visible");
+  assert.ok(await page.evaluate(() => typeof prayerPermText() === "string"));
+  await page.locator("#prayerTest").click(); await page.waitForTimeout(300);
+  assert.ok(await page.evaluate(() => state.notificationsLog.some(n => n.title.includes("Проверка напоминания"))), "the test reminder reached the list");
+  assert.ok(await page.evaluate(() => { const o = []; const real = notify; return prayerReminders().length === 0 || prayerReminders().every(p => p.title.includes("намаза")); }));
+  assert.deepEqual(page.errors, []); await ctx.close();
+});
+await test("75.15: окно «Внести накопление» — строки с цифрами не слиплись", async () => {
+  const { ctx, page } = await device(makeCloud());
+  await page.evaluate(seedGoal);
+  await page.evaluate(() => { state.goal.finance.targetAmount = 100000; state.goal.finance.targetDate = "2027-10-26"; saveState(); openGoalSaving(); });
+  await page.waitForTimeout(300);
+  const r = await page.evaluate(() => { const l = document.getElementById("gPrevLine"); return { ws: getComputedStyle(l).whiteSpace, text: l.textContent, cls: document.getElementById("gsAmount").className }; });
+  assert.equal(r.ws, "pre-line"); assert.ok(r.text.includes("\n"), "lines are separate: " + JSON.stringify(r.text)); assert.ok(r.cls.includes("jl-amount"));
+  assert.deepEqual(page.errors, []); await ctx.close();
 });
 
 await browser.close(); server.close();
