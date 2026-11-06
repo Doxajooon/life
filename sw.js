@@ -1,8 +1,8 @@
 // Life service worker: offline shell only.
 // It never touches requests to other origins (Supabase, Gemini): those must always hit the network,
 // otherwise a cached "session OK" answer hides an expired login and blocks sync.
-const CACHE = 'life-v74-8';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable.png', './fonts/inter-cyrillic.woff2', './fonts/inter-latin.woff2', './fonts/manrope-cyrillic.woff2', './fonts/manrope-latin.woff2', './fonts/nunito-cyrillic.woff2', './fonts/nunito-latin.woff2', './sounds/jamal-dawn.wav', './images/bg-kaaba.jpg'];
+const CACHE = 'life-v74-9';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable.png', './fonts/inter-cyrillic.woff2', './fonts/inter-latin.woff2', './fonts/manrope-cyrillic.woff2', './fonts/manrope-latin.woff2', './fonts/nunito-cyrillic.woff2', './fonts/nunito-latin.woff2', './sounds/jamal-dawn.wav', './sounds/jamal-prayer.wav', './images/bg-kaaba.jpg'];
 
 self.addEventListener('install', e => e.waitUntil(
   caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())

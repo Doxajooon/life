@@ -2414,8 +2414,8 @@ await test("74.1: «Громкие напоминания» — по умолч�
   assert.deepEqual(mig, [true, false]);
   // the Android side: loud = channel jamal_life_dawn3 on the alarm stream, quiet = its own channel on the notification stream, both vibrate
   const java = fs.readFileSync(path.join(ROOT, "android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java"), "utf8");
-  assert.ok(/make\(ctx, nm, CHANNEL, "[^"]+", about, AudioAttributes\.USAGE_ALARM\)/.test(java) && java.includes('CHANNEL = "jamal_life_dawn3"'), "loud channel jamal_life_dawn3 uses USAGE_ALARM");
-  assert.ok(/make\(ctx, nm, CHANNEL_SOFT, "[^"]+", about, AudioAttributes\.USAGE_NOTIFICATION_EVENT\)/.test(java) && java.includes("isLoud(ctx) ? CHANNEL : CHANNEL_SOFT"), "quiet channel keeps the old notification stream");
+  assert.ok(/make\(ctx, nm, CHANNEL, "[^"]+", about, AudioAttributes\.USAGE_ALARM, chimeUri\(ctx\)\)/.test(java) && java.includes('CHANNEL = "jamal_life_dawn3"'), "loud channel jamal_life_dawn3 uses USAGE_ALARM");
+  assert.ok(/make\(ctx, nm, CHANNEL_SOFT, "[^"]+", about, AudioAttributes\.USAGE_NOTIFICATION_EVENT, chimeUri\(ctx\)\)/.test(java) && java.includes("isLoud(ctx) ? CHANNEL : CHANNEL_SOFT"), "quiet channel keeps the old notification stream");
   assert.ok(java.includes("ch.enableVibration(true)") && /OLD_CHANNELS = \{"jamal_life_dawn",/.test(java), "vibration on; the old 74.0 channel is removed");
   assert.deepEqual(page.errors, []);
   await ctx.close();
@@ -2435,7 +2435,7 @@ await test("74.1: «Через 15 мин» — напоминание повто
     notify("Тест", "текст", "tasks"); return { sent, played: __snd - before }; });
   assert.equal(w.sent.length, 1); assert.equal(w.sent[0].sound, true, "the host is asked to play the sound"); assert.equal(w.played, 0, "no double sound from the page");
   const cs = fs.readFileSync(path.join(ROOT, "desktop/MainWindow.xaml.cs"), "utf8");
-  assert.ok(cs.includes("PlayChime()") && cs.includes('"sounds", "jamal-dawn.wav"'), "Windows plays Web/sounds/jamal-dawn.wav");
+  assert.ok(cs.includes("PlayChime(prayer)") && cs.includes('"sounds", "jamal-dawn.wav"'), "Windows plays Web/sounds/jamal-dawn.wav");
   assert.deepEqual(page.errors, []);
   await ctx.close();
 });
@@ -2942,6 +2942,19 @@ await test("75.15: окно «Внести накопление» — строк
   await page.waitForTimeout(300);
   const r = await page.evaluate(() => { const l = document.getElementById("gPrevLine"); return { ws: getComputedStyle(l).whiteSpace, text: l.textContent, cls: document.getElementById("gsAmount").className }; });
   assert.equal(r.ws, "pre-line"); assert.ok(r.text.includes("\n"), "lines are separate: " + JSON.stringify(r.text)); assert.ok(r.cls.includes("jl-amount"));
+  assert.deepEqual(page.errors, []); await ctx.close();
+});
+
+await test("74.9: у намаза свой звук — файл грузится, декодируется и звучит дольше обычного перезвона; проверка звука использует его", async () => {
+  const { ctx, page } = await device(makeCloud());
+  const r = await page.evaluate(async () => { audioCtx(); await loadPrayer(); await loadGlass(); return { prayer: _prayerBuf ? _prayerBuf.duration : 0, chime: _glassBuf ? _glassBuf.duration : 0 }; });
+  assert.ok(r.prayer > 2.5 && r.prayer < 4.5, "prayer sound length " + r.prayer);
+  assert.ok(r.chime > 1 && r.chime < 2.6 && r.prayer > r.chime, "the prayer sound is calmer and longer than the chime: " + JSON.stringify(r));
+  const used = await page.evaluate(() => { let kind = null; const real = window.playNotificationSound; window.playNotificationSound = (f, k) => { kind = k; return real(f, k); };
+    state.settings.prayerOn = true; saveState(); renderAll(); document.getElementById("prayerTest").click(); return kind; });
+  assert.equal(used, "prayer", "the test button plays the prayer sound");
+  const sent = await page.evaluate(() => { let msg = null; window.__jlHostSound = true; window.chrome = { webview: { postMessage: m => { msg = m } } }; notify("т", "т", "tasks", { prayer: true }); return msg; });
+  assert.ok(sent && sent.prayer === true, "the Windows host is told it is a prayer reminder: " + JSON.stringify(sent));
   assert.deepEqual(page.errors, []); await ctx.close();
 });
 

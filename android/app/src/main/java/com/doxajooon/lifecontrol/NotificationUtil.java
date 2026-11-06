@@ -30,6 +30,9 @@ public final class NotificationUtil {
     static final String CHANNEL_SOFT = "jamal_life_dawn3_soft"; // quiet: notification volume
     /** 74.7: the hourly reminder (every 1 h inside the day): soft nature sound, no vibration, rings once */
     static final String CHANNEL_NATURE = "jamal_life_nature1";
+    /** 74.9: the prayer time has its own calm sound («Тихий колокол», res/raw/jamal_prayer.wav); loud = alarm volume, soft = notification volume */
+    static final String CHANNEL_PRAYER = "jamal_life_prayer1";
+    static final String CHANNEL_PRAYER_SOFT = "jamal_life_prayer1_soft";
     private static final String[] OLD_CHANNELS = {"jamal_life_dawn", "jamal_life_dawn2", "jamal_life_dawn2_soft", "jamal_life_glass", "jamal_life_glow", "jamal_life_reminders", "life_control_v2", "life_control"};
     private static final long[] VIBRATION = {0, 180, 120, 180};
     private NotificationUtil() {}
@@ -49,6 +52,12 @@ public final class NotificationUtil {
 
     static String channel(Context ctx) { return isLoud(ctx) ? CHANNEL : CHANNEL_SOFT; }
 
+    static String prayerChannel(Context ctx) { return isLoud(ctx) ? CHANNEL_PRAYER : CHANNEL_PRAYER_SOFT; }
+
+    static Uri prayerUri(Context ctx) {
+        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + ctx.getPackageName() + "/" + R.raw.jamal_prayer);
+    }
+
     static Uri natureUri(Context ctx) {
         return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + ctx.getPackageName() + "/" + R.raw.jamal_nature);
     }
@@ -59,8 +68,11 @@ public final class NotificationUtil {
         if (nm == null) return;
         for (String old : OLD_CHANNELS) { try { nm.deleteNotificationChannel(old); } catch (Exception ignored) {} }
         String about = "Задачи и этапы дня · " + ctx.getString(R.string.app_name);
-        make(ctx, nm, CHANNEL, "Напоминания (громко, как будильник)", about, AudioAttributes.USAGE_ALARM);
-        make(ctx, nm, CHANNEL_SOFT, "Напоминания (обычная громкость)", about, AudioAttributes.USAGE_NOTIFICATION_EVENT);
+        make(ctx, nm, CHANNEL, "Напоминания (громко, как будильник)", about, AudioAttributes.USAGE_ALARM, chimeUri(ctx));
+        make(ctx, nm, CHANNEL_SOFT, "Напоминания (обычная громкость)", about, AudioAttributes.USAGE_NOTIFICATION_EVENT, chimeUri(ctx));
+        String prayerAbout = "Время намаза · " + ctx.getString(R.string.app_name);
+        make(ctx, nm, CHANNEL_PRAYER, "Намаз (громко, как будильник)", prayerAbout, AudioAttributes.USAGE_ALARM, prayerUri(ctx));
+        make(ctx, nm, CHANNEL_PRAYER_SOFT, "Намаз (обычная громкость)", prayerAbout, AudioAttributes.USAGE_NOTIFICATION_EVENT, prayerUri(ctx));
         makeNature(ctx, nm);
     }
 
@@ -77,7 +89,7 @@ public final class NotificationUtil {
         nm.createNotificationChannel(ch);
     }
 
-    private static void make(Context ctx, NotificationManager nm, String id, String name, String about, int usage) {
+    private static void make(Context ctx, NotificationManager nm, String id, String name, String about, int usage, Uri sound) {
         NotificationChannel had = nm.getNotificationChannel(id);
         if (had != null) {
             // same id, so the sound and the user's settings stay; only the visible description follows the app name
@@ -90,7 +102,7 @@ public final class NotificationUtil {
         ch.setVibrationPattern(VIBRATION);
         ch.enableLights(true);
         ch.setLightColor(0xFF22C55E);
-        ch.setSound(chimeUri(ctx), new AudioAttributes.Builder()
+        ch.setSound(sound, new AudioAttributes.Builder()
                 .setUsage(usage)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build());
@@ -174,13 +186,18 @@ public final class NotificationUtil {
 
     /** force = true only for the user's own «Проверить звук» preview. */
     static void show(Context ctx, String title, String body, int id, String taskId, long dueAt, boolean nature, boolean force) {
+        show(ctx, title, body, id, taskId, dueAt, nature, force, false);
+    }
+
+    /** 74.9: prayer = true rings the prayer sound on its own channels (alarms «pray_…»). */
+    static void show(Context ctx, String title, String body, int id, String taskId, long dueAt, boolean nature, boolean force, boolean prayer) {
         if (!force && blocked(ctx)) return;
         ensureChannel(ctx);
         if (Build.VERSION.SDK_INT >= 33 && ctx.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
         Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent pi = PendingIntent.getActivity(ctx, 999, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         String text = body == null ? "" : body;
-        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, nature ? CHANNEL_NATURE : channel(ctx))
+        NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, nature ? CHANNEL_NATURE : prayer ? prayerChannel(ctx) : channel(ctx))
                 .setSmallIcon(R.drawable.ic_notification)
                 .setColor(0xFF22C55E)
                 .setLargeIcon(appIcon(ctx))
@@ -196,7 +213,7 @@ public final class NotificationUtil {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setOnlyAlertOnce(false) // a repeated reminder («Через 15 мин») rings again
-                .setSound(nature ? natureUri(ctx) : chimeUri(ctx));
+                .setSound(nature ? natureUri(ctx) : prayer ? prayerUri(ctx) : chimeUri(ctx));
         if (!nature) b.setVibrate(VIBRATION);
         if (dueAt > System.currentTimeMillis()) {
             b.setWhen(dueAt).setShowWhen(true).setUsesChronometer(true);

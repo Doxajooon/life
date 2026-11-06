@@ -17,13 +17,13 @@ const desktop = read("desktop/MainWindow.xaml.cs");
 const csproj = read("desktop/JamalLife.Desktop.csproj");
 
 // one version everywhere
-assert.equal(pkg.version, "74.8.0");
-assert.match(gradle, /versionCode 748\b/); assert.match(gradle, /versionName '74\.8'/);
-assert.match(csproj, /<Version>74\.8\.0<\/Version>/);
+assert.equal(pkg.version, "74.9.0");
+assert.match(gradle, /versionCode 749\b/); assert.match(gradle, /versionName '74\.9'/);
+assert.match(csproj, /<Version>74\.9\.0<\/Version>/);
 // 73: one APP_VERSION, shown only in «Настройки → О приложении» (not on the home or login screen); state schema stays 58
-assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.8'") && html.includes('id="appVersion">74.8</span>'), "app version 74.1 from one constant (state schema 58)");
+assert.ok(html.includes("s.version=58") && (html.match(/\bAPP_VERSION=/g) || []).length === 1 && html.includes("APP_VERSION='74.9'") && html.includes('id="appVersion">74.9</span>'), "app version 74.1 from one constant (state schema 58)");
 assert.ok(!html.includes("brand-ver") && !/auth-title[^>]*>[^<]*<span>V\d/.test(html) && !/>V\d\d</.test(html), "no version on the home screen or the login screen");
-assert.ok(sw.includes("'life-v74-8'"), "service worker cache must be life-v74-8");
+assert.ok(sw.includes("'life-v74-9'"), "service worker cache must be life-v74-9");
 assert.ok(sw.includes("./images/bg-kaaba.jpg") && read("tools/sync-platforms.mjs").includes("images/bg-kaaba.jpg"), "the background photo works offline and on Android/Windows");
 
 // branding
@@ -292,7 +292,7 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
 // 75.3: every sound the web app plays must be copied into the Android and Windows builds
 {
   const sync = readFileSync(new URL("tools/sync-platforms.mjs", root), "utf8");
-  for (const snd of ["sounds/jamal-dawn.wav", "sounds/jamal-nature.wav"]) assert.ok(sync.includes(`"${snd}"`), `the sync list copies ${snd} into the apps`);
+  for (const snd of ["sounds/jamal-dawn.wav", "sounds/jamal-nature.wav", "sounds/jamal-prayer.wav"]) assert.ok(sync.includes(`"${snd}"`), `the sync list copies ${snd} into the apps`);
 }
 // 75.4: prayer alarms are planned a week ahead
 {
@@ -307,3 +307,19 @@ assert.ok(fn.includes("DEADLINE_MS") && fn.includes("busyUntil") && fn.includes(
   assert.ok(act.includes("onShowFileChooser") && act.includes("REQ_FILE_CHOOSER") && act.includes("protected void onActivityResult"), "Android: the WebView opens the gallery for the goal photo and returns the result");
 }
 console.log("LIFE_V73_STATIC_QA_OK");
+
+// 74.9: the prayer time has its own calm sound on every platform (page, Windows host, Android channels)
+{
+  const pw = readFileSync(new URL("sounds/jamal-prayer.wav", root)), pr = readFileSync(new URL("android/app/src/main/res/raw/jamal_prayer.wav", root));
+  assert.ok(pw.equals(pr), "the page and the Android prayer sound are the same file");
+  const sr = pw.readUInt32LE(24), bits = pw.readUInt16LE(34), dataLen = pw.readUInt32LE(40), n = dataLen / (bits / 8);
+  const secs = n / sr; let peak = 0, sum = 0;
+  for (let i = 0; i < n; i++) { const v = Math.abs(pw.readInt16LE(44 + i * 2)) / 32768; peak = Math.max(peak, v); sum += v * v; }
+  const rms = 20 * Math.log10(Math.sqrt(sum / n));
+  assert.ok(secs >= 2 && secs <= 4.5 && peak >= 0.5 && peak <= 0.98 && rms >= -26 && rms <= -10, `prayer sound: ${secs.toFixed(2)} s, peak ${peak.toFixed(2)}, rms ${rms.toFixed(1)} dBFS`);
+  const notif = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/NotificationUtil.java", root), "utf8"), alarm = readFileSync(new URL("android/app/src/main/java/com/doxajooon/lifecontrol/AlarmReceiver.java", root), "utf8"), host = readFileSync(new URL("desktop/MainWindow.xaml.cs", root), "utf8");
+  assert.ok(notif.includes("R.raw.jamal_prayer") && notif.includes("jamal_life_prayer1") && notif.includes("jamal_life_prayer1_soft") && notif.includes("prayerChannel(ctx)"), "Android prayer channels (loud and soft)");
+  assert.ok(alarm.includes('key.startsWith("pray_")') && alarm.includes("nature, false, prayer"), "prayer alarms ring the prayer sound");
+  assert.ok(host.includes("jamal-prayer.wav") && host.includes('TryGetProperty("prayer"'), "the Windows host plays the prayer sound");
+  assert.ok(html.includes("sounds/jamal-prayer.wav") && html.includes("playNotificationSound(true,'prayer')") && sw.includes("jamal-prayer.wav"), "the page plays and caches the prayer sound");
+}

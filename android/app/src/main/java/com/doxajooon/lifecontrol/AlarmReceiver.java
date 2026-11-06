@@ -21,7 +21,9 @@ public class AlarmReceiver extends BroadcastReceiver {
         boolean ring = (!"daily".equals(kind) || AlarmScheduler.ringsToday(days)) && !twice && !NotificationUtil.blocked(ctx);
         // 74.7: the hourly reminder («every1h_HH00») plays the nature sound
         boolean nature = key.startsWith("every1h_");
-        if (ring) NotificationUtil.show(ctx, title, body, key.hashCode(), taskOf(id), intent.getLongExtra("due", 0), nature);
+        // 74.9: the prayer alarms («pray_<name>_<day>») ring the prayer sound
+        boolean prayer = key.startsWith("pray_");
+        if (ring) NotificationUtil.show(ctx, title, body, key.hashCode(), taskOf(id), intent.getLongExtra("due", 0), nature, false, prayer);
         JamalWidget.updateAll(ctx);
         if (id == null) return;
         if ("daily".equals(kind) && time != null) AlarmScheduler.schedule(ctx, id, time, days, title, body);

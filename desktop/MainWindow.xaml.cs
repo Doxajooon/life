@@ -132,7 +132,8 @@ public partial class MainWindow : Window
                 var title = root.TryGetProperty("title", out var ti) ? ti.GetString() ?? AppName : AppName;
                 var body = root.TryGetProperty("body", out var b) ? b.GetString() ?? "" : "";
                 _tray.ShowBalloonTip(8000, title, string.IsNullOrWhiteSpace(body) ? " " : body, Forms.ToolTipIcon.None);
-                if (root.TryGetProperty("sound", out var snd) && snd.ValueKind == JsonValueKind.True) PlayChime();
+                var prayer = root.TryGetProperty("prayer", out var pr) && pr.ValueKind == JsonValueKind.True;
+                if (root.TryGetProperty("sound", out var snd) && snd.ValueKind == JsonValueKind.True) PlayChime(prayer);
                 if (!IsVisible || WindowState == WindowState.Minimized) FlashTaskbar();
             }
             else if (type == "autostart")
@@ -144,12 +145,23 @@ public partial class MainWindow : Window
     }
 
     private SoundPlayer? _chime;
+    private SoundPlayer? _prayerChime;
 
     /// <summary>The same «Dawn» sound as on Android (Web/sounds/jamal-dawn.wav), played by Windows even with the window in the tray.</summary>
-    private void PlayChime()
+    private void PlayChime(bool prayer = false)
     {
         try
         {
+            // 74.9: the prayer time rings its own calm sound (Web/sounds/jamal-prayer.wav)
+            if (prayer)
+            {
+                if (_prayerChime == null)
+                {
+                    var pw = Path.Combine(AppContext.BaseDirectory, "Web", "sounds", "jamal-prayer.wav");
+                    if (File.Exists(pw)) { _prayerChime = new SoundPlayer(pw); _prayerChime.Load(); }
+                }
+                if (_prayerChime != null) { _prayerChime.Play(); return; }
+            }
             if (_chime == null)
             {
                 var wav = Path.Combine(AppContext.BaseDirectory, "Web", "sounds", "jamal-dawn.wav");

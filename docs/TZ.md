@@ -109,6 +109,13 @@ Life — приложение для любого человека: день, г
 - **Цель:** окна «Внести накопление» и «Сумма и срок» — больше отступов, строки с цифрами разнесены (`white-space:pre-line`), крупное поле суммы (`.jl-amount`).
 - **Заметки:** без заголовка — имя из первой фразы; группы «Закреплённые / Сегодня / Вчера / На этой неделе / В этом месяце / Раньше» с числом заметок; закреплённые теперь всегда сверху (раньше сравнение давало `NaN`, если у других заметок не было поля `pinned`).
 
+### 74.9: отдельный звук для намаза (по просьбе владельца 5.11.2026)
+- **Звук «Тихий колокол»** (`tools/make-prayer.py` → `sounds/jamal-prayer.wav` = `android/app/src/main/res/raw/jamal_prayer.wav`, 3,4 с, три медленных чаши D5 → F#5 → A5 и низкая D4): спокойный и тёплый, не похож на чёткий перезвон обычных напоминаний.
+- **Сайт/приложение:** `playNotificationSound(force, 'prayer')` (`loadPrayer()`; пока файл не загружен — звучит обычный перезвон); `notify(..., {prayer:true})` берёт его сам; кнопка «Проверить звук» тоже.
+- **Android:** будильники `pray_<имя>_<день>` (`AlarmReceiver`: `key.startsWith("pray_")`) идут через `NotificationUtil.show(..., prayer=true)` на своих каналах `jamal_life_prayer1` (громко, как будильник) и `jamal_life_prayer1_soft` (обычная громкость); существующие каналы и их id не менялись. Новый raw-файл `jamal_prayer` стоит в алфавите после `jamal_nature`, поэтому номера ресурсов `jamal_dawn` и `jamal_nature` не сдвигаются.
+- **Windows:** страница шлёт `prayer:true` в сообщении `notify`, хост (`MainWindow.PlayChime(bool prayer)`) играет `Web/sounds/jamal-prayer.wav`.
+- Код Android и Windows в этой версии проверен только разбором синтаксиса (javac без android.jar) и тестами `static_qa`; настоящую сборку делает GitHub Actions.
+
 ### Синхронизация (важно не сломать)
 - Состояние сохраняется сразу локально (localStorage `LIFE_CONTROL_V52` + IndexedDB `LifeControlDB`) и уходит в облако через 2,5 с (`queueCloudSync` → `cloudAutoSync` → `cloudSync`).
 - Запись в облако — только поверх известной версии (`PATCH ... &updated_at=eq.<base>`); при расхождении — трёхстороннее слияние `mergeStates(base, local, remote)` по `id` записей; база хранится в IndexedDB (`storeCloudBase`/`loadCloudBase`).

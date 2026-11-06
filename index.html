@@ -2564,7 +2564,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, копия в файл</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.8</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.9</span></div>
   </div>
 </section>
 
@@ -2617,7 +2617,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.8';
+const APP_NAME='Life',APP_VERSION='74.9';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -3851,8 +3851,8 @@ function prayerTimes(date=new Date(),city=prayerCity(),asr=state?.settings?.pray
 // 75.15: the owner could not hear the prayer reminders — the box now says why (sound off, notifications not allowed) and has a test button
 function prayerPermText(){let p='';try{if(!window.AndroidBridge?.notify&&!window.chrome?.webview&&'Notification'in window){const s=Notification.permission;p=s==='granted'?'':s==='denied'?'Уведомления запрещены в браузере — разреши их в настройках сайта (значок замка в адресной строке).':'Нажми «Проверить звук» — браузер спросит разрешение на уведомления.'}}catch(e){}return (state.settings?.sound===false?'Звук выключен в настройках. ':'')+(state.settings?.notifications===false?'Уведомления выключены в настройках. ':'')+p}
 document.addEventListener('click',e=>{const b=e.target.closest?.('#prayerTest');if(!b)return;
-  try{audioCtx();loadGlass();if(!window.AndroidBridge?.notify&&'Notification'in window&&Notification.permission==='default')Notification.requestPermission().then(()=>renderPrayer()).catch(()=>{})}catch(_){}
-  playNotificationSound(true);notify('🕌 Проверка напоминания','Так прозвучит время намаза','tasks',{prayer:true});renderPrayer()});
+  try{audioCtx();loadGlass();loadPrayer();if(!window.AndroidBridge?.notify&&'Notification'in window&&Notification.permission==='default')Notification.requestPermission().then(()=>renderPrayer()).catch(()=>{})}catch(_){}
+  playNotificationSound(true,'prayer');notify('🕌 Проверка напоминания','Так прозвучит время намаза','tasks',{prayer:true});renderPrayer()});
 function renderPrayer(){
   const box=$('prayerBox');if(!box)return;const on=prayerOn();if(box.hidden===on)box.hidden=!on;if(!on)return;
   const t=prayerTimes(),m=Math.floor(nowMin()),list=PRAYER_NAMES.filter(([k])=>t[k]!==null),next=list.find(([k])=>t[k]>m);
@@ -3894,8 +3894,9 @@ function toast(title,body='',act=null){_toastAct=act;$('toast').classList.toggle
 function logNotice(title,body,kind='tasks',read=false){state.notificationsLog.unshift({id:uid(),title,body,kind,read:!!read,at:new Date().toISOString()});state.notificationsLog=state.notificationsLog.slice(0,80);saveState();updateBell();if(currentView==='viewNotifications')renderNotifications()}
 let notificationAudioCtx=null;function audioCtx(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;notificationAudioCtx=notificationAudioCtx||new AC();if(notificationAudioCtx.state==='suspended')notificationAudioCtx.resume().catch(()=>{});return notificationAudioCtx}
 let _lastChimeAt=0,_glassBuf=null,_glassLoading=null;
-let _natureBuf=null,_natureLoading=null;
+let _natureBuf=null,_natureLoading=null,_prayerBuf=null,_prayerLoading=null;
 function loadNature(){const ctx=audioCtx();if(!ctx||_natureBuf||_natureLoading)return _natureLoading;_natureLoading=fetch('sounds/jamal-nature.wav').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,no)=>ctx.decodeAudioData(b,ok,no))).then(buf=>{_natureBuf=buf}).catch(()=>{}).finally(()=>{_natureLoading=null});return _natureLoading}
+function loadPrayer(){const ctx=audioCtx();if(!ctx||_prayerBuf||_prayerLoading)return _prayerLoading;_prayerLoading=fetch('sounds/jamal-prayer.wav').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,no)=>ctx.decodeAudioData(b,ok,no))).then(buf=>{_prayerBuf=buf}).catch(()=>{}).finally(()=>{_prayerLoading=null});return _prayerLoading}
 function loadGlass(){const ctx=audioCtx();if(!ctx||_glassBuf||_glassLoading)return _glassLoading;_glassLoading=fetch('sounds/jamal-dawn.wav').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>new Promise((ok,no)=>ctx.decodeAudioData(b,ok,no))).then(buf=>{_glassBuf=buf}).catch(()=>{}).finally(()=>{_glassLoading=null});return _glassLoading}
 /* Chime: a soft ascending major arpeggio (E5 · G#5 · B5 · E6) with bell partials and a short echo. */
 function playNotificationSound(force=false,kind){
@@ -3906,6 +3907,8 @@ function playNotificationSound(force=false,kind){
     const ctx=audioCtx();if(!ctx)return;
     // «Dawn» — the same nature tone as on Android (sounds/jamal-dawn.wav; 75.0: a water drop with soft tones, 1.6 s, rings once)
     if(kind==='nature'){loadNature();if(_natureBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=.9;src.buffer=_natureBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}}
+    // 74.9: the prayer time has its own calm sound («Тихий колокол», sounds/jamal-prayer.wav); until it is loaded the usual chime rings
+    if(kind==='prayer'){loadPrayer();if(_prayerBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=1;src.buffer=_prayerBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}}
     if(_glassBuf){const src=ctx.createBufferSource(),g=ctx.createGain();g.gain.value=1;src.buffer=_glassBuf;src.connect(g).connect(ctx.destination);src.start(ctx.currentTime+.02);return}
     loadGlass();
     const t0=ctx.currentTime+.03,out=ctx.createGain(),echo=ctx.createDelay(),fb=ctx.createGain();
@@ -3923,7 +3926,7 @@ function playNotificationSound(force=false,kind){
   }catch(e){}
 }
 // Browsers only allow sound after the first tap/click: unlock the audio context then.
-['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{try{audioCtx();loadGlass()}catch(e){}},{once:true,passive:true,capture:true}));
+['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{try{audioCtx();loadGlass();loadPrayer()}catch(e){}},{once:true,passive:true,capture:true}));
 function hasNativeAlarms(){try{return typeof window.AndroidBridge?.scheduleDaily==='function'}catch(e){return false}}
 function showWebNotification(title,body,taskId){
   try{
@@ -3953,10 +3956,10 @@ function notify(title,body,kind='tasks',opts={}){
   const android=!!window.AndroidBridge?.notify;
   if(allowed&&opts.native&&hasNativeAlarms())return;          // the alarm already rang with the chime
   const host=allowed&&!android&&hostPlaysSound();
-  if(!(allowed&&android)&&!host)playNotificationSound(false,opts.sound);       // Android channel / the Windows host play the same chime themselves
+  if(!(allowed&&android)&&!host)playNotificationSound(false,opts.prayer?'prayer':opts.sound);       // Android channel / the Windows host play the same chime themselves
   if(!allowed)return;
   try{if(android){const br=window.AndroidBridge;if(opts.taskId&&opts.due&&br.notifyTaskAt)br.notifyTaskAt(title,body,opts.taskId,opts.due);else if(opts.taskId&&br.notifyTask)br.notifyTask(title,body,opts.taskId);else br.notify(title,body);return}}catch(e){}
-  try{if(window.chrome?.webview?.postMessage){window.chrome.webview.postMessage({type:'notify',title,body,sound:host&&state.settings?.sound!==false});return}}catch(e){}
+  try{if(window.chrome?.webview?.postMessage){window.chrome.webview.postMessage({type:'notify',title,body,sound:host&&state.settings?.sound!==false,prayer:!!opts.prayer});return}}catch(e){}
   showWebNotification(title,body,opts.taskId);
 }
 /* 74.1: the Windows app (desktop host sets window.__jlHostSound) plays the chime itself, so it is heard with the window in the tray */
