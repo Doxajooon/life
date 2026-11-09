@@ -45,6 +45,8 @@ function makeCloud() {
     const req = route.request(), url = new URL(req.url()), m = req.method(), cors = { "access-control-allow-origin": "*" };
     const send = (status, body) => route.fulfill({ status, headers: cors, contentType: "application/json", body: JSON.stringify(body) });
     if (cloud.down) return route.abort("internetdisconnected");
+    // 75.17: the logout test takes the cloud offline exactly when the sign-out request arrives (not earlier), so a late background write cannot turn the logout into the "unsynced, keep data" path
+    if (cloud.downOnLogout && url.pathname === "/auth/v1/logout") { cloud.down = true; return route.fulfill({ status: 204, headers: cors }); }
     // 74.6: delete_my_account — removes the user's cloud rows (signed-in users only)
     if (url.pathname === "/rest/v1/rpc/delete_my_account") {
       if (!ok(req.headers().authorization)) return send(401, { message: "JWT expired" });
@@ -958,7 +960,7 @@ await test("Выход из аккаунта: телефон очищается,
   await sync(A.page);
   await A.page.evaluate(() => { window.confirm = () => true; });
   // the test harness signs the page in again on reload; keep the cloud offline to see what the device itself kept
-  cloud.down = true;
+  cloud.downOnLogout = true;
   // 75.2: start the logout first, then wait for the reload with a generous timeout (under CPU load the reload can finish before a listener is attached)
   // 75.3: listen for the navigation BEFORE the logout starts, then wait for the new page (the old page is still "ready" until the reload)
   const navigated = A.page.waitForEvent("framenavigated", { timeout: 30000 }).catch(() => null);
