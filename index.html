@@ -2034,6 +2034,10 @@ html[data-theme="light"] .jl-section-head .v-title{display:inline-flex;align-ite
 .jl-pc-trend{font-size:.75rem;font-weight:700;color:var(--muted)}
 .jl-pc-trend.up{color:var(--green)}
 .jl-pc-trend.down{color:var(--red)}
+/* 75.16: in the light theme at night the text sits on a mid-tone photo; its own dark chip keeps it readable (contrast test) */
+html[data-theme="light"][data-daypart="night"] .jl-pc-trend{background:rgba(8,20,40,.78);color:#e2e8f0;padding:2px 9px;border-radius:999px}
+html[data-theme="light"][data-daypart="night"] .jl-pc-trend.up{color:#86efac}
+html[data-theme="light"][data-daypart="night"] .jl-pc-trend.down{color:#fca5a5}
 .jl-pc-svg{display:block;width:100%;height:auto;margin-top:6px;overflow:visible}
 .jl-pc-grid{stroke:rgba(155,196,255,.16);stroke-width:1;stroke-dasharray:3 5}
 .jl-pc-line{stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
