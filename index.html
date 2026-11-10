@@ -2166,6 +2166,38 @@ html #viewToday>.card{margin-top:14px!important}
 html body[data-layout="desktop"] .shell{max-width:980px!important}
 html body[data-layout="desktop"] .modal{width:min(620px,calc(100% - 32px))!important}
 html .modal{padding:14px!important}
+/* design fix: cards stand apart, compact rhythm and stages, prayer row full width, tidy round checks */
+html body[data-layout="mobile"] input[type="checkbox"],html body input.check{min-height:0!important}
+html #prayerBox{padding-right:0!important;margin-top:12px;padding:10px;border-radius:16px;background:rgba(6,16,36,.38);border:1px solid rgba(155,196,255,.16)}
+html #prayerBox .jl-pray-head{margin-top:0;flex-wrap:wrap;row-gap:2px;background:transparent;padding:2px 4px 6px}
+html #prayerBox .jl-pray-head b{white-space:nowrap}
+html #prayerBox .jl-pray-head small{flex:1 1 140px}
+html #prayerBox .jl-pray{margin-top:4px;gap:6px}
+html #prayerBox .jl-pray div{background:rgba(255,255,255,.08);border:1px solid rgba(155,196,255,.18)!important}
+html #prayerBox .jl-pray div.next{background:color-mix(in srgb,#34d399 28%,#0f2546);border-color:#34d399!important}
+html #prayerBox .jl-pray-test{margin-top:8px}
+html #viewToday>.card,html #viewToday>.jl-freeline,html #viewToday>.jl-salary{margin:0 0 14px!important;border:1px solid rgba(155,196,255,.2)!important;background:linear-gradient(180deg,#223f6d,#193258)!important;box-shadow:0 8px 20px rgba(3,10,24,.35)!important}
+html #viewToday>.jl-freeline{border-left:4px solid #34d399!important;background:linear-gradient(90deg,color-mix(in srgb,#34d399 18%,#1b3560),#193258)!important}
+html #viewToday>.jl-salary{border-left:4px solid #f2b451!important;background:linear-gradient(90deg,color-mix(in srgb,#f2b451 18%,#1b3560),#193258)!important}
+html[data-theme="light"] #viewToday>.card,html[data-theme="light"] #viewToday>.jl-freeline,html[data-theme="light"] #viewToday>.jl-salary{background:#fff!important;border-color:#d3deec!important;box-shadow:0 6px 16px rgba(20,40,80,.08)!important}
+.jl-rsteps{gap:6px!important;margin-top:10px!important}
+.jl-rstep{grid-template-columns:40px minmax(0,1fr)!important;gap:10px!important;padding:8px 10px 8px 4px!important}
+.jl-rstep::before,.jl-rstep::after{top:50px!important;height:calc(100% - 36px)!important}
+.jl-rstep-top{padding-right:34px}
+.jl-rstep-note{margin-top:3px!important;font-size:.76rem!important;line-height:1.35!important}
+.jl-rstep-main{margin-top:6px!important;padding:6px 10px!important}
+.jl-rstep-acts{margin-top:6px!important}
+.jl-strip{margin-top:30px!important}
+.jl-rstep>.check,.jl-step>.check{position:absolute;top:10px;right:10px;width:24px!important;height:24px!important;min-height:0!important;margin:0!important;border-radius:50%!important;border:2px solid rgba(155,196,255,.5)!important;background:transparent!important}
+.jl-rstep>.check:checked,.jl-step>.check:checked{background:#eaf8ee!important;border-color:#4caf68!important}
+.milestones{gap:8px!important}
+.milestones::before,.milestones::after{display:none!important}
+.jl-step{grid-template-columns:38px minmax(0,1fr)!important;gap:10px!important;padding:10px 40px 10px 8px!important;background:rgba(255,255,255,.04);border:1px solid rgba(155,196,255,.14);border-radius:14px}
+.jl-step.current{padding:12px 40px 12px 8px!important;background:linear-gradient(135deg,rgba(246,213,138,.16),rgba(91,156,255,.10));border-color:rgba(246,213,138,.45)}
+.jl-step.current .jl-step-body>b{font-size:1rem!important}
+.jl-step-body small{margin-top:3px!important}
+.jl-ms-prog{margin-top:6px!important}
+.jl-ms-add{margin-top:8px!important}
 </style>
 
 
