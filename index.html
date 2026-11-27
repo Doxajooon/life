@@ -1008,6 +1008,15 @@ body[data-layout="mobile"] #topChips{display:none}
 #viewToday>.jl-after{display:contents}
 body.jl-boot #viewToday{opacity:0;animation:jlBootShow 0s linear .9s forwards}
 @keyframes jlBootShow{to{opacity:1}}
+/* 75.17: touch targets. The round ticks keep their look but get a 44px invisible hit area; form checkboxes are bigger */
+html .jl-rstep>.check::before,html .jl-step>.check::before{content:"";position:absolute;inset:-12px;border-radius:50%}
+html .jl-rstep>.check,html .jl-step>.check{z-index:2}
+html .modal .stack label.small input[type="checkbox"],html #nePinned{width:22px;height:22px}
+html .debt-payment-toggle{min-height:44px}
+html .debt-payment-toggle input[type="checkbox"]{width:22px;height:22px;flex:0 0 auto}
+/* 75.17: the gold «+» fades out while it sits on top of another button (a card's own «+», a tick, a delete cross) */
+.jl-fab{transition:opacity .18s ease,transform .18s ease}
+html .jl-fab.jl-fab-dodge{opacity:0;pointer-events:none;transform:scale(.85)}
 html[data-theme="dark"] #viewToday .jl-week #wkWhen,html[data-theme="dark"] #viewToday .jl-week-stats span{color:#eef3fb!important}
 :root[data-theme="dark"] .jl-sky::after{background:linear-gradient(180deg,rgba(10,22,46,.55) 0%,rgba(10,22,46,.06) 26%,rgba(10,22,46,.08) 68%,rgba(10,22,46,.55) 100%)}
 /* 390px fixes: calendar period bar and debt-history buttons no longer run off the right edge */
@@ -2640,7 +2649,7 @@ html[data-theme="light"] #viewToday>.card.jl-week,html[data-theme="light"] #view
     <button class="v-row" type="button" id="setBackupRow"><span class="v-row-ico" style="--c:var(--green)"><svg class="ui-icon" aria-hidden="true"><use href="#i-backup"></use></svg></span><span class="v-row-main"><b>Резервные копии</b><small>Копия за каждый день, 14 дней — вернуть в один тап</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setWeekRow"><span class="v-row-ico" style="--c:var(--cyan)"><svg class="ui-icon" aria-hidden="true"><use href="#i-calendar"></use></svg></span><span class="v-row-main"><b>График по дням недели</b><small id="setWeekSub">Свои часы или выходной для каждого дня</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
     <button class="v-row" type="button" id="setAdvancedRow"><span class="v-row-ico" style="--c:var(--blue)"><svg class="ui-icon" aria-hidden="true"><use href="#i-sliders"></use></svg></span><span class="v-row-main"><b>Расширенные настройки</b><small>Расписание дня, валюта, касса, AI, копия в файл</small></span><span class="v-row-val"><svg class="ui-icon" aria-hidden="true"><use href="#i-chevron-right"></use></svg></span></button>
-    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">74.9</span></div>
+    <div class="v-row"><span class="v-row-ico" style="--c:var(--muted)"><svg class="ui-icon" aria-hidden="true"><use href="#i-info"></use></svg></span><span class="v-row-main"><b>О приложении</b><small><span data-app-name>Life</span> · офлайн-first · Supabase</small></span><span class="v-row-val jl-app-ver" id="appVersion">75.17</span></div>
   </div>
 </section>
 
@@ -2693,7 +2702,7 @@ html[data-theme="light"] #viewToday>.card.jl-week,html[data-theme="light"] #view
 <script>
 'use strict';
 // the name and the version the person sees — change them only here (Android: strings.xml, Windows: .csproj <Product>)
-const APP_NAME='Life',APP_VERSION='74.9';
+const APP_NAME='Life',APP_VERSION='75.17';
 const KEY='LIFE_CONTROL_V52';
 const BACKUP_KEY='LIFE_CONTROL_V52_SNAPSHOT';
 const BACKUP2_KEY='LIFE_CONTROL_V52_SNAPSHOT_2';
@@ -3330,14 +3339,23 @@ function markCloudDirty(){_localDirtySinceCloud=true;try{localStorage.setItem(CL
 function clearCloudDirty(){_localDirtySinceCloud=false;try{localStorage.removeItem(CLOUD_DIRTY_KEY);localStorage.removeItem(DIRTY_SINCE_KEY)}catch(e){}}
 /* 74.5: the data must not stay off the cloud unnoticed. A line under the header when, with the internet on,
    the device has not agreed with the cloud for 24 h, or an edit has waited to be sent for over an hour. */
+let _syncTried=false;
 function lsNum(k){try{return Number(localStorage.getItem(k))||0}catch(e){return 0}}
 function lsSet(k,v){try{localStorage.setItem(k,String(v))}catch(e){}}
+/* 75.17: the gold «+» steps aside while it covers another control, so it never hides a card's own «+», a done-tick or a delete cross */
+let _fabDodgeRaf=0;
+function fabDodge(){_fabDodgeRaf=0;const f=$('quickAddBtn');if(!f)return;const r=f.getBoundingClientRect();let hit=false;
+  if(r.width&&!document.body.classList.contains('modal-open')){const xs=[r.left+8,r.left+r.width/2,r.right-8],ys=[r.top+8,r.top+r.height/2,r.bottom-8];
+    scan:for(const y of ys)for(const x of xs)for(const el of document.elementsFromPoint(x,y)){if(el===f||f.contains(el)||el.closest('nav,header,#modalBack,.modal,#toast'))continue;const t=el.closest('button,a[href],input,select,textarea,label,[role=button]');if(t){const q=t.getBoundingClientRect();if(q.width<=80&&q.height<=80){hit=true;break scan}}}}
+  f.classList.toggle('jl-fab-dodge',hit)}
+function fabDodgeSoon(){if(!_fabDodgeRaf)_fabDodgeRaf=requestAnimationFrame(fabDodge)}
+addEventListener('scroll',fabDodgeSoon,{passive:true});addEventListener('resize',fabDodgeSoon);document.addEventListener('click',()=>setTimeout(fabDodgeSoon,90),true);setInterval(fabDodgeSoon,1500);
 function syncWarnSince(now=Date.now()){
   if(!cloudAuth()||('onLine' in navigator&&navigator.onLine===false))return 0;
   let ok=lsNum(CLOUD_OK_KEY);if(!ok){lsSet(CLOUD_OK_KEY,now);ok=now} // the first start of 74.5 counts from now
   const since=isCloudDirty()?lsNum(DIRTY_SINCE_KEY):0;
   if(since&&now-since>3600e3)return since;
-  if(now-ok>24*3600e3)return ok;
+  if(now-ok>24*3600e3&&(_syncTried||performance.now()>60000))return ok; // 75.17: not before the first sync attempt of this launch
   return 0;
 }
 function fmtWhen(t){const d=new Date(t),today=keyDay(),day=keyDay(d),hm=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});return day===today?'сегодня '+hm:d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' '+hm}
@@ -3346,6 +3364,7 @@ function renderSyncWarn(){
   if(el.hidden!==!show)el.hidden=!show;if(show)textOf($('syncWarnText')).v='Данные не в облаке с '+fmtWhen(since);
   const p=$('cloudPushAt');if(p){const t=lsNum(CLOUD_PUSH_KEY);textOf(p).v=t?fmtWhen(t):'ещё не было на этом устройстве'}
 }
+{const _cas=cloudAutoSync;cloudAutoSync=async function(){try{return await _cas.apply(this,arguments)}finally{_syncTried=true;try{renderSyncWarn()}catch(e){}}}}
 async function syncWarnSend(){const b=$('syncWarnBtn');if(b)b.disabled=true;try{const ok=await cloudAutoSync();renderSyncWarn();toast(ok?'Данные в облаке ☁️':'Пока не отправилось',ok?'Всё сохранено':'Проверь интернет — попробую ещё раз сам')}finally{if(b)b.disabled=false}}
 function queueCloudSync(){clearTimeout(cloudSyncTimer);cloudSyncTimer=setTimeout(()=>{if(appReadyForSync&&cloudAuth()&&_persistFingerprint)cloudAutoSync().catch(()=>{})},2500)}
 function saveState(){if(_wipingDevice)return;
@@ -4935,10 +4954,11 @@ function liveMoneyForm(kind){
     setText('rcWhat',what);const ic=$('rcIco');if(ic&&ic.textContent!==ico){ic.textContent=ico;ic.classList.remove('pop');void ic.offsetWidth;ic.classList.add('pop')}};
   stack.addEventListener('input',upd);stack.addEventListener('change',upd);stack.addEventListener('click',e=>{if(e.target.closest('[data-expense-quick]'))setTimeout(upd,0)});upd();
 }
+function lastExpenseCategory(){const e=(state.expenses||[]).filter(x=>x&&x.category&&!x.debtPayment&&!x.transfer).sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')))[0];return e?String(e.category):''}
 function openMoneyForm(kind,presetCategory='',editItem=null,forcedDate=''){
   const isProfit=kind==='profit',dk=isProfit?'moneyProfit':'moneyExpense',draft=editItem?{amount:editItem.amount,type:isProfit?(editItem.sourceGroup||editItem.source):editItem.category,note:editItem.note||'',customCategory:editItem.customCategory||'',debtPay:!!editItem.debtPayment,debtType:editItem.debtPayment||'bank',dateKey:txDay(editItem)||keyDay()}:state.drafts?.[dk]||{};const editing=!!editItem;
   const sourceValue=normalizeProfitSource(draft.type||draft.source||(isProfit?presetCategory:'Зарплата'));
-  const savedCategory=draft.type||presetCategory||'Еда';
+  const savedCategory=draft.type||presetCategory||(!isProfit&&lastExpenseCategory())||'Еда';
   const CATS=expenseCats(),category=CATS.some(x=>x.value===savedCategory)?savedCategory:'Другое';
   const customDraft=String(draft.customCategory||((category==='Другое'&&savedCategory!=='Другое')?savedCategory:''));
   const typeField=isProfit
